@@ -1,0 +1,241 @@
+Metadata-Version: 1.1
+Name: plone.portlet.static
+Version: 2.0.3
+Summary: A simple static HTML portlet for Plone.
+Home-page: http://pypi.python.org/pypi/plone.portlet.static
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: Introduction
+        ============
+        
+        A simple static HTML portlet for Plone 3 and up.
+        
+        Changelog
+        =========
+        
+        
+        2.0.3 (2014-10-13)
+        ------------------
+        
+        - Fix the relative url transformation.
+          The 'safe_html' transformation has to be called with 'assignment context'
+          instead of 'display context'.
+          [sverbois]
+        
+        
+        2.0.2 (2013-01-13)
+        ------------------
+        
+        - Check if instance is str before turning to unicode as Portal_tranform itself
+          can return unicode
+          [fafhrd91]
+        
+        - Portlet title no longer required. If the title is empty, the css class
+          "titleless" is added to the header.
+          [rnix, thet]
+        
+        - Adding constraint to validate white spaces
+          Fix https://dev.plone.org/ticket/13130
+          [hersonrodrigues]
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        - Add metadata.xml to profile.
+          [WouterVH]
+        
+        
+        2.0.1 - 2011-01-03
+        ------------------
+        
+        - Add Site Administrator to the default roles for the
+          "plone.portlet.static: Add static portlet" permission, for forward
+          compatibility with Plone 4.1.
+          [davisagli]
+        
+        
+        2.0 - 2010-07-18
+        ----------------
+        
+        - Removed the deprecated `hide` option form the portlet.
+          [hannosch]
+        
+        - Update license to GPL version 2 only.
+          [hannosch]
+        
+        
+        2.0b2 - 2010-02-17
+        ------------------
+        
+        - Removed the transformation cache from the portlet renderer. Portal transforms
+          doesn't actually work with the assignment class as a cache context.
+          This closes http://dev.plone.org/plone/ticket/10167.
+          [hannosch]
+        
+        
+        2.0b1 - 2009-12-02
+        ------------------
+        
+        - Removed Kupu as a testing dependency. In Plone 4 the tests work with the
+          default TinyMCE transforms.
+          [hannosch]
+        
+        
+        2.0a2 - 2009-11-18
+        ------------------
+        
+        - Removed reference to non-existent profile in plone.app.portlets.
+          [hannosch]
+        
+        
+        2.0a1 - 2009-11-13
+        ------------------
+        
+        - Remove the "hide" option as this is now available to all portlets (PLIP 9286)
+          [igbun]
+        
+        - Adjusted test setup to Plone 5.
+          [hannosch]
+        
+        - Added the z3c.autoinclude entry point so this package is automatically loaded
+          on Plone 3.3 and above.
+          [hannosch]
+        
+        - Declare test dependencies in an extra.
+          [hannosch]
+        
+        - Specify package dependencies.
+          [hannosch]
+        
+        - Added 'tile' CSS class to the links within dt.portletHeader and 
+          dd.portletFooter for static portlet's template
+          [spliter]
+        
+        
+        1.2.1 - 2009-11-25
+        ------------------
+        
+        - Fixed a syntax error introduced in the last change.
+          [hannosch]
+        
+        
+        1.2 - 2009-11-25
+        ----------------
+        
+        - Ensure that text output is passed through the safe-html transform to protect
+          against malicious text. This also ensures the resolve uid behavior works when
+          only TinyMCE and not Kupu is installed.
+          [hannosch]
+        
+        - Removed msgids in portlets.xml. There is no support for
+          msgids in the import of portlets.xml implementation.
+          This allows to extract translatable strings with i18ndude.
+          [vincentfretin]
+        
+        - Added transform to resolve uids.
+          [lrowe]
+        
+        
+        1.2rc1 - 2009-03-27
+        -------------------
+        
+        - The portlet was incorrectly using the 'Manage portlet' permission. It now
+          uses a custom permission with the same default roles.
+          Fixes http://dev.plone.org/plone/ticket/8403.
+          [optilude]
+        
+        
+        1.1.5 - 2008-08-18
+        ------------------
+        
+        - Fixed a typo in CSS class name. This closes
+          http://dev.plone.org/plone/ticket/8119.
+          [hannosch]
+        
+        
+        1.1.2 -  2008-06-01
+        -------------------
+        
+        - Added more i18n in the main python file as the i18n in portlets.xml
+          is not used.  [maurits]
+        
+        - Added option to (temporarily) hide the portlet without needing to
+          delete it.  [maurits]
+        
+        
+        1.1.0 - 2008-04-20
+        ------------------
+        
+        - Unchanged from 1.1rc2
+        
+        
+        1.1rc2 - 2008-03-26
+        -------------------
+        
+        - Use README.txt and HISTORY.txt as the package's long description and
+          add missing history entries for all releases.
+          [wichert]
+        
+        - Fix the version restriction on the plone.app.form dependency.
+          [wichert]
+        
+        
+        1.1rc1 - 2008-03-25
+        -------------------
+        
+        - Add missing i18n support.
+          [hannosch]
+        
+        - Add a version restriction on the plone.app.form dependency.
+          [optilude]
+        
+        
+        1.1.0a1 - 2008-03-09
+        --------------------
+        
+        - Packaging cleanups
+          [wichert]
+        
+        - PLIP 184: make text editable using a rich text editor such as kupu
+          [optilude]
+        
+        - Add an 'omit border' option
+          [optilude]
+        
+        
+        1.0b3 - 2007-08-27
+        -------------------
+        
+        - Correct portlet styling to Plone standards
+          [optilude]
+        
+        
+        1.0b2 - 2007-08-26
+        ------------------
+        
+        - Make header and footer configurable
+          [optilude]
+        
+        
+        1.0b1 - 2007-08-26
+        ------------------
+        
+        - Added missing i18n markup to portlets.xml.
+          [hannosch]
+        
+        - Changed the i18n domain to `plone`.
+          [hannosch]
+        
+        - Initial release
+          [optilude]
+        
+        
+Keywords: plone portlet static
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

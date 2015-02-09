@@ -1,0 +1,9 @@
+setuptools
+zope.interface
+zope.component
+zope.event
+zope.lifecycleevent
+zope.browser
+
+[zcml]
+zope.configuration

@@ -1,0 +1,11 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="plone.app.imaging">
+
+  <include package="plone.app.imaging" />
+
+  <include zcml:condition="installed plone.app.blob"
+      package="plone.app.blob.tests" file="testing.zcml" />
+
+</configure>

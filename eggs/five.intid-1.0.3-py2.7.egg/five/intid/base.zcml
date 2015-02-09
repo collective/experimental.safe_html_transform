@@ -1,0 +1,43 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:browser="http://namespaces.zope.org/browser">
+
+  <exclude package="zope.keyreference" file="configure.zcml" />
+
+  <adapter
+     factory=".keyreference.KeyReferenceToPersistent"
+     trusted="y" />
+
+  <adapter factory=".keyreference.connectionOfPersistent" />
+
+  <class class=".keyreference.KeyReferenceToPersistent">
+    <require permission="zope.Public"
+             interface="zope.keyreference.interfaces.IKeyReference" />
+  </class>
+
+  <browser:page
+     for="OFS.interfaces.IFolder"
+     class=".site.FiveIntIdsInstall"
+     permission="five.ManageSite"
+     template="install.pt"
+     name="install-intids.html"
+     />
+
+  <browser:page
+     for="OFS.interfaces.IApplication"
+     class=".site.FiveIntIdsInstall"
+     permission="five.ManageSite"
+     template="install.pt"
+     name="install-intids.html"
+     />
+
+  <subscriber
+     for="zope.intid.interfaces.IIntIdAddedEvent"
+     handler="zope.component.event.objectEventNotify"
+     />
+
+  <subscriber
+     for="zope.intid.interfaces.IIntIdRemovedEvent"
+     handler="zope.component.event.objectEventNotify"
+     />
+
+</configure>

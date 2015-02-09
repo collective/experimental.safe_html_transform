@@ -1,0 +1,246 @@
+=====================================
+Key References for Persistent Objects
+=====================================
+
+`zope.keyreference.persistent.KeyReferenceToPersistent` provides an
+`zope.keyreference.interfaces.IKeyReference` reference for persistent
+objects.
+
+Let's look at an example. First, we'll create some persistent objects
+in a database:
+
+    >>> from ZODB.MappingStorage import DB
+    >>> import transaction
+    >>> from persistent.mapping import PersistentMapping
+
+    >>> db = DB()
+    >>> conn = db.open()
+    >>> root = conn.root()
+
+    >>> root['ob1'] = PersistentMapping()
+    >>> root['ob2'] = PersistentMapping()
+
+    >>> transaction.commit()
+
+Then we'll create some key references:
+
+    >>> from zope.keyreference.persistent import KeyReferenceToPersistent
+
+    >>> key1 = KeyReferenceToPersistent(root['ob1'])
+    >>> key2 = KeyReferenceToPersistent(root['ob2'])
+
+We can call the keys to get the objects:
+
+    >>> key1() is root['ob1'], key2() is root['ob2']
+    (True, True)
+
+New keys to the same objects are equal to the old:
+
+    >>> KeyReferenceToPersistent(root['ob1']) == key1
+    True
+
+and have the same hashes:
+
+    >>> hash(KeyReferenceToPersistent(root['ob1'])) == hash(key1)
+    True
+
+Other key reference implementations are differed by their key type id.
+Key references should sort first on their key type and second on any
+type-specific information:
+
+    >>> from zope.interface import implements
+    >>> from zope.keyreference.interfaces import IKeyReference
+
+    >>> class DummyKeyReference(object):
+    ...     implements(IKeyReference)
+    ...     key_type_id = 'zope.app.keyreference.object'
+    ...     def __init__(self, obj):
+    ...         self.object = obj
+    ...     def __cmp__(self, other):
+    ...          if self.key_type_id == other.key_type_id:
+    ...              return cmp(self.object, other.object)
+    ...          return cmp(self.key_type_id, other.key_type_id)
+
+    >>> dummy_key1 = DummyKeyReference(object())
+    >>> dummy_key2 = DummyKeyReference(object())
+    >>> dummy_key3 = DummyKeyReference(object())
+
+    >>> keys = [key1, dummy_key1, dummy_key2, key2, dummy_key3]
+    >>> keys.sort()
+    >>> key_type_ids = [key.key_type_id for key in keys]
+    >>> key_type_ids[0:3].count('zope.app.keyreference.object')
+    3
+    >>> key_type_ids[3:].count('zope.app.keyreference.persistent')
+    2
+
+We'll store the key references in the database:
+
+    >>> root['key1'] = key1
+    >>> root['key2'] = key2
+
+and use the keys to store the objects again:
+
+    >>> root[key1] = root['ob1']
+    >>> root[key2] = root['ob2']
+
+    >>> transaction.commit()
+
+Now we'll open another connection:
+
+    >>> conn2 = db.open()
+
+And verify that we can use the keys to look up the objects:
+
+    >>> root2 = conn2.root()
+    >>> key1 = root2['key1']
+    >>> root2[key1] is root2['ob1']
+    True
+    >>> key2 = root2['key2']
+    >>> root2[key2] is root2['ob2']
+    True
+
+and that we can also call the keys to get the objects:
+
+    >>> key1() is root2['ob1']
+    True
+    >>> key2() is root2['ob2']
+    True
+
+We can't get the key reference for an object that hasn't been saved
+yet:
+
+    >>> KeyReferenceToPersistent(PersistentMapping())
+    ... # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    NotYet: ...
+
+Note that we get a NotYet error. This indicates that we might be able
+to get a key reference later.
+
+We can get references to unsaved objects if they have an adapter to
+`ZODB.interfaces.IConnection`.  The `add` method on the connection
+will be used to give the object an object id, which is enough
+information to compute the reference.  To see this, we'll create an
+object that conforms to `IConnection` in a silly way:
+
+    >>> import persistent
+    >>> from ZODB.interfaces import IConnection
+    >>> class C(persistent.Persistent):
+    ...     def __conform__(self, iface):
+    ...         if iface is IConnection:
+    ...             return conn2
+
+    >>> ob3 = C()
+    >>> key3 = KeyReferenceToPersistent(ob3)
+    >>> transaction.abort()
+
+Conflict Resolution
+-------------------
+
+During conflict resolution, as discussed in ZODB/ConflictResolution.txt,
+references to persistent objects are actually instances of
+ZODB.ConflictResolution.PersistentReference.  This is pertinent in two ways
+for KeyReferenceToPersistent.  First, it explains a subtlety of the class: it
+does not inherit from persistent.Persistent.  If it did, it would not be
+available for conflict resolution, just its PersistentReference stand-in.
+
+Second, it explains some of the code in the __hash__ and __cmp__
+methods. These methods not only handle persistent.Persistent objects,
+but PersistentReference objects.  Without this behavior, objects, such
+as the classic ZODB BTrees, that use KeyReferenceToPersistent as keys or
+set members will be unable to resolve conflicts.  Even with the special
+code, in some cases the KeyReferenceToPersistent will refuse to compare
+and hash during conflict resolution because it cannot reliably do so.
+
+__hash__ will work relatively rarely during conflict resolution: only for
+multidatabase references.  Here are a couple of examples.
+
+    >>> from ZODB.ConflictResolution import PersistentReference
+
+    >>> def factory(ref):
+    ...     res = KeyReferenceToPersistent.__new__(
+    ...         KeyReferenceToPersistent, ref)
+    ...     res.object = ref
+    ...     return res
+    ...
+
+    >>> hash(factory(PersistentReference(
+    ...     ('an oid', 'class metadata')))) # a typical reference
+    Traceback (most recent call last):
+    ...
+    ValueError: database name unavailable at this time
+
+    >>> bool(hash(factory(PersistentReference(
+    ...     ['m', ('a database', 'an oid', 'class metadata')])))) # multidatabase
+    True
+
+This means that KeyReferenceToPersistent will often hinder conflict resolution
+for classes such as PersistentMapping.
+
+__cmp__ works unless one object is a multidatabase reference and the other is
+not.  Here are a few examples.
+
+    >>> cmp(factory(PersistentReference(
+    ...         ('an oid', 'class metadata'))),
+    ...     factory(PersistentReference(
+    ...         ('an oid', 'class metadata'))))
+    0
+
+    >>> cmp(factory(PersistentReference(
+    ...         ('an oid', 'class metadata'))),
+    ...     factory(PersistentReference(
+    ...         ('another oid', 'class metadata'))))
+    -1
+
+    >>> cmp(factory(PersistentReference('an oid')),
+    ...     factory(PersistentReference(
+    ...         ('an oid', 'class metadata'))))
+    0
+
+    >>> cmp(factory(PersistentReference('an oid')),
+    ...     factory(PersistentReference(
+    ...         ('an oid', 'class metadata'))))
+    0
+
+    >>> cmp(factory(PersistentReference(
+    ...         ['m', ('a database', 'an oid', 'class metadata')])),
+    ...     factory(PersistentReference(
+    ...         ['m', ('a database', 'an oid', 'class metadata')])))
+    0
+
+    >>> cmp(factory(PersistentReference(
+    ...         ['m', ('a database', 'an oid', 'class metadata')])),
+    ...     factory(PersistentReference(
+    ...         ['n', ('a database', 'an oid')])))
+    0
+
+    >>> cmp(factory(PersistentReference(
+    ...         ['m', ('a database', 'an oid', 'class metadata')])),
+    ...     factory(PersistentReference(
+    ...         ['m', ('another database', 'an oid', 'class metadata')])))
+    -1
+
+    >>> cmp(factory(PersistentReference(
+    ...         ['m', ('a database', 'an oid', 'class metadata')])),
+    ...     factory(PersistentReference(
+    ...         ('an oid', 'class metadata'))))
+    Traceback (most recent call last):
+    ...
+    ValueError: cannot sort reliably
+
+Location-based connection adapter
+---------------------------------
+
+The function `zope.keyreference.connectionOfPersistent` adapts
+objects to connections using a simple location-based heuristic. It
+checked to see if the object has a `__parent__` that has a connection:
+
+    >>> from zope.keyreference.persistent import connectionOfPersistent
+    >>> ob3 = PersistentMapping()
+    >>> print connectionOfPersistent(ob3)
+    None
+
+    >>> ob3.__parent__ = root2['ob1']
+    >>> connectionOfPersistent(ob3) is conn2
+    True

@@ -1,0 +1,8 @@
+setuptools
+zope.schema
+zope.component
+zope.interface
+python-dateutil
+
+[supermodel]
+plone.supermodel

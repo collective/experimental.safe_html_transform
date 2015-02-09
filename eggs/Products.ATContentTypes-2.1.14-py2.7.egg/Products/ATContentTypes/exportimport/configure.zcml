@@ -1,0 +1,42 @@
+<configure
+  xmlns="http://namespaces.zope.org/zope"
+  xmlns:five="http://namespaces.zope.org/five"
+  xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+  i18n_domain="atcontenttypes">
+
+  <genericsetup:importStep
+      name="atcttool"
+      title="ATContentTypes Tool"
+      description="Import ATContentTypes specific configuration."
+      handler=".atcttool.importATCTTool">
+    <depends name="catalog"/>
+    <depends name="componentregistry"/>
+  </genericsetup:importStep>
+
+  <genericsetup:exportStep
+      name="atcttool"
+      title="ATContentTypes Tool"
+      description="Export ATContentTypes specific configuration."
+      handler=".atcttool.exportATCTTool"
+      />
+
+  <adapter
+      factory=".atcttool.ATCTToolXMLAdapter"
+      provides="Products.GenericSetup.interfaces.IBody"
+      for="Products.ATContentTypes.interfaces.IATCTTool
+           Products.GenericSetup.interfaces.ISetupEnviron"
+      />
+
+  <adapter
+     factory=".content.NullExporterAdapter"
+     provides="Products.GenericSetup.interfaces.IFilesystemExporter"
+     for=".content.IDisabledExport"
+     />
+
+  <adapter
+     factory="Products.CMFCore.exportimport.content.StructureFolderWalkingAdapter"
+     provides="Products.GenericSetup.interfaces.IFilesystemImporter"
+     for="Products.ATContentTypes.interfaces.IATContentType"
+     />
+
+</configure>

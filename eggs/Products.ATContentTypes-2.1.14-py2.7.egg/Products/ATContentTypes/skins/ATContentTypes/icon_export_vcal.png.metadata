@@ -1,0 +1,3 @@
+[default]
+title=vCal export
+cache=HTTPCache

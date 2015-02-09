@@ -1,0 +1,14 @@
+setuptools
+collective.z3cform.datetimewidget>=0.1a2
+z3c.form >= 3.0
+plone.z3cform>=0.5.11dev
+plone.protect
+z3c.formwidget.query
+Zope2
+zope.browserpage
+zope.component
+zope.interface
+zope.traversing
+
+[tests]
+collective.testcaselayer

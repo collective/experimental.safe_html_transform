@@ -1,0 +1,31 @@
+<h1 tal:replace="structure context/manage_page_header">HEADER</h1>
+<h1 tal:replace="structure context/manage_tabs">TABS</h1>
+
+<h3>Query  <code>portal_uid_handler</code> Tool </h3>
+
+<div tal:define="uid request/uid | nothing">
+<form action="." method="POST"
+      tal:attributes="action string:${context/absolute_url};"
+>
+ <input type="text" name="uid:int" value=""
+        tal:attributes="value uid" />
+ <input type="submit" name="manage_queryObject:method" value=" Query UID "/>
+</form>
+
+<div tal:condition="uid"
+     tal:define="obj python:context.queryObject(uid, None);">
+ <div tal:condition="obj">
+   <strong>Found
+        <a href="#object_url"
+           tal:attributes="href obj/absolute_url"
+           tal:content="obj/getId">OBJECTID</a></strong>
+ </div>
+ <div tal:condition="not: obj">
+   <strong>No object matching uid
+            <span tal:content="uid">UID</span> found</strong>
+ </div>
+</div>
+
+</div>
+
+<h1 tal:replace="structure context/manage_page_footer">FOOTER</h1>

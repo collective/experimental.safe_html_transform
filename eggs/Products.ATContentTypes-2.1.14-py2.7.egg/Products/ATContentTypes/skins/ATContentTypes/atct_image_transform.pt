@@ -1,0 +1,65 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
+      lang="en-US"
+      metal:use-macro="here/main_template/macros/master"
+      i18n:domain="atcontenttypes">
+
+<body>
+
+<metal:main fill-slot="main" tal:define="image nocall:here;
+                                         size python:here.getObjSize(here)">
+
+    <h1 class="documentFirstHeading" tal:content="here/pretty_title_or_id">Title or id</h1>
+    <div class="documentDescription" tal:content="here/Description">
+        Description
+    </div>    
+
+    <div id="content-core">
+        
+        <img src="#" alt="" tal:replace="structure python:here.tag(scale='mini')" />
+
+        <div>
+            <span i18n:translate="label_original_size"
+                  tal:omit-tag="">Original size</span>:
+            <span tal:content="size">
+                File size
+            </span>
+            <span tal:condition="not: size"
+                  i18n:translate="label_no_file_uploaded">
+              (No file has been uploaded)
+            </span>
+        </div>
+
+        <div class="label">
+          <span i18n:translate="label_transform">Transform</span>
+          <div id="display_help"
+               class="help"
+               style="visibility:hidden; left:-18em;"
+               i18n:translate="help_select_transformation_method">
+            Select transformation method.
+          </div>
+        </div>
+
+        <div class="field"
+             tal:define="transforms image/getTransformMap">
+          <form tal:attributes="action string:${request/URL1}/transformImage">
+            <select name="method">
+              <option disabled="disabled"
+                      value=""
+                      i18n:translate="label_select_method">Select method</option>
+              <option tal:repeat="trans transforms"
+                      i18n:translate=""
+                      tal:attributes="value trans/value"
+                      tal:content="trans/name">transformation</option>
+            </select>
+            <input class="context"
+                   type="submit"
+                   i18n:attributes="value label_execute;"
+                   value="Execute" />
+          </form>
+        </div>
+    </div>
+
+</metal:main>
+
+</body>
+</html>

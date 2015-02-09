@@ -1,0 +1,5 @@
+The client's sources are now in collective.zopeedit on the plone collective :
+
+https://svn.plone.org/svn/collective/collective.zopeedit
+
+You can get the egg on http://pypi.python.org/pypi/collective.zopeedit

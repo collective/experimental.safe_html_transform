@@ -1,0 +1,26 @@
+<html metal:use-macro="context/@@standard_macros/view"
+      i18n:domain="zope">
+  <body>
+  <div metal:fill-slot="body">
+
+  <p i18n:translate="">This is the source of the
+  <code tal:content="request/form/viewname">viewname</code>:</p>
+
+  <pre style="background-color: #cccccc; border: 1px solid black; padding: 5px;"
+       tal:content="python:view.templateCodeFromViewName(request.form['viewname'])">
+    template source
+  </pre>
+
+  <form action="@@customizezpt" method="post"
+        enctype="multipart/form-data">
+
+    <input type="hidden" name="viewname" value="theviewname"
+           tal:attributes="value request/form/viewname" />
+    <input type="submit" name="" value="Customize" />
+
+  </form>
+
+  </div>
+  </body>
+
+</html>

@@ -1,0 +1,50 @@
+Metadata-Version: 1.0
+Name: Products.ZSQLMethods
+Version: 2.13.4
+Summary: SQL method support for Zope 2.
+Home-page: http://pypi.python.org/pypi/Products.ZSQLMethods
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        The Products.ZSQLMethods product provides support for SQL Method objects in
+        Zope 2. They can be used in conjunction with any database adapter to use
+        relational database data from within the Zope environment.
+        
+        Changelog
+        =========
+        
+        2.13.4 (2011-07-03)
+        -------------------
+        
+        - Copy code from `App.Extensions` to keep compatibility with Zope 2.14.
+        
+        2.13.3 (2010-08-31)
+        -------------------
+        
+        - LP #142501: Only connect upon ZODB load if a new flag ``connect_on_load``
+          has been set to a true value (which is its default for backwards
+          compatibility).
+        
+        - LP #142689: Actually use SQL connection titles in the list of
+          connections returned by SQL.SQLConnectionIDs.
+        
+        2.13.2 (2010-07-09)
+        -------------------
+        
+        - Actually establish Zope 2.12 compatibility by dealing with all cases of
+          moved classes and functions.
+        
+        2.13.1 (2010-07-09)
+        -------------------
+        
+        - Made compatible with Zope 2.12.9.
+        
+        2.13.0 (2010-07-09)
+        -------------------
+        
+        - Released as separate package.
+        
+Platform: UNKNOWN

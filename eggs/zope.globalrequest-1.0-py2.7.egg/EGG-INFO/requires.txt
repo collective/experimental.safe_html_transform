@@ -1,0 +1,10 @@
+setuptools
+
+[test]
+zope.testing
+zope.configuration
+zope.app.publisher
+zope.app.securitypolicy
+zope.app.testing
+zope.app.zcmlfiles
+zope.testbrowser

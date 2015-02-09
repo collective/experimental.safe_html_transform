@@ -1,0 +1,33 @@
+<html metal:use-macro="context/@@standard_macros/view"
+      i18n:domain="zope">
+  <body>
+  <div metal:fill-slot="body">
+
+  <p i18n:translate="">Template-based (global) browser views available
+  for this component:</p>
+
+  <table>
+    <tr>
+      <th></th>
+      <th>Name of View</th>
+      <th>Registration Info</th>
+    </tr>
+    <tr tal:repeat="info view/templateViewRegInfo">
+      <td><img src="misc_/PageTemplates/zpt.gif"
+               tal:attributes="src string:${context/@@absolute_url}/misc_/PageTemplates/zpt.gif" /></td>
+      <td>
+        <a href=""
+           tal:attributes="href string:@@customizezpt.html?viewname=${info/viewname}"
+           tal:content="info/viewname">
+        </a>
+      </td>
+      <td><code tal:content="info/zptfile">zptfile</code><br />
+          <code tal:content="info/for">for</code><br />
+          <code tal:content="info/zcmlfile">zcmlfile</code></td>
+    </tr>
+  </table>
+
+  </div>
+  </body>
+
+</html>

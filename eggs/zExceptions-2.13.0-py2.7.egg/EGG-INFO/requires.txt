@@ -1,0 +1,4 @@
+setuptools
+zope.interface
+zope.publisher
+zope.security

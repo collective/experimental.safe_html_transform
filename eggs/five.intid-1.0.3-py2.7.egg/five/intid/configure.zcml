@@ -1,0 +1,12 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <!-- All Core Configuration -->
+  <include file="base.zcml" />
+
+  <!-- Event Subscribers -->
+  <include file="subscriber.zcml" />
+
+  <!-- CMFCore directoryview exceptions -->
+  <include file="cmfdirectoryview.zcml" />
+
+</configure>

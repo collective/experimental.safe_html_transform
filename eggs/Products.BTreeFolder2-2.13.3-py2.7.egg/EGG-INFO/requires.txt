@@ -1,0 +1,9 @@
+setuptools
+AccessControl
+Acquisition
+Persistence
+ZODB3
+Zope2 >= 2.13.0a1
+zope.container
+zope.event
+zope.lifecycleevent

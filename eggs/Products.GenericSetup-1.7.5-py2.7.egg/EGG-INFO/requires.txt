@@ -1,0 +1,4 @@
+setuptools
+Zope2 >= 2.12.3
+five.localsitemanager
+zope.formlib

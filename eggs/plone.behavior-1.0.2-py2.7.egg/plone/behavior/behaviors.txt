@@ -1,0 +1,346 @@
+=========================
+plone.behavior: Behaviors
+=========================
+
+Please see README.txt at the root of this egg for more details on what
+behaviors are and how to use them.
+
+See directives.txt in this directory for details on how to register new
+types of behaviors using ZCML.
+
+Usage
+-----
+
+To use this package, you must first provide a suitable IBehaviorAssignable
+adapter. This is normally done by the framework. plone.dexterity, for example,
+will provide a suitable adapter.
+
+Then, for each behavior:
+
+ * Write an interface describing the behavior.
+ * Write a factory (much like an adapter factory) that contains the logic of
+   the behavior. This is optional if your interface is a marker interface that
+   can be directly provided by the object.
+ * Register the behavior. This consists of a utility providing IBehavior and
+   an adapter factory based on IBehaviorAdapterFactory. The <plone:behavior />
+   ZCML directive makes this easy. See directives.txt.
+   
+An example might be::
+   
+    <plone:behavior
+        title="Locking"
+        description="Support object-level locking"
+        provides=".interfaces.ILocking"
+        factory=".locking.LockingBehaviorFactory"
+        />
+
+Once the behavior has been registered, you can use standard adaptation idioms
+to attempt to use it, e.g.::
+
+    locking = ILocking(context, None)
+    if locking is not None:
+        locking.lock()
+      
+Here, ILocking is a registered behavior interface. The adaptation will only
+succeed if the context support behaviors (i.e. it can be adapted to
+IBehaviorAssignable), and if the ILocking behavior is currently enabled for
+this type of context.
+
+Example
+-------
+
+As an example, let's create a basic behavior that's described by the
+interface ILockingSupport:
+
+    >>> from zope.interface import implements
+    >>> from zope.interface import Interface
+
+    >>> class ILockingSupport(Interface):
+    ...     def lock():
+    ...         "Lock the context"
+    ...     
+    ...     def unlock():
+    ...         "Unlock the context"
+
+    >>> class LockingSupport(object):
+    ...     implements(ILockingSupport)
+    ...     def __init__(self, context):
+    ...         self.context = context
+    ...         
+    ...     def lock(self):
+    ...         print 'Locked', repr(self.context)
+    ...     
+    ...     def unlock(self):
+    ...         print 'Unlocked', repr(self.context)
+
+The availability of this new behavior is indicated by registering a named
+utility providing IBehavior. There is a default implementation of this
+interface that makes this easy:
+
+    >>> from plone.behavior.registration import BehaviorRegistration
+    >>> registration = BehaviorRegistration(
+    ...     title=u"Locking support", 
+    ...     description=u"Provides content-level locking",
+    ...     interface=ILockingSupport,
+    ...     marker=None,
+    ...     factory=LockingSupport)
+
+    >>> from zope.component import provideUtility
+    >>> provideUtility(registration, name=ILockingSupport.__identifier__)
+
+NOTE: By convention, the behavior name should be the same as the identifier 
+of its interface. This convention is maintained by the <plone:behavior />
+ZCML directive.
+
+We also need to register an adapter factory that can create an instance of
+an ILockingSupport for any context. This is a bit different to a standard
+adapter factory (which is normally just a class with a constructor that
+takes the context as an argument), because we want this factory to be
+able to adapt almost anything, but return None (and thus fail to adapt) if
+the behavior isn't currently enabled for the context.
+
+To get these semantics, we can use the BehaviorAdapterFactory helper
+class.
+
+    >>> from plone.behavior.factory import BehaviorAdapterFactory
+    >>> factory = BehaviorAdapterFactory(registration)
+
+    >>> from zope.interface import implements
+    >>> from zope.component import provideAdapter
+    >>> provideAdapter(factory=factory, adapts=(Interface,), provides=ILockingSupport)
+
+One this is registered, it will be possible to adapt any context to 
+ILockingSupport, if:
+
+  * The context can be adapted to IBehaviorAssignable. This is an 
+    interface that is used to determine if a particular object supports
+    a particular behavior.
+    
+  * The behavior is enabled, i.e. the IBehaviorAssignable implementation 
+    says it is.
+
+Right now, neither of those things are true, so we'll get a TypeError when
+trying to adapt:
+
+    >>> class IContextType(Interface): pass
+
+    >>> class SomeContext(object):
+    ...     implements(IContextType)
+    ...     def __repr__(self):
+    ...         return "<sample context>"
+
+    >>> context = SomeContext()
+    >>> behavior = ILockingSupport(context) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    TypeError: ('Could not adapt', ...)
+
+Of course, we are more likely to want to code defensively:
+
+    >>> behavior = ILockingSupport(context, None)
+    >>> behavior is None
+    True
+
+For the behavior  to work, we need to define an IBehaviorAssignable adapter.
+For the purposes of this test, we'll maintain a simple, global registry that
+maps classes to a list of enabled behavior interfaces.
+
+    >>> BEHAVIORS = {}
+
+The adapter can thus be registered like this:
+
+    >>> from plone.behavior.interfaces import IBehavior, IBehaviorAssignable
+    >>> from zope.component import adapts, getUtility
+
+    >>> class TestingBehaviorAssignable(object):
+    ...     implements(IBehaviorAssignable)
+    ...     adapts(Interface)
+    ...     
+    ...     def __init__(self, context):
+    ...         self.context = context
+    ...     
+    ...     def supports(self, behavior_interface):
+    ...         global BEHAVIORS
+    ...         return behavior_interface in BEHAVIORS.get(self.context.__class__, [])
+    ...         
+    ...     def enumerateBehaviors(self):
+    ...         global BEHAVIORS
+    ...         for iface in BEHAVIORS.get(self.context.__class__, []):
+    ...             yield getUtility(IBehavior, iface.__identifier__)
+
+    >>> provideAdapter(TestingBehaviorAssignable)
+
+NOTE: Again, we are relying on the convention that the IBehavior utility
+name is the identifier of the behavior interface.
+
+At this point, we know that the context support behavior assignment (since
+there is an adapter for it), but it's not yet enabled, so we still can't 
+adapt.
+
+    >>> behavior = ILockingSupport(context, None)
+    >>> behavior is None
+    True
+
+However, if we enable the behavior for this type...
+
+    >>> BEHAVIORS.setdefault(SomeContext, set()).add(ILockingSupport)
+
+...then we can adapt and use the behavior adapter:
+
+    >>> behavior = ILockingSupport(context, None)
+    >>> behavior is None
+    False
+    
+    >>> behavior.lock()
+    Locked <sample context>
+    
+Marker interfaces
+-----------------
+
+Behaviors work without the aid of marker interfaces. However, it may sometimes
+be desirable to apply a marker interface to newly created objects that support
+a particular behavior, for example if you need to register specific views or
+viewlets that should only be available when this behavior is supported.
+
+Note that there is no need to use marker interfaces if the desired behavior
+can be achieved using adapters only. For this, the standard plone.behavior
+adapter pattern is better, because there is no dependency on per-instance
+markers.
+
+Marker interface support again requires some framework support not configured
+by this package. One of two possible configurations is possible:
+
+  * A custom __providedBy__ descriptor that includes the markeres of all
+    enabled behaviors can be added to behavior-aware classes.
+  * An event handler can be installed that marks newly created instances with
+    the markers of all enabled behaviors.
+    
+The first approach is better in many ways, because it can be made more robust
+in case a marker interface is removed or renamed, and because it is possible
+to turn off behavior markers without finding all objects providing the
+subtype and calling noLongerProvides() on them. However, it is also pretty
+difficult to get this right, and it cannot be generalised (you can't make
+any adapter lookups in the descriptor, since you'd get infinite recursion).
+There's an implementation of such a descriptor in the plone.dexterity package,
+which also uses some heavy caching.
+
+An event handler is easier, and this package provides a simple one that you
+can use. It is not registered by default, since it may not be desirable to
+enable an event handler for every type of object.
+
+For the purposes of this test, we will simulate the event handler by calling
+it directly.
+
+    >>> from plone.behavior.markers import applyMarkers
+    >>> from zope.lifecycleevent import ObjectCreatedEvent
+
+Let us create another behavior. This time, we'll provide a marker interface
+as well.
+
+    >>> from zope import schema
+    >>> class ITaggable(Interface):
+    ...     pass
+
+    >>> class ITagging(Interface):
+    ...     tags = schema.List(title=u"Tags on this object",
+    ...                        value_type=schema.TextLine(title=u"Tag"))
+
+    >>> class Tagging(object):
+    ...     implements(ITagging)
+    ...     def __init__(self, context):
+    ...         self.context = context
+    ...         
+    ...     def get_tags(self, value):
+    ...         return getattr(self.context, '__tags__', [])
+    ...     def set_tags(self, value):
+    ...         self.context.__tags__ = value
+    ...     tags = property(get_tags, set_tags)
+
+We will register this behavior as above, this time specifying the marker
+interface explicitly. In real life, of course, we'd be more likely to use the
+<plone:behavior /> ZCML directive with the 'marker' attribute. See
+directives.txt for more details.
+
+    >>> from plone.behavior.registration import BehaviorRegistration
+    >>> registration = BehaviorRegistration(
+    ...     title=u"Tagging support",
+    ...     description=u"",
+    ...     interface=ITagging,
+    ...     marker=ITaggable,
+    ...     factory=Tagging)
+
+    >>> from zope.component import provideUtility
+    >>> provideUtility(registration, name=ITagging.__identifier__)
+    >>> factory = BehaviorAdapterFactory(registration)
+    >>> provideAdapter(factory=factory, adapts=(Interface,), provides=ITagging)
+
+Let us now create a new object without the behavior being enabled. The marker
+interface should not be applied.
+
+    >>> context1 = SomeContext()
+    >>> ITagging(context1, None) is not None
+    False
+    >>> ITaggable.providedBy(context1)
+    False
+    
+    >>> applyMarkers(context1, ObjectCreatedEvent(context1))
+
+    >>> ITaggable.providedBy(context1)
+    False
+    
+If we now turn on the behavior, the marker should be applied when the event
+is fired.
+
+    >>> BEHAVIORS.setdefault(SomeContext, set()).add(ITagging)
+
+    >>> context2 = SomeContext()
+    >>> ITagging(context2, None) is not None
+    True
+    >>> ITaggable.providedBy(context2)
+    False
+    
+    >>> applyMarkers(context2, ObjectCreatedEvent(context2))
+
+    >>> ITaggable.providedBy(context2)
+    True
+    
+Note that since this is applied per-instance, old instances do not get the
+marker interface automatically:
+    
+    >>> ITaggable.providedBy(context1)
+    False
+
+It may be useful to mark the content with the behavior interface directly for
+cases where the marker is all that's needed for the behavior to work. In
+these cases no factory is needed, because the object already provides the
+behavior directly as indicated by the marker. Note that the same interface
+is used as the 'interface' and 'marker':
+
+    >>> class IMarkerBehavior(Interface):
+    ...     pass
+
+    >>> from plone.behavior.registration import BehaviorRegistration
+    >>> registration = BehaviorRegistration(
+    ...     title=u"",
+    ...     description=u"",
+    ...     interface=IMarkerBehavior,
+    ...     marker=IMarkerBehavior,
+    ...     factory=None)
+
+    >>> from zope.component import provideUtility
+    >>> provideUtility(registration, name=IMarkerBehavior.__identifier__)
+    >>> factory = BehaviorAdapterFactory(registration)
+    >>> provideAdapter(factory=factory, adapts=(Interface,), provides=IMarkerBehavior)
+    >>> BEHAVIORS.setdefault(SomeContext, set()).add(IMarkerBehavior)
+
+When we adapt an object using this behavior, we get the object itself back,
+since it implements our behavior interface directly:
+
+    >>> context = SomeContext()
+    >>> IMarkerBehavior.providedBy(context)
+    False
+    >>> applyMarkers(context, ObjectCreatedEvent(context))
+    >>> IMarkerBehavior.providedBy(context)
+    True
+    >>> IMarkerBehavior(context) is context
+    True

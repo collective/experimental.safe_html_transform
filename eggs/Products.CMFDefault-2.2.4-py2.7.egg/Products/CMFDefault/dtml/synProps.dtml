@@ -1,0 +1,88 @@
+<html><head><title>portal_syndication properties</title></head>
+<body bgcolor="#ffffff">
+<dtml-var manage_tabs>
+<h2>Sitewide Default Syndication Properties</h2>
+<dtml-if expr="portal_syndication.isSiteSyndicationAllowed()"> 
+<form action="editProperties" method="POST">
+<table width="100%" border="0">
+  <tr>
+     <th valign="top" align="left">Sy Module Properties</th>
+  </tr>
+  <tr>
+     <td colspan="2">
+       <table width="90%" border="1"><tr><td>
+       <table>
+         <tr>
+           <th>Element</th>
+           <th>Default Value</th>
+         </tr>
+	<dtml-with portal_syndication>
+         <tr>
+           <td>
+             UpdatePeriod
+           </td>
+           <td>
+ <select name="updatePeriod">
+	<dtml-in buildUpdatePeriods>
+	<option value="&dtml-sequence-key;"
+	<dtml-if expr="_['sequence-key'] == getUpdatePeriod()">
+		selected="selected"</dtml-if>>&dtml-sequence-item;
+	</option>
+</dtml-in>
+</select>
+           </td>
+         </tr>
+         <tr>
+           <td>
+             UpdateFrequency
+           </td>
+           <td>
+             <input type="text" name="updateFrequency"
+              value="&dtml-getUpdateFrequency;" size="3">
+           </td>
+         </tr>
+		 <tr>
+           <td>
+             UpdateBase
+           </td>
+           <td>
+             <input type="text" name="updateBase:date"
+              value="&dtml-getUpdateBase;" size="70">
+           </td>
+         </tr>
+           <tr>
+           <td>
+             Max Syndicated Items
+           </td>
+           <td>
+             <input type="text" name="max_items"
+              value="&dtml-getMaxItems;" size="3">
+           </td>
+         </tr>
+	</dtml-with>
+         <tr>
+           <td colspan="2">
+             <input type="submit" name="edit" value=" Save ">
+           </td>
+         </tr>
+
+       </table>
+       </td></tr></table>
+     </td>
+  </tr>
+  <tr>
+   <td> <br /> </td>
+  </tr>
+</table>
+</form>
+<form action="editProperties" method="post">
+<input type="submit" value="Disable Syndication"></input>
+<input type="hidden" name="isAllowed:int" value="0"></input>
+</form>
+<dtml-else>
+<form action="editProperties" method="post">
+<input type="submit" value="Enable Syndication">
+<input type="hidden" name="isAllowed:int" value="1">
+</dtml-if>
+</body>
+</html>

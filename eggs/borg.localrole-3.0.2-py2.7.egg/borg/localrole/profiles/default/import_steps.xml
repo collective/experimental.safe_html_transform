@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<import-steps>
+  <import-step id="borg_localrole_various" version="20071003-01"
+               handler="borg.localrole.setuphandlers.importVarious"
+               title="borg.localrole plug-in installation">
+ </import-step>
+</import-steps>

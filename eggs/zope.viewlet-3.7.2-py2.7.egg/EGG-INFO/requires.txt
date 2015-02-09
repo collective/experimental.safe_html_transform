@@ -1,0 +1,17 @@
+setuptools
+zope.browserpage>=3.10.1
+zope.component
+zope.configuration
+zope.contentprovider
+zope.event
+zope.i18nmessageid
+zope.interface
+zope.location
+zope.publisher
+zope.schema
+zope.security
+zope.traversing
+
+[test]
+zope.testing
+zope.size

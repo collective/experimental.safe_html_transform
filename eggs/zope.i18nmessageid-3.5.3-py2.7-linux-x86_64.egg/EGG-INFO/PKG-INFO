@@ -1,0 +1,264 @@
+Metadata-Version: 1.1
+Name: zope.i18nmessageid
+Version: 3.5.3
+Summary: Message Identifiers for internationalization
+Home-page: http://pypi.python.org/pypi/zope.i18nmessageid
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: To translate any text, we must be able to discover the source domain
+        of the text.  A source domain is an identifier that identifies a
+        project that produces program source strings.  Source strings occur as
+        literals in python programs, text in templates, and some text in XML
+        data.  The project implies a source language and an application
+        context.
+        
+        We can think of a source domain as a collection of messages and
+        associated translation strings.
+        
+        We often need to create unicode strings that will be displayed by
+        separate views.  The view cannot translate the string without knowing
+        its source domain.  A string or unicode literal carries no domain
+        information, therefore we use messages.  Messages are unicode strings
+        which carry a translation source domain and possibly a default
+        translation.  They are created by a message factory. The message
+        factory is created by calling ``MessageFactory`` with the source
+        domain.
+        
+        This package provides facilities for *declaring* such messages within
+        program source text;  translation of the messages is the responsiblitiy
+        of the 'zope.i18n' package.
+        
+        
+        .. contents::
+        
+        =============
+        I18n Messages
+        =============
+        
+        Rationale
+        ---------
+        
+        To translate any text, we must be able to discover the source domain
+        of the text.  A source domain is an identifier that identifies a
+        project that produces program source strings.  Source strings occur as
+        literals in python programs, text in templates, and some text in XML
+        data.  The project implies a source language and an application
+        context.
+        
+        We can think of a source domain as a collection of messages and
+        associated translation strings.
+        
+        We often need to create unicode strings that will be displayed by
+        separate views.  The view cannot translate the string without knowing
+        its source domain.  A string or unicode literal carries no domain
+        information, therefore we use messages.  Messages are unicode strings
+        which carry a translation source domain and possibly a default
+        translation.  They are created by a message factory. The message
+        factory is created by calling ``MessageFactory`` with the source
+        domain.
+        
+        ZopeMessageFactory
+        ------------------
+        
+          >>> from zope.i18nmessageid import ZopeMessageFactory as _z_
+          >>> foo = _z_('foo')
+          >>> foo.domain
+          'zope'
+          
+        
+        
+        Example
+        -------
+        
+        In this example, we create a message factory and assign it to _.  By
+        convention, we use _ as the name of our factory to be compatible with
+        translatable string extraction tools such as xgettext.  We then call _
+        with a string that needs to be translatable:
+        
+          >>> from zope.i18nmessageid import MessageFactory, Message
+          >>> _ = MessageFactory("futurama")
+          >>> robot = _(u"robot-message", u"${name} is a robot.")
+        
+        Messages at first seem like they are unicode strings:
+        
+          >>> robot
+          u'robot-message'
+          >>> isinstance(robot, unicode)
+          True
+        
+        The additional domain, default and mapping information is available
+        through attributes:
+        
+          >>> robot.default
+          u'${name} is a robot.'
+          >>> robot.mapping
+          >>> robot.domain
+          'futurama'
+        
+        The message's attributes are considered part of the immutable message
+        object.  They cannot be changed once the message id is created:
+        
+          >>> robot.domain = "planetexpress"
+          Traceback (most recent call last):
+          ...
+          TypeError: readonly attribute
+        
+          >>> robot.default = u"${name} is not a robot."
+          Traceback (most recent call last):
+          ...
+          TypeError: readonly attribute
+        
+          >>> robot.mapping = {u'name': u'Bender'}
+          Traceback (most recent call last):
+          ...
+          TypeError: readonly attribute
+        
+        If you need to change their information, you'll have to make a new
+        message id object:
+        
+          >>> new_robot = Message(robot, mapping={u'name': u'Bender'})
+          >>> new_robot
+          u'robot-message'
+          >>> new_robot.domain
+          'futurama'
+          >>> new_robot.default
+          u'${name} is a robot.'
+          >>> new_robot.mapping
+          {u'name': u'Bender'}
+        
+        Last but not least, messages are reduceable for pickling:
+        
+          >>> callable, args = new_robot.__reduce__()
+          >>> callable is Message
+          True
+          >>> args
+          (u'robot-message', 'futurama', u'${name} is a robot.', {u'name': u'Bender'})
+        
+          >>> fembot = Message(u'fembot')
+          >>> callable, args = fembot.__reduce__()
+          >>> callable is Message
+          True
+          >>> args
+          (u'fembot', None, None, None)
+        
+        
+        Message IDs and backward compatability
+        --------------------------------------
+        
+        The change to immutability is not a simple refactoring that can be
+        coped with backward compatible APIs--it is a change in semantics.
+        Because immutability is one of those "you either have it or you don't"
+        things (like pregnancy or death), we will not be able to support both
+        in one implementation.
+        
+        The proposed solution for backward compatability is to support both
+        implementations in parallel, deprecating the mutable one.  A separate
+        factory, ``MessageFactory``, instantiates immutable messages, while
+        the deprecated old one continues to work like before.
+        
+        The roadmap to immutable-only message ids is proposed as follows:
+        
+          Zope 3.1: Immutable message ids are introduced.  Security
+          declarations for mutable message ids are provided to make the
+          stripping of security proxies unnecessary.
+        
+          Zope 3.2: Mutable message ids are deprecated.
+        
+          Zope 3.3: Mutable message ids are removed.
+        
+        
+        =======
+        CHANGES
+        =======
+        
+        3.5.3 (2010-08-10)
+        ------------------
+        
+        - Made compilation of C extension optional again; 3.5.1 broke this
+          inasmuch as this package become unusable on non-CPython platforms.
+          Making the compilation of the C extension optional again implied
+          removing ``setup.py`` code added in 3.5.1 which made the C extension
+          a setuptools "Feature" and readding code from 3.5.0 which overrides
+          the distutils ``build_ext`` command.
+        
+        - Move pickle equality tests into a unittest.TestCase test to make it
+          easier to condition the tests on whether the C extension has been
+          compiled.  This also makes the tests pass on Jython.
+        
+        3.5.2 (2010-04-30)
+        ------------------
+        
+        - Removed use of 'zope.testing.doctestunit' in favor of stdlib's 'doctest.
+        
+        3.5.1 (2010-04-10)
+        ------------------
+        
+        - LP #257657 / 489529:  Fix memory leak in C extension.
+        
+        - Fixed the compilation of the C extension with python 2.6: refactored it as a
+          setuptools Feature.
+        
+        3.5.0 (2009-06-27)
+        ------------------
+        
+        - Made compilation of C extension optional.
+        
+        - Added support to bootstrap on Jython.
+        
+        - Changed package's mailing list address from zope3-dev at zope.org to
+          zope-dev at zope.org, because zope3-dev is now retired.
+        
+        - Reformatted change log to common formatting style.
+        
+        - Update package description and docs a little.
+        
+        - Remove old .cfg files for zpkg.
+        
+        3.4.3 (2007-09-26)
+        ------------------
+        
+        - Make PyPI the home URL.
+        
+        3.4.2 (2007-09-25)
+        ------------------
+        
+        - Moved the ``ZopeMessageFactory`` from ``zope.app.i18n`` to this package.
+        
+        3.4.0 (2007-07-19)
+        ------------------
+        
+        - Remove incorrect dependency.
+        
+        - Create final release to reflect package status.
+        
+        3.2.0 (2006-01-05)
+        ------------------
+        
+        - Corresponds to the verison of the zope.i18nmessageid package shipped as
+          part of the Zope 3.2.0 release.
+        
+        - Implemented 'zope.i18nmessageid.message' as a C extension.
+        
+        - Deprecated 'zope.i18nmessageid.messageid' APIs ('MessageID',
+          'MessageIDFactory') in favor of replacements in 'zope.i18nmessageid.message'
+          ('Message', 'MessageFactory').  Deprecated items are scheduled for removal
+          in Zope 3.3.
+        
+        3.0.0 (2004-11-07)
+        ------------------
+        
+        - Corresponds to the verison of the zope.i18nmessageid package shipped as
+          part of the Zope X3.0.0 release.
+        
+Keywords: zope i18n message factory
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3

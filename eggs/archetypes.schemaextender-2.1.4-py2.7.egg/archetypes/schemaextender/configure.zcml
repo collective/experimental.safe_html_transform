@@ -1,0 +1,9 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+    <include file="implements.zcml" />
+
+    <!-- Register caching adapter for IExtensible objects -->
+    <adapter factory=".extender.cachingInstanceSchemaFactory" />
+
+</configure>

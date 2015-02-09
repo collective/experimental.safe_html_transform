@@ -1,0 +1,34 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:five="http://namespaces.zope.org/five">
+
+    <!-- Edit widgets -->
+
+    <view
+      type="zope.publisher.interfaces.browser.IBrowserRequest"
+      for="zope.schema.interfaces.IBool"
+      provides="zope.formlib.interfaces.IInputWidget"
+      factory=".CheckBoxWidget"
+      permission="zope.Public"
+      />
+
+  <adapter
+      for="zope.schema.interfaces.ITuple
+           zope.schema.interfaces.IField
+           zope.publisher.interfaces.browser.IBrowserRequest"
+      provides="zope.formlib.interfaces.ISimpleInputWidget"
+      factory=".TupleSequenceWidget"
+      permission="zope.Public"
+      />
+
+  <adapter
+      for="zope.schema.interfaces.IList
+           zope.schema.interfaces.IField
+           zope.publisher.interfaces.browser.IBrowserRequest"
+      provides="zope.formlib.interfaces.ISimpleInputWidget"
+      factory=".ListSequenceWidget"
+      permission="zope.Public"
+      />
+
+</configure>

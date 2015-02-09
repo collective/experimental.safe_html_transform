@@ -1,0 +1,37 @@
+Metadata-Version: 1.0
+Name: zope.size
+Version: 3.4.1
+Summary: Interfaces and simple adapter that give the size of an object
+Home-page: http://pypi.python.org/pypi/zope.size
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: This package provides a definition of simple interface that allows to
+        retrieve the size of the object for displaying and for sorting.
+        
+        The default adapter is also provided. It expects objects to have the ``getSize``
+        method that returns size in bytes, however, it won't crash if an object doesn't
+        have one and will show size as ``not available`` instead.
+        
+        
+        =======
+        CHANGES
+        =======
+        
+        3.4.1 (2009-09-10)
+        ------------------
+        
+        - Added support to bootstrap on Jython.
+        
+        - Added docstrings
+        
+        - Beautify package's README and include CHANGES into the description.
+        
+        - Changed package's url to PyPI instead of Subversion.
+        
+        3.4.0 (2006-09-29)
+        ------------------
+        
+        - First release as a separate egg
+        
+Platform: UNKNOWN

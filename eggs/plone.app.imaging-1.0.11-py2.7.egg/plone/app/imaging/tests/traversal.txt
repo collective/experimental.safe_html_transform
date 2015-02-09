@@ -1,0 +1,55 @@
+A simple test the make sure the traversal adapters for image scales are
+working correctly.  First we have to create an image to start with:
+
+  >>> self.setRoles(('Manager',))
+  >>> data = self.getImage()
+  >>> portal.invokeFactory('Image', id='foo', title='Foo', image=data)
+  'foo'
+  >>> portal.foo.getField('image').removeScales(portal.foo)
+
+Then we can use a testbrowser to access the image itself and a scaled down
+version:
+
+  >>> browser = self.getBrowser()
+  >>> browser.open('http://nohost/plone/foo')
+  >>> browser.contents
+  'GIF89a...'
+  >>> len(browser.contents) == len(data)
+  True
+
+Let's analyse the image a little further:
+
+  >>> from PIL.Image import open
+  >>> from StringIO import StringIO
+  >>> image = open(StringIO(browser.contents))
+  >>> image.format
+  'GIF'
+  >>> image.size
+  (200, 200)
+
+Now check the scaled version:
+
+  >>> browser.open('http://nohost/plone/foo/image_thumb')
+  >>> browser.contents
+  'GIF87a...'
+  >>> image = open(StringIO(browser.contents))
+  >>> image.format
+  'GIF'
+  >>> image.size
+  (128, 128)
+
+We also want to be able to traverse to the image scale in path expressions,
+which don't use publish traversal:
+
+  >>> from Products.CMFCore.Expression import Expression, getExprContext
+  >>> def eval_expression(expr):
+  ...     econtext = getExprContext(self.portal)
+  ...     return Expression(expr)(econtext)
+  >>> eval_expression('portal/foo/image_thumb')
+  <ImageScale at ...>
+
+And let's make sure that we can check for the scale with an 'exists'
+expression:
+
+  >>> bool(eval_expression('exists:portal/foo/image_thumb'))
+  True

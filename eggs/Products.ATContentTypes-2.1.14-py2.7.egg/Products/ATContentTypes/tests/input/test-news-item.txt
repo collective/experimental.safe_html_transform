@@ -1,0 +1,18 @@
+title: test news item
+allowDiscussion: None
+subject: 
+description: test news item description
+contributors: 
+creators: tiran
+effectiveDate: None
+expirationDate: None
+language: 
+rights: 
+creation_date: 2005/05/27 00:00:00 GMT
+modification_date: 2005/05/27 01:00:00 GMT
+layout: newsitem_view
+imageCaption: an image caption
+relatedItems: 
+Content-Type: text/html
+
+<em>a test news item</em>

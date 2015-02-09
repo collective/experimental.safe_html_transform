@@ -1,0 +1,297 @@
+========================
+archetypes.schemaxtender
+========================
+
+This package allows you to inject new fields into an Archetypes schema, using
+an adapter.
+
+For example, let's say we want to add a tags field to a number of content
+types. The field stores values in an annotation, has a default and accesses
+a vocabulary. In addition, we want to be able to highlight some content items.
+We do this with a marker interface, so that we can register viewlets (say)
+for highlighted items.
+
+For the purposes of the test, we will store the vocabulary and the default
+in properties on the site root.
+
+    >>> self.portal.manage_addProperty('tags_vocab', ['A', 'B', 'C'], 'lines')
+    >>> self.portal.manage_addProperty('tags_default', ['A', 'B'], 'lines')
+
+Schema extenders are applied by adaptation. One way to achieve that, is to
+use a marker interface on content types that you want to extend, and apply
+this selectively, either using the <implements /> ZCML directive, or via
+the methods in zope.interface.
+
+    >>> import zope.interface
+    >>> class ITaggable(zope.interface.Interface):
+    ...     """Taggable content
+    ...     """
+
+    >>> from Products.ATContentTypes.content import document
+    >>> zope.interface.classImplements(document.ATDocument, ITaggable)
+
+Let's ensure that this applies to a properly created document:
+
+    >>> self.folder.invokeFactory('Document', 'taggable-document')
+    'taggable-document'
+
+    >>> taggable_doc = getattr(self.folder, 'taggable-document')
+    >>> ITaggable.providedBy(taggable_doc)
+    True
+
+Now we can set up a schema extender, adding a new LinesField, with a
+LinesWidget, using a custom default method and a custom vocabulary.
+
+To create the new field, we subclass the standard LinesField and use the
+methods in the Field class to provide a default and vocabulary.
+
+    >>> from archetypes.schemaextender.field import ExtensionField
+    >>> from Products.Archetypes import atapi
+    >>> from Products.CMFCore.utils import getToolByName
+
+    >>> class TagsField(ExtensionField, atapi.LinesField):
+    ...
+    ...     def getDefault(self, instance):
+    ...         portal_url = getToolByName(instance, 'portal_url')
+    ...         portal = portal_url.getPortalObject()
+    ...         return portal.getProperty('tags_default')
+    ...
+    ...     def Vocabulary(self, content_instance):
+    ...         portal_url = getToolByName(content_instance, 'portal_url')
+    ...         portal = portal_url.getPortalObject()
+    ...         return atapi.DisplayList([(x, x) for x in portal.getProperty('tags_vocab')])
+
+By mixing in ExtensionField (first!), we get standard accessors and mutators
+which are *not* generated on the class. The default storage is
+AnnotationStorage. Here, we override getDefault() and Vocabulary() to set the
+default and the vocabulary. Note that Vocabulary() needs to return an
+Archetypes DisplayList.
+
+Sometimes, we may want to do something quite different - for example, we can
+let the field manage a marker interface on the type. Here, we override
+get, getRaw and/or set.
+
+    >>> from archetypes.schemaextender.tests.mocks import IHighlighted
+
+    >>> class HighlightedField(ExtensionField, atapi.BooleanField):
+    ...
+    ...     def get(self, instance, **kwargs):
+    ...         return IHighlighted.providedBy(instance)
+    ...
+    ...     def getRaw(self, instance, **kwargs):
+    ...         return self.get(instance, **kwargs)
+    ...
+    ...     def set(self, instance, value, **kwargs):
+    ...         if value and not IHighlighted.providedBy(instance):
+    ...             zope.interface.alsoProvides(instance, IHighlighted)
+    ...         elif not value and IHighlighted.providedBy(instance):
+    ...             zope.interface.noLongerProvides(instance, IHighlighted)
+
+At this point, we have two custom fields. Now, let's add them to the
+schema of any ITaggable. We also define the order of fields. Here, it is
+important to use relative operations, since other schema extenders could be
+setting the order as well.
+
+    >>> import zope.component
+    >>> from archetypes.schemaextender.interfaces import IOrderableSchemaExtender
+
+    >>> class TaggingSchemaExtender(object):
+    ...     zope.interface.implements(IOrderableSchemaExtender)
+    ...     zope.component.adapts(ITaggable)
+    ...
+    ...     _fields = [
+    ...             TagsField('schemaextender_test_tags',
+    ...                 schemata='categorization',
+    ...                 enforceVocabulary=True,
+    ...                 widget=atapi.LinesWidget(
+    ...                     label="Tags",
+    ...                     description="Set some cool tags"
+    ...                 ),
+    ...             ),
+    ...             HighlightedField('schemaextender_test_highlighted',
+    ...                 schemata='settings',
+    ...                 widget=atapi.BooleanWidget(
+    ...                     label="Highlighted",
+    ...                     description="Highlight this item"
+    ...                 ),
+    ...             ),
+    ...         ]
+    ...
+    ...     def __init__(self, context):
+    ...         self.context = context
+    ...
+    ...     def getFields(self):
+    ...         return self._fields
+    ...
+    ...     def getOrder(self, original):
+    ...         categorization = original['categorization']
+    ...         idx = categorization.index('relatedItems')
+    ...         categorization.remove('schemaextender_test_tags')
+    ...         categorization.insert(idx, 'schemaextender_test_tags')
+    ...
+    ...         settings = original['settings']
+    ...         idx = settings.index('excludeFromNav')
+    ...         settings.remove('schemaextender_test_highlighted')
+    ...         settings.insert(idx, 'schemaextender_test_highlighted')
+    ...
+    ...         return original
+
+NOTE: These methods are called quite frequently, so it pays to optimise
+them.
+
+This will not show up in the schema yet:
+
+    >>> schema = taggable_doc.Schema()
+    >>> 'schemaextender_test_tags' in schema
+    False
+    >>> 'schemaextender_test_highlighted' in schema
+    False
+
+But look!
+
+    >>> zope.component.provideAdapter(TaggingSchemaExtender,
+    ...                               name=u"archetypes.schemaextender.tests")
+
+    >>> self.clearSchemaCache()
+    >>> schema = taggable_doc.Schema()
+    >>> 'schemaextender_test_tags' in schema
+    True
+    >>> 'schemaextender_test_highlighted' in schema
+    True
+
+Please note that as long as we don't use a testbrowser, thereby triggering
+new requests, the schema cache needs to be cleared explicitly in order to
+make the test work as intended.  On a real instance, caching per request
+shouldn't pose a problem, though.
+
+By registering a named adapter, we have extended the original schema. Let's
+also ensure that we got the order right:
+
+    >>> categ_fields = [a.getName() for a in schema.getSchemataFields('categorization')]
+    >>> set_fields = [a.getName() for a in schema.getSchemataFields('settings')]
+    >>> categ_fields.index('schemaextender_test_tags') == categ_fields.index('relatedItems') - 1
+    True
+    >>> set_fields.index('schemaextender_test_highlighted') == set_fields.index('excludeFromNav') - 1
+    True
+
+Note that there are no generated methods involved here. All access is via
+the schema:
+
+    >>> getattr(taggable_doc, 'getSchemaextender_test_tags', None) is None
+    True
+
+Let us verify that getting and setting values will work:
+
+    >>> tags_field = schema.getField('schemaextender_test_tags')
+    >>> tags_field.getDefault(taggable_doc)
+    ('A', 'B')
+    >>> tags_field.Vocabulary(taggable_doc).values()
+    ['A', 'B', 'C']
+    >>> tags_field.get(taggable_doc)
+    ('A', 'B')
+    >>> tags_field.set(taggable_doc, ('B',))
+    >>> tags_field.get(taggable_doc)
+    ('B',)
+
+    >>> highlighted_field = schema.getField('schemaextender_test_highlighted')
+    >>> highlighted_field.get(taggable_doc)
+    False
+    >>> highlighted_field.set(taggable_doc, True)
+    >>> highlighted_field.get(taggable_doc)
+    True
+    >>> IHighlighted.providedBy(taggable_doc)
+    True
+    >>> highlighted_field.set(taggable_doc, False)
+    >>> IHighlighted.providedBy(taggable_doc)
+    False
+
+It is also possible to modify the existing schema more directly, using an
+ISchemaModifier adapter. This is more powerful, but also more dangerous
+(and possibly a bit less efficient for the more common cases of adding
+and re-ordering fields). In general, if a field is deleted or changed to an
+incompatible type, you can expect trouble.
+
+    >>> from archetypes.schemaextender.interfaces import ISchemaModifier
+    >>> class SchemaModifier(object):
+    ...     zope.interface.implements(ISchemaModifier)
+    ...     zope.component.adapts(ITaggable)
+    ...
+    ...     def __init__(self, context):
+    ...         self.context = context
+    ...
+    ...     def fiddle(self, schema):
+    ...         schema['description'].widget.label = "Blurb"
+
+    >>> zope.component.provideAdapter(SchemaModifier,
+    ...                               name=u"archetypes.schemaextender.tests")
+
+    >>> self.clearSchemaCache()
+    >>> schema = taggable_doc.Schema()
+    >>> schema['description'].widget.label
+    'Blurb'
+
+Finally, let's ensure that this works through-the-web, using a browser
+test.
+
+    # BBB Zope 2.12
+    >>> try:
+    ...     from Testing.testbrowser import Browser
+    ... except ImportError:
+    ...     from Products.Five.testbrowser import Browser
+    >>> browser = Browser()
+    >>> folder_url = self.folder.absolute_url()
+    >>> self.portal.error_log._ignored_exceptions = ()
+
+    >>> from Products.PloneTestCase.setup import default_user, default_password
+    >>> browser = Browser()
+    >>> browser.addHeader('Authorization',
+    ...                   'Basic %s:%s' % (default_user, default_password))
+
+    >>> browser.open(folder_url)
+    >>> browser.getLink('Add new').click()
+    >>> browser.getControl('Page').click()
+    >>> browser.getControl('Add').click()
+
+Now we are on the edit page. Let's find and set some values, as well as
+verify that our changed widget took effect.
+
+    >>> 'Description' in browser.contents
+    False
+    >>> 'Blurb' in browser.contents
+    True
+
+    >>> browser.getControl('Title').value = "Test doc"
+    >>> 'A' in browser.getControl('Tags').value
+    True
+    >>> 'B' in browser.getControl('Tags').value
+    True
+    >>> browser.getControl('Tags').value = 'D'
+    >>> browser.getControl('Highlighted').click()
+    >>> browser.getControl('Save').click()
+
+This will raise a validation error:
+
+    >>> 'Please correct the indicated errors.' in browser.contents
+    True
+    >>> "Values ['D'] are not allowed for vocabulary" in browser.contents
+    True
+
+Let's fix that:
+
+    >>> browser.getControl('Tags').value = 'A'
+    >>> browser.getControl('Save').click()
+
+At this point, we should have saved the tags and applied the marker interface.
+
+    >>> test_doc = getattr(self.folder, 'test-doc')
+    >>> tags_field = test_doc.Schema()['schemaextender_test_tags']
+    >>> tags_field.get(test_doc)
+    ('A',)
+
+    >>> IHighlighted.providedBy(test_doc)
+    True
+
+Clean up after ourselves.
+
+    >>> spec = zope.interface.implementedBy(document.ATDocument) - ITaggable
+    >>> zope.interface.classImplementsOnly(document.ATDocument, spec)

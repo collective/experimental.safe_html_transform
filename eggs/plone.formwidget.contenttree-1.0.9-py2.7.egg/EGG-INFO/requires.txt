@@ -1,0 +1,7 @@
+setuptools
+z3c.formwidget.query
+plone.formwidget.autocomplete >= 1.2.0
+plone.z3cform >= 0.7.4
+
+[test]
+plone.app.testing

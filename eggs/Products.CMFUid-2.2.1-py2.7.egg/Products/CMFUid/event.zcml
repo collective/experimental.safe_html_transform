@@ -1,0 +1,10 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <subscriber
+      for="Products.CMFCore.interfaces.IContentish
+           zope.component.interfaces.IObjectEvent"
+      handler=".UniqueIdAnnotationTool.handleUidAnnotationEvent"
+      />
+
+</configure>

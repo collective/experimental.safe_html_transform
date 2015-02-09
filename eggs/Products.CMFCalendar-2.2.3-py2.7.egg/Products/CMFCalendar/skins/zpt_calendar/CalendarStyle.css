@@ -1,0 +1,132 @@
+.CalendarArrow {
+    font-weight: bold;
+    text-decoration: none;
+    color: #000000;
+}
+
+.CalendarTitle {
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    color: #000000;
+}
+
+div.CalendarBox {
+    background-color: white;
+    border: None;
+    }
+
+table.calendar {
+    border: 1px solid Black;
+    text-align: right;
+}
+
+table.calendar th {
+    background-color: #DDDDDD;
+    font-weight: bold;
+    text-align: center;
+}
+
+table.calendar td {
+    white-space: nowrap;
+    background-color: white;
+    width: 1.5em;
+}
+
+table.calendar a {
+    text-decoration: none;
+    color: Blue;
+}
+
+table.calendar a:hover {
+    text-decoration: none;
+}
+
+table.calendar td.weekdays {
+    background-color: #AAAAAA;
+    border: Black;
+    border-style: solid none;
+    text-align: center;
+}
+
+table.calendar td.event {
+    background-color: #DDDDDD;
+    font-weight: bold;
+}
+
+table.calendar td.todayevent {
+    background-color: #DDDDDD;
+    border: 2px solid Orange;
+    font-weight: bold;
+}
+
+table.calendar td.todaynoevent {
+    border-collapse: collapse;
+    border: 2px solid Orange;
+}
+
+div.day {
+    background-color: #FFFFBB;
+    border: 1px solid Black;
+    visibility: hidden;
+    width: 12em;
+    z-index: 2;
+}
+
+
+div.dayViewBox {
+    background-color: white;
+    border: None;
+    }
+
+table.dayView {
+    border: 1px solid Black;
+    text-align: right;
+}
+
+table.dayView th {
+    background-color: #DDDDDD;
+    font-weight: bold;
+    font-size: 75%;
+    text-align: center;
+}
+
+table.dayView td {
+    white-space: nowrap;
+    background-color: white;
+    font-size: 75%;
+    width: 1.5em;
+    padding: 0.2em;
+    text-align: center;
+}
+
+table.dayView td.startDate {
+    text-align: right;
+}
+
+table.dayView td.endDate {
+    text-align: left;
+}
+
+table.dayView td.heading {
+    background-color: #AAAAAA;
+    border: 1px solid Black;
+    text-align: center;
+}
+
+table.Event {
+    background-color: #DDDDDD;
+}
+
+table.Event th {
+    text-align: left;
+    white-space: nowrap;
+    font-size: 80%;
+    font-weight: bold;
+    font-family: Verdana, Helvetica, sans-serif;
+}
+
+table.Event td {
+    font-size: 80%;
+    font-family: Verdana, Helvetica, sans-serif;
+}

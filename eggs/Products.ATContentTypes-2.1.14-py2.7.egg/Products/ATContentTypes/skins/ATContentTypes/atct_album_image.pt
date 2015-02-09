@@ -1,0 +1,47 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
+      lang="en-US"
+      metal:use-macro="here/main_template/macros/master"
+      i18n:domain="atcontenttypes">
+
+<body>
+
+  <metal:content-core metal:fill-slot="content-core">
+      <metal:block define-macro="content-core"
+           tal:define="DateTime python:modules['DateTime'].DateTime;
+                       images python:here.atctListAlbum(images=1)['images'];
+                       Batch python:modules['Products.CMFPlone'].Batch;
+                       b_start python:request.get('b_start', 0);
+                       batch python:Batch(images, 1, int(b_start), orphan=0);
+                       image python:batch[0];
+                       photo_display python:request.cookies.get('photo_display', 'large');
+                       photo_display python:'large';">
+
+        <div metal:use-macro="here/batch_macros/macros/navigation"></div>
+
+        <div style="position: relative; top: 1.6em; left: 0.3em;"
+             class="exifImageDate"
+             tal:define="orig_date image/getEXIFOrigDate"
+             tal:condition="orig_date">
+            <span style="color: white; background: black; white-space: nowrap; padding: 1px;"
+                  tal:content="python:here.toLocalizedTime(orig_date, long_format=1)"></span>
+        </div>
+
+        <a tal:condition="image/size" tal:attributes="href string:${image/absolute_url}/view">
+            <img src="#" alt="" tal:replace="structure python:image.tag(scale=photo_display)" />
+        </a>
+
+        <div tal:define="b_start python:request.get('b_start', 0)">
+          <a href="" tal:attributes="href string:${request/URL1}/view?b_start=$b_start">
+            <img src="#" alt="Back to album"
+                 title="Back to album"
+                 tal:attributes="src string:$portal_url/folder_icon.png"
+                 i18n:attributes="alt label_back_to_album; title title_back_to_album;" />
+          </a>
+        </div>
+
+      </metal:block>
+  </metal:content-core>
+
+</body>
+
+</html>

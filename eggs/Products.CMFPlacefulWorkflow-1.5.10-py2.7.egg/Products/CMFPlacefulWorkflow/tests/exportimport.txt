@@ -1,0 +1,133 @@
+;-*-Doctest-*-
+=================================================
+GenericSetup Exmport/Import Handlers for Policies
+=================================================
+
+Placeful workflow policies can be imported and exported through
+portal_setup.
+
+Import
+------
+
+Start with basic policies::
+
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> self.setRoles(['Manager'])
+    >>> ppw = getToolByName(self.portal, 'portal_placeful_workflow')
+    >>> ppw.getWorkflowPolicyIds()
+    ('intranet', 'old-plone', 'one-state', 'simple-publication')
+
+Import the portal_placeful_workflow step with a profile defining a
+policy::
+
+    >>> ps = getToolByName(self.portal, 'portal_setup')
+    >>> specific_context = 'profile-Products.CMFPlacefulWorkflow.tests:exportimport'
+    >>> ps.runImportStepFromProfile(specific_context, 'portal_placeful_workflow')
+    {'messages': {'portal_placeful_workflow': 'placeful_workflow: Folder
+    imported.\nplaceful_workflow: Workflow tool imported.', u'workflow': ''},
+    'steps': [u'workflow', 'portal_placeful_workflow']}
+
+    >>> ppw.getWorkflowPolicyIds()
+    ('intranet', 'old-plone', 'one-state', 'simple-publication', 'baz_policy')
+
+In this policy, folder_workflow is the default chain::
+
+    >>> policy = ppw.getWorkflowPolicyById('baz_policy')
+    >>> policy.getDefaultChain(None)
+    ('folder_workflow',)
+
+Anything not specified in the policy should acquire policy from above or
+portal_workflow. Here the policy should return None for News Item::
+
+    >>> policy.getChainFor('News Item') is None
+    True
+
+Folder is bound to only plone_workflow::
+
+    >>> policy.getChainFor('Folder')
+    ('plone_workflow',)
+
+The chains for Document and Event should be empty::
+
+    >>> policy.getChainFor('Document')
+    ()
+    >>> policy.getChainFor('Event')
+    ()
+
+File is bound to both plone_workflow and folder_workflow::
+
+    >>> policy.getChainFor('File')
+    ('plone_workflow', 'folder_workflow')
+
+
+Export
+------
+
+Export the portal_placeful_workflow step::
+
+    >>> tarball = ps._doRunExportSteps(['portal_placeful_workflow'])['tarball']
+
+The export produces a file for the tool itself::
+
+    >>> import tarfile
+    >>> import StringIO
+    >>> archive = tarfile.open(
+    ...     name='export',
+    ...     fileobj=StringIO.StringIO(tarball))
+
+    >>> print archive.extractfile(
+    ...     'portal_placeful_workflow.xml').read()
+    <?xml version="1.0"?>
+    <object name="portal_placeful_workflow" meta_type="Placeful Workflow Tool">
+     <property name="title"></property>
+     <property name="max_chain_length" type="int">1</property>
+     <object name="baz_policy" meta_type="WorkflowPolicy"/>
+     <object name="intranet" meta_type="WorkflowPolicy"/>
+     <object name="old-plone" meta_type="WorkflowPolicy"/>
+     <object name="one-state" meta_type="WorkflowPolicy"/>
+     <object name="simple-publication" meta_type="WorkflowPolicy"/>
+    </object>
+    <BLANKLINE>
+
+The export also produces a file for any policies::
+
+    >>> print archive.extractfile('portal_placeful_workflow/baz_policy.xml').read()
+    <?xml version="1.0"?>
+    <object name="baz_policy" meta_type="WorkflowPolicy">
+     <property name="title">Baz Policy</property>
+     <bindings>
+      <default>
+       <bound-workflow workflow_id="folder_workflow"/>
+      </default>
+      <type type_id="Document"/>
+      <type type_id="Event"/>
+      <type type_id="File">
+       <bound-workflow workflow_id="plone_workflow"/>
+       <bound-workflow workflow_id="folder_workflow"/>
+      </type>
+      <type type_id="Folder">
+       <bound-workflow workflow_id="plone_workflow"/>
+      </type>
+     </bindings>
+    </object>
+    <BLANKLINE>
+
+Export works when chains are left unset to acquire::
+
+    >>> policy._default_chain = None
+    >>> policy._chains_by_type = None
+    >>> baseline = ps.getBaselineContextID()
+    >>> ignored = ps.runImportStepFromProfile(specific_context, 'portal_placeful_workflow')
+
+Snapshot
+--------
+    
+    >>> snapshotResults = ps.createSnapshot('sn1')
+    >>> snapshotResults['url']
+    'http://nohost/plone/portal_setup/sn1'
+    
+    >>> 'portal_placeful_workflow' in snapshotResults['steps']
+    True
+    
+    >>> snapshotResults['snapshot']
+    <Folder at /plone/portal_setup/snapshots/sn1>

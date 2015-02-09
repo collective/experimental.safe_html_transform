@@ -1,0 +1,87 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           xmlns:five="http://namespaces.zope.org/five">
+
+  <include package="plone.app.viewletmanager" />
+
+  <browser:viewletManager
+      name="archetypes.edit.beforefieldsets"
+      provides="..interfaces.IEditBeforeFieldsets"
+      permission="cmf.ModifyPortalContent"
+      class="plone.app.viewletmanager.manager.OrderedViewletManager"
+      />
+
+  <browser:viewletManager
+      name="archetypes.edit.afterfieldsets"
+      provides="..interfaces.IEditAfterFieldsets"
+      permission="cmf.ModifyPortalContent"
+      class="plone.app.viewletmanager.manager.OrderedViewletManager"
+      />
+
+  <browser:page
+      for="..interfaces.IBaseObject"
+      name="at_base_edit_view"
+      class=".edit.Edit"
+      permission="cmf.ModifyPortalContent"
+      allowed_interface="..interfaces.IEditForm"
+      />
+  
+  <!-- Make sure that if a user goes to /edit on an unauthorized context,
+  they get the login form rather than a LocationError -->
+  <browser:page
+      for="Shared.DC.Scripts.Bindings.UnauthorizedBinding"
+      name="at_base_edit_view"
+      class=".edit.UnauthorizedEdit"
+      permission="zope.Public"
+      />
+
+  <browser:page
+      for="..interfaces.IBaseObject"
+      name="at_lifecycle_view"
+      class=".lifecycle.Lifecycle"
+      permission="cmf.ModifyPortalContent"
+      allowed_attributes="begin_edit cancel_edit"
+      />
+
+  <browser:page
+      for="*"
+      name="kss_field_decorator_view"
+      permission="zope2.View"
+      class=".fields.DefaultFieldDecoratorView"
+      allowed_attributes="getKssClassesInlineEditable getKssClasses"
+      />
+
+  <browser:page
+      for="*"
+      name="at_selection_widget"
+      class=".widgets.SelectionWidget"
+      permission="zope.Public"
+      allowed_attributes="getSelected"
+      />
+
+  <browser:page
+      for="*"
+      name="at_textarea_widget"
+      class=".widgets.TextareaWidget"
+      permission="zope2.View"
+      allowed_attributes="getSelected lookupMime"
+      />
+
+  <browser:page
+      for="*"
+      name="at_validate_field"
+      class=".validation.InlineValidationView"
+      permission="zope2.View"
+      />
+
+
+  <browser:page
+      for="*"
+      name="at_utils"
+      class=".utils.Utils"
+      allowed_interface="..interfaces.utils.IUtils"
+      permission="zope2.View"
+      />
+ 
+
+</configure>

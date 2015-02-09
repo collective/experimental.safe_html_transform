@@ -1,0 +1,41 @@
+<form action="manage_addWorkflowPolicy" method="POST">
+
+<h3>Add Workflow policy</h3>
+
+<table cellspacing="0" cellpadding="2" border="0">
+  <tr>
+    <td align="left" valign="top">
+    <div class="form-label">
+    Id
+    </div>
+    </td>
+    <td align="left" valign="top">
+    <input type="text" name="id" size="40" />
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+    <div class="form-label"><label>Type</label></div>
+    </td>
+    <td align="left" valign="top">
+    <div tal:repeat="wptype options/workflow_policy_types">
+      <input type="radio" name="workflow_policy_type" value="id" id="id"
+             tal:attributes="name wptype;id wptype;">
+      <label for="ids"
+             tal:attributes="for wptype"
+             tal:content="wptype">Id</label><br />
+    </div>
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+    </td>
+    <td align="left" valign="top">
+    <div class="form-element">
+    <input class="form-element" type="submit" name="submit" 
+     value=" Add " /> 
+    </div>
+    </td>
+  </tr>
+</table>
+</form>

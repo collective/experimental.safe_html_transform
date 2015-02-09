@@ -1,0 +1,16 @@
+setuptools
+zope.annotation
+zope.component
+zope.deferredimport
+zope.interface
+Products.CMFCore
+Products.GenericSetup
+Products.PlonePAS
+Products.PluggableAuthService
+plone.memoize
+Acquisition
+Zope2
+
+[test]
+Products.ATContentTypes
+Products.PloneTestCase

@@ -1,0 +1,31 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directives namespace="http://namespaces.zope.org/zope">
+
+    <meta:directive
+        name="includeDependencies"
+        schema=".zcml.IIncludeDependenciesDirective"
+        handler=".zcml.includeDependenciesDirective"
+        />
+    <meta:directive
+        name="includeDependenciesOverrides"
+        schema=".zcml.IIncludeDependenciesDirective"
+        handler=".zcml.includeDependenciesOverridesDirective"
+        />
+
+    <meta:directive
+        name="includePlugins"
+        schema=".zcml.IIncludePluginsDirective"
+        handler=".zcml.includePluginsDirective"
+        />
+    <meta:directive
+        name="includePluginsOverrides"
+	schema=".zcml.IIncludePluginsDirective"
+	handler=".zcml.includePluginsOverridesDirective"
+	/>
+
+  </meta:directives>
+
+</configure>

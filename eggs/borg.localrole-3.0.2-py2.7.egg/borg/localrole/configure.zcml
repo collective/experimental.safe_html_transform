@@ -1,0 +1,33 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="borg.localrole">
+
+    <five:registerPackage package="." initialize=".initialize" />
+
+    <!-- Register GenericSetup profile used for installation -->
+    <genericsetup:registerProfile
+        name="default"
+        title="b-org local role plug-in"
+        directory="profiles/default"
+        description="This is a PAS plug-in that makes it easy to determine local roles via an adapter lookup"
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
+
+    <!-- Installs the Factory Tool adapter if Plone is installed -->
+    <class class="Products.CMFPlone.FactoryTool.TempFolder"
+           zcml:condition="installed Products.CMFPlone">
+      <implements interface=".interfaces.IFactoryTempFolder" />
+    </class>
+
+    <adapter zcml:condition="installed Products.CMFPlone"
+             factory=".factory_adapter.FactoryTempFolderProvider"
+             />
+
+    <include file="exportimport.zcml" />
+
+    <include package="plone.memoize" />
+
+</configure>

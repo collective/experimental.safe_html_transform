@@ -1,0 +1,174 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:cache="http://namespaces.zope.org/cache"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="plone.app.caching">
+
+    <!-- Out-of-the-box cache profiles
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <genericsetup:registerProfile
+        name="with-caching-proxy"
+        title="With caching proxy"
+        description="Settings useful for setups with a caching proxy such as Squid or Varnish"
+        directory="profiles/with-caching-proxy"
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        for="plone.app.caching.interfaces.ICacheProfiles"
+        />
+
+    <genericsetup:registerProfile
+        name="without-caching-proxy"
+        title="Without caching proxy"
+        description="Settings useful for setups without a caching proxy such as Squid or Varnish"
+        directory="profiles/without-caching-proxy"
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        for="plone.app.caching.interfaces.ICacheProfiles"
+        />
+
+    <genericsetup:registerProfile
+        name="with-caching-proxy-splitviews"
+        title="With caching proxy (and split-view caching)"
+        description="An example profile for a caching proxy setup with split-view caching enabled."
+        directory="profiles/with-caching-proxy-splitviews"
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        for="plone.app.caching.interfaces.ICacheProfiles"
+        />
+
+    <!-- Default caching ruleset types
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <cache:rulesetType
+        name="plone.resource"
+        title="File and image resources"
+        description="Includes images and files created or customised through the ZMI, those exposed in the portal_skins tool, and images registered in resource directories on the filesystem."
+        />
+
+    <cache:rulesetType
+        name="plone.stableResource"
+        title="Stable file and image resources"
+        description="These are resources which can be cached 'forever'. Normally this means that if the object does change, its URL changes too."
+        />
+
+    <cache:rulesetType
+        name="plone.content.file"
+        title="Content files and images"
+        description="Includes files and images in content space."
+        />
+
+    <cache:rulesetType
+        name="plone.content.itemView"
+        title="Content item view"
+        description="A public-facing view for a content item that is not a folder or container for other items"
+        />
+
+    <cache:rulesetType
+        name="plone.content.folderView"
+        title="Content folder view"
+        description="A public-facing view for a content item that is a folder or container for other items"
+        />
+
+    <cache:rulesetType
+        name="plone.content.feed"
+        title="Content feed"
+        description="A dynamic feed, e.g. using RSS or ATOM"
+        />
+
+    <!-- Default caching ruleset assignments
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <!-- CMF filesystem (skin layer) files and images -->
+    <configure zcml:condition="installed Products.CMFCore">
+
+        <cache:ruleset ruleset="plone.resource" for="Products.CMFCore.FSFile.FSFile" />
+        <cache:ruleset ruleset="plone.resource" for="Products.CMFCore.FSImage.FSImage" />
+
+    </configure>
+
+    <!-- OFS (in-ZODB) files, images -->
+    <configure zcml:condition="installed OFS.Image">
+
+        <cache:ruleset ruleset="plone.resource" for="OFS.Image.File" />
+
+        <!-- Automatically purge these always -->
+        <class class="OFS.Image.File">
+            <implements interface="z3c.caching.interfaces.IPurgeable" />
+        </class>
+
+    </configure>
+
+    <!-- Zope resources (including those in resource directories) -->
+    <cache:ruleset ruleset="plone.resource" for="zope.browserresource.interfaces.IResource" />
+
+    <!-- Resources cooked in ResourceRegistries -->
+    <configure zcml:condition="installed Products.ResourceRegistries">
+
+        <cache:ruleset ruleset="plone.stableResource" for="Products.ResourceRegistries.interfaces.ICookedFile" />
+
+    </configure>
+
+    <!-- Standard Plone (non-blob) file and image content objects -->
+    <configure zcml:condition="installed Products.ATContentTypes">
+
+        <cache:ruleset ruleset="plone.content.file" for="Products.ATContentTypes.interfaces.IATFile" />
+        <cache:ruleset ruleset="plone.content.file" for="Products.ATContentTypes.interfaces.IATImage" />
+
+    </configure>
+
+    <!-- Standard image content saved in an Archetype field, like ATImage scales-->
+    <configure zcml:condition="installed Products.Archetypes">
+
+        <cache:ruleset ruleset="plone.content.file" for="Products.Archetypes.Field.Image" />
+
+    </configure>
+
+    <!-- Archetypes based folders and non-folderish content items -->
+    <configure zcml:condition="installed Products.Archetypes">
+
+        <!-- These rely on the ContentItemLookup delegation -->
+        <cache:ruleset ruleset="plone.content.itemView"   for="Products.Archetypes.BaseContent.BaseContent" />
+        <cache:ruleset ruleset="plone.content.folderView" for="Products.Archetypes.BaseFolder.BaseFolder" />
+
+    </configure>
+
+    <!-- Dexterity based folders and non-folderish content items -->
+    <configure zcml:condition="installed plone.dexterity">
+
+        <!-- These rely on the ContentItemLookup delegation -->
+        <cache:ruleset ruleset="plone.content.itemView"   for="plone.dexterity.interfaces.IDexterityItem" />
+        <cache:ruleset ruleset="plone.content.folderView" for="plone.dexterity.interfaces.IDexterityContainer" />
+
+    </configure>
+
+    <!-- plone.namedfile downloadable -->
+    <configure zcml:condition="installed plone.namedfile">
+
+        <!-- These rely on the ContentItemLookup delegation -->
+        <cache:ruleset ruleset="plone.content.file"   for="plone.namedfile.browser.Download" />
+        <cache:ruleset ruleset="plone.stableResource" for="plone.namedfile.scaling.ImageScale" />
+
+    </configure>
+
+    <!-- plone.app.blob content -->
+    <configure zcml:condition="installed plone.app.blob">
+
+        <cache:ruleset ruleset="plone.content.file" for="plone.app.blob.interfaces.IATBlob" />
+
+    </configure>
+
+    <!-- Paths to purge -->
+
+    <!-- Standard CMF content -->
+    <adapter factory=".purge.ContentPurgePaths" name="plone.content" />
+
+    <!-- Discussion items -->
+    <adapter factory=".purge.DiscussionItemPurgePaths" name="plone.content" />
+
+    <!-- Archetypes object fields -->
+    <configure zcml:condition="installed plone.app.blob">
+    <configure zcml:condition="installed Products.Archetypes">
+        <adapter factory=".purge.ObjectFieldPurgePaths" name="plone.atobjectfields" />
+    </configure>
+    </configure>
+
+</configure>

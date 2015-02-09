@@ -1,0 +1,73 @@
+<h1 tal:replace="structure here/manage_page_header">Header</h1>
+<h2 tal:replace="structure here/manage_tabs">Tabs</h2>
+
+<h1> Edit Action Icons </h1>
+
+<table>
+
+ <tr>
+  <th align="left"> Category </th>
+  <th align="left"> Action ID </th>
+  <th align="left"> Action Title </th>
+  <th align="left"> Priority </th>
+  <th align="left"> Icon URL Expression </th>
+  <td> </td>
+ </tr>
+
+ <tal:rowform tal:repeat="ai here/listActionIcons">
+ <form action=".">
+ <input type="hidden" name="category"
+        tal:attributes="value ai/getCategory" />
+ <input type="hidden" name="action_id"
+        tal:attributes="value ai/getActionId" />
+        
+ <tr>
+  <td tal:content="ai/getCategory">CATEGORY</td>
+  <td tal:content="ai/getActionId">ACTION_ID</td>
+  <td>
+   <input type="text" name="title" size="20" value=""
+          tal:attributes="value ai/getTitle | default" />
+  </td>
+  <td>
+   <input type="text" name="priority:int" size="8" value="0"
+          tal:attributes="value ai/getPriority | default" />
+  </td>
+  <td>
+   <input type="text" name="icon_expr" size="20"
+          tal:attributes="value ai/getExpression" />
+  </td>
+  <td>
+   <input type="submit" name="manage_updateActionIcon:method" value="Update" />
+   <input type="submit" name="manage_removeActionIcon:method" value="Remove" />
+  </td>
+ </tr>
+ </form>
+ </tal:rowform>
+
+ <form action=".">
+        
+ <tr>
+  <td>
+   <input type="text" name="category" />
+  </td>
+  <td>
+   <input type="text" name="action_id" />
+  </td>
+  <td>
+   <input type="text" name="title" size="20" />
+  </td>
+  <td>
+   <input type="text" name="priority:int" size="8" value="0" />
+  </td>
+  <td>
+   <input type="text" name="icon_expr" size="20" />
+  </td>
+  <td>
+   <input type="submit" name="manage_addActionIcon:method" value="Add" />
+  </td>
+ </tr>
+ </form>
+
+</table>
+
+<h1 tal:replace="structure here/manage_page_footer">Footer</h1>

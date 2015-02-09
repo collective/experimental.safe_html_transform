@@ -1,0 +1,17 @@
+CHANGES.txt
+bootstrap.py
+buildout.cfg
+setup.cfg
+setup.py
+src/zope/__init__.py
+src/zope.dottedname.egg-info/PKG-INFO
+src/zope.dottedname.egg-info/SOURCES.txt
+src/zope.dottedname.egg-info/dependency_links.txt
+src/zope.dottedname.egg-info/namespace_packages.txt
+src/zope.dottedname.egg-info/not-zip-safe
+src/zope.dottedname.egg-info/requires.txt
+src/zope.dottedname.egg-info/top_level.txt
+src/zope/dottedname/README.txt
+src/zope/dottedname/__init__.py
+src/zope/dottedname/resolve.py
+src/zope/dottedname/tests.py

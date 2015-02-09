@@ -1,0 +1,144 @@
+Metadata-Version: 1.1
+Name: plone.fieldsets
+Version: 2.0.2
+Summary: An extension to zope.formlib, which allows to group fields into different fieldsets.
+Home-page: http://pypi.python.org/pypi/plone.fieldsets
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: Overview
+        ========
+        
+        An extension to zope.formlib, which allows to group fields into different
+        fieldsets.
+        
+        Changelog
+        =========
+        
+        
+        2.0.2 (2012-07-02)
+        ------------------
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        
+        2.0.1 - 2011-04-03
+        ------------------
+        
+        - Require five.formlib on Zope 2.13 to call processInputs before rendering
+          the fieldset.
+          [vincentfretin]
+        
+        
+        2.0 - 2010-07-18
+        ----------------
+        
+        - Update license to GPL version 2 only.
+          [hannosch]
+        
+        - Clarify test dependencies and remove deprecated code, allowing us to remove
+          the `zope.deferredimport` dependency.
+          [hannosch]
+        
+        
+        2.0a1 - 2009-04-04
+        ------------------
+        
+        - Specify package dependencies.
+          [hannosch]
+        
+        
+        1.0.3 - 2008-08-18
+        ------------------
+        
+        - Documentation updates.
+          [hannosch]
+        
+        
+        1.0.2 - 2008-07-04
+        ------------------
+        
+        - Restored Zope 2.9 compatibility. This closes
+          http://dev.plone.org/plone/ticket/8177.
+          [hannosch]
+        
+        - Added conditional import logic to make the package work without Five.
+          [hannosch]
+        
+        
+        1.0.1 - 2008-03-09
+        ------------------
+        
+        - Deprecated the convenience import, as it confused the test coverage tool.
+          [hannosch]
+        
+        - Added tests for all aspects of the fieldsets.
+          [hannosch]
+        
+        - Added tests for the edit and input forms.
+          [hannosch]
+        
+        
+        1.0 - 2007-08-13
+        ----------------
+        
+        - No changes.
+          [hannosch]
+        
+        
+        1.0rc3 - 2007-07-28
+        -------------------
+        
+        - Corrected missing history.
+          [hannosch]
+        
+        
+        1.0rc2 - 2007-07-27
+        -------------------
+        
+        - Removed unnecessary adapters definition in FieldsetsInputForm.
+          [davconvent]
+        
+        - Added FieldsetsInputForm to the available fieldsets forms.
+          [davconvent]
+        
+        
+        1.0rc1 - 2007-07-09
+        -------------------
+        
+        - Removed useless setup.cfg.
+          [hannosch]
+        
+        - Added new optional description attribute to fieldsets.
+          [hannosch]
+        
+        
+        1.0b2 - 2007-05-01
+        ------------------
+        
+        - No changes.
+          [hannosch]
+        
+        
+        1.0b1 - 2007-03-05
+        ------------------
+        
+        - Fixed error reporting by referencing the widgets on the form itself on
+          the individual fieldsets rather than copying them.
+          [duncan, nouri]
+        
+        - Initial implementation of the fieldsets class and the edit form support.
+          [hannosch]
+        
+        - Initial package structure.
+          [zopeskel]
+        
+Keywords: zope formlib fieldsets
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

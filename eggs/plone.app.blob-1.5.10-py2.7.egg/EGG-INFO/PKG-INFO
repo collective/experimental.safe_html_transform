@@ -1,0 +1,1422 @@
+Metadata-Version: 1.1
+Name: plone.app.blob
+Version: 1.5.10
+Summary: ZODB blob support for Plone
+Home-page: http://plone.org/products/plone.app.blob
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Download-URL: http://pypi.python.org/pypi/plone.app.blob/
+Description: ==============
+        plone.app.blob
+        ==============
+        
+        Overview
+        ========
+        
+        This package aims to be an add-on for Plone (>= 3.x) integrating ZODB (>=3.8)
+        blob support, which allows large binary data to be managed by the ZODB, but
+        separately from your usual ``FileStorage`` database, i.e. ``Data.fs``.  This
+        has several advantages, most importantly a much smaller ``Data.fs`` and better
+        performance both cpu- as well as memory-wise.
+        
+          .. |__| unicode:: U+20  .. space
+        
+        
+        Contents
+        ========
+        
+        .. contents:: |__|
+        
+        
+        Status
+        ======
+        
+        At the moment the integration for "File" content should be stable, but still
+        needs more field testing.  It is being successfully used in several production
+        deployments, though.  The provided blob-based content type should safely
+        usable as a drop-in replacement for ``ATFile``.  As such it has been
+        successfully tested against all ``CMFPlone`` and ``ATContentTypes`` tests.
+        Please use the provided ``test-compatibility.sh`` script to run these tests
+        for yourself.
+        
+        Image support is still in an alpha stadium and not enabled by default. It can
+        be activated by applying the respective profile via the portal setup tool.
+        
+        More detailed information about the integration and the current status can be
+        found in the corresponding `Plone enhancement`_ and `Plone 4 PLIP`_ tickets.
+        
+          .. _`Plone enhancement`: http://dev.plone.org/plone/ticket/6805
+          .. _`Plone 4 PLIP`: http://dev.plone.org/plone/ticket/7822
+          .. |--| unicode:: U+2013   .. en dash
+          .. |---| unicode:: U+2014  .. em dash
+        
+        
+        Requirements
+        ============
+        
+        Plone 3.0 or newer is required. The package has been tested with all versions
+        from 3.0 up to and including 4.0. However, as all versions before 3.0.4
+        require a workaround described in the `Troubleshooting`_ section below, it is
+        recommended to use `Plone 3.0.4`_ or a more recent version.
+        
+          .. _`Plone 3.0.4`: http://plone.org/products/plone/releases/3.0.4
+        
+        
+        Installation
+        ============
+        
+        The easiest way to get ZODB blob support in Plone 3 using this package is to
+        work with installations based on `zc.buildout`_.  Other types of installations
+        should also be possible, but might turn out to be somewhat tricky |---| please
+        see the `FAQ`_ section below.
+        
+        To get started you will simply need to add the package to your "eggs" and
+        "zcml" sections, run buildout, restart your Plone instance and install the
+        "plone.app.blob" package using the quick-installer or via the "Add-on
+        Products" section in "Site Setup".
+        
+          .. _`zc.buildout`: http://pypi.python.org/pypi/zc.buildout/
+        
+        A sample buildout configuration file, i.e. ``buildout.cfg``, could look like
+        this::
+        
+          [buildout]
+          parts = zope2 instance
+          extends = http://dist.plone.org/release/3.3.1/versions.cfg
+          find-links =
+              http://dist.plone.org/release/3.3.1
+              http://dist.plone.org/thirdparty/
+          versions = versions
+        
+          [versions]
+          ZODB3 = 3.8.3
+        
+          [zope2]
+          recipe = plone.recipe.zope2install
+          url = ${versions:zope2-url}
+        
+          [instance]
+          recipe = plone.recipe.zope2instance
+          zope2-location = ${zope2:location}
+          blob-storage = var/blobstorage
+          user = admin:admin
+          eggs =
+              Plone
+              plone.app.blob
+          zcml = plone.app.blob
+        
+        You can also use this buildout configuration to create a fresh Plone
+        installation. To do so you would store it as ``buildout.cfg`` |---| preferably
+        in an empty directory, download `bootstrap.py
+        <http://svn.zope.org/*checkout*/zc.buildout/trunk/bootstrap/bootstrap.py>`_
+        into the same directory and issue the following commands::
+        
+          $ python bootstrap.py
+          $ ./bin/buildout
+          $ ./bin/instance fg
+        
+        After that you create a "Plone Site" via the `ZMI`_ as usual and either
+        select the "plone.app.blob" extension profile at creation time or again
+        install the "plone.app.blob" package using one of the above mentioned methods.
+        
+          .. _`ZMI`: http://localhost:8080/manage
+        
+        A sample ZEO buildout configuration could look like this::
+        
+          [buildout]
+          parts = zope2 zeoserver instance1 instance2
+          extends = http://dist.plone.org/release/3.3.1/versions.cfg
+          find-links =
+              http://dist.plone.org/release/3.3.1
+              http://dist.plone.org/thirdparty/
+          versions = versions
+        
+          [versions]
+          ZODB3 = 3.8.3
+        
+          [zope2]
+          recipe = plone.recipe.zope2install
+          url = ${versions:zope2-url}
+        
+          [zeoserver]
+          recipe = plone.recipe.zope2zeoserver
+          zope2-location = ${zope2:location}
+          zeo-address = 127.0.0.1:8100
+          zeo-var = ${buildout:directory}/var
+          blob-storage = ${zeoserver:zeo-var}/blobstorage
+          eggs = plone.app.blob
+        
+          [instance1]
+          recipe = plone.recipe.zope2instance
+          zope2-location = ${zope2:location}
+          zeo-address = ${zeoserver:zeo-address}
+          blob-storage = ${zeoserver:blob-storage}
+          zeo-client = on
+          shared-blob = on
+          user = admin:admin
+          eggs =
+              Plone
+              plone.app.blob
+          zcml = plone.app.blob
+        
+          [instance2]
+          recipe = plone.recipe.zope2instance
+          http-address = 8081
+          zope2-location = ${instance1:zope2-location}
+          zeo-client = ${instance1:zeo-client}
+          zeo-address = ${instance1:zeo-address}
+          blob-storage = ${instance1:blob-storage}
+          shared-blob = ${instance1:shared-blob}
+          user = ${instance1:user}
+          eggs = ${instance1:eggs}
+          zcml = ${instance1:zcml}
+        
+        Please note the configuration options ``blob-storage`` and ``shared-blob``
+        specified in ``[client1]`` and ``[client2]``.  To enable blob support on a ZEO
+        client (or standalone instance) you always have to specify a path in the
+        ``blob-storage`` configuration option.  If ``shared-blob`` is set to "on", the
+        ZEO client will assume it can read blob files directly from within the path
+        specified in the ``blob-storage`` option.  This path might also refer to a
+        network share in case the ZEO client and server are installed on separate
+        machines. However, to stream blob files trough the ZEO connection you will
+        have to set the ``shared-blob`` option to "off".  The path specified in the
+        ``blob-storage`` option will be ignored in this situation, but it needs to be
+        set nevertheless.
+        
+        More detailed instructions on how to set things up as well as some background
+        information on blobs |---| or in other words the story of an "early adopter"
+        |---| can be found in `Ken Manheimer's wiki`__.  This is a highly useful
+        resource and recommended read for people trying to give blobs a spin.  Please
+        note however, that most of the recipe changes described in these instructions
+        have already been incorporated in the particular recipes by now.
+        
+          .. __: http://myriadicity.net/Sundry/PloneBlobs
+        
+        In addition, more information on how to use buildout is available in the
+        `accompanying README.txt`__ as well as in `Martin's`_ excellent `buildout
+        tutorial`_ on `plone.org`_.
+        
+          .. __: http://svn.plone.org/svn/plone/plone.app.blob/buildouts/plone-3.x/README.txt
+          .. _`Martin's`: http://martinaspeli.net/
+          .. _`buildout tutorial`: http://plone.org/documentation/tutorial/buildout
+          .. _`plone.org`: http://plone.org/
+        
+        
+        Migrating existing content
+        ==========================
+        
+        In-place content migration is provided for existing "File" and "Image"
+        content.  The `Products.contentmigration`_ package is required for this to
+        work.  To install this package you will again need to add its name to the
+        "eggs" and "zcml" section of your ``buildout.cfg``, so that it reads like::
+        
+          [instance]
+          ...
+          eggs +=
+              plone.app.blob
+              Products.contentmigration
+          zcml +=
+              plone.app.blob
+              Products.contentmigration
+        
+        You can also refer to the above mentioned `sample buildout.cfg`_ for details.
+        
+          .. _`Products.contentmigration`: http://pypi.python.org/pypi/Products.contentmigration/
+          .. _`sample buildout.cfg`: http://dev.plone.org/plone/browser/plone.app.blob/buildouts/plone-3.x/buildout.cfg
+        
+        In order to then migrate your existing file content to blobs you can use the
+        migration interfaces provided at ``http://<site>/@@blob-file-migration`` to
+        migrate "File" content as well as ``http://<site>/@@blob-image-migration``
+        for "Image" content respectively.  ``<site>`` will need to be replaced with
+        the URL of your "Plone Site" object here, of course.  The pages will show you
+        the number of available ``ATFile`` or ``ATImage`` instances and then lets you
+        convert these to the provided blob content types by clicking a button.
+        
+        For custom AT-based content types that use FileField(s), see
+        `example.blobattype`_ for details of how to enable and migrate them to use
+        blobs.
+        
+          .. _`example.blobattype`: http://pypi.python.org/pypi/example.blobattype
+        
+        Please refer to the next section if you encounter any errors during migration.
+        
+        
+        Troubleshooting
+        ===============
+        
+        The following are some known issues, that will hopefully be resolved soon
+        enough.  In the meantime here are the recommended workarounds:
+        
+        
+        **"AttributeError: 'module' object has no attribute 'VersionBase'" Exception**
+        
+          Symptom
+            After upgrading your buildout you're getting errors like the following::
+        
+              Traceback (innermost last):
+                ...
+                Module App.PersistentExtra, line 57, in locked_in_version
+              AttributeError: 'module' object has no attribute 'VersionBase'
+          Problem
+            Version `1.0b5`_ of ``plone.app.blob`` adds `support for Plone 4`_ as
+            well as `Dexterity`_, which is why the version restriction for ZODB had
+            to be lifted.  However, while Plone 4 will use Zope 2.12 and ZODB 3.9,
+            Plone 3.x doesn't work with either of these.
+          Solution
+            Downgrade ``ZODB3`` to a release from the 3.8 series.  You can do this by
+            adding a version pin like::
+        
+              [versions]
+              ZODB3 = 3.8.3
+        
+            to your ``buildout.cfg``.
+        
+          .. _`1.0b5`: http://pypi.python.org/pypi/plone.app.blob/1.0b5
+          .. _`support for Plone 4`: http://dev.plone.org/plone/ticket/7822
+          .. _`Dexterity`: http://plone.org/products/dexterity/
+        
+        
+        **"FileFieldException: Value is not File or String (...)" Exception**
+        
+          Symptom
+            After upgrading your buildout you're getting an error like the following
+            during blob migration::
+        
+              Traceback (innermost last):
+                File ".../basemigrator/walker.py", line 174, in migrate
+                ...
+                File ".../Archetypes/Field.py", line 931, in _process_input
+              FileFieldException: Value is not File or String (...)
+          Problem
+            Your version of ``archetypes.schemaextender`` has been upgraded to `1.1`_
+            while running buildout.  You either didn't run it in non-newest mode
+            (``-N``) or have not pinned down the version of
+            ``archetypes.schemaextender``.
+          Solution
+            Downgrade ``archetypes.schemaextender`` to version 1.0 for the moment.
+            You can do this by adding a version pin like::
+        
+              [versions]
+              archetypes.schemaextender = 1.0
+        
+            to your ``buildout.cfg``.  A proper fix to add compatibility to the
+            latest version is being worked on.
+        
+          .. _`1.1`: http://pypi.python.org/pypi/archetypes.schemaextender/1.1
+        
+        
+        **"AttributeError: 'NoneType' object has no attribute 'getAccessor'" Exception**
+        
+          Symptom
+            After upgrading from version `1.0b2`_ or earlier you're getting an error
+            like the following when trying to view blob-based content::
+        
+              Traceback (innermost last):
+                Module ZPublisher.Publish, line 119, in publish
+                ...
+                Module Products.ATContentTypes.content.base, line 300, in get_content_type
+              AttributeError: 'NoneType' object has no attribute 'getAccessor'
+          Problem
+            Recent versions have added support for sub-types based on marker
+            interfaces and your existing blob-based content hasn't been marked yet.
+          Solution
+            Upgrade to at least `1.0b4`_, re-install "plone.app.blob" via the
+            quick-installer and reset all sub-types by accessing the
+            ``@@blob-maintenance/resetSubtypes`` view.
+        
+          .. _`1.0b2`: http://pypi.python.org/pypi/plone.app.blob/1.0b2
+          .. _`1.0b4`: http://pypi.python.org/pypi/plone.app.blob/1.0b4
+        
+        
+        **"Invalid plugin id" Exception**
+        
+          Symptom
+            When trying to create a "Plone Site" you're getting an error like::
+        
+              Error Type: KeyError
+              Error Value: 'Invalid plugin id: credentials_basic_auth'
+          Problem
+            Your version of ``Products.PluggableAuthService`` is too old |---| you need
+            1.5.2 or newer (please see http://www.zope.org/Collectors/PAS/59 for more
+            information about this).
+          Solution
+            Please use the `provided buildout`_, add the `1.5 branch`_ as an
+            `svn:external`_ to the ``products/`` directory of your buildout or
+            upgrade to `Plone 3.0.4`_ by re-running buildout.
+        
+          .. _`provided buildout`: http://svn.plone.org/svn/plone/plone.app.blob/buildouts/plone-3.x
+          .. _`1.5 branch`: http://svn.zope.org/Products.PluggableAuthService/branches/1.5/
+          .. _`svn:external`: http://svnbook.red-bean.com/en/1.0/ch07s03.html
+        
+        
+        **"unknown type name: 'blobstorage'"**
+        
+          Symptom
+            When running buildout you're getting an error like::
+        
+              Error: unknown type name: 'blobstorage'
+              (line 36 in file:///.../parts/instance/etc/zope.conf)
+          Problem
+            Your version of the `plone.recipe.zope2instance`_ recipe is too old
+            |---| you need to have at least version `1.0`_.
+          Solution
+            Make sure you're running buildout with neither "``-N``" nor "``-o``" and
+            you also don't have::
+        
+              newest = false
+        
+            in your ``~/.buildout/default.cfg``.  Alternatively, running buildout
+            with option "``-n``" should update the recipe to the latest version.
+        
+          .. _`plone.recipe.zope2instance`: http://pypi.python.org/pypi/plone.recipe.zope2instance/
+          .. _`1.0`: http://pypi.python.org/pypi/plone.recipe.zope2instance/1.0
+        
+        
+        **missing distribution for required "zdaemon" and "ZConfig" eggs**
+        
+          Symptom
+            When running buildout you're getting errors like::
+        
+              Getting distribution for 'zdaemon>=1.4a2,<1.4.999'.
+              While:
+                Installing instance.
+                Getting distribution for 'zdaemon>=1.4a2,<1.4.999'.
+              Error: Couldn't find a distribution for 'zdaemon>=1.4a2,<1.4.999'.
+        
+            or::
+        
+              Getting distribution for 'ZConfig>=2.4a2,<2.4.999'.
+              While:
+                Installing instance.
+                Getting distribution for 'ZConfig>=2.4a2,<2.4.999'.
+              Error: Couldn't find a distribution for 'ZConfig>=2.4a2,<2.4.999'.
+          Problem
+            ``zdaemon`` and ``ZConfig`` eggs have only been released to the
+            `Cheeseshop`_ starting from more recent versions, i.e. 2.0 and 2.5
+            respectively.  Older distributions in egg format are only available
+            from http://download.zope.org/distribution
+          Solution
+            Add the above link to the ``find-links`` setting of the ``[buildout]``
+            section in your ``buildout.cfg``, like::
+        
+              find-links =
+                  http://download.zope.org/distribution/
+                  ...
+        
+          .. _`Cheeseshop`: http://pypi.python.org/pypi
+        
+        
+        **"ZRPCError: bad handshake 'Z303'"**
+        
+          Symptom
+            With a ZEO setup you are getting errors like::
+        
+              ZRPCError: bad handshake 'Z303'
+          Problem
+            You probably haven't added ``plone.app.blob`` to the ``eggs`` setting in
+            your ``[zeo]`` buildout part.  Without it the ZEO server will not use
+            the required version 3.8 of ZODB and hence not support blobs.
+          Solution
+            Add the string ``plone.app.blob`` to the ``eggs`` setting in the ``[zeo]``
+            section (i.e. the one using the ``plone.recipe.zope2zeoserver`` recipe)
+            in your ``buildout.cfg``, like::
+        
+              [zeo]
+              ...
+              eggs = plone.app.blob
+              ...
+        
+        
+        **"AttributeError: 'NoneType' object has no attribute 'product'" during migration**
+        
+          Symptom
+            After installing "plone.app.blob" via the quick-installer or applying
+            the "plone.app.blob: ATFile replacement" profile you are seeing migration
+            errors like::
+        
+              Traceback (innermost last):
+                Module ZPublisher.Publish, line 119, in publish
+                Module ZPublisher.mapply, line 88, in mapply
+                Module ZPublisher.Publish, line 42, in call_object
+                Module plone.app.blob.browser.migration, line 24, in __call__
+                Module plone.app.blob.migrations, line 42, in migrateATFiles
+                Module Products.contentmigration.basemigrator.walker, line 126, in go
+                Module Products.contentmigration.basemigrator.walker, line 205, in migrate
+              MigrationError: MigrationError for obj at /... (File -> Blob):
+              Traceback (most recent call last):
+                File ".../Products/contentmigration/basemigrator/walker.py", line 174, in migrate
+                  migrator.migrate()
+                File ".../Products/contentmigration/basemigrator/migrator.py", line 185, in migrate
+                  method()
+                File ".../Products/contentmigration/archetypes.py", line 111, in beforeChange_schema
+                  archetype = getType(self.dst_meta_type, fti.product)
+              AttributeError: 'NoneType' object has no attribute 'product'
+          Problem
+            The current migration code has been written to convert existing "File"
+            content to the "Blob" content type provided by the base "plone.app.blob"
+            profile.  However, that type isn't known when just installing the "ATFile
+            replacement" profile.  The latter is probably what you want to install,
+            though, as former "File" content will keep the same portal type, i.e.
+            "File" after being migrated.  This way no apparent changes are visible,
+            which might help with avoiding confusion.
+          Solution
+            For now you might work around this by either applying the "plone.app.blob"
+            profile via the ZMI in ``/portal_setup``.  This will install the above
+            mentioned "Blob" content type.  After that migration will work, but your
+            former "File" content will have the "Blob" content type.
+        
+            If that's not what you want, simply change line line 17 in
+            ``plone/app/blob/migrations.py`` (which is probably contained in an egg
+            directory located somewhere like ``eggs/plone.app.blob-1.0b2-py2.4.egg/``
+            relative to your buildout/installation) from::
+        
+               dst_portal_type = 'Blob'
+        
+            to::
+        
+               dst_portal_type = 'File'
+        
+            After that migration should use the new "File" type, based on ZODB blobs.
+            Once you've migrated you might remove or disable the "Blob" type from
+            ``/portal_types`` again.  A future version of "plone.app.blob" will try
+            auto-detect the correct target type for the migration (or at least allow
+            to specify it) to make this more convenient.
+        
+            If you have already migrated to "Blob" content, but would rather like to
+            have "File" items, you can change the two previous lines to::
+        
+               src_portal_type = 'Blob'
+               src_meta_type = 'ATBlob'
+        
+            and re-run the blob migration.  This will convert your "Blob"s to show up
+            as "File"s again.  You should probably pack your ZODB afterwards to avoid
+            having its blob storage occupy twice as much disk space as actually
+            needed (the extra migration will create new blobs).
+        
+        
+        **"Image" and/or "File" content doesn't show up as expected after migrating to blobs**
+        
+          Symptom
+            After migrating "Image" and/or "File" content to be based on blobs, some
+            of it doesn't show up as expected.  A typical example of this are ATCT's
+            photo album views.
+          Problem
+            All versions before 1.0b11 didn't update the "Type" catalog index
+            correctly during migration.  This could of course result in wrong results
+            for all queries using this index.
+          Solution
+            Manually update the "Type" index using the ZMI or upgrade to at least
+            `1.0b11`_ and use the ``@@blob-maintenance/updateTypeIndex`` view to
+            limit the reindexing to only blob-based content.  The latter should
+            usually be quicker, especially for bigger sites.
+        
+          .. _`1.0b11`: http://pypi.python.org/pypi/plone.app.blob/1.0b11
+        
+        
+        **Errors when using additionally mounted databases**
+        
+          Symptom
+            With additionally configured ZODB mount-points you are getting errors
+            like::
+        
+              Traceback (innermost last):
+                ...
+                Module ZEO.ClientStorage, line 1061, in temporaryDirectory
+              AttributeError: 'NoneType' object has no attribute 'temp_dir
+        
+            or::
+        
+              Traceback (innermost last):
+                ...
+                Module ZODB.blob, line 495, in temp_dir
+              TypeError: Blobs are not supported
+          Problem
+            You haven't configured a blob-storage for your extra database.
+          Solution
+            Please refer to David Glick's `comment in ticket #10130`__ for detailed
+            information about the various ways to configure a blob-storage for
+            additional mount-points.  The recommended way to accomplish this both
+            for ZEO and non-ZEO setups is to use `collective.recipe.filestorage`__
+            and adjust your buildout with the following::
+            
+              [buildout]
+              ...
+              parts =
+                  ...
+                  filestorage
+                  instance
+        
+              [filestorage]
+              recipe = collective.recipe.filestorage
+              blob-storage = var/blobstorage-%(fs_part_name)s
+              parts =
+                  foo
+        
+            Please note that for the "parts" setting in the "buildout" section it is
+            important to list "filestorage" before any parts installing Zope or ZEO.
+            The "parts" setting in the "filestorage" section, however, represents
+            a list of filestorage sub-parts to be generated, one per line.  Further
+            details can be found in the `documentation of the recipe`__.
+        
+          .. __: http://dev.plone.org/plone/ticket/10130#comment:5
+          .. __: http://pypi.python.org/pypi/collective.recipe.filestorage
+          .. __: http://pypi.python.org/pypi/collective.recipe.filestorage
+        
+        
+        FAQ
+        ===
+        
+        Is it possible to use "plone.app.blob" in installations not based on `zc.buildout`_?
+        
+          Yes, but that would require some additional steps, since it depends on ZODB
+          3.8, but Plone currently ships with Zope 2.10, which still comes with
+          ZODB 3.7.  So, to make things work you could either install the `required
+          versions`__ of all additionally needed packages into your ``lib/python/``
+          directory or use the respective eggs and make sure they get preferred over
+          their older versions on ``import``, for example by setting up
+          ``PYTHONPATH``.
+        
+          .. __: http://dev.plone.org/plone/browser/plone.app.blob/trunk/setup.py#L35
+        
+          Alternatively it should also be possible to install the package using
+          `easy_install`_, which would automatically install its dependencies
+          including ZODB 3.8, too.  Again you would need to set up your ``PYTHONPATH``
+          to make sure the desired versions are used.  However, installing the package
+          like this is likely to have side effects on other Zope/Plone instances on
+          your system, so you probably want to use `virtualenv`_ here at least.
+        
+          .. _`easy_install`: http://peak.telecommunity.com/DevCenter/EasyInstall
+          .. _`virtualenv`: http://pypi.python.org/pypi/virtualenv
+        
+          Overall, to get started without too much pain, a buildout-based
+          installation is recommended |---| for example the `provided buildout`_.
+        
+        Will this be available for Plone 2.5.x?
+        
+          Yes, support for the 2.5 series is planned and next on the agenda.
+        
+        What about image support, i.e. a drop-in for ``ATImage`` content?
+        
+          While just replacing the primary field in ``ATImage``'s schemata should
+          probably already work quite well, proper image support is planned for a
+          later release.  "proper" here means using a sub-typing approach as
+          `presented by Rocky Burt`__ in Naples, which will have several advantages
+          including a cleaner and better structured code, but will also take a little
+          longer to implement.
+        
+          .. __: http://www.serverzen.com/training/subtyping-unleashed
+        
+        Strange messages like ``Exception exceptions.OSError: (2, 'No such file or
+        directory', '.../tmpZvxjZB') in <bound method _TemporaryFileWrapper.__del__ of
+        <closed file '<fdopen>', mode 'w+b' at 0x7317650>> ignored`` get written to
+        the logs whenever a file is uploaded. Is that an error or something to worry
+        about?
+        
+          No, that's fine, it's just a small annoyance, that should be fixed
+          eventually. In case you care, the problem is that the zope publisher creates
+          a temporary file for each upload it receives.  Once the upload has finished
+          that temporary file is passed to the blob machinery, which moves it into
+          its blob storage.  However, at the end of the request the wrapper class for
+          temporary files tries to remove the file as well, since well, it's supposed
+          to be temporary.  At that time the file is already gone though, and the
+          above warning is issued.
+        
+        I have a ZEO setup with the server and clients running on separate machines.
+        Why do I get blobs stored in my ZEO clients' blobstorage directories and not
+        only on the server?
+        
+          ZEO clients cache blobs the first time they are fetched. Unfortunately the
+          cache is not cleaned automatically when the instances are stopped and will
+          keep growing. In addition, if you manually delete the files without
+          restarting, the ZEO client will still expect to find them.  ZODB 3.9, which
+          is used by Plone 4, introduces a cache size control that alleviates the
+          problem.  Plone 3.x and earlier can only be used with ZODB 3.8.x, though.
+          However, Sasha Vincic has written a `workaround for Plone 2.5.x`__ that
+          invalidates the existing reference causing the blob data to be fetched
+          again from the ZEO server should it be missing.  The patch has been merged_
+          and is available from version 1.0b11.
+        
+          .. __: http://dev.plone.org/plone/changeset/32170
+          .. _`merged`: http://dev.plone.org/plone/changeset/33100
+        
+        .. TODO: answer the following...
+        .. <jonstahl> Given the overall clutter and confusion in the
+        ..   broader file system storage product space, it might be helpful to expand
+        ..   the Overview paragraph a bit. The things I'm wondering are: how does
+        ..   Blob differ from FSS? Is it different from other blob implementations?
+        ..   Are there things naive people might expect of plone.app.blob that it
+        ..   *doesn't* do? (e.g. massive increase the speed of serving large files.
+        ..   This doesn't really fully replace tramline, right?
+        .. <jonstahl> A bit of information on how you can use
+        ..   plone.app.blog in your custom content types might helpful too.
+        
+        
+        Feedback
+        ========
+        
+        Any kind of feedback like bug reports, suggestions, feature requests and most
+        preferably success stories is most welcome and much appreciated. Especially,
+        it would be interesting to hear about success or problems with migration of
+        existing content and installations on platforms other than OSX.
+        
+        So please feel free to file tickets in the `issue tracker`_, contact me on
+        `#plone`_, `#plone-framework`_, the `plone developer mailing list`_ or
+        directly via `email`_.
+        
+          .. _`issue tracker`: http://plone.org/products/plone.app.blob/issues
+          .. _`#plone`: irc://irc.eu.freenode.net/plone
+          .. _`#plone-framework`: irc://irc.eu.freenode.net/plone-framework
+          .. _`plone developer mailing list`: mailto:plone-developers@lists.sourceforge.net
+          .. _`email`: mailto:az_at_zitc_dot_de
+        
+        Detailed Documentation
+        ======================
+        
+        This package integrates ZODB 3.8's blob support into Plone 3.0.  To do this a
+        new content type `Blob` is provided, which can be used instead of the existing
+        `File` and `Image` types.  Their behaviour is mimicked by `sub-typing`_, which
+        in this case means dynamically changing views and schema of the underlying
+        `Blob` type as well as adapting it to add functionality.
+        
+          .. _`sub-typing`: http://www.serverzen.com/training/subtyping-unleashed
+        
+        First of all the `plone.app.blob` package needs to be installed, which at the
+        moment requires a special `branch`_ of Zope 2.10 as well as a few additional
+        packages for `extending the schema`_ and `migration purposes`_.  The easiest
+        way to get a working setup is probably to use one of the provided `buildout`_
+        configurations, either one `based on ploneout`_ and therefore mainly targeted
+        at developers or another `based on plone.recipe.plone`_.  The latter uses the
+        current plone release tarball instead of subversion checkout, meaning it is
+        mainly targeted at integrators and users (and significantly faster to set up
+        as well :)).
+        
+          .. _`branch`: http://svn.zope.org/Zope/branches/2.10-with-ZODB3.8/
+          .. _`extending the schema`: http://dev.plone.org/archetypes/browser/archetypes.schemaextender/
+          .. _`migration purposes`: http://dev.plone.org/collective/browser/contentmigration/
+          .. _`buildout`: http://pypi.python.org/pypi/zc.buildout
+          .. _`based on ploneout`: http://dev.plone.org/plone/browser/plone.app.blob/buildouts/ploneout
+          .. _`based on plone.recipe.plone`: http://dev.plone.org/plone/browser/plone.app.blob/buildouts/plone-3.x
+        
+        In any way, the setup should make the new content type available as well as
+        instantiable:
+        
+          >>> from Products.CMFCore.utils import getToolByName
+          >>> portal_types = getToolByName(portal, 'portal_types')
+          >>> portal_types.getTypeInfo('Blob')
+          <DynamicViewTypeInformation at /plone/portal_types/Blob>
+        
+          >>> folder.invokeFactory('Blob', id='blob', title='a Blob')
+          'blob'
+          >>> blob = folder.blob
+          >>> blob
+          <ATBlob at /plone/Members/test_user_1_/blob>
+        
+        The new instance should have been marked with the default sub-type and
+        therefore also contain the extended schema:
+        
+          >>> from plone.app.blob.interfaces import IATBlobBlob
+          >>> IATBlobBlob.providedBy(blob)
+          True
+          >>> blob.getField('file')
+          <Field file(blob:rw)>
+        
+        Mimicking the existing "File" content type, i.e. `ATFile`, it shouldn't have
+        an associated workflow:
+        
+          >>> workflow_tool = getToolByName(portal, 'portal_workflow')
+          >>> workflow_tool.getWorkflowsFor(blob)
+          []
+        
+        Since no data has been written to it, the blob file should still be empty:
+        
+          >>> blob.getFile().getBlob()
+          <ZODB.blob.Blob object at ...>
+          >>> blob.getFile().getBlob().open().read()
+          ''
+        
+        Feeding it with some image data should result in a correctly set mime-type
+        and a now non-empty blob file:
+          
+          >>> from StringIO import StringIO
+          >>> from base64 import decodestring
+          >>> gif = 'R0lGODlhAQABAPAAAPj8+AAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
+          >>> gif = StringIO(decodestring(gif))
+          >>> blob.setFile(gif)
+          >>> print blob.getFilename()
+          None
+          >>> blob.getContentType()
+          'image/gif'
+          >>> len(blob.getFile().getBlob().open().read())
+          43
+          >>> self.assertEqual(str(blob), gif.getvalue())
+        
+        Migration from existing file content, i.e. `ATFile` instances, is also
+        provided.  The payload data as well as all other fields should be properly
+        migrated:
+        
+          >>> initial_file_product = portal.portal_types.File.product
+          >>> initial_file_factory = portal.portal_types.File.factory
+          >>> portal.portal_types.File.product = 'ATContentTypes'
+          >>> portal.portal_types.File.factory = 'addATFile'
+          >>> gif.filename = 'foo.gif'
+          >>> folder.invokeFactory('File', id='foo', title='a file', file=gif,
+          ...     subject=('foo', 'bar'), contributors=('me'))
+          'foo'
+          >>> portal.portal_types.File.product = initial_file_product
+          >>> portal.portal_types.File.factory = initial_file_factory
+          >>> folder.foo
+          <ATFile at /plone/Members/test_user_1_/foo>
+          >>> folder.foo.Title()
+          'a file'
+          >>> folder.foo.getFilename()
+          'foo.gif'
+          >>> folder.foo.getContentType()
+          'image/gif'
+          >>> folder.foo.Subject()
+          ('foo', 'bar')
+          >>> folder.foo.Contributors()
+          ('me',)
+        
+          >>> from plone.app.blob.migrations import migrateATFiles
+          >>> migrateATFiles(portal)
+          'Migrating /plone/Members/test_user_1_/foo (File -> Blob)\n'
+        
+          >>> folder.foo
+          <ATBlob at /plone/Members/test_user_1_/foo>
+          >>> folder.foo.Title()
+          'a file'
+          >>> folder.foo.getFilename()
+          'foo.gif'
+          >>> folder.foo.getContentType()
+          'image/gif'
+          >>> folder.foo.Subject()
+          ('foo', 'bar')
+          >>> folder.foo.Contributors()
+          ('me',)
+          >>> folder.foo.getFile().getBlob()
+          <ZODB.blob.Blob object at ...>
+          >>> self.assertEqual(str(folder.foo), gif.getvalue())
+          >>> folder.foo.getFile().getBlob().open().read()
+          'GIF89a...'
+        
+        Also, migrating should have indexed the new content correctly to prevent stale
+        or wrong data from showing up in some views, i.e. folder listing:
+        
+          >>> catalog = getToolByName(portal, 'portal_catalog')
+          >>> brain = catalog(id = 'foo')[0]
+          >>> self.assertEqual(folder.foo.UID(), brain.UID)
+          >>> self.assertEqual(folder.foo.getObjSize(), brain.getObjSize)
+        
+        Finally the correct creation of blob-based content "through the web" is tested
+        using a testbrowser:
+        
+          >>> self.setRoles('Editor')
+        
+          # BBB Zope 2.12
+          >>> try:
+          ...     from Testing.testbrowser import Browser
+          ... except ImportError:
+          ...     from Products.Five.testbrowser import Browser
+        
+          >>> from Products.PloneTestCase import PloneTestCase as ptc
+          >>> user, pwd = ptc.default_user, ptc.default_password
+          >>> browser = Browser()
+          >>> browser.addHeader('Authorization', 'Basic %s:%s' % (user, pwd))
+        
+          >>> browser.open('http://nohost/plone/Members/%s' % user)
+          >>> browser.getLink(url='createObject?type_name=Blob').click()
+          >>> browser.url
+          'http://nohost/plone/.../portal_factory/Blob/blob.../edit'
+          >>> browser.getControl(name='title').value = 'Foo bar'
+          >>> control = browser.getControl(name='file_file')
+          >>> control.filename = 'foo.pdf'
+          >>> control.value = StringIO('%PDF-1.4 fake pdf...' + 'foo' * 1000)
+          >>> browser.getControl('Save').click()
+          >>> browser.url
+          'http://nohost/plone/.../foo-bar/view'
+          >>> browser.contents
+          '...Info...Changes saved...
+           ...Foo bar...foo.pdf...PDF document...'
+        
+        
+        Changelog
+        =========
+        
+        1.5.10 (2014-04-16)
+        -------------------
+        
+        - Fix tests to work with barceloneta theme.
+          [vangheem]
+        
+        
+        1.5.9 (2014-01-28)
+        ------------------
+        
+        - Make sure mimetype is not None and use use filename for detection if available.
+          [tschanzt]
+        
+        
+        1.5.8 (2013-04-06)
+        ------------------
+        
+        - Use obj.Schema() instead of obj.schema in the migration process.
+          [gbastien]
+        
+        
+        1.5.7 (2013-03-05)
+        ------------------
+        
+        - Only set the instance id from the name of an uploaded file
+          if the file field is primary.
+          [davisagli]
+        
+        
+        1.5.6 (2013-01-09)
+        ------------------
+        
+        - Fix BLOB migration when LinguaPlone is installed.
+          Also for ATFile.
+        
+          CAUTION: when the fix was discussed with witsch,
+          he pointed to the fact that the files would be
+          entirely loaded in memory during migration.
+          This could potentially eat too much memory.
+          [gotcha]
+        
+        - Don't fail on obscure chars in filename
+          [tomgross]
+        
+        
+        1.5.5 (2012-11-29)
+        ------------------
+        
+        - Added adapter for data wrapped in xmlrpclib.Binary
+          https://github.com/plone/plone.app.blob/pull/1
+          [aclark, garbas]
+        
+        - Fix BLOB migration when LinguaPlone is installed.
+          [rpatterson]
+        
+        
+        1.5.4 (2012-10-15)
+        ------------------
+        
+        - Create a transaction savepoint after setting a blob's value in order to
+          make it available at its temporary path (within the same transaction).
+          [tomgross]
+        
+        
+        1.5.3 (2012-09-20)
+        ------------------
+        
+        - Update mutator to take care of filename in keyword args.
+          [gotcha]
+        
+        - Check for unicode filename first in ``index_html``.
+          [vangheem]
+        
+        
+        1.5.2 (2012-05-25)
+        ------------------
+        
+        - Deprecated aliases were replaced on tests.
+          [hvelarde]
+        
+        - Keep the acquisition context of the blob in index_html, as otherwise
+          we cannot get the http__etag method.
+          [maurits]
+        
+        - Move download implementation (the ``index_html`` method) to the blob
+          wrapper class. The wrapper object is now directly viewable via the
+          Zope 2 publisher.
+        
+          This change adds support for publishing of the original image data
+          for any image field via the scaling view (even for fields that have
+          been added via schema extension).
+        
+          Previously, if the blob wrapper was published for a content object
+          that did not derive from the provided image class, Plone's default
+          ``index_html`` template would be used, rendering an HTML page
+          instead of the image.
+          [malthe]
+        
+        
+        1.5.1 (2011-08-19)
+        ------------------
+        
+        - ATImage adapter should take care of cases where no image was uploaded.
+          [gotcha]
+        
+        
+        1.5 (2011-04-21)
+        ----------------
+        
+        - Test fixes.
+          [davisagli]
+        
+        
+        1.4 (2011-02-14)
+        ----------------
+        
+        - Avoid breaking on startup if PIL is not present.
+          [davisagli]
+        
+        
+        1.3 (2010-09-28)
+        ----------------
+        
+        - Adjust tests to the fixed spelling of 'kB'.
+          [witsch]
+        
+        
+        1.2 (2010-09-22)
+        ----------------
+        
+        - Fix the ``type`` of blob-based fields so they are distinguishable as
+          blob fields.
+          [davisagli]
+        
+        - Fix broken migration-forms.
+          [WouterVH]
+        
+        
+        1.1 (2010-08-13)
+        ----------------
+        
+        - Properly close written blobs in all `IBlobbable` adapters in order to
+          avoid `POSKeyErrors`.
+          This fixes http://plone.org/products/plone.app.blob/issues/43
+          [jbaach, witsch]
+        
+        - Allow explicitly setting a mimetype via a keyword passed to the mutator.
+          [davidblewett, kleist, witsch]
+        
+        - Don't raise `AttributeError` when calling `getSize` on empty images.
+          [ggozad, witsch]
+        
+        
+        1.0 (2010-07-18)
+        ----------------
+        
+        - Correct blob migration count to ignore unrelated messages. This closes
+          http://dev.plone.org/plone/ticket/10114.
+          [hannosch]
+        
+        - Update license to GPL version 2 only.
+          [hannosch]
+        
+        
+        1.0b18 (2010-07-01)
+        -------------------
+        
+        - Avoid deprecation warnings under Zope 2.13.
+          [hannosch]
+        
+        - Test fix: Use the API to look at request headers.
+          [hannosch]
+        
+        
+        1.0b17 (2010-06-03)
+        -------------------
+        
+        - Fix deletion of blob-based content even if the field is not called 'file'
+          or 'image'.
+          [regebro]
+        
+        - The `ImageField` could not be copied, which broke the standard way of
+          subclassing archetypes schemas.
+          [regebro]
+        
+        - Migration screen tried to check for installation via quick installer. We
+          check the product of the destination portal type instead now. This closes
+          http://dev.plone.org/plone/ticket/10365.
+          [dunlapm, hannosch]
+        
+        - Enable "Image" replacement content type by default.
+          [witsch]
+        
+        - Don't break when image-specific methods are accidentally used on
+          "File" content.
+          [witsch]
+        
+        
+        1.0b16 (2010-05-02)
+        -------------------
+        
+        - Remove existing image scales when updating blob-aware image fields.
+          Fixes http://dev.plone.org/plone/ticket/10455
+          [frisi]
+        
+        - Correct dependency on plone.app.imaging to >1.0b9 since we need the
+          new IImageScaleFactory feature.
+          [wichert]
+        
+        
+        1.0b15 (2010-04-10)
+        -------------------
+        
+        - Provide blob-aware factory for new-style image scales.
+          [witsch]
+        
+        - Don't set the modification date of migrated content.
+          [rossp]
+        
+        - Restore support for defining per-field image scale sizes.
+          Refs http://dev.plone.org/plone/ticket/10328 and
+          fixes http://dev.plone.org/plone/ticket/10159
+          [witsch]
+        
+        - Provide base classes for file and image fields to be used in custom
+          types not based on `archetypes.schemaextender`.
+          Fixes http://dev.plone.org/plone/ticket/10328
+          [witsch]
+        
+        - Drop workaround for broken index accessor handling, which has been fixed
+          upstream in `archetypes.schemaextender`.
+          [witsch]
+        
+        - Don't try to determine image dimensions for content other than images.
+          Refs http://plone.org/products/cmfeditions/issues/58
+          [witsch, do3cc]
+        
+        
+        1.0b14 (2010-03-07)
+        -------------------
+        
+        - Revert the change to use the URL normalizer when generating content ids
+          based on filename and reinstate the previous (and expected) behavior.
+          Refs http://dev.plone.org/plone/ticket/8591
+          [witsch]
+        
+        
+        1.0b13 (2010-03-06)
+        -------------------
+        
+        - Use updated version of `createScales` as monkey-patched in
+          `plone.app.imaging`.  Refs http://dev.plone.org/plone/ticket/10186
+          [witsch]
+        
+        
+        1.0b12 (2010-02-16)
+        -------------------
+        
+        - Change test setup to reuse the same directory when setting up blob
+          storages, thereby fixing some BBB test issues.
+          [witsch]
+        
+        - Remove temporary monkey wrapper for `Blob.open` used to work around an
+          issue with `CMFEditions`.  Refs http://dev.plone.org/plone/ticket/10200
+          [witsch]
+        
+        - Use URL normalizer when generating content ids based on filename.
+          [terapyon, papago, witsch]
+        
+        - Update view to analyse approximate content size grouped by type.
+          [witsch]
+        
+        - Add `z3c.autoinclude` entry point for automatic ZCML loading in Plone 3.3+.
+          [witsch]
+        
+        - Make sure image scales from old AT image fields are removed during
+          migration to blob fields, when using the BlobMigrator.  This closes
+          http://dev.plone.org/plone/ticket/10160
+          [davisagli]
+        
+        - Updated migration.pt to follow the recent markup conventions.
+          References http://dev.plone.org/plone/ticket/9981
+          [spliter]
+        
+        - Make it possible to delete image content.
+          [witsch]
+        
+        
+        1.0b11 (2010-01-30)
+        -------------------
+        
+        - Fix issues regarding migration from `OFS.File` and `OFS.Image` content.
+          [optilude, witsch]
+        
+        - Revert changes to make things more robust in case of missing blob files.
+          This refs http://plone.org/products/plone.app.blob/issues/10
+          [witsch]
+        
+        - Try to re-fetch blobs that have been removed from a client-side ZEO cache
+          before giving up and raising an error.  This makes it possible to control
+          the client blob cache size via external processes (e.g. `cron`) even with
+          ZODB 3.8.  See http://dev.plone.org/plone/changeset/32170/ for more info.
+          [svincic, witsch]
+        
+        - Fix issue with incorrect values for "Type" catalog index after migration.
+          [yomatters, witsch]
+        
+        
+        1.0b10 (2009-12-03)
+        -------------------
+        
+        - Add support for accessing image scales via path expressions like
+          `here/image_thumb` for backward-compatibility.
+          [witsch]
+        
+        
+        1.0b9 (2009-11-26)
+        ------------------
+        
+        - Unify the ATBlob factories (for CMF>=2.2 and CMF<2.2) while still
+          preventing events from being fired for the former.
+          [witsch]
+        
+        - Fix range support for open ranges.
+          [j23d, witsch]
+        
+        - Make the title field non-required for ATBlobs, since it will be
+          generated from the filename if necessary.
+          [davisagli]
+        
+        - If a title was entered, use it instead of the filename to generate an
+          id for files (matching what was already done for images).
+          [davisagli]
+        
+        - Update the CMF 2.2 version of the ATBlob factory to match a fix I made
+          in Archetypes 2.0a2.
+          [davisagli]
+        
+        
+        1.0b8 (2009-11-17)
+        ------------------
+        
+        - Added a modified version of the customized ATBlob factory for use with
+          CMF 2.2.
+          [davisagli]
+        
+        - Make sure that BlobWrappers for zero-length blobs still evaluate to
+          boolean True.
+          [davisagli]
+        
+        - Implement range support for downloads.  This fixes
+          http://plone.org/products/plone.app.blob/issues/11
+          [j23d, rossp, witsch]
+        
+        - Fix image field validator to match that from `ATContentTypes`.
+          [rossp]
+        
+        - With `ATContentTypes` >=2.0, check the `_should_set_id_to_filename`
+          method to determine if `ATBlob`'s `fixAutoId` method should set the
+          item id to the filename of the blob field.  For images, don't set it
+          to the filename if a title was supplied.
+          [davisagli]
+        
+        - Add blobbable adapters for Python file objects and OFS Pdata objects.
+          [davisagli]
+        
+        - Add helper view to get a rough estimate of the total size of binary
+          content in a site.
+          [witsch]
+        
+        
+        1.0b7 (2009-11-06)
+        ------------------
+        
+        - Fix regression in setup for running bbb tests against Plone 3.x.
+          [witsch]
+        
+        - Update migration view to issue warning when `plone.app.blob` has not
+          been quick-installed yet.  Fixes http://dev.plone.org/plone/ticket/8496
+          [witsch]
+        
+        - Preserve filename when editing via WebDAV.  This fixes
+          http://plone.org/products/plone.app.blob/issues/23
+          [witsch]
+        
+        - Update basic blob content type to be LinguaPlone-aware.  This fixes
+          http://plone.org/products/plone.app.blob/issues/24
+          [j23d]
+        
+        - Override helper method to provide file-like objects for image
+          transformations.  This fixes http://dev.plone.org/plone/ticket/8506
+          [amleczko, witsch]
+        
+        - Add some additional CMF/ATCT compatibility to the ATCT
+          replacement types using the "cmf_edit" method.
+          [alecm]
+        
+        - Provide helper methods for easier migration of custom content types.
+          [ggozad, witsch]
+        
+        - Refactor test setup to make it work with ZODB 3.9.
+          [witsch]
+        
+        
+        1.0b6 (2009-10-10)
+        ------------------
+        
+        - Minor fixes and test updates for compatibility with Plone 4.0.
+          [witsch]
+        
+        - Store image scales in blobs.
+          [witsch]
+        
+        - Use correct permissions when registering replacement types for
+          "File" and "Image" content.
+          See http://plone.org/products/plone.app.blob/issues/9
+          [witsch]
+        
+        - Fix migration issue regarding stale catalog index- & meta-data.
+          [witsch]
+        
+        - Allow certain file types to be downloaded immediately.
+          See http://plone.org/products/plone.app.blob/issues/4
+          [optilude]
+        
+        - Fix performance issue regarding extension field.
+          [witsch]
+        
+        
+        1.0b5 (2009-08-26)
+        ------------------
+        
+        - Fix compatibility issue with `repoze.zope2`.
+          [optilude, witsch]
+        
+        - Fix compatibility issues with ZODB 3.9 and Plone 4.0.
+          [witsch]
+        
+        - Speed up migration of existing content by using "in-place" migrators
+          and avoid unnecessary re-indexing.
+          [witsch]
+        
+        - Fix registration of blob-based image scale adapter to prevent getting
+          404s for content other than images.  This fixes the second issue
+          related to http://plone.org/products/plone.app.blob/issues/19
+          [witsch]
+        
+        
+        1.0b4 (2009-11-19)
+        ------------------
+        
+        - Provide maintenance view for (re)setting blob sub-types, which can also
+          be used to fix things after upgrading from 1.0b2 or earlier.
+          This fixes http://plone.org/products/plone.app.blob/issues/19
+          [witsch]
+        
+        
+        1.0b3 (2009-11-15)
+        ------------------
+        
+        - Clean up GenericSetup profiles to allow separate installation of
+          replacement types for "File" and "Image" content.
+          [witsch]
+        
+        - Add index accessor to make indexing of file content work again.
+          This fixes http://plone.org/products/plone.app.blob/issues/12
+          [witsch]
+        
+        - Make code more robust in case of missing blob files.
+          This fixes http://plone.org/products/plone.app.blob/issues/10
+          [witsch]
+        
+        - Make tests clean up their temporary blob directories.
+          [stefan]
+        
+        - Remove quota argument from DemoStorage calls.
+          [stefan]
+        
+        - Add workaround to prevent breakage with CMFEditions (blob-based
+          content can still not be versioned, though).
+          [witsch]
+        
+        - Add missing acquisition-wrapper, also allowing to remove circular
+          references between instance and field, which broke pickling.
+          [witsch]
+        
+        - Fix helper for determining image sizes to not break for non-image
+          content.
+          [witsch]
+        
+        - Use PIL for determining image sizes as the OFS code cannot handle
+          certain types of JPEGs.
+          [witsch]
+        
+        - Added missing metadata.xml to the default profile.
+          [hannosch]
+        
+        - Only use the file name for id generation for the replacement types,
+          i.e. "File" and "Image", but not custom types.  This fixes
+          http://plone.org/products/plone.app.blob/issues/3
+          [witsch]
+        
+        - Fix issue where the mime-type registry returned an empty tuple when
+          looking up an unknown mime-type.  This fixes
+          http://plone.org/products/plone.app.blob/issues/1
+          [witsch]
+        
+        
+        1.0b2 (2008-02-29)
+        ------------------
+        
+        - Reverted fix for Windows that closed the file upload object in order
+          to work around a problem with reading from the blob file afterwards.
+          [witsch]
+        
+        
+        1.0b1 (2008-02-28)
+        ------------------
+        
+        - Minor bug fixes and cleanups
+          [witsch]
+        
+        - Fix for a problem regarding file uploads on Windows, where renaming
+          the still open temporary file isn't allowed and hence caused an error.
+          Now the file is closed before the call to `consumeFile()`.
+          [rochael]
+        
+        - Fix for Windows regarding the generation of the temporary file used for
+          file uploads so that it doesn't get deleted after being moved to the
+          blob storare
+          [rochael]
+        
+        - Change file size calculation so as not to need to reopen the file, which
+          broke on Windows
+          [rochael]
+        
+        - Changed the primary field of the blob content types to not to be
+          "searchable" as this causes indexing of the blob content making ram
+          consumption go through the roof
+          [witsch]
+        
+        
+        1.0a2 (2007-12-12)
+        ------------------
+        
+        - Various minor bug fixes regarding migration, content icons etc
+          [witsch]
+        
+        - String value are now wrapped using StringIO to make them adaptable, so
+          that their mime-type can be guessed as well.
+          [naro]
+        
+        - Added alternative GenericSetup profile to allow to replace ATFile
+          as the "File" content type
+          [witsch]
+        
+        
+        1.0a1 (2007-12-07)
+        ------------------
+        
+        - Initial version
+          [witsch]
+        
+        - Initial package structure.
+          [zopeskel]
+        
+        
+Keywords: zodb blob support plone integration
+Platform: Any
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: Intended Audience :: Other Audience
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

@@ -1,0 +1,370 @@
+Metadata-Version: 1.1
+Name: plone.formwidget.contenttree
+Version: 1.0.9
+Summary: AJAX selection widget for Plone
+Home-page: https://github.com/plone/plone.formwidget.contenttree
+Author: Martin Aspeli
+Author-email: optilude@gmail.com
+License: GPL
+Description: Introduction
+        ============
+        
+        plone.formwidget.contenttree is a z3c.form widget for use with Plone. It
+        uses the jQuery Autocomplete widget, and has graceful fallback for non-
+        Javascript browsers.
+        
+        There is a single-select version (AutocompleteSelectionFieldWidget) for
+        Choice fields, and a multi-select one (AutocompleteMultiSelectionFieldWidget)
+        for collection fields (e.g. List, Tuple) with a value_type of Choice.
+        
+        When using this widget, the vocabulary/source has to provide the IQuerySource
+        interface from z3c.formwidget.query and have a search() method. The easiest
+        way to do this is generate one with one of:
+        
+        * plone.formwidget.contenttree.PathSourceBinder(navigation_tree_query=None, **kw)
+        * plone.formwidget.contenttree.ObjPathSourceBinder(navigation_tree_query=None, **kw)
+        * plone.formwidget.contenttree.UUIDSourceBinder(navigation_tree_query=None, **kw)
+        
+        Where ``navigation_tree_query`` is some restrictions that should be applied to
+        any Catalog query. The rest of the arguments are used to form a filter (see source.py).
+        
+        ``PathSourceBinder`` and ``ObjPathSourceBinder`` store the selected object's
+        path in the field value. This means that the link will be broken if the object
+        is moved. ``UUIDSourceBinder`` stores UUID references, so will handle pages
+        being moved.
+        
+        If you do not want to filter the content tree whatsoever, there are some
+        pre-baked instances too:
+        
+        * plone.formwidget.contenttree.path_src_binder
+        * plone.formwidget.contenttree.obj_path_src_binder
+        * plone.formwidget.contenttree.uuid_src_binder
+        
+        Example Usage::
+        
+            from zope.component import adapts
+            from zope.interface import Interface, implements
+            from zope import schema
+        
+            from plone.z3cform import layout
+        
+            from z3c.form import form, button, field
+        
+            from plone.formwidget.contenttree import ContentTreeFieldWidget
+            from plone.formwidget.contenttree import MultiContentTreeFieldWidget
+            from plone.formwidget.contenttree import PathSourceBinder
+        
+        
+            class ITestForm(Interface):
+        
+                buddy = schema.Choice(title=u"Buddy object",
+                                      description=u"Select one, please",
+                                      source=PathSourceBinder(portal_type='Document'))
+        
+                friends = schema.List(
+                    title=u"Friend objects",
+                    description=u"Select as many as you want",
+                    value_type=schema.Choice(
+                        title=u"Selection",
+                        source=PathSourceBinder(portal_type='Document')))
+        
+        
+            class TestAdapter(object):
+                implements(ITestForm)
+                adapts(Interface)
+        
+                def __init__(self, context):
+                    self.context = context
+        
+                def _get_buddy(self):
+                    return None
+                def _set_buddy(self, value):
+                    print "setting", value
+                buddy = property(_get_buddy, _set_buddy)
+        
+                def _get_friends(self):
+                    return []
+                def _set_friends(self, value):
+                    print "setting", value
+                friends = property(_get_friends, _set_friends)
+        
+        
+            class TestForm(form.Form):
+                fields = field.Fields(ITestForm)
+                fields['buddy'].widgetFactory = ContentTreeFieldWidget
+                fields['friends'].widgetFactory = MultiContentTreeFieldWidget
+                # To check display mode still works, uncomment this and hit refresh.
+                #mode = 'display'
+        
+                @button.buttonAndHandler(u'Ok')
+                def handle_ok(self, action):
+                    data, errors = self.extractData()
+                    print data, errors
+        
+            TestView = layout.wrap_form(TestForm)
+        
+        Changelog
+        =========
+        
+        1.0.9 (2014-10-25)
+        ------------------
+        
+        * Implement ``renderForValue`` on ``ContentTreeBase`` in order to make
+          single valued relation fields work.
+          [rnixx]
+        
+        1.0.8 (2014-10-21)
+        ------------------
+        
+        * Work around bizarro Diazo encoding bug
+          [gyst]
+        
+        1.0.7 (2013-06-30)
+        ------------------
+        
+        * Add in some default binder instances, mostly for use with supermodel XML
+          schemas.
+          [lentinj]
+        
+        * Switch to ``plone.app.testing``
+          [saily]
+        
+        * Add js and css registration tests
+          [saily]
+        
+        * Added check in tree generation if it allready exists (reopening the contenttree window).
+          [phgross]
+        
+        * Do not exclude content types which are not allowed in navigation [ebrehault]
+        
+        * Ignore missing values, content objects can go away or the content of a source may change.
+          [gaudenz]
+        
+        1.0.6 (2012-09-28)
+        ------------------
+        
+        * Tweak CSS to use outline instead of border.
+          [elro]
+        
+        * Avoid theming ajax response.
+          [elro]
+        
+        * Ensure context is a content item of some sort.
+          [elro]
+        
+        * Import getSite from zope.component to avoid dependency on zope.app.component.
+          [hvelarde]
+        
+        * Import ViewPageTemplateFile from zope.browserpage to avoid dependency on
+          zope.app.pagetemplate.
+          [hvelarde]
+        
+        * Added french translation.
+          [phgross]
+        
+        * Trigger change handler when used with datagrid
+          [kingel]
+        
+        * Use an ajax fetch for the initial call
+          [kingel]
+        
+        * Fix url in display templates, so that it uses absolute urls.
+          [phgross]
+        
+        * pep8
+          [joka]
+        
+        * Fix term title genration to use the brain id if there is not brain title
+          [joka]
+        
+        * Added Italian translation.
+          [gborelli]
+        
+        * Added Finnish (fi) translation.
+          [dokai]
+        
+        * By default filter out nodes that are not selectable and not folderish.
+          This can be overridden on the widget by setting show_all_nodes to True.
+          [maurits]
+        
+        * Added Dutch translation.
+          [maurits]
+        
+        1.0.5 (2012-02-20)
+        ------------------
+        
+        * Added Spanish translation
+          [hvelarde]
+        
+        1.0.4 (2011-10-04)
+        ------------------
+        
+        * fix _getBrainByValue to check if value is traversable
+          first so we can provide the correct token.
+          [vangheem]
+        
+        1.0.3 (2011-09-24)
+        ------------------
+        
+        * Add zh_CN translation.
+          [jianaijun]
+        
+        1.0.2 (2011-07-02)
+        ------------------
+        
+        * Fix regression that broke the browsing with JQuery < 1.4.
+          [davisagli]
+        
+        1.0.1 (2011-05-16)
+        ------------------
+        
+        * Make placeholder terms for hidden / missing items, so that you can still see
+          something in the editing interface and not accidentally remove them. Ideally
+          we should say if a page is invisible or missing, but not today.
+          [lentinj]
+        
+        * Use javascript function from plone.formwidget.autocomplete to add new input
+          boxes, make javascript as clone-safe (when making new rows in datagridfield)
+          as possible
+          [lentinj]
+        
+        * Just use full widget name in ++widget++ URL, don't try and strip form prefix
+          off. If within a subform, this is the wrong thing to do and the traverser now
+          supports stripping the initial 'form.widgets'
+          [lentinj]
+        
+        * Workaround for sources being used without being bound first.
+          [lentinj]
+        
+        * Check the request for context before falling back to getSite()
+          [lentinj]
+        
+        * Add a UUIDSource that stores plone.uuid pointers to content.
+          [lentinj]
+        
+        * Use tokens as full URL of content, move all token<->value operations into the
+          source. Rename methods so that actually-public methods have public names
+          [lentinj]
+        
+        * Alter terms so that token is the full path to an item, value is the path
+          without portal_url that is stored in the DB. This means all the path parsing
+          can be kept within the source.
+          [lentinj]
+        
+        * _filter is used outside the source, so not an internal helper function
+          anymore.
+          [lentinj]
+        
+        1.0 (2011-04-30)
+        ----------------
+        
+        * Made compatible with Plone 4.1 by loading the permissions.zcml from
+          Products.CMFCore (only when plone.app.upgrade is available, to keep
+          compatibility with Plone 3, if we currently have that).
+          [maurits]
+        
+        * Improved CSS for selected items to make them more evident in the Sunburst
+          theme.
+          [davisagli]
+        
+        * Add content type CSS class to items in the navtree so that icons are shown
+          in Plone 4.
+          [davisagli]
+        
+        1.0b3 (2011-02-11)
+        ------------------
+        
+        * Use `zope.i18n.translate` instead of translation_service, since
+          translation_service was removed in plone4.
+          [jbaumann]
+        
+        
+        1.0b2 (2010-08-25)
+        ------------------
+        
+        * Fall back to the site to perform content-related operations if the
+          context is not wrapped into an acquisition chain.
+          [dukebody]
+        
+        * Compute the view name as the request URL left-stripped the content
+          absolute URL.
+          [dukebody]
+        
+        * Make it possible to restrict the field to objects below a path
+          The constructor of ObjPathSource takes a path keyword argument
+          with a PathIndex catalog query. This argument filters objects
+          outside of this path. If the navigation_tree_query does not have
+          a path argument, the path is also copied into this query.
+          [gaudenzius]
+        
+        * Update widget in the contenttree-fetch browser view
+          The widget.update() call rebinds to source which previously
+          was only bound during traversal. This avoids problems with
+          sources that only work after security is applied.
+          [gaudenzius]
+        
+        
+        1.0b1 - 2010-04-19
+        ------------------
+        
+        * Adjusted styles so the widget looks reasonable with Plone 4's sunburst theme.
+          [davisagli]
+        
+        * Fix icons in CMF 2.2.  This closes
+          http://code.google.com/p/dexterity/issues/detail?id=111
+          [davisagli]
+        
+        * Make the widget work properly on Zope 2.12
+          [optilude]
+        
+        * Add a template for HIDDEN_MODE.
+          [csenger]
+        
+        * Convert all strings in a new navtree node into unicode using the site
+          encoding to render non-ascii characters in the widget.
+          [csenger]
+        
+        * Added message IDs for translations and added locales directory with
+          german translations.
+          [jbaumann]
+        
+        1.0a5 - 2009-08-02
+        ------------------
+        
+        * Don't filter children of non-queriable parent types (e.g. Large Plone
+          Folders).
+          [optilude]
+        
+        1.0a3 - 2009-07-12
+        ------------------
+        
+        * Apply patch from Gerhard Weis to make the lightbox play nicer with CSS
+          z-indexes.
+          [optilude]
+        
+        1.0a3 - 2009-06-29
+        ------------------
+        
+        * Fix security validator to work properly on add views and other views using
+          namespace traversal (++add++...)
+          [optilude]
+        
+        1.0a2 - 2009-06-28
+        ------------------
+        
+        * Fix display widgets.
+          [optilude]
+        
+        * Import SitemapNavtreeStrategy conditionally so it doesn't break on Plone
+          trunk. [davisagli]
+        
+        1.0a1 - 2009-04-17
+        ------------------
+        
+        * Initial release
+        
+Keywords: Plone selection widget AJAX
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

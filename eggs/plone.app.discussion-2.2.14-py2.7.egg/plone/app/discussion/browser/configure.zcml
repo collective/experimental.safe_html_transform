@@ -1,0 +1,152 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="plone.app.discussion">
+
+    <include package="plone.app.registry" />
+
+    <include file="captcha.zcml" />
+
+    <!-- Traversal adapter -->
+    <adapter factory=".traversal.ConversationNamespace" name="conversation" />
+
+    <!-- Migration view -->
+    <browser:page
+        for="Products.CMFCore.interfaces.ISiteRoot"
+        name="comment-migration"
+        layer="..interfaces.IDiscussionLayer"
+        class=".migration.View"
+        permission="cmf.ManagePortal"
+        />
+
+    <!-- Moderation view -->
+    <browser:page
+        for="Products.CMFCore.interfaces.ISiteRoot"
+        name="moderate-comments"
+        layer="..interfaces.IDiscussionLayer"
+        class=".moderation.View"
+        permission="plone.app.discussion.ReviewComments"
+        />
+
+    <browser:page
+        for="plone.app.layout.navigation.interfaces.INavigationRoot"
+        name="moderate-comments"
+        layer="..interfaces.IDiscussionLayer"
+        class=".moderation.View"
+        permission="plone.app.discussion.ReviewComments"
+        />
+
+    <!-- Moderation bulk actions view -->
+    <browser:page
+        for="Products.CMFCore.interfaces.ISiteRoot"
+        name="bulk-actions"
+        layer="..interfaces.IDiscussionLayer"
+        class=".moderation.BulkActionsView"
+        permission="plone.app.discussion.ReviewComments"
+        />
+
+    <browser:page
+        for="plone.app.layout.navigation.interfaces.INavigationRoot"
+        name="bulk-actions"
+        layer="..interfaces.IDiscussionLayer"
+        class=".moderation.BulkActionsView"
+        permission="plone.app.discussion.ReviewComments"
+        />
+
+    <!-- Moderate comments enabled view -->
+    <browser:page
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+        name="moderate-comments-enabled"
+        layer="..interfaces.IDiscussionLayer"
+        class=".moderation.ModerateCommentsEnabled"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="plone.app.layout.navigation.interfaces.INavigationRoot"
+        name="moderate-comments-enabled"
+        layer="..interfaces.IDiscussionLayer"
+        class=".moderation.ModerateCommentsEnabled"
+        permission="zope2.View"
+        />
+
+    <!-- Edit comment view -->
+    <browser:page
+        for="plone.app.discussion.interfaces.IComment"
+        name="edit-comment"
+        layer="..interfaces.IDiscussionLayer"
+        class=".comment.EditComment"
+        permission="plone.app.discussion.EditComments"
+        />
+
+    <!-- Delete comment view -->
+    <browser:page
+        for="plone.app.discussion.interfaces.IComment"
+        name="moderate-delete-comment"
+        layer="..interfaces.IDiscussionLayer"
+        class=".moderation.DeleteComment"
+        permission="plone.app.discussion.ReviewComments"
+        />
+
+    <!-- Publish comment view -->
+    <browser:page
+        for="plone.app.discussion.interfaces.IComment"
+        name="moderate-publish-comment"
+        layer="..interfaces.IDiscussionLayer"
+        class=".moderation.PublishComment"
+        permission="plone.app.discussion.ReviewComments"
+        />
+
+    <!-- Comments viewlet -->
+    <browser:viewlet
+        name="plone.comments"
+        for="Products.CMFCore.interfaces.IContentish"
+        layer="..interfaces.IDiscussionLayer"
+        manager="plone.app.layout.viewlets.interfaces.IBelowContent"
+        view="plone.app.layout.globals.interfaces.IViewView"
+        class=".comments.CommentsViewlet"
+        permission="zope2.View"
+        />
+
+    <!-- Conversation view -->
+    <browser:page
+        name="conversation_view"
+        for="Products.CMFCore.interfaces.IContentish"
+        layer="..interfaces.IDiscussionLayer"
+        class=".conversation.ConversationView"
+        permission="zope2.View"
+        />
+
+    <!-- Comment view -->
+    <browser:view
+        name="view"
+        for="plone.app.discussion.interfaces.IComment"
+        layer="..interfaces.IDiscussionLayer"
+        class=".comment.View"
+        permission="zope2.View"
+        />
+
+    <!-- Resource directory for javascripts -->
+    <browser:resourceDirectory
+        name="plone.app.discussion.javascripts"
+        directory="javascripts"
+        layer="..interfaces.IDiscussionLayer"
+        />
+
+    <!-- Resource directory for stylesheets -->
+    <browser:resourceDirectory
+        name="plone.app.discussion.stylesheets"
+        directory="stylesheets"
+        layer="..interfaces.IDiscussionLayer"
+        />
+
+    <!-- Control panel -->
+    <browser:page
+        name="discussion-settings"
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+        class=".controlpanel.DiscussionSettingsControlPanel"
+        permission="cmf.ManagePortal"
+        />
+
+</configure>

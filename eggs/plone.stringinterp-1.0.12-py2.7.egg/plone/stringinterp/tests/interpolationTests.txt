@@ -1,0 +1,46 @@
+Base Interpolation Tests
+========================
+
+Basics
+------
+
+plone.stringinterp.Interpolate will do ${id} style interpolation
+using string substitutions provided by named adapters.
+
+Let's test basic interpolation using the homepage::
+
+    >>> from plone.stringinterp import Interpolator
+
+    >>> s = """one two three ${title} ${url} ${nonesuch}"""
+
+    >>> apage = self.portal['front-page']
+
+    >>> Interpolator(apage)(s)
+    u'one two three Welcome to Plone http://nohost/plone/front-page ${nonesuch}'
+    
+    
+That was a direct call. Let's do it by adapter, too, proving this
+may be swapped out.
+
+    >>> from plone.stringinterp.interfaces import IStringInterpolator
+    >>> IStringInterpolator(apage)(s)
+    u'one two three Welcome to Plone http://nohost/plone/front-page ${nonesuch}'
+
+
+Test caching scheme
+
+    >>> interpolator = IStringInterpolator(apage)
+    >>> interpolator(s)
+    u'one two three Welcome to Plone http://nohost/plone/front-page ${nonesuch}'
+
+    >>> interpolator._ldict._cache
+    {'url': u'http://nohost/plone/front-page', 'nonesuch': u'_bad_', 'title': u'Welcome to Plone'}
+
+Directly change cache
+
+    >>> interpolator._ldict._cache['nonesuch'] = u'nothing much here'
+    
+And prove that the interpolator is using the cache
+
+    >>> interpolator(s)
+    u'one two three Welcome to Plone http://nohost/plone/front-page nothing much here'

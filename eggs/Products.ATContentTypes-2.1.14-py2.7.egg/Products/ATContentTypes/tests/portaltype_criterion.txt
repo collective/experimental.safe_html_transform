@@ -1,0 +1,132 @@
+Adding an ATTopic criterion for Type
+====================================
+
+    # BBB Zope 2.12
+    >>> try:
+    ...     from Testing.testbrowser import Browser
+    ... except ImportError:
+    ...     from Products.Five.testbrowser import Browser
+
+    >>> browser = Browser()
+    >>> browser.open('http://nohost/plone/login')
+
+First, we need to log in.
+
+    >>> from Products.PloneTestCase.setup import portal_owner, default_password
+    >>> browser.getControl('Login Name').value = portal_owner
+    >>> browser.getControl('Password').value = default_password
+    >>> browser.getControl('Log in').click()
+
+
+Add Collection
+--------------
+
+What we do next is we 
+
+  - add a new collection,
+  - ...edit some values,
+  - ...save the page,
+  - ...and along the way we check that everything works as expected.
+
+    >>> browser.open('http://nohost/plone')
+    >>> browser.getLink('Add new').click()
+    >>> 'Add new item' in browser.contents
+    True
+    >>> browser.getControl('Collection', index=-1).click()
+    >>> browser.getControl('Add').click()
+    >>> #'Edit Collection' in browser.contents # ouch, Plone has <span> around 'Collection'
+    >>> browser.url
+    'http://nohost/plone/portal_factory/Topic/topic.../edit'
+
+Now that the collection has been added, we can edit it, but we pretend
+we don't know better and forget to type in a Title:
+
+    >>> browser.getControl(name = 'title').value = 'My Collection'
+    >>> browser.getControl('Save').click()
+    >>> 'Changes saved.' in browser.contents
+    True
+    >>> 'My Collection' in browser.contents
+    True
+
+We edit the criteria:
+
+    >>> browser.getLink('Criteria').click()
+    >>> browser.url
+    'http://nohost/plone/my-collection/criterion_edit_form'
+    >>> 'Add New Search Criteria' in browser.contents
+    True
+
+We add a criterion for Type:
+
+    >>> browser.getControl(name='field', index=0).value = ['Type']
+    >>> browser.getControl(name='criterion_type', index=0).value = ['ATPortalTypeCriterion']
+    >>> browser.handleErrors = False
+    >>> browser.getControl(name='form.button.AddCriterion').click()
+    >>> 'Added criterion ATPortalTypeCriterion for field Type.' in browser.contents
+    True
+
+Verify that Page is an option, with value Page as well.
+
+    >>> browser.getControl('Page')
+    <ItemControl ...optionValue='Page'...>
+
+Make sure that sorting by the getObjPositionInParent index is an option.
+
+    >>> browser.getControl('Order in folder') is not None
+    True
+
+We select Page and save our selection.
+
+    >>> browser.getControl(name='crit__Type_ATPortalTypeCriterion_value:list').value = ['Page']
+    >>> browser.getControl('Save', index=0).click() 
+    >>> 'Changes saved.' in browser.contents
+    True
+
+
+View collection
+----------------------
+
+We add a document to test whether the collection works. We test the portal type Document specifically
+because its portal_type ('Document') is different from its catalog Type ('Page'). We take care to
+exclude the document from navigation, to make it easier to inspect the browser contents and
+detect whether it shows up in searches.
+
+    >>> self.loginAsPortalOwner()
+    >>> self.portal.invokeFactory('Document', 'doc1')
+    'doc1'
+    >>> self.portal.doc1.setTitle('Test Document')
+    >>> self.portal.doc1.setExcludeFromNav(True)
+    >>> self.portal.doc1.content_status_modify(workflow_action='publish')
+    'http://nohost/plone/doc1'
+
+We now view the collection.
+
+    >>> browser.getLink('View').click()
+    >>> browser.url
+    'http://nohost/plone/my-collection/'
+
+The test document should be in the collection.
+
+    >>> 'Test Document' in browser.contents
+    True
+    >>> 'There are currently no results for this search.' in browser.contents
+    False
+
+Change language
+----------------------
+Now we change the default language of the Plone site. Click on Site Setup, then Language
+select form.default_language equal to de
+
+    >>> browser.getLink('Site Setup').click()
+    >>> browser.getLink('Language').click()
+    >>> browser.getControl('Site language').value = ['de']
+    >>> browser.getControl('Save').click()
+
+Edit the collection again, and verify that one available option has value "Page" but displays as
+the German translation, "Seite."
+
+XXX This test is currently disabled because the translations don't show up in the test browser.
+
+    >>> browser.open('http://nohost/plone/my-collection/criterion_edit_form')
+    >>> #browser.getControl('Seite')
+    >>> ## EXPECT: <ItemControl ...optionValue='Page'...>

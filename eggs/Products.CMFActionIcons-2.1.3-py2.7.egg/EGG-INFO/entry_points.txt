@@ -1,0 +1,6 @@
+
+      [zope2.initialize]
+      Products.CMFActionIcons = Products.CMFActionIcons:initialize
+      [distutils.commands]
+      ftest = zope.testing.testrunner.eggsupport:ftest
+      

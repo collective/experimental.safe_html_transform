@@ -1,0 +1,286 @@
+==============
+Form fieldsets
+==============
+
+Fieldsets are a way to group fields from schema definitions, so they provide
+enough information, to be grouped in the rendered output.
+
+First we define two test schemata:
+
+    >>> from zope import interface, schema
+    >>> class IText(interface.Interface):
+    ...     abstract = schema.TextLine(title=u"Abstract")
+    ...     text = schema.TextLine(title=u"Text")
+
+    >>> class IAuthor(interface.Interface):
+    ...     name = schema.TextLine(title=u"Name")
+    ...     birthday = schema.TextLine(title=u"Birthday")
+
+And set up a normal form from the interface, IText.
+
+    >>> from zope.formlib import form
+    >>> class MySimpleForm:
+    ...     form_fields = form.Fields(IText)
+
+We make sure this simple form actually works:
+
+    >>> len(MySimpleForm.form_fields)
+    2
+
+    >>> [w.__name__ for w in MySimpleForm.form_fields]
+    ['abstract', 'text']
+
+Now we set up a regular form combining the two interfaces:
+
+    >>> class MyCombinedForm:
+    ...     form_fields = form.Fields(IText, IAuthor)
+
+    >>> len(MyCombinedForm.form_fields)
+    4
+
+    >>> [w.__name__ for w in MyCombinedForm.form_fields]
+    ['abstract', 'text', 'name', 'birthday']
+
+And finally we use our fieldsets at the base level:
+
+    >>> from plone.fieldsets.fieldsets import FormFieldsets
+    >>> class MyBaseFieldsetsForm:
+    ...     form_fields = FormFieldsets(IText, IAuthor)
+
+This mimics the exact behavior of the normal forms:
+
+    >>> len(MyBaseFieldsetsForm.form_fields)
+    4
+
+    >>> [w.__name__ for w in MyBaseFieldsetsForm.form_fields]
+    ['abstract', 'text', 'name', 'birthday']
+
+But we have the additional fieldsets attribute available:
+
+    >>> len(MyBaseFieldsetsForm.form_fields.fieldsets)
+    0
+
+In order to use the fieldsets we wrap the two schemata first:
+
+    >>> textset = FormFieldsets(IText)
+    >>> textset.label = u'Label for text fieldset.'
+    
+    >>> authorset = FormFieldsets(IAuthor)
+    >>> authorset.label = u'Label for author fieldset.'
+
+And make a form of those two fieldsets:
+
+    >>> class MyFieldsetsForm:
+    ...     form_fields = FormFieldsets(textset, authorset)
+
+The fieldsets still behave exactly like normal fields:
+
+    >>> fields = MyFieldsetsForm.form_fields
+    >>> len(fields)
+    4
+
+    >>> [w.__name__ for w in fields]
+    ['abstract', 'text', 'name', 'birthday']
+
+But have the desired additional information, which can be used to iterate over
+the fieldsets:
+
+    >>> len(fields.fieldsets)
+    2
+
+    >>> fields.fieldsets[0].label
+    u'Label for text fieldset.'
+    >>> [w.__name__ for w in fields.fieldsets[0]]
+    ['abstract', 'text']
+
+    >>> fields.fieldsets[1].label
+    u'Label for author fieldset.'
+    >>> [w.__name__ for w in fields.fieldsets[1]]
+    ['name', 'birthday']
+
+
+Edit and input forms
+--------------------
+
+Set up an edit and input form based on our fieldsets:
+
+    >>> from plone.fieldsets.form import FieldsetsEditForm
+    >>> from plone.fieldsets.form import FieldsetsInputForm
+
+    >>> from zope.publisher.browser import TestRequest
+    >>> request = TestRequest()
+
+Create a dummy content object as our context:
+
+    >>> class Text(object):
+    ...     interface.implements(IText)
+    ...
+    ...     def __init__(self):
+    ...         self.abstract = ''
+    ...         self.text = ''
+
+    >>> class Author(object):
+    ...     interface.implements(IAuthor)
+    ...
+    ...     def __init__(self):
+    ...         self.name = ''
+    ...         self.birthday = ''
+
+    >>> class AuthorText(Author, Text):
+    ...
+    ...     def __init__(self):
+    ...         Author.__init__(self)
+    ...         Text.__init__(self)
+
+    >>> context = AuthorText()
+
+Test the edit form:
+
+    >>> class MyFieldsetsEditForm(FieldsetsEditForm):
+    ...     form_fields = FormFieldsets(textset, authorset)
+
+    >>> edit = MyFieldsetsEditForm(context, request)
+
+    >>> edit.setUpWidgets(ignore_request=True)
+    >>> edit.widgets
+    <zope.formlib.form.Widgets object at ...>
+
+    >>> class MySimpleEditForm(FieldsetsEditForm):
+    ...     form_fields = form.Fields(IText)
+
+    >>> edit = MySimpleEditForm(context, request)
+
+    >>> edit.setUpWidgets(ignore_request=True)
+    >>> edit.widgets
+    <zope.formlib.form.Widgets object at ...>
+
+
+Test the input form:
+
+    >>> class MyFieldsetsInputForm(FieldsetsInputForm):
+    ...     form_fields = FormFieldsets(textset, authorset)
+
+    >>> input = MyFieldsetsInputForm(context, request)
+
+    >>> input.setUpWidgets(ignore_request=True)
+    >>> input.widgets
+    <zope.formlib.form.Widgets object at ...>
+
+    >>> class MySimpleInputForm(FieldsetsInputForm):
+    ...     form_fields = form.Fields(IText)
+
+    >>> input = MySimpleInputForm(context, request)
+
+    >>> input.setUpWidgets(ignore_request=True)
+    >>> input.widgets
+    <zope.formlib.form.Widgets object at ...>
+
+
+Mixing fieldsets with normal fields
+-----------------------------------
+
+We reuse the two fieldsets defined earlier:
+
+    >>> textset
+    <plone.fieldsets.fieldsets.FormFieldsets object at ...>
+
+    >>> authorset
+    <plone.fieldsets.fieldsets.FormFieldsets object at ...>
+
+And create two normal form fields and a normal field:
+
+    >>> from zope.formlib.form import FormFields
+
+    >>> textfields = FormFields(IText)
+    >>> textfields
+    <zope.formlib.form.FormFields object at ...>
+
+    >>> authorfields = FormFields(IAuthor)
+    >>> authorfields
+    <zope.formlib.form.FormFields object at ...>
+
+    >>> title = schema.TextLine(title=u"Title")
+    >>> titlefield = form.FormField(title, name='title')
+
+You can combine two fieldsets:
+
+    >>> textset + authorset
+    <plone.fieldsets.fieldsets.FormFieldsets object at ...>
+
+Add normal fields to a set:
+
+    >>> textset + authorfields
+    <plone.fieldsets.fieldsets.FormFieldsets object at ...>
+
+Initialize a new set with an additional field:
+
+    >>> FormFieldsets(textset, titlefield)
+    <plone.fieldsets.fieldsets.FormFieldsets object at ...>
+
+    >>> FormFieldsets(textset, title)
+    Traceback (most recent call last):
+    ...
+    ValueError: Field has no name
+
+    >>> namedtitle = schema.TextLine(title=u"Named Title")
+    >>> namedtitle.__name__ = 'namedtitle'
+
+    >>> FormFieldsets(textset, namedtitle)
+    <plone.fieldsets.fieldsets.FormFieldsets object at ...>
+
+But you currently cannot add a field to an existing set:
+
+    >>> textset + titlefield
+    Traceback (most recent call last):
+    ...
+    TypeError: unsupported operand type(s) for +: 'FormFieldsets' and 'instance'
+
+And the field names must still be unique in the whole set:
+
+    >>> textset + textfields
+    Traceback (most recent call last):
+    ...
+    ValueError: ('Duplicate name', 'abstract')
+
+You cannot add nonsense to a set:
+
+    >>> FormFieldsets(textset, 1)
+    Traceback (most recent call last):
+    ...
+    TypeError: ('Unrecognized argument type', 1)
+
+Test omitting read only fields
+------------------------------
+
+We create a new fieldset:
+
+    >>> class IReadOnlyText(interface.Interface):
+    ...     abstract = schema.TextLine(title=u"Abstract", readonly=True)
+    ...     text = schema.TextLine(title=u"Text", readonly=True)
+    ...     title = schema.TextLine(title=u"Title")
+
+    >>> class MyFieldsetsForm:
+    ...     form_fields = FormFieldsets(IReadOnlyText)
+
+Usually we get all fields:
+
+    >>> len(MyFieldsetsForm.form_fields)
+    3
+
+But we can also omit the readonly fields:
+
+    >>> class MyFieldsetsForm:
+    ...     form_fields = FormFieldsets(IReadOnlyText, omit_readonly=True)
+
+    >>> len(MyFieldsetsForm.form_fields)
+    1
+
+Or explicitly keep one of them:
+
+    >>> class MyFieldsetsForm:
+    ...     form_fields = FormFieldsets(IReadOnlyText,
+    ...                                 omit_readonly=True,
+    ...                                 keep_readonly=('text'))
+
+    >>> len(MyFieldsetsForm.form_fields)
+    2

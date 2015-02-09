@@ -1,0 +1,26 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:gs="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone">
+
+    <adapter
+        factory=".exportimport.SharingXMLAdapter"
+        name="plone.app.workflow.sharing"
+        />
+
+    <gs:importStep
+        name="sharing"
+        title="Sharing (local) roles"
+        description="The roles that are used on the sharing page"
+        handler=".exportimport.import_sharing">
+        <depends name="rolemap"/>
+    </gs:importStep>
+
+    <gs:exportStep
+        name="sharing"
+        title="Sharing (local) roles"
+        description="The roles that are used on the sharing page"
+        handler=".exportimport.export_sharing"
+        />
+
+</configure>

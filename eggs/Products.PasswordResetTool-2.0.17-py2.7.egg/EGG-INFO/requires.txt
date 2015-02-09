@@ -1,0 +1,14 @@
+setuptools
+plone.memoize
+zope.component
+zope.i18nmessageid
+zope.i18n
+zope.interface
+Products.CMFPlone
+Products.CMFCore
+Acquisition
+DateTime
+Zope2
+
+[test]
+Products.PloneTestCase

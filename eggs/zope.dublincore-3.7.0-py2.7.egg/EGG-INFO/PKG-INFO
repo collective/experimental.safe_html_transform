@@ -1,0 +1,402 @@
+Metadata-Version: 1.0
+Name: zope.dublincore
+Version: 3.7.0
+Summary: Zope Dublin Core implementation
+Home-page: http://pypi.python.org/pypi/zope.dublincore
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: .. contents::
+        
+        ========
+        Overview
+        ========
+        ``zope.dublincore`` provides a Dublin Core support for Zope-based web
+        applications.  This includes:
+        
+        * an ``IZopeDublinCore`` interface definition that can be implemented
+          by objects directly or via an adapter to support DublinCore
+          metadata.
+        
+        * an ``IZopeDublinCore`` adapter for annotatable objects (objects
+          providing ``IAnnotatable`` from ``zope.annotation``).
+        
+        * a partial adapter for objects that already implement some of the
+          ``IZopeDublinCore`` API,
+        
+        * a "Metadata" browser page (which by default appears in the ZMI),
+        
+        * subscribers to various object lifecycle events that automatically
+          set the created and modified date and some other metadata.
+        
+        
+        ======================
+        Dublin Core Properties
+        ======================
+        
+        A dublin core property allows us to use properties from dublin core
+        by simply defining a property as DCProperty.
+        
+          >>> from zope.dublincore import property
+        
+          >>> from zope import interface
+          >>> from zope.annotation.interfaces import IAttributeAnnotatable
+          >>> class DC(object):
+          ...     interface.implements(IAttributeAnnotatable)
+          ...     title   = property.DCProperty('title')
+          ...     author  = property.DCProperty('creators')
+          ...     authors = property.DCListProperty('creators')
+        
+          >>> obj = DC()
+          >>> obj.title = u'My title'
+          >>> obj.title
+          u'My title'
+        
+        Let's see if the title is really stored in dublin core:
+        
+          >>> from zope.dublincore.interfaces import IZopeDublinCore
+          >>> IZopeDublinCore(obj).title
+          u'My title'
+        
+        Even if a dublin core property is a list property we can set and get the
+        property as scalar type:
+        
+          >>> obj.author = u'me'
+          >>> obj.author
+          u'me'
+        
+        DCListProperty acts on the list:
+        
+          >>> obj.authors
+          (u'me',)
+          >>> obj.authors = [u'I', u'others']
+          >>> obj.authors
+          (u'I', u'others')
+          >>> obj.author
+          u'I'
+        
+        
+        
+        ====================================
+        Dublin Core metadata as content data
+        ====================================
+        
+        Sometimes we want to include data in content objects which mirrors one
+        or more Dublin Core fields.  In these cases, we want the Dublin Core
+        structures to use the data in the content object rather than keeping a
+        separate value in the annotations typically used.  What fields we want
+        to do this with can vary, however, and we may not want the Dublin Core
+        APIs to constrain our choices of field names for our content objects.
+        
+        To deal with this, we can use speciallized adapter implementations
+        tailored to specific content objects.  To make this a bit easier,
+        there is a factory for such adapters.
+        
+        Let's take a look at the simplest case of this to start with.  We have
+        some content object with a `title` attribute that should mirror the
+        Dublin Core `title` field::
+        
+          >>> import zope.interface
+          >>> import zope.annotation.interfaces
+        
+          >>> class Content(object):
+          ...
+          ...     zope.interface.implements(
+          ...         zope.annotation.interfaces.IAttributeAnnotatable)
+          ...
+          ...     title = u""
+          ...     description = u""
+        
+        To avoid having a discrepency between the `title` attribute of our
+        content object and the equivalent Dublin Core field, we can provide a
+        specific adapter for our object::
+        
+          >>> from zope.dublincore import annotatableadapter
+        
+          >>> factory = annotatableadapter.partialAnnotatableAdapterFactory(
+          ...     ["title"])
+        
+        This creates an adapter factory that maps the Dublin Core `title`
+        field to the `title` attribute on instances of our `Content` class.
+        Multiple mappings may be specified by naming the additional fields in
+        the sequence passed to `partialAnnotatableAdapterFactory()`.  (We'll
+        see later how to use different attribute names for Dublin Core
+        fields.)
+        
+        Let's see what happens when we use the adapter.
+        
+        When using the adapter to retrieve a field set to use the content
+        object, the value stored on the content object is used::
+        
+          >>> content = Content()
+          >>> adapter = factory(content)
+        
+          >>> adapter.title
+          u''
+        
+          >>> content.title = u"New Title"
+          >>> adapter.title
+          u'New Title'
+        
+        If we set the relevant Dublin Core field using the adapter, the
+        content object is updated::
+        
+          >>> adapter.title = u"Adapted Title"
+          >>> content.title
+          u'Adapted Title'
+        
+        Dublin Core fields which are not specifically mapped to the content
+        object do not affect the content object::
+        
+          >>> adapter.description = u"Some long description."
+          >>> content.description
+          u''
+          >>> adapter.description
+          u'Some long description.'
+        
+        
+        Using arbitrary field names
+        ===========================
+        
+        We've seen the simple approach, allowing a Dublin Core field to be
+        stored on the content object using an attribute of the same name as
+        the DC field.  However, we may want to use a different name for some
+        reason.  The `partialAnnotatableAdapterFactory()` supports this as
+        well.
+        
+        If we call `partialAnnotatableAdapterFactory()` with a mapping instead
+        of a sequence, the mapping is used to map Dublin Core field names to
+        attribute names on the content object.
+        
+        Let's look at an example where we want the `abstract` attribute on the
+        content object to be used for the `description` Dublin Core field::
+        
+          >>> class Content(object):
+          ...
+          ...     zope.interface.implements(
+          ...         zope.annotation.interfaces.IAttributeAnnotatable)
+          ...
+          ...     abstract = u""
+        
+        We can create the adapter factory by passing a mapping to
+        `partialAnnotatableAdapterFactory()`::
+        
+          >>> factory = annotatableadapter.partialAnnotatableAdapterFactory(
+          ...     {"description": "abstract"})
+        
+        We can check the effects of the adapter as before::
+        
+          >>> content = Content()
+          >>> adapter = factory(content)
+        
+          >>> adapter.description
+          u''
+        
+          >>> content.abstract = u"What it's about."
+          >>> adapter.description
+          u"What it's about."
+        
+          >>> adapter.description = u"Change of plans."
+          >>> content.abstract
+          u'Change of plans.'
+        
+        
+        Limitations
+        ===========
+        
+        The current implementation has a number of limitations to be aware of;
+        hopefully these can be removed in the future.
+        
+        - Only simple string properties, like `title`, are supported.  This is
+          largely because other field types have not been given sufficient
+          thought.  Attempting to use this for other fields will cause a
+          `ValueError` to be raised by `partialAnnotatableAdapterFactory()`.
+        
+        - The CMF-like APIs are not supported in the generated adapters.  It
+          is not clear that these APIs are used, but content object
+          implementations should be aware of this limitation.
+        
+        
+        ===============
+        Time annotators
+        ===============
+        
+        Time annotators store the creation resp. last modification time of an object.
+        
+        Set up
+        ======
+        
+        >>> class Content(object):
+        ...     created = None
+        ...     modified = None
+        
+        The annotations are stored on the ``IZopeDublinCore`` adapter. This dummy adapter
+        reads and writes from/to the context object. 
+        
+        >>> import zope.component
+        >>> import zope.dublincore.interfaces
+        >>> class DummyDublinCore(object):
+        ...     def __init__(self, context):
+        ...         self.__dict__['context'] = context
+        ...
+        ...     def __getattr__(self, name):
+        ...         return getattr(self.context, name)
+        ...
+        ...     def __setattr__(self, name, value):
+        ...         setattr(self.context, name, value)
+        
+        >>> zope.component.provideAdapter(
+        ...     DummyDublinCore, (Content,), zope.dublincore.interfaces.IZopeDublinCore)
+        
+        Created annotator
+        =================
+        
+        The created annotator sets creation and modification time to current time.
+        
+        >>> content = Content()
+        
+        It is registered for the ``ObjectCreatedEvent``:
+        
+        >>> import zope.dublincore.timeannotators
+        >>> import zope.lifecycleevent.interfaces
+        >>> zope.component.provideHandler(
+        ...     zope.dublincore.timeannotators.CreatedAnnotator,
+        ...     (zope.lifecycleevent.interfaces.IObjectCreatedEvent,))
+        
+        >>> import zope.event
+        >>> import zope.lifecycleevent
+        >>> zope.event.notify(zope.lifecycleevent.ObjectCreatedEvent(content))
+        
+        Both ``created`` and ``modified`` get set:
+        
+        >>> content.created
+        datetime.datetime(<DATETIME>, tzinfo=<UTC>)
+        >>> content.modified
+        datetime.datetime(<DATETIME>, tzinfo=<UTC>)
+        
+        Modified annotator
+        ==================
+        
+        The modified annotator only sets the modification time to current time.
+        
+        >>> content = Content()
+        
+        It is registered for the ``ObjectModifiedEvent``:
+        
+        >>> zope.component.provideHandler(
+        ...     zope.dublincore.timeannotators.ModifiedAnnotator,
+        ...     (zope.lifecycleevent.interfaces.IObjectModifiedEvent,))
+        >>> zope.event.notify(zope.lifecycleevent.ObjectModifiedEvent(content))
+        
+        Only ``modified`` gets set:
+        
+        >>> print content.created
+        None
+        >>> content.modified
+        datetime.datetime(<DATETIME>, tzinfo=<UTC>)
+        
+        
+        
+        
+        
+        =======
+        Changes
+        =======
+        
+        
+        3.7.0 (2010-08-19)
+        ==================
+        
+        - Removed backward-compatibility shims for deprecated ``zope.app.dublincore.*``
+          permissions.
+        
+        - Removed include the zcml configuration of ``zope.dublincore.browser``.
+        
+        - Using python`s doctest instead of deprecated ``zope.testing.doctest``.
+        
+        
+        3.6.3 (2010-04-23)
+        ==================
+        
+        - Restored backward-compatible ``zope.app.dublincore.*`` permissions,
+          mapping them onto the new permissions using the ``<meta:redefinePermission>``
+          directive.  These shims will be removed in 3.7.0.
+        
+        - Added unit (not functional) test for loadability of ``configure.zcml``.
+        
+        
+        3.6.2 (2010-04-20)
+        ==================
+        
+        - Repaired regression introduced in 3.6.1:  the renamed permissions were
+          not updated in other ZCML files.
+        
+        
+        3.6.1 (2010-04-19)
+        ==================
+        
+        - Renamed the ``zope.app.dublincore.*`` permissions to
+          ``zope.dublincore.*``.  Applications may need to fix up grants based on the
+          old permissions.
+        
+        - Added tests for ``zope.dublincore.timeannotators``.
+        
+        - Added not declared dependency on ``zope.lifecycleevent``.
+        
+        
+        3.6.0 (2009-12-02)
+        ==================
+        
+        - Removed the marker interface IZopeDublinCoreAnnotatable which doesn't seem
+          to be used.
+        
+        - Made the registration of ZDCAnnotatableAdapter conditional, lifting the
+          dependency on zope.annotation and thereby the ZODB, leaving it as a test
+          dependency.
+        
+        
+        3.5.0 (2009-09-15)
+        ==================
+        
+        - Add missing dependencies.
+        
+        - Get rid of any testing dependencies beyond zope.testing.
+        
+        - Include browser ZCML configuration only if zope.browserpage is installed.
+        
+        - Specify i18n domain in package's ``configure.zcml``, because we use message
+          IDs for permission titles.
+        
+        - Remove unused imports, fix one test that was inactive because of being
+          overriden by another one by a mistake.
+        
+        
+        3.4.2 (2009-01-31)
+        ==================
+        
+        - Declare dependency on zope.datetime.
+        
+        
+        3.4.1 (2009-01-26)
+        ==================
+        
+        - Test dependencies are declared in a `test` extra now.
+        
+        - Fix: Make CreatorAnnotator not to fail if participation principal is None
+        
+        
+        3.4.0 (2007-09-28)
+        ==================
+        
+        No further changes since 3.4.0a1.
+        
+        
+        3.4.0a1 (2007-04-22)
+        ====================
+        
+        Initial release as a separate project, corresponds to zope.dublincore
+        from Zope 3.4.0a1
+        
+        
+        
+Platform: UNKNOWN

@@ -1,0 +1,12 @@
+setuptools
+zope.component
+zope.i18n
+zope.interface
+zope.publisher
+Unidecode
+
+[test]
+zope.browserresource
+zope.component [zcml]
+zope.configuration
+zope.testing

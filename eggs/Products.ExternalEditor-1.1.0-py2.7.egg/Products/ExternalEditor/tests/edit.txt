@@ -1,0 +1,325 @@
+Tests for the External Editor
+=============================
+
+  >>> from Acquisition import Implicit
+  >>> from AccessControl.SecurityManagement import getSecurityManager
+  >>> from Testing.ZopeTestCase import user_name, user_password
+  >>> from Products.ExternalEditor.ExternalEditor import registerCallback
+  >>> from Products.ExternalEditor.ExternalEditor import _callbacks
+
+  >>> self.login()
+  >>> self.setRoles(('Manager',))
+
+Create a OFS.File instance, see if it gets properly sent out by
+External Editor:
+
+  >>> self.folder.manage_addFile('some-file', file='some content')
+
+  >>> print http(r"""
+  ... GET /test_folder_1_/externalEdit_/some-file.zem HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name, user_password))
+  HTTP/1.1 200 OK
+  Content-Length: 167
+  Content-Type: application/x-zope-edit
+  Expires:...
+  Last-Modified:...
+  Pragma: no-cache
+  <BLANKLINE>
+  url:http://localhost/test_folder_1_/some-file
+  meta_type:File
+  title:
+  content_type:application/octet-stream
+  auth:...
+  cookie:
+  <BLANKLINE>
+  some content
+
+Lock the file, should now send out the lock-token in the metadata:
+
+  >>> self.folder['some-file'].wl_clearLocks()
+  >>> print http(r"""
+  ... LOCK /test_folder_1_/some-file HTTP/1.1
+  ... Content-Type: text/xml; charset="utf-8"
+  ... Depth: 0
+  ... Authorization: Basic %s:%s
+  ...
+  ... <?xml version="1.0" encoding="utf-8"?>
+  ... <DAV:lockinfo xmlns:DAV="DAV:">
+  ... <DAV:lockscope><DAV:exclusive/></DAV:lockscope>
+  ... <DAV:locktype><DAV:write/></DAV:locktype>
+  ... </DAV:lockinfo>""" % (user_name, user_password))
+  HTTP/1.1 200 OK
+  ...
+  Lock-Token: ...
+
+  >>> print http(r"""
+  ... GET /test_folder_1_/externalEdit_/some-file HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name, user_password))
+  HTTP/1.1 200 OK
+  Content-Length: ...
+  Content-Type: application/x-zope-edit
+  Expires:...
+  Last-Modified:...
+  Pragma: no-cache
+  <BLANKLINE>
+  url:http://localhost/test_folder_1_/some-file
+  meta_type:File
+  title:
+  content_type:application/octet-stream
+  auth:...
+  cookie:
+  lock-token:...
+  <BLANKLINE>
+  some content
+
+If 'borrow_lock' is found in the request, then a 'borrow_lock:1' is
+appended to the metadata along with the lock-token:
+
+  >>> print http(r"""
+  ... GET /test_folder_1_/externalEdit_/some-file?borrow_lock=1 HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name, user_password))
+  HTTP/1.1 200 OK
+  Content-Length: ...
+  Content-Type: application/x-zope-edit
+  Expires:...
+  Last-Modified:...
+  Pragma: no-cache  
+  <BLANKLINE>
+  url:http://localhost/test_folder_1_/some-file
+  meta_type:File
+  title:
+  content_type:application/octet-stream
+  auth:...
+  cookie:
+  lock-token:...
+  borrow_lock:1
+  <BLANKLINE>
+  some content
+
+If 'skip_data' is found in the request, then the file data is **not**
+appended after the metadata:
+
+  >>> print http(r"""
+  ... GET /test_folder_1_/externalEdit_/some-file?skip_data=1 HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name, user_password))
+  HTTP/1.1 200 OK
+  Content-Length: ...
+  Content-Type: application/x-zope-edit
+  Expires:...
+  Last-Modified:...
+  Pragma: no-cache  
+  <BLANKLINE>
+  url:http://localhost/test_folder_1_/some-file
+  meta_type:File
+  title:
+  content_type:application/octet-stream
+  auth:...
+  cookie:
+  lock-token:...
+  <BLANKLINE>
+
+A user that is not the lock owner will not get the 'lock-token' or
+'borrow_lock':
+
+  >>> user_name_2 = 'test_user_2_'
+  >>> user_password_2 = 'frob'
+
+  >>> uf = self.folder.acl_users
+  >>> uf.userFolderAddUser(user_name_2, user_password_2, ['Manager'], [])
+
+  >>> print http(r"""
+  ... GET /test_folder_1_/externalEdit_/some-file?borrow_lock=1 HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name_2, user_password_2))
+  HTTP/1.1 200 OK
+  Content-Length: 163
+  Content-Type: application/x-zope-edit
+  Expires:...
+  Last-Modified:...
+  Pragma: no-cache  
+  <BLANKLINE>
+  url:http://localhost/test_folder_1_/some-file
+  meta_type:File
+  title:
+  content_type:application/octet-stream
+  auth:...
+  cookie:
+  <BLANKLINE>
+  some content
+
+Clear the locks:
+
+  >>> self.folder['some-file'].wl_clearLocks()
+
+
+Create a class that has a 'manage_FTPget' method with
+side-effects. Make sure that the content-type header is properly set
+to 'application/x-zope-edit':
+
+  >>> from Products.ExternalEditor.tests.test_functional import SideEffects
+  >>> _ = self.folder._setObject('another-file', SideEffects('another-file', 'some content'))
+
+  >>> print http(r"""
+  ... GET /test_folder_1_/externalEdit_/another-file HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name, user_password))
+  HTTP/1.1 200 OK
+  Content-Length: 140
+  Content-Type: application/x-zope-edit
+  Expires:...
+  Last-Modified:...
+  Pragma: no-cache  
+  <BLANKLINE>
+  url:http://localhost/test_folder_1_/another-file
+  meta_type:Side Effects
+  title:
+  auth:...
+  cookie:
+  <BLANKLINE>
+  some content
+
+
+Callback Registry
+=================
+
+There is a callback registry that can be used to modify the metadata
+that is sent out:
+
+  >>> def md_callback(ob, md, req, resp):
+  ...     md.append('x-my-custom-metadata:42')
+
+  >>> old_cb = _callbacks[:]
+  >>> registerCallback(md_callback)
+
+  >>> print http(r"""
+  ... GET /test_folder_1_/externalEdit_/some-file?borrow_lock=1 HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name, user_password))
+  HTTP/1.1 200 OK
+  Content-Length: 191
+  Content-Type: application/x-zope-edit
+  Expires:...
+  Last-Modified:...
+  Pragma: no-cache  
+  <BLANKLINE>
+  url:http://localhost/test_folder_1_/some-file
+  meta_type:File
+  title:
+  content_type:application/octet-stream
+  auth:...
+  cookie:
+  x-my-custom-metadata:42
+  <BLANKLINE>
+  some content
+
+  >>> _callbacks[:] = old_cb
+
+The same callback registry can also be used to set a value in the
+REQUEST, for example the 'skip_data' parameter:
+
+  >>> def req_callback(ob, md, req, resp):
+  ...     req.other['skip_data'] = '1'
+
+  >>> old_cb = _callbacks[:]
+  >>> registerCallback(req_callback)
+
+  >>> print http(r"""
+  ... GET /test_folder_1_/externalEdit_/some-file HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name, user_password))
+  HTTP/1.1 200 OK
+  Content-Length: 155
+  Content-Type: application/x-zope-edit
+  Expires:...
+  Last-Modified:...
+  Pragma: no-cache  
+  <BLANKLINE>
+  url:http://localhost/test_folder_1_/some-file
+  meta_type:File
+  title:
+  content_type:application/octet-stream
+  auth:...
+  cookie:
+  <BLANKLINE>
+
+  >>> _callbacks[:] = old_cb
+
+Or, if the client supports gzip compression, enabling compression in
+the RESPONSE:
+
+  >>> def resp_callback(ob, md, req, resp):
+  ...     resp.enableHTTPCompression(force=1)
+
+  >>> old_cb = _callbacks[:]
+  >>> registerCallback(resp_callback)
+
+  >>> print http(r"""
+  ... GET /test_folder_1_/externalEdit_/some-file HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name, user_password))
+  HTTP/1.1 200 OK
+  Content-Encoding: gzip
+  Content-Length: 159
+  Content-Type: application/x-zope-edit
+  Expires:...
+  Last-Modified:...
+  Pragma:...
+
+  >>> _callbacks[:] = old_cb
+  
+  
+MSIE cache behaviour
+====================
+
+We set the user agent at `MSIE` and look at the cache headers.
+
+  >>> print http(r"""
+  ... GET /test_folder_1_/externalEdit_/some-file.zem HTTP/1.1
+  ... User-Agent: MSIE
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name, user_password))
+  HTTP/1.1 200 OK
+  Cache-Control: must-revalidate, post-check=0, pre-check=0
+  Content-Length: 167
+  Content-Type: application/x-zope-edit
+  Expires:...
+  Last-Modified:...
+  Pragma: public
+  <BLANKLINE>
+  url:http://localhost/test_folder_1_/some-file
+  meta_type:File
+  title:
+  content_type:application/octet-stream
+  auth:...
+  cookie:
+  <BLANKLINE>
+  some content
+
+Because we also are IE 1.0 compliant, we try with `Microsoft Internet Explorer'
+Cheers JNUT !! ;)
+
+  >>> print http(r"""
+  ... GET /test_folder_1_/externalEdit_/some-file.zem HTTP/1.1
+  ... User-Agent: Microsoft Internet Explorer
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name, user_password))
+  HTTP/1.1 200 OK
+  Cache-Control: must-revalidate, post-check=0, pre-check=0
+  Content-Length: 167
+  Content-Type: application/x-zope-edit
+  Expires:...
+  Last-Modified:...
+  Pragma: public
+  <BLANKLINE>
+  url:http://localhost/test_folder_1_/some-file
+  meta_type:File
+  title:
+  content_type:application/octet-stream
+  auth:...
+  cookie:
+  <BLANKLINE>
+  some content

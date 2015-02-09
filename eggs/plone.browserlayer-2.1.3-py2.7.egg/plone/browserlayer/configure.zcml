@@ -1,0 +1,31 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone.browserlayer">
+
+    <genericsetup:importStep
+        name="browserlayer"
+        title="Package browser layers"
+        description="Enables use of skin layers for installed products."
+        handler="plone.browserlayer.exportimport.importLayers">
+        <depends name="componentregistry" />
+    </genericsetup:importStep>
+
+    <genericsetup:exportStep
+        name="browserlayer"
+        title="Package browser layers"
+        description="Export package browser layers"
+        handler="plone.browserlayer.exportimport.exportLayers"
+        />
+
+    <subscriber
+        for="Products.CMFCore.interfaces.ISiteRoot
+             zope.traversing.interfaces.IBeforeTraverseEvent"
+        handler=".layer.mark_layer"
+        />
+
+    <adapter
+        factory=".exportimport.BrowserLayerXMLAdapter"
+        name="plone.browserlayer" />
+
+</configure>

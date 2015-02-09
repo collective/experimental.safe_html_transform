@@ -1,0 +1,114 @@
+Metadata-Version: 1.1
+Name: zope.lifecycleevent
+Version: 3.6.2
+Summary: Object life-cycle events
+Home-page: http://pypi.python.org/pypi/zope.lifecycleevent
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: =================
+        Life-cycle events
+        =================
+        
+        In Zope, events are used by components to inform each other about
+        relevant new objects and object modifications.
+        
+        To keep all subscribers up to date it is indispensable that the life
+        cycle of an object is accompanied by various events.
+        
+            >>> from zope.event import notify
+            >>> from zope.lifecycleevent import ObjectCreatedEvent, ObjectModifiedEvent
+        
+            >>> class Sample(object) :
+            ...    "Test class"
+        
+            >>> obj = Sample()
+            >>> notify(ObjectCreatedEvent(obj))
+            
+            >>> obj.modified = True
+            >>> notify(ObjectModifiedEvent(obj))
+        
+        Some event consumers like catalogs and caches may need more information to
+        update themselves in an efficient manner. The necessary information can be
+        provided as optional modification descriptions of the ObjectModifiedEvent.
+        
+        Some examples:
+        
+            >>> from zope.interface import Interface, Attribute, implements
+            >>> class IFile(Interface):
+            ...     data = Attribute("Data")
+            ... 
+        
+            >>> class File(object):
+            ...     implements(IFile)
+            ...
+        
+            >>> file = File()
+            >>> file.data = "123"
+            >>> notify(ObjectModifiedEvent(obj, IFile))
+        
+        This says that we modified something via IFile. Note that an interface is an
+        acceptable description. In fact, we might allow pretty much anything as a
+        description and it depends on your needs what kind of descriptions you use.
+        
+        
+        =======
+        CHANGES
+        =======
+        
+        3.6.2 (2010-09-25)
+        ------------------
+        
+        - Added not declared, but needed test dependency on `zope.component [test]`.
+        
+        3.6.1 (2010-04-30)
+        ------------------
+        
+        - Removed dependency on undeclared zope.testing.doctest.
+        
+        3.6.0 (2009-12-29)
+        ------------------
+        
+        - Refactor tests to loose zope.annotation and zope.dublincore as dependencies.
+        
+        3.5.2 (2009-05-17)
+        ------------------
+        
+        - ``IObjectMovedEvent``, ``IObjectAddedEvent``,
+          ``IObjectRemovedEvent`` interfaces and ``ObjectMovedEvent``,
+          ``ObjectAddedEvent`` and ``ObjectRemovedEvent`` classes copied here
+          from zope.container (plus tests).  The intent is to allow packages
+          that rely on these interfaces or the event classes to rely on
+          zope.lifecycleevent (which has few dependencies) instead of
+          zope.container (which has many).
+        
+        3.5.1 (2009-03-09)
+        ------------------
+        
+        - Remove deprecated code and thus remove dependency on zope.deferredimport.
+        
+        - Change package's mailing list address to zope-dev at zope.org, as
+          zope3-dev at zope.org is now retired.
+        
+        - Update package's description and documentation.
+        
+        3.5.0 (2009-01-31)
+        ------------------
+        
+        - Remove old module declarations from classes.
+        
+        - Use zope.container instead of zope.app.container.
+        
+        3.4.0 (2007-09-01)
+        ------------------
+        
+        Initial release as an independent package
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Software Development

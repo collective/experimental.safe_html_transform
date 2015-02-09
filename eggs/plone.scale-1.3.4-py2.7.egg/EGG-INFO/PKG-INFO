@@ -1,0 +1,210 @@
+Metadata-Version: 1.1
+Name: plone.scale
+Version: 1.3.4
+Summary: Image scaling
+Home-page: http://pypi.python.org/pypi/plone.scale
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: BSD
+Description: Introduction
+        ============
+        
+        This package contains image scaling logic for use in Zope environments. It
+        supports Zope 2, grok and other systems build on using the Zope ToolKit (ZTK).
+        
+        Several design goals were used when writing this package:
+        
+        - image scaling to any width, height, width&height should be supported
+          using both up-scaling and down-scaling. Scaling parameters should never
+          be fixed in code. This allows designers to use any image scale they want
+          without having to modify python code.
+        
+        - the result of scaling will be an image along with its new size, not a
+          HTML or XHTML tag. We already have excellent tools to generate tags in
+          the form of Zope Pagetemplates, Genshi and other template languages that
+          are much better suited for this purpose.
+        
+        In addition several implementation goals were defined:
+        
+        - image scaling must happen on demand instead of up-front. This reduces
+          initial save time and prevents unnecessary scalings from being generated.
+        
+        - image scaling parameters should not be part of the generated URL. Since
+          the number of parameters can change and new parameters may be added in
+          the future this would create overly complex URLs and URL parsing.
+        
+        - no HTML rewriting (such as done by `repoze.bitblt`_) should be required.
+        
+        - it should be possibly to develop an external storage system which stores
+          scaled images externally and returns a URL which bypasses the application
+          server. This should be configurable via just a filesystem path & base
+          URL.
+        
+        - minimum number of external dependencies, allowing this package to be
+          used in many environments.
+        
+        - testable without requiring zope.testing. Running `setup.py test` should
+          be sufficient.
+        
+        - URLs for scaled images should have an extension which reflects their
+          MIME type. This is facilitates cache (and other front-end services)
+          configuration.
+        
+        .. _repoze.bitblt: http://pypi.python.org/pypi/repoze.bitblt
+        
+        
+        Usage
+        =====
+        
+        The most common way to use *plone.scale* is from a HTML template.
+        In TAL syntax a typical usage looks like this::
+        
+          <img tal:define="scales context/@@image-scaling;
+                           thumbnail python:scales.scale('logo', width=64, height=64)"
+               tal:attributes="src thumbnail/url;
+                               width thumbnail/width;
+                               height thumbnail/height" />
+        
+        This generates a thumbnail of an image field called *logo* with a maximum size
+        of 64x64 pixels. The dimensions of the resulting image (which might not be
+        exactly 64x64) are set as attributes on the ``img`` tag to speed up browser
+        rendering.
+        
+        If you prefer Genshi syntax and have the ``IImageScaleStorage`` interface
+        in scope the syntax looks like this::
+        
+          <img py:with="thumbnail=IImageScaleStorage(context).scale('logo', width=64, heigh=64)"
+               py:attributes="dict(src=thumbnail.url, width=thumbnail.width, height=thumbnail.height" />
+        
+        
+        Changelog
+        =========
+        
+        
+        1.3.4 (2014-09-07)
+        ------------------
+        
+        - When a scale is outdated, discard all image scales that are more
+          than a day older than the context.
+          Refs https://dev.plone.org/ticket/13791
+          [maurits]
+        
+        - Make sure deleting items or clearing a complete storage works.
+          Deleting one item would often delete a linked second item, which
+          made it hard to remove several items at once.
+          [maurits]
+        
+        
+        1.3.3 (2014-01-27)
+        ------------------
+        
+        - Discard old image scales if item was modified.
+          Refs https://dev.plone.org/ticket/13791
+          [gforcada]
+        
+        - Generate Progressive JPEG.
+          [kroman0]
+        
+        
+        1.3.2 (2013-05-23)
+        ------------------
+        
+        - Added a marker interface for scaled image quality.
+          Refs http://dev.plone.org/plone/ticket/13337
+          [khink]
+        
+        
+        1.3.1 (2013-04-06)
+        ------------------
+        
+        - Cropped images are now centralised vertically as well as horizontally [mattss]
+        
+        
+        1.3 (2013-01-17)
+        ----------------
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        - Break up `scaleImage`, so that its scaling-related parts can be applied
+          to instances of `PIL.Image` for further processing.
+          [witsch]
+        
+        
+        1.2.2 - 2010-09-28
+        ------------------
+        
+        - Re-release to fix bad egg created for 1.2.1.
+          Refs http://dev.plone.org/plone/ticket/11154
+          [witsch]
+        
+        
+        1.2.1 - 2010-08-18
+        ------------------
+        
+        - Convert CMYK to RGB, allowing for web previews of print images.
+          [tomster]
+        
+        
+        1.2 - 2010-07-18
+        ----------------
+        
+        - Update package metadata.
+          [hannosch]
+        
+        
+        1.1 - 2010-04-20
+        ----------------
+        
+        - Abort if thumbnail behaviour is requested but either width or height is
+          missing. This is nicer than confronting the caller with a PIL exception.
+          [wichert]
+        
+        - Rename the `keep` direction to `thumbnail` to make its behaviour more
+          intuitive, but accept `keep` for now.
+          [wichert]
+        
+        
+        1.0 - 2010-04-12
+        ----------------
+        
+        - Only pull in the uuid distribution in Python versions before 2.5.
+          [hannosch]
+        
+        - Don't declare dependency on PIL.
+          [davisagli]
+        
+        
+        1.0a2 - 2010-04-10
+        ------------------
+        
+        - Add BSD license text following board decision:
+          http://lists.plone.org/pipermail/membership/2009-August/001038.html
+          [elro]
+        
+        - Allow to use PIL's thumbnail algorithm to keep the present aspect ratio.
+          [spamsch, witsch]
+        
+        - Allow to set the quality of the resulting image scales.
+          [witsch]
+        
+        - Refactor storage adapter for image scales to be less dependent on the
+          underlying content type.
+          [witsch]
+        
+        
+        1.0a1 - 2009-11-10
+        ------------------
+        
+        - Initial release
+          [wichert]
+        
+Keywords: image scaling
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

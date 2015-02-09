@@ -1,0 +1,15 @@
+setuptools
+pytz
+zope.schema
+zope.i18nmessageid
+zope.component
+
+[compile]
+python-gettext
+
+[test]
+zope.testing
+
+[zcml]
+zope.component [zcml]
+zope.configuration

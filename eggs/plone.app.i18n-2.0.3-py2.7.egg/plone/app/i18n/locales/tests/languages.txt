@@ -1,0 +1,51 @@
+Language tests
+--------------
+
+  >>> from plone.app.i18n.locales.interfaces import IContentLanguages
+  >>> from plone.app.i18n.locales.interfaces import IMetadataLanguages
+  >>> from zope.component import queryUtility
+
+  >>> util = queryUtility(IContentLanguages)
+  >>> util
+  <ContentLanguages at ...>
+
+  >>> languagecodes = util.getAvailableLanguages()
+  >>> len(languagecodes)
+  1
+
+  >>> u'en' in languagecodes
+  True
+
+  >>> id(languagecodes) == id(util.languages)
+  False
+
+  >>> old = util.getAvailableLanguages()
+  >>> util.setAvailableLanguages((u'en', u'de'))
+  >>> util.getAvailableLanguages()
+  [u'en', u'de']
+
+  >>> util.setAvailableLanguages(old)
+
+  >>> old = util.combined
+  >>> combined = ['de-de']
+  >>> util.setAvailableLanguages(combined, combined=True)
+  >>> languagecodes = util.getAvailableLanguages(combined=True)
+  >>> len(languagecodes)
+  2
+
+  >>> id(combined) == id(util.combined)
+  False
+
+  >>> util.setAvailableLanguages(old, combined=True)
+
+
+  >>> util = queryUtility(IMetadataLanguages)
+  >>> util
+  <MetadataLanguages at ...>
+
+  >>> languagecodes = util.getAvailableLanguages()
+  >>> len(languagecodes)
+  1
+
+  >>> u'en' in languagecodes
+  True

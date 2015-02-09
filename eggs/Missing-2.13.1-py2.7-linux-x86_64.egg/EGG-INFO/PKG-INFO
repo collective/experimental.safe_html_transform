@@ -1,0 +1,27 @@
+Metadata-Version: 1.0
+Name: Missing
+Version: 2.13.1
+Summary: Special Missing objects used in Zope2.
+Home-page: http://pypi.python.org/pypi/Missing
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        Missing provides special objects used in some Zope2 internals like the ZCatalog.
+        
+        Changelog
+        =========
+        
+        2.13.1 (2010-06-16)
+        -------------------
+        
+        - Added a ``__class__`` to Missing.Value objects.
+        
+        2.13.0 (2010-03-30)
+        -------------------
+        
+        - Released as separate package.
+        
+Platform: UNKNOWN

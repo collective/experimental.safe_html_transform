@@ -1,0 +1,8 @@
+flake8
+setuptools
+zc.buildout
+zc.recipe.egg
+
+[test]
+zc.buildout [test]
+zope.testing

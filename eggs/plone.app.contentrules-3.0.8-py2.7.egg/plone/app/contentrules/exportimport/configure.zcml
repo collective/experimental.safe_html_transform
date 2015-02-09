@@ -1,0 +1,33 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone">
+
+    <adapter
+        factory=".rules.RulesXMLAdapter"
+        name="plone.contentrules"
+        />
+
+    <adapter
+        factory=".rules.PropertyRuleElementExportImportHandler"
+        />
+
+    <!-- Register import and export steps -->
+    <genericsetup:importStep
+        name="contentrules"
+        title="Content rules"
+        description="Import content rule definitions and assignments"
+        handler=".rules.importRules">
+        <depends name="componentregistry"/>
+        <depends name="content"/>
+        <depends name="workflow"/>
+    </genericsetup:importStep>
+
+    <genericsetup:exportStep
+        name="contentrules"
+        title="Content rules"
+        description="Export content rule definitions and assignments"
+        handler=".rules.exportRules"
+        />
+
+</configure>

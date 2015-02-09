@@ -1,0 +1,45 @@
+<configure
+    xmlns="http://namespaces.zope.org/browser"
+    xmlns:zope="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="atreferencebrowserwidget">
+
+  <!-- pages and views -->
+  <page
+      name="refbrowserhelper"
+      permission="zope2.Public"
+      for="Products.Archetypes.interfaces.IReferenceable"
+      allowed_interface="..interfaces.IReferenceBrowserHelperView"
+      class=".view.ReferenceBrowserHelperView"
+      />
+
+  <page
+      name="refbrowserhelper"
+      permission="zope2.Public"
+      for="Products.ATContentTypes.interface.IATTopicCriterion"
+      allowed_interface="..interfaces.IReferenceBrowserHelperView"
+      class=".view.ReferenceBrowserHelperView"
+      />
+
+  <page
+      name="refbrowser_popup"
+      permission="zope2.Public"
+      for="*"
+      class=".view.ReferenceBrowserPopup"
+      />
+
+  <page
+      name="refbrowser_querycatalog"
+      permission="zope2.Public"
+      for="*"
+      class=".view.QueryCatalogView"
+      />
+
+  <zope:adapter
+      for="Products.Five.BrowserView"
+      factory=".view.default_popup_template"
+      name="popup"
+      provides="zope.formlib.namedtemplate.INamedTemplate"
+      />
+
+</configure>

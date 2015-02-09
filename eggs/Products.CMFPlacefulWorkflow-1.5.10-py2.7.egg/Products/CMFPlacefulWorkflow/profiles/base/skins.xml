@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<object name="portal_skins">
+
+ <object name="CMFPlacefulWorkflow"
+         meta_type="Filesystem Directory View"
+         directory="Products.CMFPlacefulWorkflow:skins/CMFPlacefulWorkflow"/>
+
+ <skin-path name="*">
+  <layer insert-after="custom"
+         name="CMFPlacefulWorkflow"/>
+ </skin-path>
+
+</object>

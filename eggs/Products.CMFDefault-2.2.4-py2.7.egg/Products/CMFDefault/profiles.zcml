@@ -1,0 +1,45 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="cmf_default">
+
+  <genericsetup:registerProfile
+      name="default"
+      title="CMFDefault Site"
+      description="Profile for a default CMFSite."
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      />
+
+  <genericsetup:registerProfile
+      name="views_support"
+      title="Experimental CMFDefault Browser Views"
+      description="Hooks up the browser views."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      />
+
+  <genericsetup:registerProfile
+      name="sample_content"
+      title="Sample CMFDefault Content"
+      description="Content for a sample CMFSite."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      />
+
+  <genericsetup:registerProfile
+      name="ursa"
+      title="CMF 'Bare' skin"
+      description="Provide skin w/ stripped-down main template."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      />
+
+  <genericsetup:registerProfile
+      name="were"
+      title="CMF 'Bare' / hybrid skin"
+      description="Use stripped-down globals in regular main template."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      />
+
+</configure>

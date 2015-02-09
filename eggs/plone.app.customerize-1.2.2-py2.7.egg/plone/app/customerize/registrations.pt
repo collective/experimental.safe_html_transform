@@ -1,0 +1,51 @@
+<h1 tal:replace="structure context/manage_page_header" />
+<h1 tal:replace="structure context/manage_tabs" />
+
+<style type="text/css">
+  dl {
+    font-family: Verdana, Helvetica, sans-serif;
+    font-size: 10pt;
+    margin-left: 1em;
+  }
+  dd {
+    margin-bottom: 1em;
+  }
+  dd span.type {
+    color: #999;
+  }
+  .customized {
+    background-color: yellow;
+  }
+</style>
+
+<div>
+  <p> The following list shows all registered (template-based) views
+  sorted by interface.  Click one of the links to see the contents
+  of the view template and possibly customize it.  Views that already
+  have been customized are <span class="customized">highlighted like
+  this</span>.</p>
+</div>
+
+<dl>
+  <tal:iface repeat="iface python:view.getTemplateViewRegistrations(mangle=False)">
+    <dt tal:content="iface/name" />
+    <dd>
+      <tal:reg repeat="info iface/views">
+        <a href="" class="customized"
+           tal:condition="info/customized"
+           tal:attributes="href string:${info/customized}/manage_main;"
+           tal:content="info/viewname">
+        </a>
+        <a href=""
+           tal:condition="not: info/customized"
+           tal:attributes="href info/customize_url;
+                           title info/zptfile;"
+           tal:content="info/viewname">
+        </a>
+        <span tal:content="string:(${info/type})" class="type" /> <br />
+      </tal:reg>
+    </dd>
+  </tal:iface>
+</dl>
+
+<h1 tal:replace="structure context/manage_page_footer" />

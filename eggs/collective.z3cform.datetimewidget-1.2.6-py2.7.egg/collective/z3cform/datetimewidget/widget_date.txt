@@ -1,0 +1,143 @@
+====
+Date
+====
+
+All necessary components are set up in the testclass to make sure that
+we test the real configuration. Let's render the widgets in different
+modes and try to extract the value form an request.
+
+  >>> import datetime
+  >>> import z3c.form
+  >>> import zope.schema
+
+  >>> field = zope.schema.Date(default=datetime.date(2007, 4, 1))
+  >>> widget = self.setupWidget(field)
+  >>> widget.update()
+  >>> widget.extract() is z3c.form.interfaces.NOVALUE
+  True
+
+
+INPUT_MODE
+----------
+
+  >>> widget.mode == z3c.form.interfaces.INPUT_MODE
+  True
+  >>> print widget.render()
+  <input type="text" id="foo-day" name="bar-day"
+         class="date-widget required date-field" size="2"
+         maxlength="2" value="1" /> /
+  <select id="foo-month" name="bar-month"
+          class="date-widget required date-field">
+      <option value="1">January</option>
+      <option value="2">February</option>
+      <option value="3">March</option>
+      <option value="4" selected="selected">April</option>
+      <option value="5">May</option>
+      <option value="6">June</option>
+      <option value="7">July</option>
+      <option value="8">August</option>
+      <option value="9">September</option>
+      <option value="10">October</option>
+      <option value="11">November</option>
+      <option value="12">December</option>
+  </select> /
+  <input type="text" id="foo-year" name="bar-year"
+         class="date-widget required date-field" alt=""
+         accesskey="" size="4" maxlength="4" value="2007" />
+  <input name="bar-empty-marker" type="hidden" value="1" />
+
+  >>> widget.request = self.testrequest(
+  ...     form={'bar-day': '1',
+  ...           'bar-month': '4',
+  ...           'bar-year': '2007',
+  ...           'bar-empty-marker': '1'}
+  ...     )
+  >>> widget.extract()
+  ('2007', '4', '1')
+
+
+DISPLAY_MODE
+------------
+
+  >>> widget.mode = z3c.form.interfaces.DISPLAY_MODE
+  >>> print widget.render()
+  <span id="foo" class="date-widget required date-field">4/1/07</span>
+
+
+HIDDEN_MODE
+-----------
+
+  >>> widget.mode = z3c.form.interfaces.HIDDEN_MODE
+  >>> print widget.render()
+  <input type="hidden" id="foo" name="bar"
+           class="hidden-widget" value="4/1/07" />
+  >>> widget.request = self.testrequest(
+  ...     form={'bar': '4/1/07'}
+  ...     )
+  >>> widget.extract()
+  ('2007', '4', '1')
+
+
+INPUT_MODE and show_today_link
+------------------------------
+
+now lets enable show_today_link option to provide plain javascript for
+inserting current date into the fields.
+
+  >>> widget.mode = z3c.form.interfaces.INPUT_MODE
+  >>> widget.show_today_link = True
+  >>> print widget.render()
+  <input type="text" id="foo-day" name="bar-day"
+         class="date-widget required date-field" size="2"
+         maxlength="2" value="1" /> /
+  <select id="foo-month" name="bar-month"
+          class="date-widget required date-field">
+      <option value="1">January</option>
+      <option value="2">February</option>
+      <option value="3">March</option>
+      <option value="4" selected="selected">April</option>
+      <option value="5">May</option>
+      <option value="6">June</option>
+      <option value="7">July</option>
+      <option value="8">August</option>
+      <option value="9">September</option>
+      <option value="10">October</option>
+      <option value="11">November</option>
+      <option value="12">December</option>
+  </select> /
+  <input type="text" id="foo-year" name="bar-year"
+         class="date-widget required date-field" alt=""
+         accesskey="" size="4" maxlength="4" value="2007" />
+  <input name="bar-empty-marker" type="hidden" value="1" />
+  <BLANKLINE>
+  <BLANKLINE>
+  <BLANKLINE>
+  <a href="#" onclick="document.getElementById('foo-day').value = ...;document.getElementById('foo-month').value = ...;document.getElementById('foo-year').value = ...;return false;">Today</a>
+
+
+Translations
+------------
+
+check if translations are working
+
+  >>> widget = self.setupWidget(field, lang='sl')
+  >>> widget.update()
+  >>> widget.show_today_link = True
+  >>> print widget.render()
+  <input... 
+  ...
+      <option ...>januar</option>
+      <option ...>februar</option>
+      <option ...>marec</option>
+      <option ...>april</option>
+      <option ...>maj</option>
+      <option ...>junij</option>
+      <option ...>julij</option>
+      <option ...>avgust</option>
+      <option ...>september</option>
+      <option ...>oktober</option>
+      <option ...>november</option>
+      <option ...>december</option>
+  ...
+  <a ...>Danes</a>
+

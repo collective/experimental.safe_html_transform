@@ -1,0 +1,5 @@
+setuptools
+plone.keyring > 1.0
+zope.component
+zope.interface
+Zope2

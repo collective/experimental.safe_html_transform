@@ -1,0 +1,11 @@
+Acquisition
+ZODB3
+setuptools
+zope.component
+zope.event
+zope.interface
+zope.location
+zope.lifecycleevent
+zope.site
+zope.testing
+Zope2 >= 2.12.0

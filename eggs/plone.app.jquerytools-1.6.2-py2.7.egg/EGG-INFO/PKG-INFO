@@ -1,0 +1,909 @@
+Metadata-Version: 1.1
+Name: plone.app.jquerytools
+Version: 1.6.2
+Summary: jQuery Tools integration for Plone plus overlay and AJAX form helpers.
+Home-page: http://pypi.python.org/pypi/plone.app.jquerytools
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: Introduction
+        ============
+        
+        plone.app.jquerytools adds `jquery.tools`_ and some related
+        overlay and form-handling JavaScript libraries to Plone.
+        
+        ``plone.app.jquerytools`` was developed for Plone 4. Earlier versions could
+        be used in Plone 3.x by adding a zcml slug and running its
+        GS Setup extension profile. This version requires Plone 4.x.
+        
+        Plone developers will wish to use ``plone.app.jquerytools`` to provide DOM
+        popups, particularly if they require AJAX. There is extensive support
+        for AJAX form posting. It's also useful for adding dateinput and forminput
+        widgets that are HTML5 compatible.
+        
+        The AJAX and AJAX-form support is Plone-specific, and is documented in this module.
+        Dateinput, rangeinput, accordions, and tooltips are all unchanged from
+        jquerytools, and the jquerytools docs should be consulted.
+        
+        .. contents::
+        
+        
+        Development
+        ===========
+        
+        Since version 2.0 we use a Grunt based build system. To update the package, you
+        have to setup Grunt like descibed below (this works on Linux). You need ``npm``
+        and ``git`` installed.
+        
+        If grunt-cli isn't installed, do::
+        
+            $ sudo npm install -g grunt-cli
+        
+        Then install the rest locally::
+        
+            $ npm install
+        
+        For more information see: http://gruntjs.com/getting-started
+        
+        
+        Available resources
+        ===================
+        
+        `jquery.tools`_ plugins and widgets are packed into Zope browser resources:
+        
+        ``++resource++plone.app.jquerytools.js``
+            Default plugins and widgets used by plone. This resource is enabled
+            by default with ``plone.app.jquerytools:default`` profile.
+        
+            Included scripts: `overlay.js`_, `scrollable.js`_, `tabs.js`_,
+            `toolbox.history.js`_, `toolbox.expose.js`_, `tooltip.js`_
+        
+        ``++resource++plone.app.jquerytools.plugins.js``
+            Additional plugin and widgets which does not take much space and for
+            this reason are packed together. This plugins are not enabled by
+            default.
+        
+            Included scripts: `overlay.apple.js`_, `scrollable.autoscroll.js`_,
+            `scrollable.navigator.js`_, `tabs.slideshow.js`_, `toolbox.flashembed.js`_,
+            `toolbox.mousewheel.js`_, `tooltip.dynamic.js`_, `tooltip.slide.js`_
+        
+        ``++resource++plone.app.jquerytools.dateinput.js`` ``++resource++plone.app.jquerytools.dateinput.css``
+            `jquerytools dateinput`_ widget with style from `first demo`_. Both
+            scripts are added to portal_javascript and portal_css but disabled by
+            default.
+        
+        ``++resource++plone.app.jquerytools.rangeinput.js``
+            `jquerytools rangeinput`_ widget. Added to portal_javascript tool, but
+            disabled by default.
+        
+        ``++resource++plone.app.jquerytools.validator.js``
+            `jquerytools validator`_ script, which should help you with nice
+            validation of your forms. Added to portal_javascript tool, but
+            disabled byt default.
+        
+        ``++resource++plone.app.jquerytools.form.js``
+            Integrates the `jquery form plugin`_ to add support for AJAX form
+             handling. More about this below.
+        
+        ``++resource++plone.app.jquerytools.overlayhelpers.js``
+            not yet minimized) and ``++resource++plone.app.jquerytools.overlays.css``
+            (Size: 1.9KB, not yet minimized)
+        
+            Adds helper code for loading overlays dynamically and for handling AJAX
+            forms based on existing pages with minimal setup. More about this in
+            instructions below.
+        
+        JS resources are minified, but uncompressed versions are available in
+        plone/app/jquerytools/browser for reading/debugging purposes. To use them
+        for debugging, edit plone/app/jquerytools/configure.zcml to temporarily
+        specify files ending with .js rather than .min.js.
+        
+        
+        Overlay helpers
+        ===============
+        
+        plone.app.jquerytools provides a helper for handling various kinds of dynamic
+        overlays, including overlays with forms you wish handled by AJAX.
+        
+        The helper, jQuery.fn.prepOverlay, is a jQuery-style function: it should be
+        used as a method of a jQuery selection object. The selection object is always
+        a selection of trigger elements.
+        
+        prepOverlay should be passed one parameter: a options object, which will often
+        be constructed as a JavaScript literal object.
+        
+        
+        Examples
+        --------
+        
+        Let's say, for example, that you want to make clicking on news-item photos
+        open a lightbox-style larger version of the image. To do this, you'll need to
+        specify:
+        
+        * A jQuery style selector for a Plone element, e.g., ".newsImageContainer a"
+        
+        * "image" for the load method ("ajax" and "iframe" are other alternatives)
+        
+        * A regular expression search/replace to transform the href or src URL.
+          In this example, we're changing the URL to point to the preview-sized
+          image. So, our search/replace pair is "/image_view_fullscreen"
+          and "_preview".
+        
+        * You could also specify additional overlay configuration parameters.
+        
+        The code::
+        
+            $('.newsImageContainer a')
+                .prepOverlay({
+                     subtype: 'image',
+                     urlmatch: '/image_view_fullscreen$',
+                     urlreplace: '_preview'
+                    });
+        
+        Another quick example, one that provides full-image popups for images placed
+        via kupu::
+        
+            $('img.image-right, img.image-left, img.image-inline')
+                .prepOverlay({
+                    subtype: 'image',
+                    urlmatch: '/image_.+$',
+                    urlreplace: ''
+                    });
+        
+        What's different? We're targeting <img ... /> tags, which don't have href
+        attributes. The helper automatically picks up the target URL from the src
+        attribute, so that we can have a popup view of image elements that aren't
+        linked to that view. Note also that we're using a real regular expression
+        in the search/replace so that we can strip off image_preview, image_mini, etc.
+        
+        And, a configuration to put the site map in an iframe popup with expose
+        settings, picking up the target from an href::
+        
+            $('#siteaction-sitemap a')
+                .prepOverlay({
+                    subtype: 'iframe',
+                    config: {expose:{color:'#00f'}}
+                    });
+        
+        Options
+        -------
+        
+        The complete options list:
+        
+        subtype
+          'image' | 'iframe' | 'ajax'
+        urlmatch:
+          Regular expression for a portion of the target URL. Target
+          URL is determined by checking href, src or action attributes.
+        urlreplace
+          Replacement expression for the matched expression.
+        filter (ajax only)
+          the jQuery selector used to find the elements of
+          the ajax loaded resource that you wish to use in the overlay.
+        width
+          Width of the popup. Defaults to 60%. Overriden by image width
+          for image overlays. Percentages are computed against window width,
+          not parent.
+        cssclass
+          A custom css class to apply to the overlay. Ignored
+          for inline overlays.
+        config
+          jQuery Tools configuration options in a dictionary.
+        
+        For AJAX overlay forms, add the following, form-oriented, options:
+        
+        formselector
+          Used to specify the JQuery selector for any
+          forms inside the loaded content that you want to be handled
+          inside the overlay by doing an AJAX load to get the overlay
+          content.
+        
+          When a form is submitted, the overlay handler checks the response
+          for formselector. If it's found, the result is displayed in the
+          overlay and form handlers are bound. If not, the 'noform' action
+          is carried out.
+        
+        noform
+          the action to take if an ajax form is submitted and the returned
+          content has nothing matching the formselector. Available actions include
+          'close' to simply close the overlay, 'reload' to reload the page, and
+          'redirect' to redirect to another page. If you choose 'redirect', you
+          must specify the URL in the redirect option. Default
+          action is to display the filtered response in the popup.
+        
+          You may also supply as the 'noform' argument a
+          callback function that returns one of these strings. The overlay helper
+          will call the function with the overlay element as an argument.
+        
+        closeselector
+          use this to specify a JQuery selector that will be used
+          to find elements within the overlay that should close the overlay if
+          clicked. The most obvious example is a form's cancel button.
+        
+        redirect
+          if you specify 'redirect' for the noform action, use the
+          redirect option to specify the full target URL. You may also supply a
+          callback function that returns a URL. The overlay helper will call the
+          function with the overlay element and the response text as arguments.
+        
+        beforepost
+          you may specify a function that will be called before the
+          AJAX form posting. This callback will be passed the jQuery-wrapped form
+          and the serialized form data. Return true if you wish the AJAX form
+          handler to handle the event; return false if you wish to cancel the
+          submit.
+        
+        afterpost
+          you may specify a function that will be called immediately
+          after the AJAX load of the post response. The function will be passed an
+          element containing the returned HTML as a jQuery object. Second argument
+          is data_parent object, which contains overlay configuration and other
+          useful data in the jQuery 'data' resource. This callback occurs before
+          any other processing of the response. The callback function's return
+          value is ignored.
+        
+        AJAX
+        ----
+        
+        Some of the options allow use of AJAX to get content. When you're
+        loading content into an overlay or tab via AJAX, you're nearly always
+        going to want only part of the loaded content. For example, if you're
+        picking up a Plone page, you may only want the #content div's contents.
+        
+        To do this, just add a CSS (or JQuery) selector as a 'filter' option.
+        JQuery's load method (which pipbox uses) will only pick up the content inside
+        the selection.
+        
+        For example, let's say that you wish to display the standard Plone site map
+        in an overlay. You could use::
+        
+            $('#siteaction-sitemap a').prepOverlay({
+                subtype: 'ajax',
+                filter: '#content > *'
+                });
+        
+        The filter code causes the overlay handler to load only a portion of the
+        AJAX-loaded HTML into the overlay, picking up only what's inside the
+        #content div. If you don't specify a filter, you'll get
+        everything inside the body section of the page -- not usually what you
+        want.
+        
+        Some browsers cache AJAX loads, so a random argument is automatically
+        added to URLs.
+        
+        NOTE: the  "ajax_load" query string argument is automatically added to AJAX
+        urls and may be used in templates to determine which resources are shipped
+        for AJAX overlays. Plone 4's main template uses this to exclude nearly
+        all elements of the page outside the content area.
+        
+        
+        AJAX Forms
+        ----------
+        
+        The overlay helper can automatically handle forms that are within the
+        overlay by making an AJAX post action, then replacing the overlay content with
+        the results.
+        
+        Specify forms for this handling with the "formselector" option. The content
+        filter specified in the original overlay is reused.
+        
+        For example, if you wished to handle the standard Plone contact form in an
+        overlay, you could specify::
+        
+            $('#siteaction-contact a').prepOverlay({
+                subtype: 'ajax',
+                filter: '#content>*',
+                formselector: 'form'
+                });
+        
+        Another example: using popups for the delete confirmation and rename forms
+        (from the action menu)::
+        
+            $('a#delete,a#rename').prepOverlay({
+                subtype: 'ajax',
+                filter: '#content>*',
+                closeselector: '[name=form.button.Cancel]'
+                });
+        
+        There are a couple of differences here. First, there is no form selector
+        specified; that's because we don't want to install an ajax submit handler
+        when we may be renaming or deleting the displayed object. Second, we specify
+        a close selector so that pushing the cancel button will close the overlay
+        without bothering to submit the form.
+        
+        See ``Products/CMFPlone/skins/plone_ecmascript/popupforms.js`` for several
+        examples of using callbacks to handle tricky cases like confirming deletion of
+        the current content item.
+        
+        The `jquery form plugin`_ is used to do the data serialization for form posts.
+        It provides a more complete serialization, including submit name/value and file
+        data, than jQuery alone.
+        
+        jQuery Tools Events
+        -------------------
+        
+        Event handlers for jQuery Tools overlay events may be set in via the optional
+        "config" argument, which is passed as a dictionary. For example, to specify an
+        onBeforeLoad event::
+        
+            $('a#testimage').prepOverlay({
+                subtype: 'image',
+                config: {
+                    onBeforeLoad : function (e) {
+                        console.log('onBeforeLoad', this.getOverlay());
+                        return true;
+                        }
+                    }
+                });
+        
+        
+        Useful events are specified in the jQuery Tools `overlay documentation`_.
+        Also, see the `events documentation`_. Note that you should return ``true`` in
+        ```onBeforeLoad``` and ``onBeforeClose`` handlers if you want the default behavior
+        (opening or closing). Return ``false`` to prevent opening or closing.
+        
+        jQuery Tools passes the event as a parameter when it calls the event handlers.
+        ``this`` will be the jqt API object, which has ``getOverlay()`` and
+        ``getTrigger()`` methods.
+        
+        
+        .. _`jquery.tools`: http://jquerytools.org
+        .. _`overlay.js`: http://jquerytools.org/documentation/overlay/index.html
+        .. _`scrollable.js`: http://jquerytools.org/documentation/scrollable/index.html
+        .. _`tabs.js`: http://jquerytools.org/documentation/tabs/index.html
+        .. _`toolbox.history.js`: http://jquerytools.org/documentation/toolbox/history.html
+        .. _`toolbox.expose.js`: http://jquerytools.org/documentation/toolbox/expose.html
+        .. _`tooltip.js`: http://jquerytools.org/documentation/tooltip/index.html
+        .. _`overlay.apple.js`: http://jquerytools.org/documentation/overlay/apple.html
+        .. _`scrollable.autoscroll.js`: http://jquerytools.org/documentation/scrollable/autoscroll.html
+        .. _`scrollable.navigator.js`: http://jquerytools.org/documentation/scrollable/navigator.html
+        .. _`tabs.slideshow.js`: http://jquerytools.org/documentation/tabs/slideshow.html
+        .. _`toolbox.flashembed.js`: http://jquerytools.org/documentation/toolbox/flashembed.html
+        .. _`toolbox.mousewheel.js`: http://jquerytools.org/documentation/toolbox/mousewheel.html
+        .. _`tooltip.dynamic.js`: http://jquerytools.org/documentation/tooltip/dynamic.html
+        .. _`tooltip.slide.js`: http://jquerytools.org/documentation/tooltip/slide.html
+        .. _`jquerytools dateinput`: http://jquerytools.org/documentation/dateinput/index.html
+        .. _`first demo`: http://jquerytools.org/demos/dateinput/index.html
+        .. _`jquerytools rangeinput`: http://jquerytools.org/documentation/rangeinput/index.html
+        .. _`jquerytools validator`: http://jquerytools.org/documentation/validator/index.html
+        .. _`jquery form plugin`: http://malsup.com/jquery/form
+        .. _`overlay documentation`: http://jquerytools.org/documentation/overlay/#events
+        .. _`events documentation`: http://jquerytools.org/documentation/scripting.html#events
+        
+        Changelog
+        =========
+        
+        1.6.2 (2014-11-04)
+        ------------------
+        
+        - Revert "check each tooltip for existence, fixes issue 349". Fixes broken
+          Tooltip.
+          [vincentfretin, thet]
+        
+        
+        1.6.1 (2014-09-11)
+        ------------------
+        
+        - Fix dateinput (change event was not triggered anymore).
+          [thomasdesvenain]
+        
+        
+        1.6.0 (2014-07-10)
+        ------------------
+        
+        - Ensure jQuery 1.7+, including 1.9 compatibility by using the dev branch of
+          jquerytools and applying further fixes. We now use a fork of jquerytools at:
+          https://github.com/collective/jquerytools/tree/dev
+          [thet]
+        
+        - Fix ``overlayhelpers.js`` to work with jQuery 1.7 and 1.9.
+          jQuery.buildFragment has a slightly changed API. While it accepts a list of
+          context objects in jQuery 1.7, it expects an explicit context object in
+          jQuery 1.9. See::
+        
+            - https://github.com/jquery/jquery/blob/1.7/src/manipulation.js#L465
+            - https://github.com/jquery/jquery/blob/1.7/src/manipulation.js#L472
+            - https://github.com/jquery/jquery/blob/1.9.1/src/manipulation.js#L617
+        
+          [thet]
+        
+        - Switched to Grunt based build system.
+          [thet]
+        
+        - Switch test infrastructure to plone.app.testing.
+          [sdelcourt]
+        
+        
+        1.5.7 (2014-02-23)
+        ------------------
+        
+        - Fix a test isolation issue.
+          [davisagli]
+        
+        - Install plone.app.jquerytools.js after plone_javasscript_variables.js
+          in new instances.
+          [bloodbare]
+        
+        
+        1.5.6 (2013-08-13)
+        ------------------
+        
+        - In the date picker, fire the change event on the input
+          so it doesn't bubble up and cause an error in jquery 1.8.
+          [davisagli]
+        
+        - Backport pull-req https://github.com/jquerytools/jquerytools/pull/873 and
+          apply in other jquerytools files too: Fix API of outerWidth and outerHeight
+          to ensure jQuery 1.8.x compatibility. This change is backwards compatible at
+          least to 1.4, since jquerytools used the API incorrectly. See jQuery 1.4 API
+          doc:
+          http://web.archive.org/web/20100210083046/http://api.jquery.com/outerWidth/
+          [thet]
+        
+        1.5.5 (2013-03-18)
+        ------------------
+        
+        - Set z-index for dateinput calendar popup so that it will display in
+          an overlay context.
+          [smcmahon]
+        
+        - Pass the pbo object as third parameter to the redirect callback. This
+          provides the same flexibility for redirect that was added for noform in
+          1.5.4.
+          [izak]
+        
+        
+        1.5.4 (2013-03-04)
+        ------------------
+        
+        - Now execute inline scripts in ajax overlay.
+          [vincentfretin]
+        
+        - Give the pbo object as second parameter for noform callback. You can access
+          everything from it, for example the overlay trigger pbo.source.
+          [vincentfretin]
+        
+        - Give the disconnected "el" jQuery object (the div created with the html
+          response) instead of "this" (the request object) to the noform and redirect
+          callbacks. This fixes the noformerrorshow callback from popupforms.js in the
+          Products.CMFPlone package.
+          [vincentfretin]
+        
+        - Adapt jquery.tools.dateinput.css to use Plone popup calendar icon and
+          compatible styles.
+          [smcmahon]
+        
+        - Change jqt_checkout_build to *not* pick up dateinput.css from jQuery.
+          This should be Plone-specific.
+          [smcmahon]
+        
+        
+        1.5.3 (2013-01-17)
+        ------------------
+        
+        - Call ploneTabInit when a form is reloaded with errors.
+          [vincentfretin]
+        
+        
+        1.5.2 (2013-01-01)
+        ------------------
+        
+        - Dont be so strong with regexp in overlayhelpers.js
+          [garbas]
+        
+        
+        1.5.1 (2012-10-16)
+        ------------------
+        
+        - Revert to always adding the overlay at the bottom of the document body.
+          [davisagli]
+        
+        - Make sure the "Close this box" link has a hiddenStructure class so it
+          won't show up for most users.
+          [davisagli]
+        
+        
+        1.5 (2012-08-30)
+        ----------------
+        
+        - Add translatable string for close box. This and the following change by
+          giacomos fix http://dev.plone.org/ticket/12122.
+          [fulviocasali]
+        
+        - Use link instead of @import for css resources. This improves speed, since it
+          better uses parallel downloads. See: "don't use @import" by Steve Souders.
+          [thet]
+        
+        
+        1.4 - 2012-05-11
+        ----------------
+        
+        - Added a link in the close button to improve accessibility
+          [giacomos]
+        
+        - Update to jQueryTools 1.2.7.
+          [thet]
+        
+        - Fix sed command in jqt_checkout_build script to work on Linux and OSX.
+          [thet]
+        
+        - Update to jQueryTools 1.2.6.
+          [smcmahon]
+        
+        - For overlays that are not already inline, insert them inline after the
+          triggering element rather than at the end of the body. This solves an
+          accessibility problem for screen readers (see ticket #12123), but is
+          going to require more css reset work for overlay styling.
+          [smcmahon]
+        
+        
+        1.3 - 2011-06-27
+        ----------------
+        
+        - Add events triggering so you can hook into it more.
+          [vangheem]
+        
+        - Don't break if a formselector was specified but the overlay has no form.
+          [davisagli]
+        
+        - Refactor setup of AJAX-loaded content so it's easier to call from custom
+          code.
+          [davisagli]
+        
+        - It's now possible to repeatedly apply prepOverlay to the same element
+          and have the last-applied case win. Previously, once prepOverlay had been
+          used on an element, all subsequent uses on that element were ignored.
+          [smcmahon]
+        
+        - Add documentation in README for using jQuery Tools event handlers.
+          [smcmahon]
+        
+        
+        1.2 - 2011-05-13
+        ----------------
+        
+        - 1.2 final release.
+          [esteele]
+        
+        
+        1.2b5 - 2011-04-06
+        ------------------
+        
+        - Added next.gif and prev.gif for the dateinput widget.
+          [vincentfretin]
+        
+        - Add ajax_load hidden input to loaded forms.
+          [smcmahon]
+        
+        
+        1.2b4 - 2010-12-05
+        ------------------
+        
+        - Add plone.app.testing / Selenium testing framework based on esteele's
+          example.
+          [smcmahon]
+        
+        - noform and redirect options not passed to ajax form handlers in
+          b1, b2, b3. Fixed.
+          [smcmahon]
+        
+        
+        1.2b3 - 2010-12-30
+        ------------------
+        
+        - Some options not passed to ajax form handlers in b1, b2. Fixed.
+          [smcmahon]
+        
+        
+        1.2b2 - 2010-12-29
+        ------------------
+        
+        - AJAX overlays broken in b1 due to plain stupidity. Will try to remember
+          to always test after editing.
+          [smcmahon]
+        
+        
+        1.2b1 - 2010-12-27
+        ------------------
+        
+        - Avoid creating overlay divs until needed; remove ajax overlay divs
+          on close. Less DOM clutter.
+          [smcmahon]
+        
+        - Include both .min.js and .js versions of js resources to make life
+          a little easier for folks who want to read the source. The .min.js
+          versions will go into the browser resources.
+          [smcmahon]
+        
+        - Updated documentation so it reflect changes.
+          [garbas]
+        
+        - Updated jquerytools to 1.2.5. dateinput, rangeinput and validator
+          plugins added as additional browser resources. Now all plugins from
+          jquerytools are added with this package.
+          [garbas]
+        
+        - Added build script which builds js files from source (from github).
+          [garbas]
+        
+        - getContent does not exist in jqtools. It has been replaced by
+          getOverlay. http://flowplayer.org/tools/forum/40/28687
+          [naro]
+        
+        
+        1.1.2 - 2010-07-19
+        ------------------
+        
+        - Avoid use of genericsetup:upgradeSteps (plural), which doesn't work in Plone
+          3.
+          [davisagli]
+        
+        
+        1.1.1 - 2010-07-19
+        ------------------
+        
+        - Add 'description' parameter to upgrade step directives to fix breakage on
+          Plone 3.
+          [davisagli]
+        
+        
+        1.1 - 2010-07-18
+        ----------------
+        
+        - Add overlays.css. For Plone 3 only (it is disabled on installation in Plone
+          4, and on upgrade from Plone 3 to Plone 4).
+          [davisagli]
+        
+        - Update license to GPL version 2 only.
+          [hannosch]
+        
+        - Added experimental windmill browser integration tests.
+          [smcmahon]
+        
+        
+        1.1b5 - 2010-06-12
+        ------------------
+        
+        - Update to jQuery Tools 1.2.3.
+          [smcmahon]
+        
+        - Recode to one "var" per function standard.
+          [smcmahon]
+        
+        - Don't show empty ajax form responses, even if "noform" is not set.
+          [smcmahon]
+        
+        
+        1.1b4 - 2010-06-06
+        ------------------
+        
+        - The select technique used to filter ajax response in b1-b3 was not robust
+          if the responseText was not well-formed (think ZMI forms). Fixed by emulating
+          the technique used in jQuery's .load method.
+          [smcmahon]
+        
+        
+        1.1b3 - 2010-06-03
+        ------------------
+        
+        - Switch back to "find", undoing 1.1b2 change. 'filter' does not find
+          descendents, and will thus not work in most validation error situations.
+          Also, cleaned up identifiers and comments that suggested that we were
+          filtering rather than selecting.
+          [smcmahon]
+        
+        
+        1.1b2 - 2010-06-03
+        ------------------
+        
+        - Fix regression in filtering introduced in 1.1b1.
+          [davisagli]
+        
+        
+        1.1b1
+        -----
+        
+        - Integrate jQuery form plugin http://malsup.com/jquery/form/ so that we
+          can handle file uploads. Bump version # to reflect significant change.
+          [davisagli, smcmahon]
+        
+        
+        1.0rc3
+        ------
+        
+        - Update to tools 1.2.2. (Trivial changes)
+          [smcmahon]
+        
+        - Set max-height on ajax overlays to 75% of the viewport's height; switch
+          to fixed positioning on everything but IE6.
+          [smcmahon]
+        
+        - Updated to tools 1.2.1; removed jqt image resources (too bulky
+          to justify as part of main distribution).
+          [smcmahon]
+        
+        
+        1.0rc2
+        ------
+        
+        - Change query string variable for ajax loads from "rand" to "ajax_load"
+          to clarify its purpose.
+        
+        - Added cssclass option for prepOverlay.
+        
+        
+        1.0rc1
+        ------
+        
+        - Add responseText to parameters passed in the redirect callback; this
+          enables smarter redirects in cases where pages may have disappeared.
+          [smcmahon]
+        
+        - Add 'link-overlay' class to overlay triggers.
+          [davisagli]
+        
+        - Made the closing of an ajax overlay delete the loaded content so that it
+          doesn't muddy up the DOM. [smcmahon]
+        
+        - Added 'source' to data_parent to be able to access source element (element
+          on original page, which raised the overlay window) eg. in afterpost handler.
+          [naro]
+        
+        - Add message for ajax no response from server.
+          [smcmahon]
+        
+        - Insert overlays in the DOM at the end of body rather than visual
+          portal wrapper. Fixes #10307.
+          [smcmahon]
+        
+        
+        1.0b17
+        ------
+        
+        - 1.0b16 fix to click-outside-overlay cause *any* click to close the overlay.
+          Fixed. [smcmahon]
+        
+        
+        1.0b16
+        ------
+        
+        - Patched jquery.tools.min.js to fix close on click outside overlay.
+          [smcmahon]
+        
+        - Improved logic for finding the submit button via a click handler.
+          [smcmahon]
+        
+        
+        1.0b15 - 2010-02-17
+        -------------------
+        
+        - AJAX form handling was busted in Safari by submit button marshaling
+          fix. Found a hopefully more general solution for finding submit
+          button name and value.
+          [smcmahon]
+        
+        - beforepost and afterpost callback options weren't working. fixed.
+          [smcmahon]
+        
+        - Recover when jQuery tries to throw away error responses in ajax loads.
+          [smcmahon]
+        
+        - Circumvent double-submit warning for AJAX forms.
+          [smcmahon]
+        
+        - Use the $ convention for jQuery.
+          [smcmahon]
+        
+        
+        1.0b14 - 2010-10-27
+        -------------------
+        
+        - Add beforepost and afterpost callback options for ajax forms.
+          [smcmahon]
+        
+        - Change reload strategy to set location to current href rather than using
+          reload, which can cause repost queries on some browsers.
+          [smcmahon]
+        
+        
+        1.0b13 - 2010-01-22
+        -------------------
+        
+        - Fixed marshaling of submit buttons on AJAX submit when form has multiple
+          buttons.
+          [smcmahon]
+        
+        
+        1.0b12 - 2010-01-11
+        -------------------
+        
+        - Allow noform and redirect options to be specified as callback functions.
+          This will allow building in more smarts about what to do when ajax
+          forms finish.
+          [smcmahon]
+        
+        - Avoid clobbering the onLoad config option if it is passed to prepOverlay.
+          [davisagli]
+        
+        
+        1.0b11 - 2009-12-27
+        -------------------
+        
+        - Declared all package dependencies and avoid unused imports inside tests.
+          [hannosch]
+        
+        
+        1.0b10 - 2009-12-18
+        -------------------
+        
+        - Add plugins resource and graphics directory.
+        
+        - Update jqtools to use tooltips 1.1.3
+        
+        
+        1.0b9
+        -----
+        
+        - Avoid overlay helper errors in Plone 3.x when trying to handle tabbed
+          forms.
+        
+        
+        1.0b8
+        -----
+        
+        - Check 'action' attribute for url, enabling simple forms to open overlays.
+        
+        
+        1.0b7
+        -----
+        
+        - Initialize form tabbing on ajax form load.
+        
+        - Marshall submit button values in ajax form submit, since jQuery
+          doesn't include them.
+        
+        
+        1.0b6
+        -----
+        
+        - Document use of overlay helper.
+        
+        
+        1.0b5
+        -----
+        
+        - Integrate overlay helpers originally developed in pipbox. These
+          provide support for AJAX loads and forms.
+        
+        
+        1.0b4
+        -----
+        
+        - Advance to jQuery Tools 1.2.1
+        
+        
+        1.0b3
+        -----
+        
+        - Fix packaging problem that prevented easy_install of 1.0b2.
+        
+        
+        1.0b2
+        -----
+        
+        - Move to jQuery Tools 1.1.1.
+        
+        
+        1.0b1
+        -----
+        
+        - Initial release
+        
+Keywords: Plone jQuery overlays AJAX
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

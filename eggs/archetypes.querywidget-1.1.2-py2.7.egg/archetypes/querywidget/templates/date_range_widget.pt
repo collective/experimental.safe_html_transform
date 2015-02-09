@@ -1,0 +1,36 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      i18n:domain="plone">
+
+    <body>
+       <metal:widget define-macro="widget"
+       	tal:define="fieldName fieldName|string:query;
+       				      value value|nothing;
+                    start_date python:value[0] if value else None;
+                    end_date python:value[1] if value else None;">
+         <div class="querywidget dateRangeWidget">
+
+          <input autocomplete="off"
+                 type="text"
+                 class="queryvalue"
+                 tal:attributes="name python:str(fieldName)+'.v:records:list';
+                                 value start_date;"
+                 name="query.v:records:list"/>
+
+          <span  i18n:translate="">and</span>
+
+          <input autocomplete="off"
+                 type="text"
+                 class="queryvalue"
+                 tal:attributes="name python:str(fieldName)+'.v:records:list';
+                                 value end_date;"
+                 name="query.v:records:list"/>
+          </div>
+        </metal:widget>
+
+    </body>
+</html>
+
+

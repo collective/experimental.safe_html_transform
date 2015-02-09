@@ -1,0 +1,10 @@
+setuptools
+zope.dottedname
+zope.interface
+zope.configuration
+zope.schema
+zc.buildout
+
+[test]
+zc.buildout
+zope.testing

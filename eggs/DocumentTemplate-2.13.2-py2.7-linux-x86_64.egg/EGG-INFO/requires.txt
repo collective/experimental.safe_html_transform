@@ -1,0 +1,7 @@
+AccessControl
+Acquisition
+ExtensionClass
+RestrictedPython
+zExceptions
+zope.sequencesort
+zope.structuredtext

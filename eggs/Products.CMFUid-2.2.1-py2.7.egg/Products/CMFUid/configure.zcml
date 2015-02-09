@@ -1,0 +1,18 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="cmf_default">
+
+  <include file="event.zcml" />
+
+  <!-- profiles -->
+
+  <genericsetup:registerProfile
+      name="default"
+      title="CMFUid"
+      description="Adds UID support."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      />
+
+</configure>

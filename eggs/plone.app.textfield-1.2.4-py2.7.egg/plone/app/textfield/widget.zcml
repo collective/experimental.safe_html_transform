@@ -1,0 +1,34 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:z3c="http://namespaces.zope.org/z3c"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone.app.textfield">
+
+    <include package="z3c.form" file="meta.zcml" />
+    <include package="z3c.form" />
+
+    <adapter factory=".widget.RichTextFieldWidget" />
+    <adapter factory=".widget.RichTextConverter" />
+
+    <class class=".widget.RichTextWidget">
+        <require
+            permission="zope.Public"
+            interface=".widget.IRichTextWidget"
+        />
+    </class>
+
+    <z3c:widgetTemplate
+        mode="display"
+        widget=".widget.IRichTextWidget"
+        layer="z3c.form.interfaces.IFormLayer"
+        template="widget_display.pt"
+        />
+
+    <z3c:widgetTemplate
+        mode="input"
+        widget=".widget.IRichTextWidget"
+        layer="z3c.form.interfaces.IFormLayer"
+        template="widget_input.pt"
+        />
+
+</configure>

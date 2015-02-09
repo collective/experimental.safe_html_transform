@@ -1,0 +1,63 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:plone="http://namespaces.plone.org/plone">
+
+  <!-- Only use intids for objects with relations -->
+  <include package="plone.app.intid" />
+  <include package="z3c.relationfield" />
+
+  <utility factory=".path.Zope2ObjectPath" />
+  
+  <!-- setup GS profile -->
+  <genericsetup:registerProfile
+      name="default"
+      title="Relation Field"
+      description="Adds support for content relationships defined using z3c.relationfield"
+      directory="profiles/default"
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      />
+
+  <genericsetup:importStep
+      name="import-relations-utils"
+      title="Import Relations Utils"
+      description="Import relation utility."
+      handler=".setuphandlers.installRelations">
+     <depends name="toolset"/>
+  </genericsetup:importStep>
+
+  <!-- Dexterity Content will support incoming and outgoing relations -->
+  <configure zcml:condition="installed plone.dexterity">
+    <class class="plone.dexterity.content.DexterityContent">
+      <implements interface=".interfaces.IDexterityHasRelations" />
+    </class>
+    <subscriber
+      for="plone.dexterity.interfaces.IDexterityContent
+           zope.lifecycleevent.interfaces.IObjectModifiedEvent"
+      handler=".event.update_behavior_relations" 
+      />
+    <!-- Make 'related items' behavior available if plone.behavior is present. -->
+    <plone:behavior
+        zcml:condition="installed plone.behavior"
+        title="Related items"
+        description="Adds the ability to assign related items"
+        provides=".behavior.IRelatedItems"
+        for="plone.dexterity.interfaces.IDexterityContent"
+        />
+  </configure>
+
+  <!-- Archetypes Content will support incoming relations -->
+  <class zcml:condition="installed Products.Archetypes"
+         class="Products.Archetypes.BaseObject.BaseObject">
+    <implements interface="z3c.relationfield.interfaces.IHasIncomingRelations" />
+  </class>
+
+  <!-- widgets setup -->
+  <include file="widget.zcml" />
+  
+  <!-- marshaler setup -->
+  <include file="marshaler.zcml" />
+
+</configure>

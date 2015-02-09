@@ -1,0 +1,170 @@
+Metadata-Version: 1.1
+Name: Products.DocFinderTab
+Version: 1.0.5
+Summary: Makes Dieter Maurer's DocFinder available from a ZMI management tab
+Home-page: http://plone.org/products/docfindertab
+Author: Stefan H. Holek
+Author-email: stefan@epy.co.at
+License: ZPL
+Description: DocFinderTab
+        ============
+        
+        This product makes Dieter Maurer's DocFinder_ available from a ZMI management
+        tab. Looking inside an object becomes as easy as clicking its "Doc" tab!
+        
+        DocFinderTab allows you to view an object's:
+        
+        - Class (and base class) names and docstrings.
+        
+        - Attribute names, roles, arguments, and docstrings.
+        
+        DocFinderTab can be of great help when discovering object APIs and debugging
+        security problems.
+        
+        .. _DocFinder: http://www.dieter.handshake.de/pyprojects/zope/DocFinder.html
+        
+        Egg Installation
+        ================
+        
+        Either use easy_install or add Products.DocFinderTab to the eggs section of
+        your buildout.cfg and re-run buildout.
+        
+        Traditional Product Installation
+        ================================
+        
+        Copy or symlink the DocFinderTab subdirectory of this package into your
+        Products directory.
+        
+        Final Steps
+        ===========
+        
+        Restart Zope. This will add a "Doc" tab to every object's managment
+        screens (ZMI). Now click the "Doc" tab and start exploring.
+        
+        See the online help for a detailed explanation of what you can
+        do with DocFinderTab, or read help/README.stx directly.
+        
+        
+        Changelog
+        =========
+        
+        1.0.5 - 2011-07-27
+        ------------------
+        
+        - Upgrade imports, remove warnings in Zope 2.13.
+          [lzdych]
+        
+        - Do not show docstrings of datetime, date, time, and timedelta attributes.
+          [stefan]
+        
+        1.0.4 - 2009-05-26
+        ------------------
+        
+        - CHANGES.txt didn't make it into the long desc (and onto this page).
+        
+        1.0.3 - 2009-05-25
+        ------------------
+        
+        - Reformat README.txt and CHANGES.txt to use restructured text.
+        
+        - Repackage as a Python source egg.
+        
+        1.0.2
+        -----
+        
+        - Print a pretty None.
+        
+        1.0.1
+        -----
+        
+        - Do not show docstrings of DateTime attributes.
+        
+        1.0
+        ---
+        
+        - Update to DocFinder 1.0.3.
+        
+        - Require at least Python 2.3.
+        
+        - Use logging instead of zLOG.
+        
+        - Handle Acquisition.Acquired.
+        
+        - Handle property, staticmethod, and classmethod.
+        
+        0.5.3
+        -----
+        
+        - Minor tweaks to the monkey patch and showDocumentation.dtml.
+        
+        - Added 'bool' and 'complex' to simple types mapping.
+        
+        - Don't display zope.interface internal attributes.
+        
+        0.5.2
+        -----
+        
+        - Format roles more nicely, remove duplicates and faux roles, sort.
+        
+        - You can get the raw representation back by setting FORMAT_ROLES=0
+          in config.py.
+        
+        0.5.0
+        -----
+        
+        - Renamed product to DocFinderTab.
+        
+        - Do not display docstrings but names of simple types in Python 2.3.
+        
+        0.4.1
+        -----
+        
+        - Cookies did not work for everybody, they do now.
+        
+        0.4.0
+        -----
+        
+        - Make full use of DocFinder 0.4's filtering capabilities. Results may
+          now be filtered by regular expression and level of detail.
+        
+        - Even nicer stylesheets for structured text.
+        
+        - Again change the monkey patch and apply it to Item only.
+        
+        0.3.4
+        -----
+        
+        - Patch ObjectManager instead of Application. Thanks to Gilles Lenfant.
+        
+        0.3.3
+        -----
+        
+        - Go even further and patch Bindings directly.
+        
+        - Fix file permissions issue.
+        
+        0.3.2
+        -----
+        
+        - Boldly patch the Script base class.
+        
+        0.3.0
+        -----
+        
+        - Added 'View documentation' permission.
+        
+        0.2.0
+        -----
+        
+        - Monkey patch wrapper around Dieter Maurer's DocFinder_ product.
+          Adds a ZMI "Doc" tab to all Zope objects.
+        
+        .. _DocFinder: http://www.dieter.handshake.de/pyprojects/zope/DocFinder.html
+        
+        
+Keywords: Zope2 DocFinder DocFinderTab
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Framework :: Zope2
+Classifier: Framework :: Plone

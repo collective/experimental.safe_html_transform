@@ -1,0 +1,39 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five">
+
+  <adapter
+      name="add"
+      factory=".namespace.AddViewTraverser"
+      />
+
+  <five:registerClass
+      class=".PortalFolder.PortalFolder"
+      meta_type="Portal Folder"
+      permission="cmf.AddPortalFolders"
+      />
+
+  <utility
+      component=".PortalFolder.PortalFolderFactory"
+      name="cmf.folder"
+      />
+
+  <five:registerClass
+      class=".CMFBTreeFolder.CMFBTreeFolder"
+      meta_type="CMF BTree Folder"
+      permission="cmf.AddPortalFolders"
+      />
+
+  <utility
+      component=".CMFBTreeFolder.CMFBTreeFolderFactory"
+      name="cmf.folder.btree"
+      />
+
+  <!-- Default wrapper for indexing IContentish objects -->
+  <adapter
+      for=".interfaces.ICatalogAware
+           .interfaces.ICatalogTool"
+      provides=".interfaces.IIndexableObject"
+      factory=".CatalogTool.IndexableObjectWrapper" />
+
+</configure>

@@ -1,0 +1,50 @@
+Metadata-Version: 1.1
+Name: five.globalrequest
+Version: 1.0
+Summary: Zope 2 integration for zope.globalrequest
+Home-page: http://pypi.python.org/pypi/five.globalrequest
+Author: Martin Aspeli
+Author-email: optilude@gmail.com
+License: ZPL
+Description: Overview
+        ========
+        
+        This package integrates `zope.globalrequest <http://pypi.python.org/pypi/zope.globalrequest>`_
+        with Zope 2. It is compatible with Zope 2.12 and later. In Zope 2.10, you
+        can install `ZPublisherEventsBackport <http://pypi.python.org/pypi/ZPublisherEventsBackport>`_
+        to use it.
+        
+        The only thing you need to do to use this package is to load its configuration
+        from your own ZCML file::
+        
+            <include package="five.globalrequest" />
+        
+        You can now use ``zope.globalrequest`` as normal::
+        
+            from zope.globalrequest import getRequest
+            request = getRequest()
+        
+        The request is set up when publication starts, when the ``IPubStart`` event
+        is fired. It is cleared on one of the ``IPubEnd`` events: ``IPubSuccess`` or
+        ``IPubFailure``. If you have your own event handlers for either of these
+        events, you should be aware that the event setup/clear could happen after/
+        before your own event handler is executed, since the order of execution for
+        event handlers is not controllable.
+        
+        Changelog
+        =========
+        
+        1.0 - 2010-08-06
+        ------------------
+        
+        - No changes
+        
+        1.0a2 - 2010-01-08
+        ------------------
+        
+        - Initial release
+        
+Keywords: zope global request
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python

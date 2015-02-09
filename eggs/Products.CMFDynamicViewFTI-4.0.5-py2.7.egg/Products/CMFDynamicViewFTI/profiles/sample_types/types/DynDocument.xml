@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<object name="DynDocument"
+   meta_type="Factory-based Type Information with dynamic views"
+   xmlns:i18n="http://xml.zope.org/namespaces/i18n">
+ <property name="title">DynDocument</property>
+ <property
+    name="description">A page in the site. Can contain rich text.</property>
+ <property name="content_icon">document_icon.gif</property>
+ <property name="content_meta_type">DynDocument</property>
+ <property name="product">CMFDefault</property>
+ <property name="factory">addDocument</property>
+ <property name="immediate_view">metadata_edit_form</property>
+ <property name="global_allow">True</property>
+ <property name="filter_content_types">True</property>
+ <property name="allowed_content_types"/>
+ <property name="default_view">document_view</property>
+ <property name="view_methods">
+  <element value="document_view"/>
+  <element value="custom_view"/>
+ </property>
+ <alias from="(Default)" to="(Dynamic view)"/>
+ <alias from="view" to="(Selected layout)"/>
+ <action title="View" action_id="view" category="object" condition_expr=""
+    url_expr="string:${object_url}/view" visible="True">
+  <permission value="View"/>
+ </action>
+</object>

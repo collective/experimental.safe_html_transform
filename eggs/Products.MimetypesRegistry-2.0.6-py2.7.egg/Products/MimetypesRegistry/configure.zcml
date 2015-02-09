@@ -1,0 +1,28 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="Products.MimetypesRegistry">
+
+  <cmf:registerDirectory
+      name="skins"
+      directory="skins"
+      recursive="True"
+      />
+
+  <genericsetup:registerProfile
+      name="MimetypesRegistry"
+      title="MimetypesRegistry"
+      directory="profiles/default"
+      description="Extension profile for default MimetypesRegistry setup."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+    />
+
+  <genericsetup:importStep
+      name="mimetypes-registry-various"
+      handler="Products.MimetypesRegistry.setuphandlers.setupMimetypesRegistry"
+      title="MimetypesRegistry setup"
+      description="MimetypesRegistry installation step.">
+    <depends name="componentregistry" />
+  </genericsetup:importStep>
+</configure>

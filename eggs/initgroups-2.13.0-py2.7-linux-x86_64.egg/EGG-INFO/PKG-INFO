@@ -1,0 +1,23 @@
+Metadata-Version: 1.0
+Name: initgroups
+Version: 2.13.0
+Summary: Convenience uid/gid helper function used in Zope2.
+Home-page: http://pypi.python.org/pypi/initgroups
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        initgroups provides a convenience function to deal with user / group ids on
+        Unix-style systems.
+        
+        Changelog
+        =========
+        
+        2.13.0 (2010-03-30)
+        -------------------
+        
+        - Released as separate package.
+        
+Platform: UNKNOWN

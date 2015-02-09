@@ -1,0 +1,37 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone.app.relationfield">
+
+  <!-- Widget setup -->
+  
+  <include package="plone.formwidget.contenttree" />
+  
+  <adapter factory=".widget.RelationDataManager" />
+  <adapter factory=".widget.RelationDictDataManager" />
+  <adapter factory=".widget.RelationListDataManager" />
+
+  <utility component=".source.CMFContentSearchSource"
+           name="plone.formwidget.relations.cmfcontentsearch"
+           provides="zope.schema.interfaces.IVocabularyFactory"
+           />
+
+  <adapter factory="plone.formwidget.contenttree.ContentTreeFieldWidget"
+           for="z3c.relationfield.interfaces.IRelationChoice
+                z3c.form.interfaces.IFormLayer"
+           />
+      
+  <adapter factory="plone.formwidget.contenttree.MultiContentTreeFieldWidget"
+           for="z3c.relationfield.interfaces.IRelationList
+                z3c.form.interfaces.IFormLayer"
+           />
+
+  <!-- plone.supermodel export/import handlers -->
+  <utility component=".widget.RelationChoiceHandler"
+           name="plone.app.relationfield.Relation"
+           />
+  <utility component=".widget.RelationListHandler"
+           name="plone.app.relationfield.RelationList"
+           />
+
+</configure>

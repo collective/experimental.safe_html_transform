@@ -1,0 +1,15 @@
+setuptools
+ZODB3
+zope.lifecycleevent>=3.5.2
+zope.component
+zope.event
+zope.interface
+zope.keyreference
+zope.location>=3.5.4
+zope.security
+
+[test]
+zope.testing
+zope.site
+zope.traversing
+zope.container

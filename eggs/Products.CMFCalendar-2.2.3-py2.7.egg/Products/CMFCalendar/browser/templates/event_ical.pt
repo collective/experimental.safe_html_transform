@@ -1,0 +1,29 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+X-WR-CALNAME:<tal:content tal:content="context/absolute_url" />
+PRODID:-//Zope CMF 2.1//iCal 2.0//EN
+X-WR-TIMEZONE:UTC
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+CREATED:<tal:content tal:content="view/creation_date | nothing" />
+DTSTAMP:<tal:content tal:content="view/timestamp" />
+UID:<tal:content tal:content="view/UID" />
+DTSTART:<tal:content tal:content="view/start" />
+DTEND:<tal:content tal:content="view/end" />
+SUMMARY:<tal:content tal:content="view/title" />
+LOCATION:<tal:content tal:content="view/location" />
+DESCRIPTION:<tal:content tal:content="view/description" />
+<tal:condition tal:condition="exists: view/contact_name">
+ATTENDEE;CN="<tal:content tal:content='view/contact_name' />":MAILTO:<tal:content tal:content="context/contact_email | nothing" />
+</tal:condition>
+URL:<tal:content tal:content="context/absolute_url | nothing" />
+<tal:condition tal:condition="exists: view/alarm">
+BEGIN:VALARM
+DESCRIPTION:<tal:content tal:content="view/title" />
+ACTION:DISPLAY
+TRIGGER;RELATED=START:<tal:content tal:content="context/alarm" />
+END:VALARM
+</tal:condition>
+END:VEVENT
+END:VCALENDAR

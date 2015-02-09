@@ -1,0 +1,10 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <include file="implements.zcml"/>
+  <include file="exportimport.zcml"/>
+  <include file="profiles.zcml"/>
+  <include file="permissions.zcml"/>
+
+  <adapter factory=".adapter.PlacefulWorkflowChain" />
+
+</configure>

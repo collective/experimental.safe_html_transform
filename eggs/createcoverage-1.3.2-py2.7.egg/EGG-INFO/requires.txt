@@ -1,0 +1,4 @@
+setuptools
+coverage >= 3.4
+
+[test]

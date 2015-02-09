@@ -1,0 +1,34 @@
+<div class="managedViewlets" tal:attributes="id view/normalized_name"
+     i18n:domain="plone">
+    <dl class="viewletmanager">
+        <dt>
+            ViewletManager: <span tal:content="view/name">ViewletManager name</span>
+            (<span tal:content="view/interface" />)
+        </dt>
+        <dd>
+            <dl tal:repeat="viewlet options/viewlets"
+                tal:attributes="class python:'viewlet %s' % (viewlet['hidden'] and 'hiddenViewlet' or '')">
+                <dt>
+                    Viewlet: <span tal:replace="viewlet/name">Viewlet name</span>
+                    (<span tal:replace="viewlet/index">Index</span>)
+                    <a class="up"
+                       tal:condition="viewlet/up_url | nothing"
+                       tal:attributes="href viewlet/up_url">&#9650;</a>
+                    <a class="down"
+                       tal:condition="viewlet/down_url | nothing"
+                       tal:attributes="href viewlet/down_url">&#9660;</a>
+                    <a class="hide"
+                       i18n:translate="label_hide_item"
+                       tal:attributes="href viewlet/hide_url">Hide</a>
+                    <a class="show"
+                       i18n:translate="label_show_item"
+                       tal:attributes="href viewlet/show_url">Show</a>
+                </dt>
+                <dd>
+                    <div tal:replace="structure viewlet/content"></div>
+                    <div class="visualClear"><!-- --></div>
+                </dd>
+            </dl>
+        </dd>
+    </dl>
+</div>

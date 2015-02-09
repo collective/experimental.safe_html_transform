@@ -1,0 +1,13 @@
+setuptools
+zope.annotation
+zope.container
+zope.security
+zope.component>=3.8.0
+zope.event
+zope.interface
+zope.lifecycleevent
+zope.location>=3.7.0
+
+[test]
+zope.configuration
+zope.testing

@@ -1,0 +1,15 @@
+setuptools
+zope.browser
+zope.component
+zope.configuration
+zope.contenttype >= 3.5
+zope.event
+zope.exceptions
+zope.i18n
+zope.interface
+zope.location
+zope.proxy
+zope.security
+
+[test]
+zope.testing

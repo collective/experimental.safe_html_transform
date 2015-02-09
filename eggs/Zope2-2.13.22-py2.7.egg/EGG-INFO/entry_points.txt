@@ -1,0 +1,10 @@
+[paste.app_factory]
+main = Zope2.Startup.run:make_wsgi_app
+
+[console_scripts]
+runzope = Zope2.Startup.run:run
+zopectl = Zope2.Startup.zopectl:run
+zpasswd = Zope2.utilities.zpasswd:main
+addzope2user = Zope2.utilities.adduser:main
+mkzopeinstance = Zope2.utilities.mkzopeinstance:main
+

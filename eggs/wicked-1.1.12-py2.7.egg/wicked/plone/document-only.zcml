@@ -1,0 +1,23 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:wicked="http://namespaces.openplans.org/wicked">
+
+  <include package="wicked.at" />
+
+  <wicked:decorate-at-field
+     fieldclass="Products.Archetypes.Field.TextField"
+     />
+
+  <!-- ATDocument -->
+
+  <class class="Products.ATContentTypes.content.document.ATDocument">
+      <implements interface="wicked.interfaces.IAmWicked" />
+  </class>
+
+  <wicked:atschema-fields-implement
+     atclass="Products.ATContentTypes.content.document.ATDocument"
+     fields="text"
+     implements="wicked.at.interfaces.IAmATWickedField"
+     />
+
+</configure>

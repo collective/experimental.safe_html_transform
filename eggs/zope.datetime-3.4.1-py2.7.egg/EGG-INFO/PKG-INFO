@@ -1,0 +1,26 @@
+Metadata-Version: 1.0
+Name: zope.datetime
+Version: 3.4.1
+Summary: Zope datetime
+Home-page: http://pypi.python.org/pypi/zope.datetime
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Commonly used date and time related utility functions.
+        
+        CHANGES
+        =======
+        
+        3.4.1 (2011-11-29)
+        ------------------
+        
+        - Added test cases from LP #139360 (all passed without modification to
+          the ``parse`` function).
+        - Remove unneeded ``zope.testing`` dependency.
+        
+        3.4.0 (2007-07-20)
+        ------------------
+        
+        - Initial release as a separate project.
+        
+Platform: UNKNOWN

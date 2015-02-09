@@ -1,0 +1,71 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="atreferencebrowserwidget">
+
+    <five:registerPackage package="." initialize=".initialize" />
+    <cmf:registerDirectory name="referencebrowser" />
+
+    <genericsetup:registerProfile
+       name="default"
+       title="Referencebrowser widget"
+       directory="profiles/default"
+       description="An alternate referencebrowser implementation"
+       provides="Products.GenericSetup.interfaces.EXTENSION"
+       />
+
+    <include package=".browser" />
+
+<!--   <class class="Products.ATBackRef.BackReferenceField"
+          zcml:condition="installed Products.ATBackRef.BackReferenceField">
+     <implements interface=".interfaces.IATBackRefereneceField" />
+   </class> -->
+
+   <class class="Products.Archetypes.Field.ReferenceField">
+     <implements interface=".interfaces.IATReferenceField" />
+   </class>
+
+   <class class="plonerelations.ATField.ploneRelationsATField.PloneRelationsATField"
+          zcml:condition="installed plonerelations.ATField">
+     <implements interface=".interfaces.IPloneRelationsRefField" />
+   </class>
+
+   <class class="plonerelations.ATField.ploneRelationsATField.ReversePloneRelationsATField"
+          zcml:condition="installed plonerelations.ATField">
+     <implements interface=".interfaces.IPloneRelationsRevRefField" />
+   </class>
+
+  <adapter
+     for="Products.Archetypes.interfaces.IReferenceable
+          .interfaces.IATReferenceField"
+     factory=".adapter.ATReferenceAdapter"
+     provides=".interfaces.IFieldRelation"
+     />
+
+  <adapter
+      for="Products.Archetypes.interfaces.IReferenceable
+           .interfaces.IATBackRefereneceField"
+      factory=".adapter.ATBackReferenceAdapter"
+      provides=".interfaces.IFieldRelation"
+      />
+
+  <adapter
+     for="Products.Archetypes.interfaces.IReferenceable
+          .interfaces.IPloneRelationsRefField"
+     factory=".adapter.PloneRelationsAdapter"
+     provides=".interfaces.IFieldRelation"
+     />
+
+  <adapter
+      for="Products.Archetypes.interfaces.IReferenceable
+           .interfaces.IPloneRelationsRevRefField"
+      factory=".adapter.PloneRelationsRevAdapter"
+      provides=".interfaces.IFieldRelation"
+      />
+
+  <five:deprecatedManageAddDelete class=".demo.RefBrowserDemo" />
+
+</configure>

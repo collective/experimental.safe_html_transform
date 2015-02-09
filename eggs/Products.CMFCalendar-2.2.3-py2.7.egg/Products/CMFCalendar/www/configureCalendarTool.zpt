@@ -1,0 +1,78 @@
+<tal:header tal:replace="structure here/manage_page_header">header</tal:header>
+<tal:tabs   tal:replace="structure here/manage_tabs">tabs</tal:tabs>
+
+
+<form action="edit_configuration" method="post">
+
+ <h3>Portal Types to show in the calendar</h3>
+ <select name="show_types:list" size="7" multiple="multiple">
+ 
+  <tal:types tal:repeat="type here/portal_types/objectIds">
+  
+   <option value="#"
+           tal:attributes="value type"
+           tal:content="type"
+           tal:condition="python: type not in here.getCalendarTypes()">type</option>
+
+   <option value="#" selected="selected"
+           tal:attributes="value type"
+           tal:content="type"
+           tal:condition="python: type in here.getCalendarTypes()">type</option>
+
+  </tal:types>
+
+ </select>
+ 
+ <p>
+ All types that are to show in the calendar must have an attribute 'start' and 
+ an attribute 'end' which return DateTime objects to the Catalog.
+ </p>
+
+ <h3>Workflow states to show in the calendar</h3>
+ <tal:define define="states here/getCalendarStates">
+
+  <textarea name="show_states:lines" rows="5" cols="20" wrap="off"
+            tal:content="python:'\n'.join(states)">state</textarea>
+
+ </tal:define>
+
+ <p>
+ Each name must be on a separate line.
+ </p>
+
+ <h3>Preserve selected year and month</h3>
+<p>
+<tal:define tal:define="use_session here/portal_calendar/getUseSession">
+
+    <tal:use_session tal:condition="python:use_session">
+      <input type="radio" name="use_session" value="True" checked="checked" />Use sessions to remember the calendars state<br />
+      <input type="radio" name="use_session" value="" />Don't use sessions to remember the calendars state<br />
+    </tal:use_session>
+      
+    <tal:use_session tal:condition="python:not use_session">
+      <input type="radio" name="use_session" value="True" />Use sessions to remember the calendars state<br />
+      <input type="radio" name="use_session" value="" checked="checked" />Don't use sessions to remember the calendars state<br />
+    </tal:use_session>
+
+  </tal:define>
+</p>
+  <br/>
+  <h3>First day of week</h3>
+  <p>
+    <select name="firstweekday:int" 
+            tal:define="firstweekday here/portal_calendar/getFirstWeekDay;
+                        days python: [(0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'), (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')]">
+      <span tal:repeat="day days">
+        <option value="" 
+                tal:attributes="value python: day[0];
+                                selected python: day[0] == firstweekday"
+                tal:content="python: day[1]"/>
+       </span>
+    </select>
+  </p>
+  <br/>
+  
+ <input type="submit" value="Submit"/>
+</form>
+
+<tal:footer tal:replace="structure here/manage_page_footer">footer</tal:footer>

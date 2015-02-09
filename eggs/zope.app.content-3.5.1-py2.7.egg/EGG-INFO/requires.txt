@@ -1,0 +1,8 @@
+setuptools
+zope.componentvocabulary
+zope.interface
+zope.schema
+zope.security
+
+[test]
+zope.testing

@@ -1,0 +1,55 @@
+<metal:master-macro define-macro="master">
+  <h1 tal:replace="structure here/manage_page_header" />
+  <h2 tal:replace="structure here/manage_tabs" />
+  <metal:body-slot define-slot="body">
+    Putting body here
+  </metal:body-slot>
+  <h1 tal:replace="structure here/manage_page_footer" />
+</metal:master-macro>
+
+<metal:to-english-macro define-macro="to_english">
+  <a href="#"
+     tal:attributes="href view/to_english_link">[Switch to full english]</a>
+</metal:to-english-macro>
+
+<metal:attributes-macro define-macro="summary"
+      i18n:domain="aws.zope2zcmldoc">
+  <h3 i18n:translate="">Summary</h3>
+  <p class="form-help" tal:content="info/summary">Blah...</p>
+  <h3 i18n:translate="">Attributes</h3>
+  <p i18n:translate="">Required attributes are in <strong>bold</strong>.</p>
+  <table>
+    <tr class="row-hilite">
+      <th i18n:translate="">Name</th>
+      <th i18n:translate="">Default</th>
+      <th i18n:translate="">Type</th>
+      <th i18n:translate="">Description</th>
+    </tr>
+    <tal:loop repeat="attrib info/attributes">
+      <tr class="#"
+          tal:attributes="class attrib/row_class">
+        <td>
+          <tt>
+            <strong tal:omit-tag="not: attrib/required"
+                    tal:content="attrib/name">
+              foo
+            </strong>
+          </tt>
+        </td>
+        <td tal:content="attrib/default">100</td>
+        <td tal:content="attrib/type">Boolean</td>
+        <td>
+          <strong tal:content="attrib/title">Foo</strong>
+          <span tal:content="attrib/description">Lorem ipsum...</span>
+        </td>
+      </tr>
+    </tal:loop>
+  </table>
+  <h3 i18n:translate="">Misc</h3>
+  <p i18n:translate="">Defined in:
+    <span tal:content="info/zcml_source" i18n:name="zcml_source">File stuff...</span>
+  </p>
+  <p i18n:translate="">Handler:
+    <tt tal:content="info/python_handler" i18n:name="python_handler">foo.bar</tt>
+  </p>
+</metal:attributes-macro>

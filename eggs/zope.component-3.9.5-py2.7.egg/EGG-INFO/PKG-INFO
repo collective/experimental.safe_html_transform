@@ -1,0 +1,2611 @@
+Metadata-Version: 1.0
+Name: zope.component
+Version: 3.9.5
+Summary: Zope Component Architecture
+Home-page: http://pypi.python.org/pypi/zope.component
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: *****************************
+        zope.component Package Readme
+        *****************************
+        
+        *This package is intended to be independently reusable in any Python
+        project. It is maintained by the* `Zope Toolkit project <http://docs.zope.org/zopetoolkit/>`_.
+        
+        This package represents the core of the Zope Component Architecture.
+        Together with the 'zope.interface' package, it provides facilities for
+        defining, registering and looking up components.
+        
+        .. contents::
+        
+        Detailed Documentation
+        **********************
+        
+        Zope Component Architecture
+        ===========================
+        
+        This package, together with `zope.interface`, provides facilities for
+        defining, registering and looking up components.  There are two basic
+        kinds of components: adapters and utilities.
+        
+        Utilities
+        ---------
+        
+        Utilities are just components that provide an interface and that are
+        looked up by an interface and a name.  Let's look at a trivial utility
+        definition:
+        
+            >>> from zope import interface
+        
+            >>> class IGreeter(interface.Interface):
+            ...     def greet():
+            ...         "say hello"
+        
+            >>> class Greeter:
+            ...     interface.implements(IGreeter)
+            ...
+            ...     def __init__(self, other="world"):
+            ...         self.other = other
+            ...
+            ...     def greet(self):
+            ...         print "Hello", self.other
+        
+        We can register an instance this class using `provideUtility` [1]_:
+        
+            >>> from zope import component
+            >>> greet = Greeter('bob')
+            >>> component.provideUtility(greet, IGreeter, 'robert')
+        
+        In this example we registered the utility as providing the `IGreeter`
+        interface with a name of 'bob'. We can look the interface up with
+        either `queryUtility` or `getUtility`:
+        
+            >>> component.queryUtility(IGreeter, 'robert').greet()
+            Hello bob
+        
+            >>> component.getUtility(IGreeter, 'robert').greet()
+            Hello bob
+        
+        `queryUtility` and `getUtility` differ in how failed lookups are handled:
+        
+            >>> component.queryUtility(IGreeter, 'ted')
+            >>> component.queryUtility(IGreeter, 'ted', 42)
+            42
+            >>> component.getUtility(IGreeter, 'ted')
+            ... # doctest: +ELLIPSIS
+            Traceback (most recent call last):
+            ...
+            ComponentLookupError: (<InterfaceClass ...IGreeter>, 'ted')
+        
+        If a component provides only one interface, as in the example above,
+        then we can omit the provided interface from the call to `provideUtility`:
+        
+            >>> ted = Greeter('ted')
+            >>> component.provideUtility(ted, name='ted')
+            >>> component.queryUtility(IGreeter, 'ted').greet()
+            Hello ted
+        
+        The name defaults to an empty string:
+        
+            >>> world = Greeter()
+            >>> component.provideUtility(world)
+            >>> component.queryUtility(IGreeter).greet()
+            Hello world
+        
+        Adapters
+        --------
+        
+        Adapters are components that are computed from other components to
+        adapt them to some interface.  Because they are computed from other
+        objects, they are provided as factories, usually classes.  Here, we'll
+        create a greeter for persons, so we can provide personalized greetings
+        for different people:
+        
+            >>> class IPerson(interface.Interface):
+            ...     name = interface.Attribute("Name")
+        
+            >>> class PersonGreeter:
+            ...
+            ...     component.adapts(IPerson)
+            ...     interface.implements(IGreeter)
+            ...
+            ...     def __init__(self, person):
+            ...         self.person = person
+            ...
+            ...     def greet(self):
+            ...         print "Hello", self.person.name
+        
+        The class defines a constructor that takes an argument for every
+        object adapted.
+        
+        We used `component.adapts` to declare what we adapt.  We can find
+        out if an object declares that it adapts anything using adaptedBy:
+        
+            >>> list(component.adaptedBy(PersonGreeter)) == [IPerson]
+            True
+        
+        If an object makes no declaration, then None is returned:
+        
+            >>> component.adaptedBy(Greeter()) is None
+            True
+        
+        
+        If we declare the interfaces adapted and if we provide only one
+        interface, as in the example above, then we can provide the adapter
+        very simply [1]_:
+        
+            >>> component.provideAdapter(PersonGreeter)
+        
+        For adapters that adapt a single interface to a single interface
+        without a name, we can get the adapter by simply calling the
+        interface:
+        
+            >>> class Person:
+            ...     interface.implements(IPerson)
+            ...
+            ...     def __init__(self, name):
+            ...         self.name = name
+        
+            >>> IGreeter(Person("Sally")).greet()
+            Hello Sally
+        
+        We can also provide arguments to be very specific about what
+        how to register the adapter.
+        
+            >>> class BobPersonGreeter(PersonGreeter):
+            ...     name = 'Bob'
+            ...     def greet(self):
+            ...         print "Hello", self.person.name, "my name is", self.name
+        
+            >>> component.provideAdapter(
+            ...                        BobPersonGreeter, [IPerson], IGreeter, 'bob')
+        
+        The arguments can also be provided as keyword arguments:
+        
+            >>> class TedPersonGreeter(BobPersonGreeter):
+            ...     name = "Ted"
+        
+            >>> component.provideAdapter(
+            ...     factory=TedPersonGreeter, adapts=[IPerson],
+            ...     provides=IGreeter, name='ted')
+        
+        For named adapters, use `queryAdapter`, or `getAdapter`:
+        
+            >>> component.queryAdapter(Person("Sally"), IGreeter, 'bob').greet()
+            Hello Sally my name is Bob
+        
+            >>> component.getAdapter(Person("Sally"), IGreeter, 'ted').greet()
+            Hello Sally my name is Ted
+        
+        If an adapter can't be found, `queryAdapter` returns a default value
+        and `getAdapter` raises an error:
+        
+            >>> component.queryAdapter(Person("Sally"), IGreeter, 'frank')
+            >>> component.queryAdapter(Person("Sally"), IGreeter, 'frank', 42)
+            42
+            >>> component.getAdapter(Person("Sally"), IGreeter, 'frank')
+            ... # doctest: +ELLIPSIS
+            Traceback (most recent call last):
+            ...
+            ComponentLookupError: (...Person...>, <...IGreeter>, 'frank')
+        
+        Adapters can adapt multiple objects:
+        
+            >>> class TwoPersonGreeter:
+            ...
+            ...     component.adapts(IPerson, IPerson)
+            ...     interface.implements(IGreeter)
+            ...
+            ...     def __init__(self, person, greeter):
+            ...         self.person = person
+            ...         self.greeter = greeter
+            ...
+            ...     def greet(self):
+            ...         print "Hello", self.person.name
+            ...         print "my name is", self.greeter.name
+        
+            >>> component.provideAdapter(TwoPersonGreeter)
+        
+        To look up a multi-adapter, use either `queryMultiAdapter` or
+        `getMultiAdapter`:
+        
+            >>> component.queryMultiAdapter((Person("Sally"), Person("Bob")),
+            ...                                  IGreeter).greet()
+            Hello Sally
+            my name is Bob
+        
+        Adapters need not be classes.  Any callable will do.  We use the
+        adapter decorator (in the Python 2.4 decorator sense) to declare that
+        a callable object adapts some interfaces (or classes):
+        
+            >>> class IJob(interface.Interface):
+            ...     "A job"
+        
+            >>> class Job:
+            ...     interface.implements(IJob)
+        
+            >>> def personJob(person):
+            ...     return getattr(person, 'job', None)
+            >>> personJob = interface.implementer(IJob)(personJob)
+            >>> personJob = component.adapter(IPerson)(personJob)
+        
+        In Python 2.4, the example can be written:
+        
+            >>> @interface.implementer(IJob)
+            ... @component.adapter(IPerson)
+            ... def personJob(person):
+            ...     return getattr(person, 'job', None)
+        
+        which looks a bit nicer.
+        
+        In this example, the personJob function simply returns the person's
+        `job` attribute if present, or None if it's not present.  An adapter
+        factory can return None to indicate that adaptation wasn't possible.
+        Let's register this adapter and try it out:
+        
+            >>> component.provideAdapter(personJob)
+            >>> sally = Person("Sally")
+            >>> IJob(sally) # doctest: +ELLIPSIS
+            Traceback (most recent call last):
+            ...
+            TypeError: ('Could not adapt', ...
+        
+        The adaptation failed because sally didn't have a job.  Let's give her
+        one:
+        
+            >>> job = Job()
+            >>> sally.job = job
+            >>> IJob(sally) is job
+            True
+        
+        Subscription Adapters
+        ---------------------
+        
+        Unlike regular adapters, subscription adapters are used when we want
+        all of the adapters that adapt an object to a particular adapter.
+        
+        Consider a validation problem.  We have objects and we want to assess
+        whether they meet some sort of standards.  We define a validation
+        interface:
+        
+            >>> class IValidate(interface.Interface):
+            ...     def validate(ob):
+            ...         """Determine whether the object is valid
+            ...
+            ...         Return a string describing a validation problem.
+            ...         An empty string is returned to indicate that the
+            ...         object is valid.
+            ...         """
+        
+        Perhaps we have documents:
+        
+            >>> class IDocument(interface.Interface):
+            ...     summary = interface.Attribute("Document summary")
+            ...     body = interface.Attribute("Document text")
+        
+            >>> class Document:
+            ...     interface.implements(IDocument)
+            ...     def __init__(self, summary, body):
+            ...         self.summary, self.body = summary, body
+        
+        Now, we may want to specify various validation rules for
+        documents. For example, we might require that the summary be a single
+        line:
+        
+            >>> class SingleLineSummary:
+            ...     component.adapts(IDocument)
+            ...     interface.implements(IValidate)
+            ...
+            ...     def __init__(self, doc):
+            ...         self.doc = doc
+            ...
+            ...     def validate(self):
+            ...         if '\n' in self.doc.summary:
+            ...             return 'Summary should only have one line'
+            ...         else:
+            ...             return ''
+        
+        Or we might require the body to be at least 1000 characters in length:
+        
+            >>> class AdequateLength:
+            ...     component.adapts(IDocument)
+            ...     interface.implements(IValidate)
+            ...
+            ...     def __init__(self, doc):
+            ...         self.doc = doc
+            ...
+            ...     def validate(self):
+            ...         if len(self.doc.body) < 1000:
+            ...             return 'too short'
+            ...         else:
+            ...             return ''
+        
+        We can register these as subscription adapters [1]_:
+        
+            >>> component.provideSubscriptionAdapter(SingleLineSummary)
+            >>> component.provideSubscriptionAdapter(AdequateLength)
+        
+        We can then use the subscribers to validate objects:
+        
+            >>> doc = Document("A\nDocument", "blah")
+            >>> [adapter.validate()
+            ...  for adapter in component.subscribers([doc], IValidate)
+            ...  if adapter.validate()]
+            ['Summary should only have one line', 'too short']
+        
+            >>> doc = Document("A\nDocument", "blah" * 1000)
+            >>> [adapter.validate()
+            ...  for adapter in component.subscribers([doc], IValidate)
+            ...  if adapter.validate()]
+            ['Summary should only have one line']
+        
+            >>> doc = Document("A Document", "blah")
+            >>> [adapter.validate()
+            ...  for adapter in component.subscribers([doc], IValidate)
+            ...  if adapter.validate()]
+            ['too short']
+        
+        Handlers
+        --------
+        
+        Handlers are subscription adapter factories that don't produce
+        anything.  They do all of their work when called.  Handlers
+        are typically used to handle events.
+        
+        Event subscribers are different from other subscription adapters in
+        that the caller of event subscribers doesn't expect to interact with
+        them in any direct way.  For example, an event publisher doesn't
+        expect to get any return value.  Because subscribers don't need to
+        provide an API to their callers, it is more natural to define them
+        with functions, rather than classes.  For example, in a
+        document-management system, we might want to record creation times for
+        documents:
+        
+            >>> import datetime
+        
+            >>> def documentCreated(event):
+            ...     event.doc.created = datetime.datetime.utcnow()
+        
+        In this example, we have a function that takes an event and performs
+        some processing.  It doesn't actually return anything.  This is a
+        special case of a subscription adapter that adapts an event to
+        nothing.  All of the work is done when the adapter "factory" is
+        called.  We call subscribers that don't actually create anything
+        "handlers".  There are special APIs for registering and calling
+        them.
+        
+        To register the subscriber above, we define a document-created event:
+        
+            >>> class IDocumentCreated(interface.Interface):
+            ...     doc = interface.Attribute("The document that was created")
+        
+            >>> class DocumentCreated:
+            ...     interface.implements(IDocumentCreated)
+            ...
+            ...     def __init__(self, doc):
+            ...         self.doc = doc
+        
+        We'll also change our handler definition to:
+        
+            >>> def documentCreated(event):
+            ...     event.doc.created = datetime.datetime.utcnow()
+        
+            >>> documentCreated = component.adapter(IDocumentCreated)(documentCreated)
+        
+        Note that in Python 2.4, this can be written:
+        
+            >>> @component.adapter(IDocumentCreated)
+            ... def documentCreated(event):
+            ...     event.doc.created = datetime.datetime.utcnow()
+        
+        This marks the handler as an adapter of `IDocumentCreated` events.
+        
+        Now we'll register the handler  [1]_:
+        
+            >>> component.provideHandler(documentCreated)
+        
+        Now, if we can create an event and use the `handle` function to call
+        handlers registered for the event:
+        
+            >>> component.handle(DocumentCreated(doc))
+            >>> doc.created.__class__.__name__
+            'datetime'
+        
+        
+        
+        .. [1] CAUTION: This API should only be used from test or
+               application-setup code. This API shouldn't be used by regular
+               library modules, as component registration is a configuration
+               activity.
+        
+        Events
+        ======
+        
+        The Component Architecture provides a way to dispatch events to event
+        handlers.  Event handlers are registered as *subscribers*
+        a.k.a. *handlers*.
+        
+        Before we can start we need to import ``zope.component.event`` to make
+        the dispatching effective:
+        
+          >>> import zope.component.event
+        
+        Consider two event classes:
+        
+          >>> class Event1(object):
+          ...     pass
+        
+          >>> class Event2(Event1):
+          ...     pass
+        
+        Now consider two handlers for these event classes:
+        
+          >>> called = []
+        
+          >>> import zope.component
+          >>> @zope.component.adapter(Event1)
+          ... def handler1(event):
+          ...     called.append(1)
+        
+          >>> @zope.component.adapter(Event2)
+          ... def handler2(event):
+          ...     called.append(2)
+        
+        We can register them with the Component Architecture:
+        
+          >>> zope.component.provideHandler(handler1)
+          >>> zope.component.provideHandler(handler2)
+        
+        Now let's go through the events.  We'll see that the handlers have been
+        called accordingly:
+        
+          >>> from zope.event import notify
+          >>> notify(Event1())
+          >>> called
+          [1]
+        
+          >>> del called[:]
+          >>> notify(Event2())
+          >>> called.sort()
+          >>> called
+          [1, 2]
+        
+        
+        
+        Object events
+        -------------
+        
+        
+        The ``objectEventNotify`` function is a subscriber to dispatch
+        ObjectEvents to interested adapters.
+        
+        First create an object class:
+        
+          >>> class IUseless(zope.interface.Interface):
+          ...     """Useless object"""
+        
+          >>> class UselessObject(object):
+          ...     """Useless object"""
+          ...     zope.interface.implements(IUseless)
+        
+        Then create an event class:
+        
+          >>> class IObjectThrownEvent(zope.component.interfaces.IObjectEvent):
+          ...     """An object has been thrown away"""
+        
+          >>> class ObjectThrownEvent(zope.component.interfaces.ObjectEvent):
+          ...     """An object has been thrown away"""
+          ...     zope.interface.implements(IObjectThrownEvent)
+        
+        Create an object and an event:
+        
+          >>> hammer = UselessObject()
+          >>> event = ObjectThrownEvent(hammer)
+        
+        Then notify the event to the subscribers.
+        Since the subscribers list is empty, nothing happens.
+        
+          >>> zope.component.event.objectEventNotify(event)
+        
+        Now create an handler for the event:
+        
+          >>> events = []
+          >>> def record(*args):
+          ...     events.append(args)
+        
+          >>> zope.component.provideHandler(record, [IUseless, IObjectThrownEvent])
+        
+        The event is notified to the subscriber:
+        
+          >>> zope.component.event.objectEventNotify(event)
+          >>> events == [(hammer, event)]
+          True
+        
+        Following test demonstrates how a subscriber can raise an exception
+        to prevent an action.
+        
+          >>> zope.component.provideHandler(zope.component.event.objectEventNotify)
+        
+        Let's create a container:
+        
+          >>> class ToolBox(dict):
+          ...     def __delitem__(self, key):
+          ...         notify(ObjectThrownEvent(self[key]))
+          ...         return super(ToolBox,self).__delitem__(key)
+        
+          >>> container = ToolBox()
+        
+        And put the object into the container:
+        
+          >>> container['Red Hammer'] = hammer
+        
+        Create an handler function that will raise an error when called:
+        
+          >>> class Veto(Exception):
+          ...     pass
+        
+          >>> def callback(item, event):
+          ...     assert(item == event.object)
+          ...     raise Veto
+        
+        Register the handler:
+        
+          >>> zope.component.provideHandler(callback, [IUseless, IObjectThrownEvent])
+        
+        Then if we try to remove the object, an ObjectThrownEvent is fired:
+        
+          >>> del container['Red Hammer']
+          ... # doctest: +NORMALIZE_WHITESPACE
+          Traceback (most recent call last):
+          ...
+              raise Veto
+          Veto
+        
+        Factories
+        =========
+        
+        
+        The Factory Class
+        -----------------
+        
+          >>> from zope.interface import Interface
+          >>> class IFunction(Interface):
+          ...     pass
+        
+          >>> class IKlass(Interface):
+          ...     pass
+        
+          >>> from zope.interface import implements
+          >>> class Klass(object):
+          ...     implements(IKlass)
+          ... 
+          ...     def __init__(self, *args, **kw):
+          ...         self.args = args
+          ...         self.kw = kw
+        
+          >>> from zope.component.factory import Factory
+          >>> factory = Factory(Klass, 'Klass', 'Klassier')
+          >>> factory2 = Factory(lambda x: x, 'Func', 'Function')
+          >>> factory3 = Factory(lambda x: x, 'Func', 'Function', (IFunction,))
+        
+        Calling a Factory
+        ~~~~~~~~~~~~~~~~~
+        
+        Here we test whether the factory correctly creates the objects and
+        including the correct handling of constructor elements.
+        
+        First we create a factory that creates instanace of the `Klass` class:
+        
+          >>> factory = Factory(Klass, 'Klass', 'Klassier')
+        
+        Now we use the factory to create the instance
+        
+          >>> kl = factory(1, 2, foo=3, bar=4)
+        
+        and make sure that the correct class was used to create the object:
+        
+          >>> kl.__class__
+          <class 'Klass'>
+        
+        Since we passed in a couple positional and keyword arguments
+          
+          >>> kl.args
+          (1, 2)
+          >>> kl.kw
+          {'foo': 3, 'bar': 4}
+          
+          >>> factory2(3)
+          3
+          >>> factory3(3)
+          3
+        
+        
+        Title and Description
+        ~~~~~~~~~~~~~~~~~~~~~
+        
+          >>> factory.title
+          'Klass'
+          >>> factory.description
+          'Klassier'
+          >>> factory2.title
+          'Func'
+          >>> factory2.description
+          'Function'
+          >>> factory3.title
+          'Func'
+          >>> factory3.description
+          'Function'
+        
+        
+        Provided Interfaces
+        ~~~~~~~~~~~~~~~~~~~
+        
+          >>> implemented = factory.getInterfaces()
+          >>> implemented.isOrExtends(IKlass)
+          True
+          >>> list(implemented)
+          [<InterfaceClass __builtin__.IKlass>]
+          
+          >>> implemented2 = factory2.getInterfaces()
+          >>> list(implemented2)
+          []
+          
+          >>> implemented3 = factory3.getInterfaces()
+          >>> list(implemented3)
+          [<InterfaceClass __builtin__.IFunction>]
+        
+        
+        The Component Architecture Factory API
+        --------------------------------------
+        
+          >>> import zope.component
+          >>> factory = Factory(Klass, 'Klass', 'Klassier')
+          >>> gsm = zope.component.getGlobalSiteManager() 
+        
+          >>> from zope.component.interfaces import IFactory
+          >>> gsm.registerUtility(factory, IFactory, 'klass')
+        
+        Creating an Object
+        ~~~~~~~~~~~~~~~~~~
+        
+          >>> kl = zope.component.createObject('klass', 1, 2, foo=3, bar=4)
+          >>> isinstance(kl, Klass)
+          True
+          >>> kl.args
+          (1, 2)
+          >>> kl.kw
+          {'foo': 3, 'bar': 4}
+        
+        Accessing Provided Interfaces
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
+          >>> implemented = zope.component.getFactoryInterfaces('klass')
+          >>> implemented.isOrExtends(IKlass)
+          True
+          >>> [iface for iface in implemented]
+          [<InterfaceClass __builtin__.IKlass>]
+        
+        List of All Factories
+        ~~~~~~~~~~~~~~~~~~~~~
+        
+          >>> [(name, fac.__class__) for name, fac in
+          ...  zope.component.getFactoriesFor(IKlass)]
+          [(u'klass', <class 'zope.component.factory.Factory'>)]
+        
+        
+        Component-Management objects
+        ============================
+        
+        Component-management objects provide a higher-level
+        component-management API over the basic adapter-registration API
+        provided by the zope.interface package.  In particular, it provides:
+        
+        - utilities
+        
+        - support for computing adapters, rather than just looking up adapter
+          factories.
+        
+        - management of registration comments
+        
+        The zope.component.registry.Components class provides an
+        implementation of zope.component.interfaces.IComponents that provides
+        these features.
+        
+            >>> from zope.component import registry
+            >>> from zope.component import tests
+            >>> components = registry.Components('comps')
+        
+        As components are registered, events are generated.  Let's register
+        an event subscriber, so we can see the events generated:
+        
+            >>> import zope.event
+            >>> def logevent(event):
+            ...     print event
+            >>> zope.event.subscribers.append(logevent)
+            
+        Utilities
+        ---------
+        
+        You can register Utilities using registerUtility:
+        
+            >>> components.registerUtility(tests.U1(1))
+            Registered event:
+            UtilityRegistration(<Components comps>, I1, u'', 1, None, u'')
+        
+        Here we didn't specify an interface or name.  An unnamed utility was
+        registered for interface I1, since that is only interface implemented
+        by the U1 class:
+        
+            >>> components.getUtility(tests.I1)
+            U1(1)
+        
+        You can also register a utility using a factory instead of a utility instance:
+        
+            >>> def factory():
+            ...    return tests.U1(1)
+            >>> components.registerUtility(factory=factory)
+            Unregistered event:
+            UtilityRegistration(<Components comps>, I1, u'', 1, None, u'')
+            Registered event:
+            UtilityRegistration(<Components comps>, I1, u'', 1, <function factory at <SOME ADDRESS>>, u'')
+        
+        
+        If a component implements other than one interface or no interface,
+        then an error will be raised:
+        
+            >>> components.registerUtility(tests.U12(2))
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The utility doesn't provide a single interface and
+            no provided interface was specified.
+        
+            >>> components.registerUtility(tests.A)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The utility doesn't provide a single interface and
+            no provided interface was specified.
+         
+            
+        We can provide an interface if desired:
+        
+            >>> components.registerUtility(tests.U12(2), tests.I2)
+            Registered event:
+            UtilityRegistration(<Components comps>, I2, u'', 2, None, u'')
+        
+        and we can specify a name:
+        
+            >>> components.registerUtility(tests.U12(3), tests.I2, u'three')
+            Registered event:
+            UtilityRegistration(<Components comps>, I2, u'three', 3, None, u'')
+        
+            >>> components.getUtility(tests.I2)
+            U12(2)
+        
+            >>> components.getUtility(tests.I2, 'three')
+            U12(3)
+        
+        If you try to get a utility that doesn't exist, you'll get a component
+        lookup error:
+        
+            >>> components.getUtility(tests.I3)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            ComponentLookupError: 
+            (<InterfaceClass zope.component.tests.I3>, u'')
+        
+        Unless you use queryUtility:
+        
+            >>> components.queryUtility(tests.I3)
+            >>> components.queryUtility(tests.I3, default=42)
+            42
+        
+        You can get information about registered utilities with the
+        registeredUtilities method:
+        
+            >>> for registration in sorted(components.registeredUtilities()):
+            ...     print registration.provided, registration.name
+            ...     print registration.component, registration.info
+            <InterfaceClass zope.component.tests.I1> 
+            U1(1) 
+            <InterfaceClass zope.component.tests.I2> 
+            U12(2) 
+            <InterfaceClass zope.component.tests.I2> three
+            U12(3) 
+        
+        Duplicate registrations replace existing ones:
+        
+            >>> components.registerUtility(tests.U1(4), info=u'use 4 now')
+            Unregistered event:
+            UtilityRegistration(<Components comps>, I1, u'', 1, <function factory at <SOME ADDRESS>>, u'')
+            Registered event:
+            UtilityRegistration(<Components comps>, I1, u'', 4, None, u'use 4 now')
+            >>> components.getUtility(tests.I1)
+            U1(4)
+        
+            >>> for registration in sorted(components.registeredUtilities()):
+            ...     print registration.provided, registration.name
+            ...     print registration.component, registration.info
+            <InterfaceClass zope.component.tests.I1> 
+            U1(4) use 4 now
+            <InterfaceClass zope.component.tests.I2> 
+            U12(2) 
+            <InterfaceClass zope.component.tests.I2> three
+            U12(3) 
+        
+        As shown in the this example, you can provide an "info" argumemnt when
+        registering utilities.  This provides extra documentation about the
+        registration itself that is shown when listing registrations.
+        
+        You can also unregister utilities:
+        
+            >>> components.unregisterUtility(provided=tests.I1)
+            Unregistered event:
+            UtilityRegistration(<Components comps>, I1, u'', 4, None, u'use 4 now')
+            True
+        
+        A boolean is returned indicating whether anything changed:
+        
+            >>> components.queryUtility(tests.I1)
+            >>> for registration in sorted(components.registeredUtilities()):
+            ...     print registration.provided, registration.name
+            ...     print registration.component, registration.info
+            <InterfaceClass zope.component.tests.I2> 
+            U12(2) 
+            <InterfaceClass zope.component.tests.I2> three
+            U12(3) 
+        
+        When you unregister, you can specify a component.  If the component
+        doesn't match the one registered, then nothing happens:
+        
+            >>> u5 = tests.U1(5)
+            >>> components.registerUtility(u5)
+            Registered event:
+            UtilityRegistration(<Components comps>, I1, u'', 5, None, u'')
+            >>> components.unregisterUtility(tests.U1(6))
+            False
+            >>> components.queryUtility(tests.I1)
+            U1(5)
+            >>> components.unregisterUtility(u5)
+            Unregistered event:
+            UtilityRegistration(<Components comps>, I1, u'', 5, None, u'')
+            True
+            >>> components.queryUtility(tests.I1)
+        
+        You can get the name and utility for all of the utilities that provide
+        an interface using getUtilitiesFor:
+        
+            >>> sorted(components.getUtilitiesFor(tests.I2))
+            [(u'', U12(2)), (u'three', U12(3))]
+        
+        getAllUtilitiesRegisteredFor is similar to getUtilitiesFor except that
+        it includes utilities that are overridden.  For example, we'll
+        register a utility that for an extending interface of I2:
+        
+            >>> util = tests.U('ext')
+            >>> components.registerUtility(util, tests.I2e)
+            Registered event:
+            UtilityRegistration(<Components comps>, I2e, u'', ext, None, u'')
+        
+        We don't get the new utility for getUtilitiesFor:
+        
+            >>> sorted(components.getUtilitiesFor(tests.I2))
+            [(u'', U12(2)), (u'three', U12(3))]
+        
+        but we do get it from getAllUtilitiesRegisteredFor:
+        
+            >>> sorted(map(str, components.getAllUtilitiesRegisteredFor(tests.I2)))
+            ['U(ext)', 'U12(2)', 'U12(3)']
+        
+        Removing a utility also makes it disappear from getUtilitiesFor:
+        
+            >>> components.unregisterUtility(util, tests.I2e)
+            Unregistered event:
+            UtilityRegistration(<Components comps>, I2e, u'', ext, None, u'')
+            True
+            >>> list(components.getAllUtilitiesRegisteredFor(tests.I2e))
+            []
+        
+        Adapters
+        --------
+        
+        You can register adapters with registerAdapter:
+        
+            >>> components.registerAdapter(tests.A12_1)
+            Registered event:
+            AdapterRegistration(<Components comps>, [I1, I2], IA1, u'', A12_1, u'')
+        
+        Here, we didn't specify required interfaces, a provided interface, or
+        a name.  The required interfaces were determined from the factory
+        s __component_adapts__ attribute and the provided interface was
+        determined by introspecting what the factory implements.
+        
+            >>> components.getMultiAdapter((tests.U1(6), tests.U12(7)), tests.IA1)
+            A12_1(U1(6), U12(7))
+        
+        If a factory implements more than one interface, an exception will be
+        raised:
+        
+            >>> components.registerAdapter(tests.A1_12)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't implement a single
+            interface and no provided interface was specified.
+        
+        Unless the provided interface is specified:
+        
+            >>> components.registerAdapter(tests.A1_12, provided=tests.IA2)
+            Registered event:
+            AdapterRegistration(<Components comps>, [I1], IA2, u'', A1_12, u'')
+        
+        If a factory doesn't declare an implemented interface, an exception will be
+        raised:
+        
+            >>> components.registerAdapter(tests.A12_)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't implement a single
+            interface and no provided interface was specified. 
+        
+        Unless the provided interface is specified:
+        
+            >>> components.registerAdapter(tests.A12_, provided=tests.IA2)
+            Registered event:
+            AdapterRegistration(<Components comps>, [I1, I2], IA2, u'', A12_, u'')
+        
+        The required interface needs to be specified in the registration if
+        the factory doesn't have a __component_adapts__ attribute: 
+        
+            >>> components.registerAdapter(tests.A_2)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't have a __component_adapts__
+            attribute and no required specifications were specified 
+        
+        Unless the required specifications specified:
+        
+            >>> components.registerAdapter(tests.A_2, required=[tests.I3])
+            Registered event:
+            AdapterRegistration(<Components comps>, [I3], IA2, u'', A_2, u'')
+        
+        Classes can be specified in place of specifications, in which case the
+        implementedBy specification for the class is used:
+        
+            >>> components.registerAdapter(tests.A_3, required=[tests.U],
+            ...                            info="Really class specific")
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Registered event:
+            AdapterRegistration(<Components comps>, [zope.component.tests.U], IA3, u'',
+                                A_3, 'Really class specific')
+        
+        We can see the adapters that have been registered using the
+        registeredAdapters method:
+        
+            >>> for registration in sorted(components.registeredAdapters()):
+            ...     print registration.required
+            ...     print registration.provided, registration.name
+            ...     print registration.factory, registration.info
+            ... # doctest: +NORMALIZE_WHITESPACE
+            (<InterfaceClass zope.component.tests.I1>, 
+             <InterfaceClass zope.component.tests.I2>)
+            <InterfaceClass zope.component.tests.IA1> 
+            zope.component.tests.A12_1 
+            (<InterfaceClass zope.component.tests.I1>, 
+             <InterfaceClass zope.component.tests.I2>)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A12_ 
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A1_12 
+            (<InterfaceClass zope.component.tests.I3>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A_2 
+            (<implementedBy zope.component.tests.U>,)
+            <InterfaceClass zope.component.tests.IA3> 
+            zope.component.tests.A_3 Really class specific
+        
+        As with utilities, we can provide registration information when
+        registering adapters.
+        
+        If you try to fetch an adapter that isn't registered, you'll get a
+        component-lookup error:
+        
+            >>> components.getMultiAdapter((tests.U(8), ), tests.IA1)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            ComponentLookupError: ((U(8),), 
+                                  <InterfaceClass zope.component.tests.IA1>, u'')
+        
+        unless you use queryAdapter:
+        
+            >>> components.queryMultiAdapter((tests.U(8), ), tests.IA1)
+            >>> components.queryMultiAdapter((tests.U(8), ), tests.IA1, default=42)
+            42
+        
+        When looking up an adapter for a single object, you can use the
+        slightly simpler getAdapter and queryAdapter calls:
+        
+            >>> components.getAdapter(tests.U1(9), tests.IA2)
+            A1_12(U1(9))
+        
+            >>> components.queryAdapter(tests.U1(9), tests.IA2)
+            A1_12(U1(9))
+        
+            >>> components.getAdapter(tests.U(8), tests.IA1)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            ComponentLookupError: (U(8), 
+                                   <InterfaceClass zope.component.tests.IA1>, u'')
+        
+            >>> components.queryAdapter(tests.U(8), tests.IA2)
+            >>> components.queryAdapter(tests.U(8), tests.IA2, default=42)
+            42
+        
+        You can unregister an adapter.  If a factory is provided and if the
+        rewuired and provided interfaces, can be infered, then they need not
+        be provided:
+        
+            >>> components.unregisterAdapter(tests.A12_1)
+            Unregistered event:
+            AdapterRegistration(<Components comps>, [I1, I2], IA1, u'', A12_1, u'')
+            True
+        
+            >>> for registration in sorted(components.registeredAdapters()):
+            ...     print registration.required
+            ...     print registration.provided, registration.name
+            ...     print registration.factory, registration.info
+            ... # doctest: +NORMALIZE_WHITESPACE
+            (<InterfaceClass zope.component.tests.I1>, 
+             <InterfaceClass zope.component.tests.I2>)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A12_ 
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A1_12 
+            (<InterfaceClass zope.component.tests.I3>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A_2 
+            (<implementedBy zope.component.tests.U>,)
+            <InterfaceClass zope.component.tests.IA3> 
+            zope.component.tests.A_3 Really class specific
+        
+        A boolean is returned indicating whether a change was made.
+        
+        If a factory implements more than one interface, an exception will be
+        raised:
+        
+            >>> components.unregisterAdapter(tests.A1_12)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't implement a single
+            interface and no provided interface was specified.
+        
+        Unless the provided interface is specified:
+        
+            >>> components.unregisterAdapter(tests.A1_12, provided=tests.IA2)
+            Unregistered event:
+            AdapterRegistration(<Components comps>, [I1], IA2, u'', A1_12, u'')
+            True
+        
+        If a factory doesn't declare an implemented interface, an exception will be
+        raised:
+        
+            >>> components.unregisterAdapter(tests.A12_)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't implement a single
+            interface and no provided interface was specified. 
+        
+        Unless the provided interface is specified:
+        
+            >>> components.unregisterAdapter(tests.A12_, provided=tests.IA2)
+            Unregistered event:
+            AdapterRegistration(<Components comps>, [I1, I2], IA2, u'', A12_, u'')
+            True
+        
+        The required interface needs to be specified if the factory doesn't
+        have a __component_adapts__ attribute:
+        
+            >>> components.unregisterAdapter(tests.A_2)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't have a __component_adapts__
+            attribute and no required specifications were specified 
+        
+            >>> components.unregisterAdapter(tests.A_2, required=[tests.I3])
+            Unregistered event:
+            AdapterRegistration(<Components comps>, [I3], IA2, u'', A_2, u'')
+            True
+        
+            >>> for registration in sorted(components.registeredAdapters()):
+            ...     print registration.required
+            ...     print registration.provided, registration.name
+            ...     print registration.factory, registration.info
+            ... # doctest: +NORMALIZE_WHITESPACE
+            (<implementedBy zope.component.tests.U>,)
+            <InterfaceClass zope.component.tests.IA3> 
+            zope.component.tests.A_3 Really class specific
+        
+        If a factory is unregistered that is not registered, False is
+        returned:
+        
+        
+            >>> components.unregisterAdapter(tests.A_2, required=[tests.I3])
+            False
+            >>> components.unregisterAdapter(tests.A12_1, required=[tests.U])
+            False
+        
+        The factory can be omitted, to unregister *any* factory that matches
+        specified required and provided interfaces:
+        
+            >>> components.unregisterAdapter(required=[tests.U], provided=tests.IA3)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Unregistered event:
+            AdapterRegistration(<Components comps>, [zope.component.tests.U], 
+                                IA3, u'', A_3, 'Really class specific')
+            True
+        
+            >>> for registration in sorted(components.registeredAdapters()):
+            ...     print registration
+        
+        Adapters can be named:
+        
+            >>> components.registerAdapter(tests.A1_12, provided=tests.IA2, 
+            ...                            name=u'test')
+            Registered event:
+            AdapterRegistration(<Components comps>, [I1], IA2, u'test', A1_12, u'')
+        
+            >>> components.queryMultiAdapter((tests.U1(9), ), tests.IA2)
+            >>> components.queryMultiAdapter((tests.U1(9), ), tests.IA2, name=u'test')
+            A1_12(U1(9))
+        
+            >>> components.queryAdapter(tests.U1(9), tests.IA2)
+            >>> components.queryAdapter(tests.U1(9), tests.IA2, name=u'test')
+            A1_12(U1(9))
+            >>> components.getAdapter(tests.U1(9), tests.IA2, name=u'test')
+            A1_12(U1(9))
+        
+        It is possible to look up all of the adapters that provide an
+        interface:
+        
+            >>> components.registerAdapter(tests.A1_23, provided=tests.IA2, 
+            ...                            name=u'test 2')
+            Registered event:
+            AdapterRegistration(<Components comps>, [I1], IA2, u'test 2', A1_23, u'')
+        
+            >>> components.registerAdapter(tests.A1_12, provided=tests.IA2)
+            Registered event:
+            AdapterRegistration(<Components comps>, [I1], IA2, u'', A1_12, u'')
+        
+            >>> for name, adapter in sorted(components.getAdapters((tests.U1(9), ), 
+            ...                                                    tests.IA2)):
+            ...     print name, adapter
+             A1_12(U1(9))
+            test A1_12(U1(9))
+            test 2 A1_23(U1(9))
+        
+        
+        getAdapters is most commonly used as the basis of menu systems.
+        
+        If an adapter factory returns None, it is equivalent to there being no
+        factory:
+        
+            >>> components.registerAdapter(tests.noop, 
+            ...                            required=[tests.IA1], provided=tests.IA2, 
+            ...                            name=u'test noop')
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Registered event:
+            AdapterRegistration(<Components comps>, [IA1], IA2, u'test noop', 
+                                noop, u'')
+            >>> components.queryAdapter(tests.U1(9), tests.IA2, name=u'test noop')
+        
+            >>> components.registerAdapter(tests.A1_12, provided=tests.IA2)
+            Registered event:
+            AdapterRegistration(<Components comps>, [I1], IA2, u'', A1_12, u'')
+        
+            >>> for name, adapter in sorted(components.getAdapters((tests.U1(9), ), 
+            ...                                                    tests.IA2)):
+            ...     print name, adapter
+             A1_12(U1(9))
+            test A1_12(U1(9))
+            test 2 A1_23(U1(9))
+        
+        
+            >>> components.unregisterAdapter(tests.A1_12, provided=tests.IA2, 
+            ...                              name=u'test')
+            Unregistered event:
+            AdapterRegistration(<Components comps>, [I1], IA2, u'test', A1_12, u'')
+            True
+            >>> components.unregisterAdapter(tests.A1_12, provided=tests.IA2)
+            Unregistered event:
+            AdapterRegistration(<Components comps>, [I1], IA2, u'', A1_12, u'')
+            True
+            >>> for registration in sorted(components.registeredAdapters()):
+            ...     print registration.required
+            ...     print registration.provided, registration.name
+            ...     print registration.factory, registration.info
+            ... # doctest: +NORMALIZE_WHITESPACE
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> test 2
+            zope.component.tests.A1_23 
+            (<InterfaceClass zope.component.tests.IA1>,)
+            <InterfaceClass zope.component.tests.IA2> test noop
+            <function noop at 0xb79a1064> 
+        
+        
+        Subscribers
+        -----------
+        
+        Subscribers provide a way to get multiple adapters of a given type.
+        In this regard, subscribers are like named adapters, except that there
+        isn't any concept of the most specific adapter for a given name.
+        
+        Subscribers are registered by calling registerSubscriptionAdapter:
+        
+            >>> components.registerSubscriptionAdapter(tests.A1_2)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Registered event:
+            SubscriptionRegistration(<Components comps>, [I1], IA2, u'', A1_2, u'')
+        
+            >>> components.registerSubscriptionAdapter(
+            ...     tests.A1_12, provided=tests.IA2)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Registered event:
+            SubscriptionRegistration(<Components comps>, [I1], IA2, u'', A1_12, u'')
+        
+            >>> components.registerSubscriptionAdapter(
+            ...     tests.A, [tests.I1], tests.IA2,
+            ...     info='a sample comment')
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Registered event:
+            SubscriptionRegistration(<Components comps>, [I1], IA2, u'', 
+                                     A, 'a sample comment')
+        
+        The same rules, with regard to when required and provided interfaces
+        have to be specified apply as with adapters:
+        
+            >>> components.registerSubscriptionAdapter(tests.A1_12)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't implement a single 
+            interface and no provided interface was specified.
+        
+            >>> components.registerSubscriptionAdapter(tests.A)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't implement a single interface and
+             no provided interface was specified.
+        
+            >>> components.registerSubscriptionAdapter(tests.A, required=[tests.IA1])
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't implement a single interface
+            and no provided interface was specified.
+        
+        Note that we provided the info argument as a keyword argument above.
+        That's because there is a name argument that's reserved for future
+        use. We can give a name, as long as it is an empty string:
+        
+            >>> components.registerSubscriptionAdapter(
+            ...     tests.A, [tests.I1], tests.IA2, u'', 'a sample comment')
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Registered event:
+            SubscriptionRegistration(<Components comps>, [I1], IA2, u'', 
+                                     A, 'a sample comment')
+        
+            >>> components.registerSubscriptionAdapter(
+            ...     tests.A, [tests.I1], tests.IA2, u'oops', 'a sample comment')
+            Traceback (most recent call last):
+            ...
+            TypeError: Named subscribers are not yet supported
+        
+        Subscribers are looked up using the subscribers method:
+        
+            >>> for s in components.subscribers((tests.U1(1), ), tests.IA2):
+            ...    print s
+            A1_2(U1(1))
+            A1_12(U1(1))
+            A(U1(1),)
+            A(U1(1),)
+        
+        Note that, because we created multiple subscriptions for A, we got multiple
+        subscriber instances.
+        
+        As with normal adapters, if a factory returns None, the result is skipped:
+        
+            >>> components.registerSubscriptionAdapter(
+            ...     tests.noop, [tests.I1], tests.IA2)
+            Registered event:
+            SubscriptionRegistration(<Components comps>, [I1], IA2, u'', noop, u'')
+        
+            >>> for s in components.subscribers((tests.U1(1), ), tests.IA2):
+            ...    print s
+            A1_2(U1(1))
+            A1_12(U1(1))
+            A(U1(1),)
+            A(U1(1),)
+        
+        We can get registration information for subscriptions:
+        
+            >>> for registration in sorted(
+            ...     components.registeredSubscriptionAdapters()):
+            ...     print registration.required
+            ...     print registration.provided, registration.name
+            ...     print registration.factory, registration.info
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A a sample comment
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A a sample comment
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A1_12 
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A1_2 
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            <function noop at 0xb796ff7c> 
+        
+        We can also unregister subscriptions in much the same way we can for adapters:
+        
+            >>> components.unregisterSubscriptionAdapter(tests.A1_2)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Unregistered event:
+            SubscriptionRegistration(<Components comps>, [I1], IA2, u'', A1_2, '')
+            True
+        
+            >>> for s in components.subscribers((tests.U1(1), ), tests.IA2):
+            ...    print s
+            A1_12(U1(1))
+            A(U1(1),)
+            A(U1(1),)
+        
+            >>> for registration in sorted(
+            ...     components.registeredSubscriptionAdapters()):
+            ...     print registration.required
+            ...     print registration.provided, registration.name
+            ...     print registration.factory, registration.info
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A a sample comment
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A a sample comment
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A1_12 
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            <function noop at 0xb796ff7c> 
+        
+            >>> components.unregisterSubscriptionAdapter(
+            ...     tests.A, [tests.I1], tests.IA2)
+            Unregistered event:
+            SubscriptionRegistration(<Components comps>, [I1], IA2, u'', A, '')
+            True
+        
+            >>> for s in components.subscribers((tests.U1(1), ), tests.IA2):
+            ...    print s
+            A1_12(U1(1))
+        
+            >>> for registration in sorted(
+            ...     components.registeredSubscriptionAdapters()):
+            ...     print registration.required
+            ...     print registration.provided, registration.name
+            ...     print registration.factory, registration.info
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            zope.component.tests.A1_12 
+            (<InterfaceClass zope.component.tests.I1>,)
+            <InterfaceClass zope.component.tests.IA2> 
+            <function noop at 0xb796ff7c> 
+        
+        Note here that both registrations for A were removed.
+        
+        If we omit the factory, we must specify the required and provided interfaces:
+        
+            >>> components.unregisterSubscriptionAdapter(required=[tests.I1])
+            Traceback (most recent call last):
+            ...
+            TypeError: Must specify one of factory and provided
+        
+            >>> components.unregisterSubscriptionAdapter(provided=tests.IA2)
+            Traceback (most recent call last):
+            ...
+            TypeError: Must specify one of factory and required
+        
+            >>> components.unregisterSubscriptionAdapter(
+            ...     required=[tests.I1], provided=tests.IA2)
+            Unregistered event:
+            SubscriptionRegistration(<Components comps>, [I1], IA2, u'', None, '')
+            True
+        
+            >>> for s in components.subscribers((tests.U1(1), ), tests.IA2):
+            ...    print s
+        
+            >>> for registration in sorted(
+            ...     components.registeredSubscriptionAdapters()):
+            ...     print registration.factory
+        
+        As when registering, an error is raised if the registration
+        information can't be determined from the factory and isn't specified:
+        
+            >>> components.unregisterSubscriptionAdapter(tests.A1_12)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't implement a single 
+            interface and no provided interface was specified.
+        
+            >>> components.unregisterSubscriptionAdapter(tests.A)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't implement a single interface and
+             no provided interface was specified.
+        
+            >>> components.unregisterSubscriptionAdapter(tests.A, required=[tests.IA1])
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't implement a single interface
+            and no provided interface was specified.
+        
+        If you unregister something that's not registered, nothing will be
+        changed and False will be returned:
+        
+        
+            >>> components.unregisterSubscriptionAdapter(
+            ...     required=[tests.I1], provided=tests.IA2)
+            False
+        
+        Handlers
+        --------
+        
+        Handlers are used when you want to perform some function in response
+        to an event.  Handlers aren't expected to return anything when called
+        and are not registered to provide any interface.
+        
+            >>> from zope import component
+            >>> @component.adapter(tests.I1)
+            ... def handle1(x):
+            ...     print 'handle1', x
+        
+            >>> components.registerHandler(handle1, info="First handler")
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Registered event:
+            HandlerRegistration(<Components comps>, [I1], u'', 
+                                handle1, 'First handler')
+            >>> components.handle(tests.U1(1))
+            handle1 U1(1)
+        
+            >>> @component.adapter(tests.I1, tests.I2)
+            ... def handle12(x, y):
+            ...     print 'handle12', x, y
+        
+            >>> components.registerHandler(handle12)
+            Registered event:
+            HandlerRegistration(<Components comps>, [I1, I2], u'', handle12, u'')
+            >>> components.handle(tests.U1(1), tests.U12(2))
+            handle12 U1(1) U12(2)
+        
+        If a handler doesn't document interfaces it handles, then 
+        the required interfaces must be specified:
+        
+            >>> def handle(*objects):
+            ...     print 'handle', objects
+        
+            >>> components.registerHandler(handle)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't have a __component_adapts__ 
+            attribute and no required specifications were specified
+        
+            >>> components.registerHandler(handle, required=[tests.I1], 
+            ...                            info="a comment")
+            Registered event:
+            HandlerRegistration(<Components comps>, [I1], u'', handle, 'a comment')
+        
+        Handlers can also be registered for classes:
+        
+            >>> components.registerHandler(handle, required=[tests.U], 
+            ...                            info="handle a class")
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Registered event:
+            HandlerRegistration(<Components comps>, [zope.component.tests.U], u'', 
+                                handle, 'handle a class')
+        
+        
+            >>> components.handle(tests.U1(1))
+            handle (U1(1),)
+            handle1 U1(1)
+            handle (U1(1),)
+        
+        We can list the handler registrations:
+        
+            >>> for registration in components.registeredHandlers():
+            ...     print registration.required
+            ...     print registration.handler, registration.info
+            ... # doctest: +NORMALIZE_WHITESPACE
+            (<InterfaceClass zope.component.tests.I1>,)
+            <function handle1 at 0xb78f5bfc> First handler
+            (<InterfaceClass zope.component.tests.I1>,
+             <InterfaceClass zope.component.tests.I2>)
+            <function handle12 at 0xb78f5c34> 
+            (<InterfaceClass zope.component.tests.I1>,)
+            <function handle at 0xb78f5ca4> a comment
+            (<implementedBy zope.component.tests.U>,)
+            <function handle at 0xb78f5ca4> handle a class
+        
+        and we can unregister handlers:
+        
+            >>> components.unregisterHandler(required=[tests.U])
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Unregistered event:
+            HandlerRegistration(<Components comps>, [zope.component.tests.U], u'', 
+                                None, '')
+            True
+        
+            >>> for registration in components.registeredHandlers():
+            ...     print registration.required
+            ...     print registration.handler, registration.info
+            ... # doctest: +NORMALIZE_WHITESPACE
+            (<InterfaceClass zope.component.tests.I1>,)
+            <function handle1 at 0xb78f5bfc> First handler
+            (<InterfaceClass zope.component.tests.I1>,
+             <InterfaceClass zope.component.tests.I2>)
+            <function handle12 at 0xb78f5c34> 
+            (<InterfaceClass zope.component.tests.I1>,)
+            <function handle at 0xb78f5ca4> a comment
+        
+            >>> components.unregisterHandler(handle12)
+            Unregistered event:
+            HandlerRegistration(<Components comps>, [I1, I2], u'', handle12, '')
+            True
+        
+            >>> for registration in components.registeredHandlers():
+            ...     print registration.required
+            ...     print registration.handler, registration.info
+            (<InterfaceClass zope.component.tests.I1>,)
+            <function handle1 at 0xb78f5bfc> First handler
+            (<InterfaceClass zope.component.tests.I1>,)
+            <function handle at 0xb78f5ca4> a comment
+        
+            >>> components.unregisterHandler(handle12)
+            False
+        
+            >>> components.unregisterHandler()
+            Traceback (most recent call last):
+            ...
+            TypeError: Must specify one of factory and required
+        
+            >>> components.registerHandler(handle)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Traceback (most recent call last):
+            ...
+            TypeError: The adapter factory doesn't have a __component_adapts__ 
+            attribute and no required specifications were specified
+        
+        Extending
+        ---------
+        
+        Component-management objects can extend other component-management
+        objects. 
+        
+            >>> c1 = registry.Components('1')
+            >>> c1.__bases__
+            ()
+        
+            >>> c2 = registry.Components('2', (c1, ))
+            >>> c2.__bases__ == (c1, )
+            True
+        
+            >>> c1.registerUtility(tests.U1(1))
+            Registered event:
+            UtilityRegistration(<Components 1>, I1, u'', 1, None, u'')
+        
+            >>> c1.queryUtility(tests.I1)
+            U1(1)
+            >>> c2.queryUtility(tests.I1)
+            U1(1)
+            >>> c1.registerUtility(tests.U1(2))
+            Unregistered event:
+            UtilityRegistration(<Components 1>, I1, u'', 1, None, u'')
+            Registered event:
+            UtilityRegistration(<Components 1>, I1, u'', 2, None, u'')
+        
+            >>> c2.queryUtility(tests.I1)
+            U1(2)
+        
+        We can use multiple inheritence:
+        
+            >>> c3 = registry.Components('3', (c1, ))
+            >>> c4 = registry.Components('4', (c2, c3))
+            >>> c4.queryUtility(tests.I1)
+            U1(2)
+        
+            >>> c1.registerUtility(tests.U12(1), tests.I2)
+            Registered event:
+            UtilityRegistration(<Components 1>, I2, u'', 1, None, u'')
+        
+            >>> c4.queryUtility(tests.I2)
+            U12(1)
+        
+            >>> c3.registerUtility(tests.U12(3), tests.I2)
+            Registered event:
+            UtilityRegistration(<Components 3>, I2, u'', 3, None, u'')
+            >>> c4.queryUtility(tests.I2)
+            U12(3)
+        
+            >>> c1.registerHandler(handle1, info="First handler")
+            Registered event:
+            HandlerRegistration(<Components 1>, [I1], u'', handle1, 'First handler')
+        
+            >>> c2.registerHandler(handle, required=[tests.U])
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Registered event:
+            HandlerRegistration(<Components 2>, [zope.component.tests.U], u'', 
+                                handle, u'')
+            
+            >>> @component.adapter(tests.I1)
+            ... def handle3(x):
+            ...     print 'handle3', x
+            >>> c3.registerHandler(handle3)
+            Registered event:
+            HandlerRegistration(<Components 3>, [I1], u'', handle3, u'')
+            
+            >>> @component.adapter(tests.I1)
+            ... def handle4(x):
+            ...     print 'handle4', x
+            >>> c4.registerHandler(handle4)
+            Registered event:
+            HandlerRegistration(<Components 4>, [I1], u'', handle4, u'')
+        
+            >>> c4.handle(tests.U1(1))
+            handle1 U1(1)
+            handle3 U1(1)
+            handle (U1(1),)
+            handle4 U1(1)
+        
+        Redispatch of registration events
+        ---------------------------------
+        
+        Some handlers are available that, if registered, redispatch
+        registration events to the objects being registered.  They depend on
+        being dispatched to by the object-event dispatcher:
+        
+            >>> from zope import component
+            >>> import zope.component.event
+            >>> zope.component.getGlobalSiteManager().registerHandler(
+            ...      zope.component.event.objectEventNotify)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Registered event:
+            HandlerRegistration(<BaseGlobalComponents base>, 
+                                [IObjectEvent], u'', objectEventNotify, u'')
+        
+        To see this, we'll first register a multi-handler to show is when
+        handlers are called on 2 objects:
+        
+            >>> @zope.component.adapter(None, None)
+            ... def double_handler(o1, o2):
+            ...     print 'Double dispatch:'
+            ...     print ' ', o1
+            ...     print ' ', o2
+            >>> zope.component.getGlobalSiteManager().registerHandler(double_handler)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Double dispatch:
+              HandlerRegistration(<BaseGlobalComponents base>, 
+                                  [Interface, Interface], u'', double_handler, u'')
+              Registered event:
+              HandlerRegistration(<BaseGlobalComponents base>, 
+              [Interface, Interface], u'', double_handler, u'')
+            Registered event:
+            HandlerRegistration(<BaseGlobalComponents base>, 
+                                [Interface, Interface], u'', double_handler, u'')
+        
+        In the example above, the double_handler reported it's own registration. :)
+        
+        Now we'll register our handlers:
+        
+            >>> zope.component.getGlobalSiteManager().registerHandler(
+            ...     registry.dispatchUtilityRegistrationEvent)
+            ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+            Double dispatch:
+            ...
+        
+            >>> zope.component.getGlobalSiteManager().registerHandler(
+            ...     registry.dispatchAdapterRegistrationEvent)
+            ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+            Double dispatch:
+            ...
+        
+            >>> zope.component.getGlobalSiteManager().registerHandler(
+            ...     registry.dispatchSubscriptionAdapterRegistrationEvent)
+            ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+            Double dispatch:
+            ...
+        
+            >>> zope.component.getGlobalSiteManager().registerHandler(
+            ...     registry.dispatchHandlerRegistrationEvent)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Double dispatch:
+              HandlerRegistration(<BaseGlobalComponents base>, 
+                                  [IHandlerRegistration, IRegistrationEvent], u'', 
+                                  dispatchHandlerRegistrationEvent, u'')
+              Registered event:
+              HandlerRegistration(<BaseGlobalComponents base>, 
+                                  [IHandlerRegistration, IRegistrationEvent], u'', 
+                                  dispatchHandlerRegistrationEvent, u'')
+            Double dispatch:
+              <function dispatchHandlerRegistrationEvent at 0xb799f72c>
+              Registered event:
+              HandlerRegistration(<BaseGlobalComponents base>,
+                                  [IHandlerRegistration, IRegistrationEvent], u'',
+                                  dispatchHandlerRegistrationEvent, u'')
+            Registered event:
+            HandlerRegistration(<BaseGlobalComponents base>,
+                                [IHandlerRegistration, IRegistrationEvent], u'',
+                                dispatchHandlerRegistrationEvent, u'')
+        
+        In the last example above, we can see that the registration of
+        dispatchHandlerRegistrationEvent was handled by
+        dispatchHandlerRegistrationEvent and redispatched.  This can be seen
+        in the second double-dispatch output, where the first argument is the
+        object being registered, which is dispatchHandlerRegistrationEvent.
+        
+        If we change some other registrations, we can the double dispatch
+        taking place:
+        
+            >>> components.registerUtility(u5)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Double dispatch:
+              UtilityRegistration(<Components comps>, I1, u'', 5, None, u'')
+              Registered event:
+              UtilityRegistration(<Components comps>, I1, u'', 5, None, u'')
+            Double dispatch:
+              U1(5)
+              Registered event:
+              UtilityRegistration(<Components comps>, I1, u'', 5, None, u'')
+            Registered event:
+            UtilityRegistration(<Components comps>, I1, u'', 5, None, u'')
+        
+            >>> components.registerAdapter(tests.A12_1)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Double dispatch:
+              AdapterRegistration(<Components comps>, [I1, I2], IA1, u'', A12_1, u'')
+              Registered event:
+              AdapterRegistration(<Components comps>, [I1, I2], IA1, u'', A12_1, u'')
+            Double dispatch:
+              zope.component.tests.A12_1
+              Registered event:
+              AdapterRegistration(<Components comps>, [I1, I2], IA1, u'', A12_1, u'')
+            Registered event:
+            AdapterRegistration(<Components comps>, [I1, I2], IA1, u'', A12_1, u'')
+        
+            >>> components.registerSubscriptionAdapter(tests.A1_2)
+            ... # doctest: +NORMALIZE_WHITESPACE
+            Double dispatch:
+              SubscriptionRegistration(<Components comps>, [I1], IA2, u'', A1_2, u'')
+              Registered event:
+              SubscriptionRegistration(<Components comps>, [I1], IA2, u'', A1_2, u'')
+            Double dispatch:
+              zope.component.tests.A1_2
+              Registered event:
+              SubscriptionRegistration(<Components comps>, [I1], IA2, u'', A1_2, u'')
+            Registered event:
+            SubscriptionRegistration(<Components comps>, [I1], IA2, u'', A1_2, u'')
+        
+        Persistent Component Management
+        ===============================
+        
+        Persistent component management allows persistent management of
+        components.  From a usage point of view, there shouldn't be any new
+        behavior beyond what's described in registry.txt.
+        
+        The Zope 3 Component Architecture (Socket Example)
+        ==================================================
+        
+        The component architecture provides an application framework that provides its
+        functionality through loosely-connected components. A *component* can be any
+        Python object and has a particular purpose associated with it. Thus, in a
+        component-based applications you have many small component in contrast to
+        classical object-oriented development, where you have a few big objects. 
+        
+        Components communicate via specific APIs, which are formally defined by
+        interfaces, which are provided by the `zope.interface` package. *Interfaces*
+        describe the methods and properties that a component is expected to
+        provide. They are also used as a primary mean to provide developer-level
+        documentation for the components. For more details about interfaces see
+        `zope/interface/README.txt`.
+        
+        The two main types of components are *adapters* and *utilities*. They will be
+        discussed in detail later in this document. Both component types are managed
+        by the *site manager*, with which you can register and access these
+        components. However, most of the site manager's functionality is hidden behind
+        the component architecture's public API, which is documented in
+        `IComponentArchitecture`.
+        
+        
+        Adapters
+        --------
+        
+        Adapters are a well-established pattern. An *adapter* uses an object providing
+        one interface to produce an object that provides another interface. Here an
+        example: Imagine that you purchased an electric shaver in the US, and thus
+        you require the US socket type. You are now traveling in Germany, where another
+        socket style is used. You will need a device, an adapter, that converts from
+        the German to the US socket style.
+        
+        The functionality of adapters is actually natively provided by the
+        `zope.interface` package and is thus well documented there. The `human.txt`
+        file provides a gentle introduction to adapters, whereby `adapter.txt` is
+        aimed at providing a comprehensive insight into adapters, but is too abstract
+        for many as an initial read. Thus, we will only explain adapters in the context
+        of the component architecture's API.
+        
+        So let's say that we have a German socket
+        
+          >>> from zope.interface import Interface, implements
+        
+          >>> class IGermanSocket(Interface):
+          ...     pass
+        
+          >>> class Socket(object):
+          ...     def __repr__(self):
+          ...         return '<instance of %s>' %self.__class__.__name__
+        
+          >>> class GermanSocket(Socket):
+          ...     """German wall socket."""
+          ...     implements(IGermanSocket)
+        
+        and we want to convert it to an US socket
+        
+          >>> class IUSSocket(Interface):
+          ...     pass
+        
+        so that our shaver can be used in Germany. So we go to a German electronics
+        store to look for an adapter that we can plug in the wall:
+        
+          >>> class GermanToUSSocketAdapter(Socket):
+          ...     implements(IUSSocket)
+          ...     __used_for__ = IGermanSocket
+          ...     
+          ...     def __init__(self, socket):
+          ...         self.context = socket
+        
+        Note that I could have called the passed in socket any way I like, but
+        `context` is the standard name accepted.
+        
+        
+        Single Adapters
+        ~~~~~~~~~~~~~~~
+        
+        Before we can use the adapter, we have to buy it and make it part of our
+        inventory. In the component architecture we do this by registering the adapter
+        with the framework, more specifically with the global site manager:
+        
+          >>> import zope.component
+          >>> gsm = zope.component.getGlobalSiteManager()
+          >>> gsm.registerAdapter(GermanToUSSocketAdapter, (IGermanSocket,), IUSSocket)
+        
+        `zope.component` is the component architecture API that is being
+        presented by this file. You registered an adapter from `IGermanSocket`
+        to `IUSSocket` having no name (thus the empty string).
+        
+        Anyways, you finally get back to your hotel room and shave, since you have not
+        been able to shave in the plane. In the bathroom you discover a socket:
+        
+          >>> bathroomDE = GermanSocket()
+          >>> IGermanSocket.providedBy(bathroomDE)
+          True
+        
+        You now insert the adapter in the German socket
+        
+          >>> bathroomUS = zope.component.getAdapter(bathroomDE, IUSSocket, '')
+        
+        so that the socket now provides the US version:
+        
+          >>> IUSSocket.providedBy(bathroomUS)
+          True
+        
+        Now you can insert your shaver and get on with your day. 
+        
+        After a week you travel for a couple of days to the Prague and you notice that
+        the Czech have yet another socket type:
+        
+          >>> class ICzechSocket(Interface):
+          ...     pass
+        
+          >>> class CzechSocket(Socket):
+          ...     implements(ICzechSocket)
+        
+          >>> czech = CzechSocket()
+        
+        You try to find an adapter for your shaver in your bag, but you fail, since
+        you do not have one:
+        
+          >>> zope.component.getAdapter(czech, IUSSocket, '') \
+          ... #doctest: +NORMALIZE_WHITESPACE
+          Traceback (most recent call last):
+          ...
+          ComponentLookupError: (<instance of CzechSocket>, 
+                                 <InterfaceClass __builtin__.IUSSocket>,
+                                 '')
+        
+        or the more graceful way:
+        
+          >>> marker = object()
+          >>> socket = zope.component.queryAdapter(czech, IUSSocket, '', marker)
+          >>> socket is marker
+          True
+        
+        In the component architecture API any `get*` method will fail with a specific
+        exception, if a query failed, whereby methods starting with `query*` will
+        always return a `default` value after a failure.
+        
+        
+        Named Adapters
+        ~~~~~~~~~~~~~~
+        
+        You are finally back in Germany. You also brought your DVD player and a couple
+        DVDs with you, which you would like to watch. Your shaver was able to convert
+        automatically from 110 volts to 240 volts, but your DVD player cannot. So you
+        have to buy another adapter that also handles converting the voltage and the
+        frequency of the AC current:
+        
+          >>> class GermanToUSSocketAdapterAndTransformer(object):
+          ...     implements(IUSSocket)
+          ...     __used_for__ = IGermanSocket
+          ...     
+          ...     def __init__(self, socket):
+          ...         self.context = socket
+        
+        Now, we need a way to keep the two adapters apart. Thus we register them with
+        a name:
+        
+          >>> gsm.registerAdapter(GermanToUSSocketAdapter,
+          ...                     (IGermanSocket,), IUSSocket, 'shaver',)
+          >>> gsm.registerAdapter(GermanToUSSocketAdapterAndTransformer,
+          ...                     (IGermanSocket,), IUSSocket, 'dvd')
+        
+        Now we simply look up the adapters using their labels (called *name*):
+        
+          >>> socket = zope.component.getAdapter(bathroomDE, IUSSocket, 'shaver')
+          >>> socket.__class__ is GermanToUSSocketAdapter
+          True
+        
+          >>> socket = zope.component.getAdapter(bathroomDE, IUSSocket, 'dvd')
+          >>> socket.__class__ is GermanToUSSocketAdapterAndTransformer
+          True
+        
+        Clearly, we do not have an adapter for the MP3 player
+        
+          >>> zope.component.getAdapter(bathroomDE, IUSSocket, 'mp3') \
+          ... #doctest: +NORMALIZE_WHITESPACE
+          Traceback (most recent call last):
+          ...
+          ComponentLookupError: (<instance of GermanSocket>, 
+                                 <InterfaceClass __builtin__.IUSSocket>,
+                                 'mp3')
+        
+        but you could use the 'dvd' adapter in this case of course. ;)
+        
+        Sometimes you want to know all adapters that are available. Let's say you want
+        to know about all the adapters that convert a German to a US socket type:
+        
+          >>> sockets = list(zope.component.getAdapters((bathroomDE,), IUSSocket))
+          >>> len(sockets)
+          3
+          >>> names = [name for name, socket in sockets]
+          >>> names.sort()
+          >>> names
+          [u'', u'dvd', u'shaver']
+        
+        `zope.component.getAdapters()` returns a list of tuples. The first
+        entry of the tuple is the name of the adapter and the second is the
+        adapter itself.
+        
+        
+        Multi-Adapters
+        ~~~~~~~~~~~~~~
+        
+        After watching all the DVDs you brought at least twice, you get tired of them
+        and you want to listen to some music using your MP3 player. But darn, the MP3
+        player plug has a ground pin and all the adapters you have do not support
+        that:
+        
+          >>> class IUSGroundedSocket(IUSSocket):
+          ...     pass
+        
+        So you go out another time to buy an adapter. This time, however, you do not
+        buy yet another adapter, but a piece that provides the grounding plug:
+        
+          >>> class IGrounder(Interface):
+          ...     pass
+        
+          >>> class Grounder(object):
+          ...     implements(IGrounder)
+          ...     def __repr__(self):
+          ...         return '<instance of Grounder>'
+        
+        
+        Then together they will provided a grounded us socket:
+        
+          >>> class GroundedGermanToUSSocketAdapter(object):
+          ...     implements(IUSGroundedSocket)
+          ...     __used_for__ = (IGermanSocket, IGrounder)
+          ...     def __init__(self, socket, grounder):
+          ...         self.socket, self.grounder = socket, grounder
+        
+        You now register the combination, so that you know you can create a
+        `IUSGroundedSocket`:
+        
+          >>> gsm.registerAdapter(GroundedGermanToUSSocketAdapter,
+          ...                 (IGermanSocket, IGrounder), IUSGroundedSocket, 'mp3')
+        
+        Given the grounder
+        
+          >>> grounder = Grounder()
+        
+        and a German socket
+        
+          >>> livingroom = GermanSocket()
+        
+        we can now get a grounded US socket:
+        
+          >>> socket = zope.component.getMultiAdapter((livingroom, grounder), 
+          ...                                         IUSGroundedSocket, 'mp3')
+        
+          >>> socket.__class__ is GroundedGermanToUSSocketAdapter
+          True
+          >>> socket.socket is livingroom
+          True
+          >>> socket.grounder is grounder
+          True
+        
+        Of course, you do not have a 'dvd' grounded US socket available:
+        
+          >>> zope.component.getMultiAdapter((livingroom, grounder),
+          ...                                IUSGroundedSocket, 'dvd') \
+          ... #doctest: +NORMALIZE_WHITESPACE
+          Traceback (most recent call last):
+          ...
+          ComponentLookupError: ((<instance of GermanSocket>, 
+                                  <instance of Grounder>), 
+                                 <InterfaceClass __builtin__.IUSGroundedSocket>,
+                                 'dvd')
+        
+        
+          >>> socket = zope.component.queryMultiAdapter(
+          ...     (livingroom, grounder), IUSGroundedSocket, 'dvd', marker)
+          >>> socket is marker
+          True
+        
+        Again, you might want to read `adapter.txt` in `zope.interface` for a more
+        comprehensive coverage of multi-adapters.
+        
+        Subscribers
+        -----------
+        
+        While subscribers are directly supported by the adapter registry and are
+        adapters for all theoretical purposes, practically it might be better to think
+        of them as separate components. Subscribers are particularly useful for
+        events.
+        
+        Let's say one of our adapters overheated and caused a small fire:
+        
+          >>> class IFire(Interface):
+          ...     pass
+        
+          >>> class Fire(object):
+          ...     implements(IFire)
+        
+          >>> fire = Fire()
+        
+        We want to use all available objects to put out the fire:
+        
+          >>> class IFireExtinguisher(Interface):
+          ...     def extinguish():
+          ...         pass
+        
+          >>> class FireExtinguisher(object):
+          ...     def __init__(self, fire):
+          ...         pass
+          ...     def extinguish(self):
+          ...         "Place extinguish code here."
+          ...         print 'Used ' + self.__class__.__name__ + '.'
+        
+        Here some specific methods to put out the fire:
+        
+          >>> class PowderExtinguisher(FireExtinguisher):
+          ...     pass
+          >>> gsm.registerSubscriptionAdapter(PowderExtinguisher, 
+          ...                                 (IFire,), IFireExtinguisher)
+        
+          >>> class Blanket(FireExtinguisher):
+          ...     pass
+          >>> gsm.registerSubscriptionAdapter(Blanket, (IFire,), IFireExtinguisher)
+        
+          >>> class SprinklerSystem(FireExtinguisher):
+          ...     pass
+          >>> gsm.registerSubscriptionAdapter(SprinklerSystem,
+          ...                                 (IFire,), IFireExtinguisher)
+        
+        Now let use all these things to put out the fire:
+        
+          >>> extinguishers = zope.component.subscribers((fire,), IFireExtinguisher)
+          >>> extinguishers.sort()
+          >>> for extinguisher in extinguishers:
+          ...     extinguisher.extinguish()
+          Used Blanket.
+          Used PowderExtinguisher.
+          Used SprinklerSystem.
+        
+        If no subscribers are found for a particular object, then an empty list is
+        returned: 
+        
+          >>> zope.component.subscribers((object(),), IFireExtinguisher)
+          []
+        
+        
+        Utilities
+        ---------
+        
+        Utilities are the second type of component, the component architecture
+        implements. *Utilities* are simply components that provide an interface. When
+        you register an utility, you always register an instance (in contrast to a
+        factory for adapters) since the initialization and setup process of a utility
+        might be complex and is not well defined. In some ways a utility is much more
+        fundamental than an adapter, because an adapter cannot be used without another
+        component, but a utility is always self-contained. I like to think of
+        utilities as the foundation of your application and adapters as components
+        extending beyond this foundation.
+        
+        Back to our story...
+        
+        After your vacation is over you fly back home to Tampa, Florida. But it is
+        August now, the middle of the Hurricane season. And, believe it or not, you are
+        worried that you will not be able to shave when the power goes out for several
+        days. (You just hate wet shavers.)
+        
+        So you decide to go to your favorite hardware store and by a Diesel-powered
+        electric generator. The generator provides of course a US-style socket:
+        
+          >>> class Generator(object):
+          ...     implements(IUSSocket)
+          ...     def __repr__(self):
+          ...         return '<instance of Generator>'
+        
+          >>> generator = Generator()
+        
+        Like for adapters, we now have to add the newly-acquired generator to our
+        inventory by registering it as a utility:
+        
+          >>> gsm.registerUtility(generator, IUSSocket)
+        
+        We can now get the utility using
+        
+          >>> utility = zope.component.getUtility(IUSSocket)
+          >>> utility is generator
+          True
+        
+        As you can see, it is very simple to register and retrieve utilities. If a
+        utility does not exist for a particular interface, such as the German socket,
+        then the lookup fails
+        
+          >>> zope.component.getUtility(IGermanSocket)
+          Traceback (most recent call last):
+          ...
+          ComponentLookupError: (<InterfaceClass __builtin__.IGermanSocket>, '')
+        
+        or more gracefully when specifying a default value:
+        
+          >>> default = object()
+          >>> utility = zope.component.queryUtility(IGermanSocket, default=default)
+          >>> utility is default
+          True
+        
+        Note: The only difference between `getUtility()` and `queryUtility()` is the
+        fact that you can specify a default value for the latter function, so that it
+        will never cause a `ComponentLookupError`.
+        
+        
+        Named Utilities
+        ~~~~~~~~~~~~~~~
+        
+        It is often desirable to have several utilities providing the same interface
+        per site. This way you can implement any sort of registry using utilities. For
+        this reason, utilities -- like adapters -- can be named.
+        
+        In the context of our story, we might want to do the following: You really do
+        not trust gas stations either. What if the roads are blocked after a hurricane
+        and the gas stations run out of oil. So you look for another renewable power
+        source. Then you think about solar panels! After a storm there is usually very
+        nice weather, so why not? Via the Web you order a set of 110V/120W solar
+        panels that provide a regular US-style socket as output:
+        
+          >>> class SolarPanel(object):
+          ...     implements(IUSSocket)
+          ...     def __repr__(self):
+          ...         return '<instance of Solar Panel>'
+        
+          >>> panel = SolarPanel()
+        
+        Once it arrives, we add it to our inventory:
+        
+          >>> gsm.registerUtility(panel, IUSSocket, 'Solar Panel')
+        
+        You can now access the solar panel using
+        
+          >>> utility = zope.component.getUtility(IUSSocket, 'Solar Panel')
+          >>> utility is panel
+          True
+        
+        Of course, if a utility is not available, then the lookup will simply fail
+        
+          >>> zope.component.getUtility(IUSSocket, 'Wind Mill')
+          Traceback (most recent call last):
+          ...
+          ComponentLookupError: (<InterfaceClass __builtin__.IUSSocket>, 'Wind Mill')
+        
+        or more gracefully when specifying a default value:
+        
+          >>> default = object()
+          >>> utility = zope.component.queryUtility(IUSSocket, 'Wind Mill',
+          ...                                       default=default)
+          >>> utility is default
+          True
+        
+        Now you want to look at all the utilities you have for a particular kind. The
+        following API function will return a list of name/utility pairs:
+        
+          >>> utils = list(zope.component.getUtilitiesFor(IUSSocket))
+          >>> utils.sort()
+          >>> utils #doctest: +NORMALIZE_WHITESPACE
+          [(u'', <instance of Generator>), 
+           (u'Solar Panel', <instance of Solar Panel>)]
+        
+        Another method of looking up all utilities is by using
+        `getAllUtilitiesRegisteredFor(iface)`. This function will return an iterable
+        of utilities (without names); however, it will also return overridden
+        utilities. If you are not using multiple site managers, you will not actually
+        need this method.
+        
+          >>> utils = list(zope.component.getAllUtilitiesRegisteredFor(IUSSocket))
+          >>> utils.sort()
+          >>> utils
+          [<instance of Generator>, <instance of Solar Panel>]
+        
+        
+        Factories
+        ~~~~~~~~~
+        
+        A *factory* is a special kind of utility that exists to create other
+        components. A factory is always identified by a name. It also provides a title
+        and description and is able to tell the developer what interfaces the created
+        object will provide. The advantage of using a factory to create an object
+        instead of directly instantiating a class or executing any other callable is
+        that we can refer to the factory by name. As long as the name stays fixed, the
+        implementation of the callable can be renamed or moved without a breakage in
+        code.
+        
+        Let's say that our solar panel comes in parts and they have to be
+        assembled. This assembly would be done by a factory, so let's create one for
+        the solar panel. To do this, we can use a standard implementation of the
+        `IFactory` interface:
+        
+          >>> from zope.component.factory import Factory
+          >>> factory = Factory(SolarPanel, 
+          ...                   'Solar Panel',
+          ...                   'This factory creates a solar panel.')
+        
+        Optionally, I could have also specified the interfaces that the created object
+        will provide, but the factory class is smart enough to determine the
+        implemented interface from the class. We now register the factory:
+        
+          >>> from zope.component.interfaces import IFactory
+          >>> gsm.registerUtility(factory, IFactory, 'SolarPanel')
+        
+        We can now get a list of interfaces the produced object will provide:
+        
+          >>> ifaces = zope.component.getFactoryInterfaces('SolarPanel')
+          >>> IUSSocket in ifaces
+          True
+        
+        By the way, this is equivalent to
+        
+          >>> ifaces2 = factory.getInterfaces()
+          >>> ifaces is ifaces2
+          True
+        
+        Of course you can also just create an object:
+        
+          >>> panel = zope.component.createObject('SolarPanel')
+          >>> panel.__class__ is SolarPanel
+          True
+        
+        Note: Ignore the first argument (`None`) for now; it is the context of the
+        utility lookup, which is usually an optional argument, but cannot be in this
+        case, since all other arguments beside the `name` are passed in as arguments
+        to the specified callable.
+        
+        Once you register several factories
+        
+          >>> gsm.registerUtility(Factory(Generator), IFactory, 'Generator')
+        
+        you can also determine, which available factories will create objects
+        providing a certain interface:
+        
+          >>> factories = zope.component.getFactoriesFor(IUSSocket)
+          >>> factories = [(name, factory.__class__) for name, factory in factories]
+          >>> factories.sort()
+          >>> factories #doctest: +NORMALIZE_WHITESPACE
+          [(u'Generator', <class 'zope.component.factory.Factory'>), 
+           (u'SolarPanel', <class 'zope.component.factory.Factory'>)]
+        
+        
+        Site Managers
+        -------------
+        
+        Why do we need site managers? Why is the component architecture API not
+        sufficient? Some applications, including Zope 3, have a concept of
+        locations. It is often desirable to have different configurations for these
+        location; this can be done by overwriting existing or adding new component
+        registrations. Site managers in locations below the root location, should be
+        able to delegate requests to their parent locations. The root site manager is
+        commonly known as *global site manager*, since it is always available. You can
+        always get the global site manager using the API:
+        
+          >>> gsm = zope.component.getGlobalSiteManager()
+        
+          >>> from zope.component import globalSiteManager
+          >>> gsm is globalSiteManager
+          True
+          >>> from zope.component.interfaces import IComponentLookup
+          >>> IComponentLookup.providedBy(gsm)
+          True
+          >>> from zope.component.interfaces import IComponents
+          >>> IComponents.providedBy(gsm)
+          True
+        
+        You can also lookup at site manager in a given context. The only requirement
+        is that the context can be adapted to a site manager. So let's create a
+        special site manager:
+        
+          >>> from zope.component.globalregistry import BaseGlobalComponents
+          >>> sm = BaseGlobalComponents()
+        
+        Now we create a context that adapts to the site manager via the `__conform__`
+        method as specified in PEP 246.
+        
+          >>> class Context(object):
+          ...     def __init__(self, sm):
+          ...         self.sm = sm
+          ...     def __conform__(self, interface):
+          ...         if interface.isOrExtends(IComponentLookup):
+          ...             return self.sm
+        
+        We now instantiate the `Context` with our special site manager:
+        
+          >>> context = Context(sm)
+          >>> context.sm is sm
+          True
+        
+        We can now ask for the site manager of this context:
+        
+          >>> lsm = zope.component.getSiteManager(context)
+          >>> lsm is sm
+          True
+        
+        The site manager instance `lsm` is formally known as a *local site manager* of
+        `context`.
+        
+        CHANGES
+        *******
+        
+        3.9.5 (2010-07-09)
+        ==================
+        
+        - Fix test requirements specification.
+        
+        3.9.4 (2010-04-30)
+        ==================
+        
+        - Prefer the standard libraries doctest module to the one from zope.testing.
+        
+        3.9.3 (2010-03-08)
+        ==================
+        
+        - The ZCML directives provided by zope.component now register the components in
+          the registry returned by getSiteManager instead of the global registry. This
+          allows the hooking of the getSiteManager method before the load of a ZCML
+          file to register the components in a custom registry.
+        
+        3.9.2 (2010-01-22)
+        ==================
+        
+        - Fixed a bug introduced by recent refactoring, where passing
+          CheckerPublic to securityAdapterFactory wrongly wrapped the factory
+          into a LocatingUntrustedAdapterFactory.
+        
+        3.9.1 (2010-01-21)
+        ==================
+        
+        - The tested testrunner somehow gets influenced by options of the outer
+          testrunner, such a the -v option. We modified the tests so that it avoids
+          this.
+        
+        3.9.0 (2010-01-21)
+        ==================
+        
+        - Add testlayer support. It is now possible to load a ZCML file within
+          tests more easily. See zope.component.testlayer.py and
+          zope.component.testlayer.txt.
+        
+        3.8.0 (2009-11-16)
+        ==================
+        
+        - Removed the dependencies on zope.proxy and zope.security from the zcml extra:
+          zope.component does not hard depend on them anymore; the support for security
+          proxied components ZCML registrations is enabled only if zope.security and
+          zope.proxy are available.
+        
+        - Moved the IPossibleSite and ISite interfaces here from zope.location as they
+          are dealing with zope.component's concept of a site, but not with location.
+        
+        - Moved the zope.site.hooks functionality to zope.component.hooks as it isn't
+          actually dealing with zope.site's concept of a site.
+        
+        3.7.1 (2009-07-24)
+        ==================
+        
+        - Fixed a problem, where ``queryNextUtility`` could fail if the context could
+          not be adapted to a ``IComponentLookup``.
+        
+        - Fixed 2 related bugs:
+        
+          When a utility is registered and there was previously a utility
+          registered for the same interface and name, then the old utility is
+          unregistered.  The 2 bugs related to this:
+        
+          - There was no ``Unregistered`` for the implicit unregistration. Now
+            there is.
+        
+          - The old utility was still held and returned by
+            getAllUtilitiesRegisteredFor.  In other words, it was still
+            considered registered, eeven though it wasn't.  A particularly
+            negative consequence of this is that the utility is held in memory
+            or in the database even though it isn't used.
+        
+        3.7.0 (2009-05-21)
+        ==================
+        
+        - The HookableTests were not run by the testrunner.
+        
+        - Add in zope:view and zope:resource implementations into
+          zope.component.zcml (dependency loaded with zope.component [zcml]).
+        
+        3.6.0 (2009-03-12)
+        ==================
+        
+        - IMPORTANT: the interfaces that were defined in the
+          zope.component.bbb.interfaces and deprecated for years are
+          now (re)moved. However, some packages, including part of zope
+          framework were still using those interfaces. They will be adapted
+          for this change. If you were using some of those interfaces, you
+          need to adapt your code as well:
+        
+           - The IView and IDefaultViewName were moved to zope.publisher.interfaces.
+        
+           - The IResource was moved to zope.app.publisher.interfaces.
+        
+           - IContextDependent, IPresentation, IPresentationRequest,
+             IResourceFactory, IViewFactory were removed completely.
+        
+             If you used IViewFactory in context of zope.app.form, there's now
+             IWidgetFactory in the zope.app.form.interfaces instead.
+        
+        - Add getNextUtility/queryNextUtility functions that used to be in zope.site
+          earlier (and in zope.app.component even more earlier).
+        
+        - Added a pure-Python 'hookable' implementation, for use when
+          'zope.hookable' is not present.
+        
+        - Removed use of 'zope.deferredimport' by breaking import cycles.
+        
+        - Cleanup package documentation and changelog a bit. Add sphinx-based
+          documentation building command to the buildout.
+        
+        - Remove deprecated code.
+        
+        - Change package's mailing list address to zope-dev at zope.org, because
+          zope3-dev at zope.org is now retired.
+        
+        3.5.1 (2008-07-25)
+        ==================
+        
+        - Fix bug introduced in 3.5.0: <utility factory="..."> no longer supported
+          interfaces declared in Python and always wanted an explicit provides="..."
+          attribute. https://bugs.launchpad.net/zope3/+bug/251865
+        
+        3.5.0 (2008-07-25)
+        ==================
+        
+        - Support registration of utilities via factories through the component registry
+          and return factory information in the registration information. This fixes
+          https://bugs.launchpad.net/zope3/+bug/240631
+        
+        - Optimized un/registerUtility via storing an optimized data structure for
+          efficient retrieval of already registered utilities. This avoids looping over
+          all utilities when registering a new one.
+        
+        3.4.0 (2007-09-29)
+        ==================
+        
+        No further changes since 3.4.0a1.
+        
+        3.4.0a1 (2007-04-22)
+        ====================
+        
+        Corresponds to zope.component from Zope 3.4.0a1.
+        
+        - In the Zope 3.3.x series, ``zope.component`` was simplified yet once
+          more.  See http://wiki.zope.org/zope3/LocalComponentManagementSimplification
+          for the proposal describing the changes.
+        
+        3.2.0.2 (2006-04-15)
+        ====================
+        
+        - Fix packaging bug:  'package_dir' must be a *relative* path.
+        
+        3.2.0.1 (2006-04-14)
+        ====================
+        
+        - Packaging change: suppress inclusion of 'setup.cfg' in 'sdist' builds.
+        
+        3.2.0 (2006-01-05)
+        ==================
+        
+        Corresponds to the verison of the zope.component package shipped as part of
+        the Zope 3.2.0 release.
+        
+        - Deprecated services and related APIs. The adapter and utility registries
+          are now available directly via the site manager's 'adapters' and 'utilities'
+          attributes, respectively.  Services are accessible, but deprecated, and
+          will be removed in Zope 3.3.
+        
+        - Deprectaed all presentation-related APIs, including all view-related
+          API functions. Use the adapter API functions instead.
+          See http://dev.zope.org/Zope3/ImplementViewsAsAdapters`
+        
+        - Deprecated 'contextdependent' package:  site managers are now looked up
+          via a thread global, set during URL traversal.  The 'context' argument
+          is now always optional, and should no longer be passed.
+        
+        3.0.0 (2004-11-07)
+        ==================
+        
+        Corresponds to the verison of the zope.component package shipped as part of
+        the Zope X3.0.0 release.
+        
+        Download
+        ********
+        
+Platform: UNKNOWN

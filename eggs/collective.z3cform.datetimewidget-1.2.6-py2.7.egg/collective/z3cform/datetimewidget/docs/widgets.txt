@@ -1,0 +1,6 @@
+Widgets
+=======
+
+.. include:: ../widget_date.txt
+.. include:: ../widget_datetime.txt
+.. include:: ../widget_monthyear.txt

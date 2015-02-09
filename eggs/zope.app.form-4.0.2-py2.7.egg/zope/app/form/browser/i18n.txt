@@ -1,0 +1,139 @@
+====================
+Internationalization
+====================
+
+Forms are fully internationalized.  The field names, descriptions,
+labels, and hints are all automatically translated if they are made
+i18n messages in the schema.
+
+Let's take this simple add form...
+
+  >>> print http(r"""
+  ... GET /addfieldcontent.html HTTP/1.1
+  ... """, handle_errors=False)
+  HTTP/1.1 200 OK
+  ...
+
+with an error...
+
+  >>> print http(r"""
+  ... POST /addfieldcontent.html HTTP/1.1
+  ... Content-Length: 670
+  ... Content-Type: multipart/form-data; boundary=---------------------------19588947601368617292863650127
+  ...
+  ... -----------------------------19588947601368617292863650127
+  ... Content-Disposition: form-data; name="field.title"
+  ...
+  ...
+  ... -----------------------------19588947601368617292863650127
+  ... Content-Disposition: form-data; name="field.description"
+  ...
+  ...
+  ... -----------------------------19588947601368617292863650127
+  ... Content-Disposition: form-data; name="field.somenumber"
+  ...
+  ... 0
+  ... -----------------------------19588947601368617292863650127
+  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
+  ...
+  ... Hinzufxgen
+  ... -----------------------------19588947601368617292863650127
+  ... Content-Disposition: form-data; name="add_input_name"
+  ...
+  ...
+  ... -----------------------------19588947601368617292863650127--
+  ... """, handle_errors=False)
+  HTTP/1.1 200 OK
+  ...
+            There are <strong>1</strong> input errors.
+  ...
+
+
+Translated
+==========
+
+And now the add form in German:
+
+  >>> print http(r"""
+  ... GET /addfieldcontent.html HTTP/1.1
+  ... Accept-Language: de
+  ... """, handle_errors=False)
+  HTTP/1.1 200 OK
+  ...Felderinhalt hinzuf...
+  ...Eine kurz...Titel...
+  ...Eine ausf...Beschreibung...
+  ...Irgendeine Zahl...
+  ...Irgendeine Liste...
+
+The same with an input error:
+
+  >>> print http(r"""
+  ... POST /addfieldcontent.html HTTP/1.1
+  ... Accept-Language: de
+  ... Content-Length: 670
+  ... Content-Type: multipart/form-data; boundary=---------------------------19588947601368617292863650127
+  ...
+  ... -----------------------------19588947601368617292863650127
+  ... Content-Disposition: form-data; name="field.title"
+  ...
+  ...
+  ... -----------------------------19588947601368617292863650127
+  ... Content-Disposition: form-data; name="field.description"
+  ...
+  ...
+  ... -----------------------------19588947601368617292863650127
+  ... Content-Disposition: form-data; name="field.somenumber"
+  ...
+  ... 0
+  ... -----------------------------19588947601368617292863650127
+  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
+  ...
+  ... Hinzufxgen
+  ... -----------------------------19588947601368617292863650127
+  ... Content-Disposition: form-data; name="add_input_name"
+  ...
+  ...
+  ... -----------------------------19588947601368617292863650127--
+  ... """, handle_errors=False)
+  HTTP/1.1 200 OK
+  ...Felderinhalt hinzuf...
+  ...<strong>1</strong>...
+  ...Eine kurz...Titel...
+  ...Eine ausf...Beschreibung...
+  ...Irgendeine Zahl...
+
+
+Source widgets
+==============
+
+Titles of terms are translated by the source widgets. Let's create a source
+for which the terms create message ids:
+
+  >>> import zc.sourcefactory.basic
+  >>> from zope.i18nmessageid import MessageFactory
+  >>> _ = MessageFactory('coffee')
+  >>> class Coffees(zc.sourcefactory.basic.BasicSourceFactory):
+  ...     def getValues(self):
+  ...         return ['arabica', 'robusta', 'liberica', 'excelsa']
+  ...     def getTitle(self, value):
+  ...         return _(value, default='Translated %s' % value)
+
+
+  >>> import zope.schema
+  >>> from zope.publisher.browser import TestRequest
+  >>> coffee = zope.schema.Choice(
+  ...    __name__ = 'coffee',
+  ...    title=u"Kinds of coffee beans",
+  ...    source=Coffees())
+  >>> request = TestRequest()
+  >>> import zope.formlib.source
+  >>> widget = zope.formlib.source.SourceDisplayWidget(
+  ...     coffee, coffee.source, request)
+  >>> print widget()
+  Nothing
+  >>> from zope.formlib.interfaces import IBrowserWidget
+  >>> IBrowserWidget.providedBy(widget)
+  True
+  >>> widget.setRenderedValue('arabica')
+  >>> print widget()
+  Translated arabica

@@ -1,0 +1,73 @@
+<h1 tal:replace="structure here/manage_page_header">Header</h1>
+<h2 tal:define="manage_tabs_message options/manage_tabs_message | nothing"
+    tal:replace="structure here/manage_tabs">Tabs</h2>
+
+
+<h3>Workflows by type</h3>
+
+<form action="manage_changeWorkflows" method="POST">
+
+<table>
+  <tr>
+    <td align="left" valign="top">
+      <div class="form-label">Workflow Policy Title</div>
+    </td>
+    <td align="left" valign="top">
+      <input type="text" name="title" value="getTitle" size="40"
+             tal:attributes="value here/getTitle"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+      <div class="form-label">Workflow Policy Description</div>
+    </td>
+    <td align="left" valign="top">
+      <input type="text" name="description" size="40" value="getDescription"
+             tal:attributes="value here/getDescription" />
+    </td>
+  </tr>
+
+  <tr tal:repeat="tinfo options/types_info">
+    <td class="form-label">
+      <a tal:attributes="href string:${here/portal_url}/portal_types/${tinfo/id}/manage_workspace">
+        <span tal:replace="tinfo/id"/>
+        <span tal:condition="tinfo/title"
+              tal:replace="string:(${tinfo/title})"/>
+      </a>
+    </td>
+    <td class="form-element">
+      <input type="text" name="id;" value="chain;" size="70"
+             tal:attributes="name string:chain_${tinfo/id};
+                             value tinfo/chain"/>
+    </td>
+  </tr>
+
+  <tr>
+    <td class="form-label" align="left">(Default)</td>
+    <td class="form-element">
+      <input type="text" name="default_chain" value="default_chain;" size="70"
+             tal:attributes="value options/default_chain"/>
+    </td>
+  </tr>
+
+</table>
+
+<input type="submit" name="submit" value="Change" />
+
+</form>
+
+<hr />
+
+<div>
+  <div>
+    Click the button below to update the security settings of all
+    workflow-aware objects in this portal.
+  </div>
+
+  <form action="/portal_workflow/updateRoleMappings" method="POST"
+        tal:attributes="action string:${here/portal_url}/portal_workflow/updateRoleMappings">
+    <input type="submit" name="submit" value="Update security settings" />
+  </form>
+</div>
+
+<h1 tal:replace="structure here/manage_page_footer">Footer</h1>

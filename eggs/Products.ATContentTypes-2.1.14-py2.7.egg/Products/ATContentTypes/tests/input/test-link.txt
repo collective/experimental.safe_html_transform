@@ -1,0 +1,17 @@
+title: test link
+allowDiscussion: None
+subject: 
+description: test link description
+contributors: 
+creators: tiran
+effectiveDate: None
+expirationDate: None
+language: 
+rights: 
+creation_date: 2005/05/27 00:00:00 GMT
+modification_date: 2005/05/27 01:00:00 GMT
+layout: link_view
+relatedItems: 
+Content-Type: text/plain
+
+http://example.org/link

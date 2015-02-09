@@ -1,0 +1,3 @@
+pyflakes >= 0.8.1
+pep8 >= 1.5.7
+mccabe >= 0.2.1

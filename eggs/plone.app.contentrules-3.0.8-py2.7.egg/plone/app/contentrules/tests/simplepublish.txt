@@ -1,0 +1,92 @@
+Setup
+-----
+
+  >>> from Testing.ZopeTestCase import user_password
+
+  # BBB Zope 2.12
+  >>> try:
+  ...     from Testing.testbrowser import Browser
+  ... except ImportError:
+  ...     from Products.Five.testbrowser import Browser
+
+  >>> if 'news' not in self.portal:
+  ...     self.loginAsPortalOwner()
+  ...     obj = self.portal.invokeFactory('Folder', 'news')
+
+  >>> browser = Browser()
+  >>> browser.addHeader('Authorization',
+  ...                   'Basic %s:%s' % ('portal_owner', user_password))
+
+Let's visit the control panel and add a content rule.  We'll add a
+rule with a triggering event of `Workflow state changed`:
+
+  >>> browser.open(self.portal.absolute_url())
+  >>> browser.getLink('Site Setup').click()
+  >>> browser.getLink('Content Rules').click()
+  >>> browser.getControl('Add content rule').click()
+  >>> browser.getControl('Title').value = 'Copy Published News'
+  >>> ctrl = browser.getControl('Triggering event')
+  >>> ctrl.value = ['Workflow state changed']
+  >>> browser.getControl('Save').click()
+
+We're back at the control panel.  Now we'll edit the content rule.
+We'll add a portal type condition for *news items* and a workflow state
+condition for *published*:
+
+  >>> browser.url
+  'http://nohost/plone/++rule++rule-1/@@manage-elements'
+  >>> browser.getControl('Add condition').value = [
+  ...     'plone.conditions.PortalType']
+  >>> browser.getControl('Add', index=1).click()
+  >>> browser.getControl('Content type').value = ['News Item']
+  >>> browser.getControl('Save').click()
+
+  >>> browser.getControl('Add condition').value = [
+  ...     'plone.conditions.WorkflowState']
+  >>> browser.getControl('Add', index=1).click()
+  >>> browser.getControl('Workflow state').value = ['published']
+  >>> browser.getControl('Save').click()
+
+Now comes the action, we want all news items to be copied into the
+`/news` folder:
+
+  >>> browser.getControl('Add action').value = ['plone.actions.Copy']
+  >>> browser.getControl('Add', index=3).click()
+  >>> ctrl = browser.getControl(name='form.target_folder.query') # XXX fix label
+  >>> ctrl.value = '/news'
+  >>> browser.getControl('Search', index=2).click()
+  >>> ctrl = browser.getControl(name='form.target_folder') # XXX fix label
+  >>> ctrl.value = ['/news']
+  >>> browser.getControl('Save').click()
+
+We're done with setting up the content rule.  We need to now apply the
+rule to the root of the site before we try to add a news item:
+
+  >>> browser.getLink('Home').click()
+  >>> browser.getLink('Rules').click()
+  >>> browser.getControl(name='rule_id').displayOptions
+  ['Copy Published News']
+  >>> browser.getControl('Add').click()
+
+Let's go back and create the news item now:
+
+  >>> browser.getLink('Home').click()
+  >>> browser.getLink('Add new').click()
+  >>> browser.getControl('News Item').click()
+  >>> browser.getControl('Add').click()
+  >>> browser.getControl('Title').value = 'My news item'
+  >>> browser.getControl('Save').click()
+  >>> 'Changes saved' in browser.contents
+  True
+  >>> browser.getLink('State:').click()
+  >>> ctrl = browser.getControl(name='workflow_action') # XXX fix label
+  >>> ctrl.value = ['publish']
+  >>> browser.getControl('Save').click()
+
+The news item should have been copied into the `news/` folder now:
+
+  >>> 'my-news-item' in self.portal.news
+  True
+
+  >>> 'my-news-item' in self.portal
+  True

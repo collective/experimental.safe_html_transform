@@ -1,0 +1,31 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:gs="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone.formwidget.autocomplete">
+
+    <include package="plone.z3cform" />
+    <include package="Products.GenericSetup" file="meta.zcml" />
+    <include package=".upgrades" />
+
+    <browser:page
+        name="autocomplete-search"
+        for=".interfaces.IAutocompleteWidget"
+        permission="zope.Public"
+        class=".widget.AutocompleteSearch"
+        />
+
+    <browser:resourceDirectory
+        name="plone.formwidget.autocomplete"
+        directory="jquery-autocomplete"
+        />
+
+    <gs:registerProfile
+        name="default"
+        title="Autocomplete widget"
+        directory="profiles/default"
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
+
+</configure>

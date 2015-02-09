@@ -1,0 +1,18 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="plone.app.dexterity">
+
+    <!-- Register schema/field modify handlers -->
+    <subscriber
+        for="plone.app.dexterity.interfaces.ITypeSchemaContext
+             plone.schemaeditor.interfaces.ISchemaModifiedEvent"
+        handler=".serialize.serializeSchemaContext"
+        />
+
+    <subscriber
+        for=".browser.behaviors.BehaviorConfigurationAdapter
+             zope.lifecycleevent.IObjectModifiedEvent"
+        handler=".browser.behaviors.behaviorConfigurationModified"
+        />
+
+</configure>

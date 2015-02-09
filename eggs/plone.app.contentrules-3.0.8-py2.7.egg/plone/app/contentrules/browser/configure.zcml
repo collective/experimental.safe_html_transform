@@ -1,0 +1,220 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+    <!-- Site-wide information -->
+    <browser:page
+        for="*"
+        name="plone_contentrules_info"
+        class=".info.ContentRulesInfo"
+        allowed_interface=".interfaces.IContentRulesInfo"
+        permission="zope.Public"
+        />
+
+    <!-- Adding views for rules and elements -->
+    <browser:view
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      name="+rule"
+      class=".adding.RuleAdding"
+      allowed_interface="plone.app.contentrules.browser.interfaces.IRuleAdding"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <class class=".adding.RuleAdding">
+      <require
+        permission="plone.app.contentrules.ManageContentRules"
+        interface=".interfaces.IRuleAdding" />
+    </class>
+
+    <browser:view
+      for="plone.contentrules.rule.interfaces.IRule"
+      name="+condition"
+      class=".adding.RuleConditionAdding"
+      allowed_interface=".interfaces.IRuleConditionAdding"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <class class=".adding.RuleConditionAdding">
+      <require
+        permission="plone.app.contentrules.ManageContentRules"
+        interface=".interfaces.IRuleConditionAdding" />
+    </class>
+
+    <browser:view
+      for="plone.contentrules.rule.interfaces.IRule"
+      name="+action"
+      class=".adding.RuleActionAdding"
+      allowed_interface=".interfaces.IRuleActionAdding"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <class class=".adding.RuleActionAdding">
+      <require
+        permission="plone.app.contentrules.ManageContentRules"
+        interface=".interfaces.IRuleActionAdding" />
+    </class>
+
+    <!-- Add and edit form for rules -->
+    <browser:page
+      for="plone.app.contentrules.browser.interfaces.IRuleAdding"
+      name="plone.ContentRule"
+      class=".rule.RuleAddForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <browser:page
+      for="plone.contentrules.rule.interfaces.IRule"
+      name="edit"
+      class=".rule.RuleEditForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <!-- Manage rules -->
+
+    <browser:page
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      name="rules-controlpanel"
+      class=".controlpanel.ContentRulesControlPanel"
+      permission="plone.app.contentrules.ManageContentRules"
+      allowed_attributes="template"
+      />
+
+    <browser:page
+      name="manage-elements"
+      for="plone.contentrules.rule.interfaces.IRule"
+      class=".elements.ManageElements"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <browser:page
+      for="plone.contentrules.engine.interfaces.IRuleAssignable"
+      name="manage-content-rules"
+      class=".assignments.ManageAssignments"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <browser:page
+      for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+      name="contentrule-enable"
+      class=".controlpanel.ContentRulesControlPanel"
+      attribute="enable_rule"
+      permission="plone.app.contentrules.ManageContentRules"
+    />
+
+    <browser:page
+      for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+      name="contentrule-disable"
+      class=".controlpanel.ContentRulesControlPanel"
+      attribute="disable_rule"
+      permission="plone.app.contentrules.ManageContentRules"
+    />
+
+    <browser:page
+      for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+      name="contentrule-delete"
+      class=".controlpanel.ContentRulesControlPanel"
+      attribute="delete_rule"
+      permission="plone.app.contentrules.ManageContentRules"
+    />
+
+    <browser:page
+      for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+      name="contentrule-globally-enable"
+      class=".controlpanel.ContentRulesControlPanel"
+      attribute="globally_enable"
+      permission="plone.app.contentrules.ManageContentRules"
+    />
+
+    <browser:page
+      for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+      name="contentrule-globally-disable"
+      class=".controlpanel.ContentRulesControlPanel"
+      attribute="globally_disable"
+      permission="plone.app.contentrules.ManageContentRules"
+    />
+
+    <!-- Namespace for rules, and for actions and conditions -->
+
+    <adapter
+        factory=".traversal.RuleNamespace"
+        name="rule"
+        />
+    <adapter
+        factory=".traversal.RuleConditionNamespace"
+        name="condition"
+        />
+    <adapter
+        factory=".traversal.RuleActionNamespace"
+        name="action"
+        />
+
+
+    <!-- Default page layout for cont rules add/edit forms -->
+    <adapter
+      for=".interfaces.IContentRulesForm"
+      factory=".formhelper.contentrules_named_template_adapter"
+      name="default"
+      provides="zope.formlib.namedtemplate.INamedTemplate"
+      />
+
+    <!-- When we access rules and elements, we still want to use a CMF/Plone
+    main_template -->
+
+    <configure package="Products.CMFDefault.skin">
+
+      <browser:page
+        name="five_template"
+        for="plone.app.contentrules.browser.interfaces.IRuleAdding"
+        template="five_template.pt"
+        permission="zope2.View"
+        />
+
+      <browser:page
+        name="five_template"
+        for="plone.app.contentrules.browser.interfaces.IRuleElementAdding"
+        template="five_template.pt"
+        permission="zope2.View"
+        />
+
+      <browser:page
+        name="five_template"
+        for="plone.contentrules.rule.interfaces.IRule"
+        template="five_template.pt"
+        permission="zope2.View"
+        />
+
+      <browser:page
+        name="five_template"
+        for="plone.contentrules.rule.interfaces.IRuleElementData"
+        template="five_template.pt"
+        permission="zope2.View"
+        />
+
+    </configure>
+
+    <!-- Resources -->
+    <browser:resource
+        name="manage-contentrules.js"
+        file="contentrules.js"
+        />
+    <!-- Resources -->
+    <browser:resource
+        name="manage-contentrule-elements.js"
+        file="contentrule-elements.js"
+        />
+    <browser:resource
+        name="manage-contentrules.css"
+        file="contentrules.css"
+        />
+
+    <!-- Rule breadcrumb -->
+
+  <browser:page
+      for="plone.contentrules.rule.interfaces.IRule"
+      name="breadcrumbs_view"
+      class=".navigation.RuleBreadcrumbs"
+      permission="zope.Public"
+      allowed_attributes="breadcrumbs"
+      />
+
+</configure>

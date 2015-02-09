@@ -1,0 +1,48 @@
+;-*-Doctest-*-
+=================
+Inplace Migration
+=================
+
+Inplace migrators load all values to be migrated into the migrator,
+then delete the old object and then load the values into the new
+object without requiring that the old object be renamed or moved.
+They can be useful when migrating content that have complex
+interactions with the application (such as CMFMember/membrane
+contentish members) that make renaming them or having the old and the
+new side-by-side a pain.
+
+Also, we test what happens when the Owner and Creator differ::
+
+    >>> self.addProfile('Products.contentmigration:testing')
+    >>> from Products.PloneTestCase.setup import _createObjectByType
+    >>> cmf_foo = _createObjectByType(
+    ...     'CMF Document', self.portal, id='foo', title='Foo')
+    >>> member_id = 'tempuser'
+    >>> self.portal.portal_membership.addMember(member_id, 'secret',
+    ...     ('Member', 'Manager'), [])
+    >>> user = self.portal.acl_users.getUserById(member_id)
+    >>> cmf_foo.changeOwnership(user)
+
+    >>> cmf_foo.portal_type, cmf_foo.getId(), cmf_foo.Title()
+    ('CMF Document', 'foo', 'Foo')
+    >>> cmf_foo.listCreators()
+    ('test_user_1_',)
+    >>> cmf_foo.Creator()
+    'test_user_1_'
+    >>> cmf_foo.getOwner().getId()
+    'tempuser'
+
+    >>> from Products.contentmigration.inplace import InplaceCMFItemMigrator
+    >>> migrator = InplaceCMFItemMigrator(cmf_foo)
+    >>> migrator.dst_portal_type = 'Document'
+    >>> migrator.migrate()
+    >>> at_foo = self.portal.foo
+
+    >>> at_foo.portal_type, at_foo.getId(), at_foo.Title()
+    ('Document', 'foo', 'Foo')
+    >>> at_foo.listCreators()
+    ('test_user_1_',)
+    >>> at_foo.Creator()
+    'test_user_1_'
+    >>> at_foo.getOwner().getId()
+    'tempuser'

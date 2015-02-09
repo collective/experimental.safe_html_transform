@@ -1,0 +1,14 @@
+NotFound errors and traversal errors
+====================================
+
+Not found errors should only be displayed when someone provides a URL
+to an object that doesn't exist, as in:
+
+  >>> from zope.app.wsgi.testlayer import http
+  >>> print http(r"""
+  ... GET /eek HTTP/1.1
+  ... """)
+  HTTP/1.0 404 Not Found
+  ...
+    A server error occurred.
+  ...

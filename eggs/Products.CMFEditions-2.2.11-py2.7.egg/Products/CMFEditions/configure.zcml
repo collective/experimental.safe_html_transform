@@ -1,0 +1,43 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    i18n_domain="cmfeditions">
+
+  <include file="permissions.zcml"/>
+  
+  <cmf:registerDirectory name="skins" directory="skins" recursive="True" />
+
+  <include package="Products.CMFUid" />
+  <!-- provides hooks for zope.copy -->
+  <include package="zope.location" />
+  <include package=".browser" />
+  <include package=".exportimport" />
+
+  <include file="profiles.zcml"/>
+
+
+  <subscriber for=".interfaces.IVersioned
+                   zope.lifecycleevent.interfaces.IObjectCopiedEvent"
+              handler=".ArchivistTool.object_copied" />
+
+  <configure zcml:condition="installed Products.Archetypes">
+    <subscriber for="*
+                     Products.Archetypes.interfaces.IWebDAVObjectInitializedEvent"
+                handler=".subscriber.webdavObjectInitialized" />
+
+    <subscriber for="*
+                     Products.Archetypes.interfaces.IWebDAVObjectEditedEvent"
+                handler=".subscriber.webdavObjectEdited" />
+
+    <subscriber for="*
+                     Products.Archetypes.interfaces.IObjectInitializedEvent"
+                handler=".subscriber.objectInitialized" />
+
+    <subscriber for="*
+                     Products.Archetypes.interfaces.IObjectEditedEvent"
+                handler=".subscriber.objectEdited" />
+  </configure>
+
+</configure>

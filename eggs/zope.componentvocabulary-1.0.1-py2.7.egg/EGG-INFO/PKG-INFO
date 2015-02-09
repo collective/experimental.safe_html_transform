@@ -1,0 +1,40 @@
+Metadata-Version: 1.1
+Name: zope.componentvocabulary
+Version: 1.0.1
+Summary: Component vocabularies
+Home-page: http://pypi.python.org/pypi/zope.componentvocabulary
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: This package contains various vocabularies.
+        
+        
+        =======
+        CHANGES
+        =======
+        
+        1.0.1 (2010-09-25)
+        ------------------
+        
+        - Added not declared but needed dependency on ``zope.component``.
+        
+        - Added test extra to declare test dependency on ``zope.component [test]``.
+        
+        
+        1.0 (2009-05-19)
+        ----------------
+        
+        * Initial public release, derived from zope.app.component and
+          zope.app.interface to replace them.
+        
+Keywords: zope component architecture vocabulary
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3

@@ -1,0 +1,25 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+    <adapter factory=".lockable.TTWLockable" />
+
+    <include package="Products.CMFCore" file="configure.zcml" />
+
+    <browser:page
+        for=".interfaces.ITTWLockable"
+        name="plone_lock_operations"
+        class=".browser.locking.LockingOperations"
+        permission="cmf.ModifyPortalContent"
+        allowed_attributes="create_lock safe_unlock force_unlock refresh_lock"
+        />
+
+    <browser:page
+        for=".interfaces.ITTWLockable"
+        name="plone_lock_info"
+        class=".browser.locking.LockingInformation"
+        permission="zope2.View"
+        allowed_attributes="is_locked is_locked_for_current_user lock_is_stealable lock_info"
+        />
+
+</configure>

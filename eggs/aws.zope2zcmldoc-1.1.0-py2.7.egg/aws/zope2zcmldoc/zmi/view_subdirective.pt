@@ -1,0 +1,36 @@
+<html metal:use-macro="context/@@controlpanel_macros/macros/master"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      lang="en"
+      i18n:domain="aws.zope2zcmldoc">
+
+  <metal:main-slot fill-slot="body">
+    <p class="location-bar">
+      <a href="@@manage_main" i18n:translate="">Namespaces</a> &gt;
+      <a href="#"
+         tal:attributes="href view/this_namespace_view_url">
+        <span tal:content="view/this_namespace">
+          http://namespaces.zope.org/some_ns
+        </span>
+      </a> &gt;
+      <a href="#"
+         tal:attributes="href view/this_directive_view_url">
+        <span tal:content="view/this_directive">foo</span>
+      </a> &gt;
+      <strong tal:content="view/this_subdirective">foo</strong>
+      <metal:to-english-macro
+         use-macro="context/@@controlpanel_macros/macros/to_english" />
+    </p>
+
+    <h2 i18n:translate="">
+      '<span tal:content="view/this_subdirective" i18n:name="subdirective">
+        foo
+      </span>' Subdirective
+    </h2>
+
+    <tal:bloc define="info view/subdirective_infos">
+      <metal:attributes use-macro="context/@@controlpanel_macros/macros/summary" />
+    </tal:bloc>
+  </metal:main-slot>
+</html>

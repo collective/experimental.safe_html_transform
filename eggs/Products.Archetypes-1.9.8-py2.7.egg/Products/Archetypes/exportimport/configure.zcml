@@ -1,0 +1,64 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:five="http://namespaces.zope.org/five"
+   xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+   i18n_domain="plone">
+
+  <adapter factory=".archetypetool.ArchetypeToolXMLAdapter" />
+  <adapter factory=".reference.ReferenceCatalogXMLAdapter"/>
+  <adapter factory=".uid.UIDCatalogXMLAdapter"/>
+
+  <genericsetup:importStep
+      name="archetypes-various"
+      title="Archetypes setup"
+      description="Import various settings for Archetypes."
+      handler="Products.Archetypes.setuphandlers.setupArchetypes">
+     <depends name="componentregistry"/>
+  </genericsetup:importStep>
+
+  <genericsetup:importStep
+      name="archetypetool"
+      title="Archetype Tool"
+      description="Import Archetype Tool."
+      handler="Products.Archetypes.exportimport.archetypetool.importArchetypeTool">
+     <depends name="archetypes-various"/>
+  </genericsetup:importStep>
+
+  <genericsetup:exportStep
+      name="archetypetool"
+      title="Archetype Tool"
+      description="Export Archetype Tool."
+      handler="Products.Archetypes.exportimport.archetypetool.exportArchetypeTool">
+  </genericsetup:exportStep>
+
+  <genericsetup:importStep
+      name="reference_catalog"
+      title="Reference Catalog"
+      description="Import reference catalog."
+      handler=".reference.importCatalogTool">
+    <depends name="toolset" />
+  </genericsetup:importStep>
+
+  <genericsetup:exportStep
+      name="reference_catalog"
+      title="Reference Catalog"
+      description="Export reference catalog."
+      handler=".reference.exportCatalogTool"
+      />
+
+  <genericsetup:importStep
+      name="uid_catalog"
+      title="UID Catalog"
+      description="Import uid catalog."
+      handler=".uid.importCatalogTool">
+    <depends name="toolset" />
+  </genericsetup:importStep>
+
+  <genericsetup:exportStep
+      name="uid_catalog"
+      title="UID Catalog"
+      description="Export uid catalog."
+      handler=".uid.exportCatalogTool"
+      />
+
+</configure>

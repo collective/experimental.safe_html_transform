@@ -1,0 +1,43 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+  <include package="zope.formlib" file="configure.zcml" />
+
+  <!-- Form Macros -->
+
+  <browser:page
+      for="*"
+      name="form_macros"
+      permission="zope.Public"
+      class=".macros.FormMacros"
+      allowed_interface="zope.interface.common.mapping.IItemMapping"
+      />
+
+  <browser:page
+      for="*"
+      name="addform_macros"
+      permission="zope.Public"
+      template="add.pt"
+      />
+
+
+  <!-- Register the form documentation with the apidoc tool -->
+  <configure
+      xmlns:apidoc="http://namespaces.zope.org/apidoc"
+      xmlns:zcml="http://namespaces.zope.org/zcml"
+      zcml:condition="have apidoc">
+
+    <apidoc:bookchapter
+        id="form"
+        title="Widgets and Forms"
+        />
+    <apidoc:bookchapter
+        id="formdirective"
+        title="The browser:form Directive"
+        doc_path="form.txt"
+        parent="form"
+        />
+  </configure>
+
+</configure>

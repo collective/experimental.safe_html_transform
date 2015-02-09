@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone.app.imaging">
+
+  <genericsetup:registerProfile
+    name="default"
+    title="plone.app.imaging"
+    directory="profiles/default"
+    description="User-configurable image scaling"
+    for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+    provides="Products.GenericSetup.interfaces.EXTENSION"
+    />
+
+</configure>

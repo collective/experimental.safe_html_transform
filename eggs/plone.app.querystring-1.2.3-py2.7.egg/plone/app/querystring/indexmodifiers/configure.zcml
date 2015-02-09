@@ -1,0 +1,46 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="plone">
+
+    <utility
+        factory=".query_index_modifiers.Subject"
+        provides="..interfaces.IParsedQueryIndexModifier"
+        name="Subject"
+        />
+    <utility
+        factory=".query_index_modifiers.Date"
+        provides="..interfaces.IParsedQueryIndexModifier"
+        name="Date"
+        />
+    <utility
+        factory=".query_index_modifiers.created"
+        provides="..interfaces.IParsedQueryIndexModifier"
+        name="created"
+        />
+    <utility
+        factory=".query_index_modifiers.effective"
+        provides="..interfaces.IParsedQueryIndexModifier"
+        name="effective"
+        />
+    <utility
+        factory=".query_index_modifiers.end"
+        provides="..interfaces.IParsedQueryIndexModifier"
+        name="end"
+        />
+    <utility
+        factory=".query_index_modifiers.expires"
+        provides="..interfaces.IParsedQueryIndexModifier"
+        name="expires"
+        />
+    <utility
+        factory=".query_index_modifiers.modified"
+        provides="..interfaces.IParsedQueryIndexModifier"
+        name="modified"
+        />
+    <utility
+        factory=".query_index_modifiers.start"
+        provides="..interfaces.IParsedQueryIndexModifier"
+        name="start"
+        />
+
+</configure>

@@ -1,0 +1,11 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+    <include package="zope.annotation" />
+
+    <utility component=".ram.global_cache"
+             provides="zope.ramcache.interfaces.ram.IRAMCache" />
+
+    <utility component=".ram.choose_cache"
+             provides=".interfaces.ICacheChooser" />
+
+</configure>

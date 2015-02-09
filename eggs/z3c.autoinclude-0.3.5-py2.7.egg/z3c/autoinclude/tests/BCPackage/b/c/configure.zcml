@@ -1,0 +1,10 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+  <include package="z3c.autoinclude" file="meta.zcml" />
+  <includeDependencies package="." />
+  <test test_string="BCPackage has been loaded" />
+  <!-- BCPackage is autoincluded.
+  This means that SiblingPackage and TestDirective will be included, in no particular order.
+  TestDirective has a meta.zcml.
+  SiblingPackage has a meta.zcml.
+  -->
+</configure>

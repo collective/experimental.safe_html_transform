@@ -1,0 +1,108 @@
+<registry>
+
+  <record name="plone.caching.interfaces.ICacheSettings.operationMapping">
+    <value purge="False">
+      <element key="plone.resource">plone.app.caching.strongCaching</element>
+      <element key="plone.stableResource">plone.app.caching.strongCaching</element>
+      <element key="plone.content.itemView">plone.app.caching.weakCaching</element>
+      <element key="plone.content.feed">plone.app.caching.moderateCaching</element>
+      <element key="plone.content.folderView">plone.app.caching.weakCaching</element>
+      <element key="plone.content.file">plone.app.caching.moderateCaching</element>
+    </value>
+  </record>
+
+
+  <!-- plone.content.itemView -->
+  <record name="plone.app.caching.weakCaching.plone.content.itemView.etags">
+      <field ref="plone.app.caching.weakCaching.etags" />
+      <value>
+          <element>userid</element>
+          <element>catalogCounter</element>
+          <element>userLanguage</element>
+          <element>gzip</element>
+          <element>skin</element>
+          <element>locked</element>
+          <element>resourceRegistries</element>
+      </value>
+  </record>
+  <record name="plone.app.caching.weakCaching.plone.content.itemView.ramCache">
+      <field ref="plone.app.caching.weakCaching.ramCache" />
+      <value>True</value>
+  </record>
+
+
+  <!-- plone.content.folderView -->
+  <record name="plone.app.caching.weakCaching.plone.content.folderView.etags">
+      <field ref="plone.app.caching.weakCaching.etags" />
+      <value>
+          <element>userid</element>
+          <element>catalogCounter</element>
+          <element>userLanguage</element>
+          <element>gzip</element>
+          <element>skin</element>
+          <element>locked</element>
+          <element>copy</element>
+          <element>resourceRegistries</element>
+      </value>
+  </record>
+  <record name="plone.app.caching.weakCaching.plone.content.folderView.ramCache">
+      <field ref="plone.app.caching.weakCaching.ramCache" />
+      <value>True</value>
+  </record>
+
+
+  <!-- plone.content.feed -->
+  <record name="plone.app.caching.moderateCaching.plone.content.feed.smaxage">
+      <field ref="plone.app.caching.moderateCaching.smaxage" />
+      <value>86400</value>
+  </record>
+  <record name="plone.app.caching.moderateCaching.plone.content.feed.etags">
+      <field ref="plone.app.caching.moderateCaching.etags" />
+      <value>
+          <element>userid</element>
+          <element>catalogCounter</element>
+          <element>userLanguage</element>
+          <element>gzip</element>
+          <element>skin</element>
+      </value>
+  </record>
+  <record name="plone.app.caching.moderateCaching.plone.content.feed.ramCache">
+      <field ref="plone.app.caching.moderateCaching.ramCache" />
+      <value>True</value>
+  </record>
+
+
+  <!-- plone.content.file -->
+  <record name="plone.app.caching.moderateCaching.plone.content.file.smaxage">
+      <field ref="plone.app.caching.moderateCaching.smaxage" />
+      <value>86400</value>
+  </record>
+  <record name="plone.app.caching.moderateCaching.plone.content.file.lastModified">
+      <field ref="plone.app.caching.moderateCaching.lastModified" />
+      <value>True</value>
+  </record>
+
+
+  <!-- plone.resource-->
+  <record name="plone.app.caching.strongCaching.plone.resource.maxage">
+      <field ref="plone.app.caching.strongCaching.smaxage" />
+      <value>86400</value>
+  </record>
+  <record name="plone.app.caching.strongCaching.plone.resource.lastModified">
+      <field ref="plone.app.caching.strongCaching.lastModified" />
+      <value>True</value>
+  </record>
+
+
+  <!-- plone.stableResource-->
+  <record name="plone.app.caching.strongCaching.plone.stableResource.maxage">
+      <field ref="plone.app.caching.strongCaching.maxage" />
+      <value>31536000</value>
+  </record>
+  <record name="plone.app.caching.strongCaching.plone.stableResource.lastModified">
+      <field ref="plone.app.caching.strongCaching.lastModified" />
+      <value>True</value>
+  </record>
+
+
+</registry>

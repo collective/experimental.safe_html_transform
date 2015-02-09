@@ -1,0 +1,96 @@
+Metadata-Version: 1.1
+Name: z3c.formwidget.query
+Version: 0.10
+Summary: A source query widget for z3c.form.
+Home-page: http://pypi.python.org/pypi/z3c.formwidget.query
+Author: Zope Community
+Author-email: zope3-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        This package implements a widget that lets users enter a query and
+        select from the results.
+        
+        The widget works with ``zope.schema.Choice``-fields supplying a query
+        source [1], optionally in conjunction with a collection field which
+        then allows multiple selections.
+        
+        The easiest way to use the widget is to provide one of the following
+        as ``widgetFactory``:
+        
+        * z3c.formwidget.query.widget.QuerySourceFieldRadioWidget
+        * z3c.formwidget.query.widget.QuerySourceFieldCheckboxWidget
+        
+        ------
+        
+        [1] The source needs to implement ``IQuerySource`` as defined in this
+        package.
+        
+        
+        Changelog
+        =========
+        
+        0.10 (2014-02-19)
+        -----------------
+        
+        - Remove :list from novalue radio box name to be the same behavior
+          as z3c.form >= 2.6.0.
+          [vincentfretin]
+        
+        
+        0.9 (2012-08-30)
+        ----------------
+        
+        * Avoid test dependency on zope.app.testing.
+          [hannosch]
+        
+        * Remove unused dependency on zope.app.form.
+          [hannosch]
+        
+        0.8 - 2012-02-20
+        ----------------
+        
+        * If one of the values to be displayed provides IRoleManager,
+          then check for permission first.
+          [frapell]
+        
+        0.7 - 2011-11-07 
+        ----------------
+        
+        * Use an ordered list instead of a set to represent source items. 
+          [timo]
+        
+        0.6 - 2011-05-04
+        ----------------
+        
+        * Add an ignoreMissing parameter and widget subclasses to avoid errors when
+          rendering missing values.
+          [elro]
+        
+        * Create changelog file.
+          [dukebody]
+        
+        * Respect the ignoreRequest parameter.
+          [dukebody]
+        
+        0.5 - 2009-04-17
+        -----------------
+        
+        * ...
+        
+        0.3 - 2008-08-28
+        -----------------
+        
+        * ...
+        
+Keywords: zope zope3 z3c.form
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Zope3
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

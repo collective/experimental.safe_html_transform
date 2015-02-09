@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<rolemap>
+  <permissions>
+    <permission name="CMFPlacefulWorkflow: Manage workflow policies"
+                acquire="True">
+      <role name="Manager"/>
+      <role name="Owner"/>
+      <role name="Site Administrator"/>
+    </permission>
+  </permissions>
+</rolemap>

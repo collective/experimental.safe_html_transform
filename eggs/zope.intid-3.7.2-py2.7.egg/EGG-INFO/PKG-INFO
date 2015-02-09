@@ -1,0 +1,56 @@
+Metadata-Version: 1.1
+Name: zope.intid
+Version: 3.7.2
+Summary: Integer Id Utility
+Home-page: http://pypi.python.org/pypi/zope.intid
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: This package provides an API to create integer ids for any object. Later
+        objects can be looked up by their id as well. This functionality is commonly
+        used in situations where dealing with objects is undesirably, such as in
+        search indices or any code that needs an easy hash of an object.
+        
+        
+        =======
+        CHANGES
+        =======
+        
+        3.7.2 (2009-12-27)
+        ------------------
+        
+        - Use the zope.component API in favor of ztapi.
+        
+        - Removed ``zope.app.testing`` dependency.
+        
+        3.7.1 (2009-05-18)
+        ------------------
+        
+        - Remove dependencies on ``zope.container``.  Instead import
+          ``Object*Event`` classes from ``zope.lifecycleevent`` and import
+          ``IContained`` from ``zope.location``.  In order to be able to do
+          this, depend on ``zope.lifecycleevent``>=3.5.2 and
+          ``zope.location``>=3.5.4.
+        
+        - Remove a dependency on ``zope.container.contained.Contained``
+          (this is a dumb base class that defines __parent__ and __name__
+          as None and declares that the class implements IContained).
+        
+        3.7.0 (2009-02-01)
+        ------------------
+        
+        - Split out this package from ``zope.app.intid``. The latter one
+          now only contains browser views and compatibility imports while
+          whole IntId functionality is moved here. 
+        
+Keywords: zope3 integer id utility
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3

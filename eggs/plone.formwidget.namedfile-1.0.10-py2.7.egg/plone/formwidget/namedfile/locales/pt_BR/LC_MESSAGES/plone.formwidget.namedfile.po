@@ -1,0 +1,60 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: plone.formwidget.namedfile\n"
+"POT-Creation-Date: 2010-11-15 10:00+0000\n"
+"PO-Revision-Date: 2011-06-29 10:00+0000\n"
+"Last-Translator: Rafael Oliveira <rafaelbco@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"Language-Code: pt_BR\n"
+"Language-Name: Portuguese\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: plone.formwidget.namedfile\n"
+
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/validator.py:8
+msgid "No file provided."
+msgstr "Nenhum arquivo fornecido."
+
+#. Default: "Keep existing file"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/file_input.pt:47
+msgid "file_keep"
+msgstr "Manter o arquivo atual"
+
+#. Default: "Remove existing file"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/file_input.pt:60
+msgid "file_remove"
+msgstr "Remover o arquivo atual"
+
+#. Default: "Replace with new file"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/file_input.pt:72
+msgid "file_replace"
+msgstr "Substituir por um novo arquivo"
+
+#. Default: "Keep existing image"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/image_input.pt:52
+msgid "image_keep"
+msgstr "Manter a imagem atual"
+
+#. Default: "Remove existing image"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/image_input.pt:65
+msgid "image_remove"
+msgstr "Remover a imagem atual"
+
+#. Default: "Replace with new image"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/image_input.pt:77
+msgid "image_replace"
+msgstr "Substituir por uma nova imagem"
+
+#. Default: "No file"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/file_display.pt:27
+msgid "no_file"
+msgstr "Sem arquivo"
+
+#. Default: "No image"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/image_display.pt:31
+msgid "no_image"
+msgstr "Sem imagem"
+
+

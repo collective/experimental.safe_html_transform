@@ -1,0 +1,354 @@
+=================
+HTTP access tests
+=================
+
+Boiler plate
+------------
+
+First, we are going to setup an environment so we can test that stuff
+is acquired or not acquired at the right times. The code is based on
+Sidneys tests for Archetypes.
+
+  >>> import os
+  >>> from Products.Archetypes.tests.attestcase import user_name
+  >>> from Products.Archetypes.tests.attestcase import user_password
+  >>> from Products.Archetypes.tests.atsitetestcase import portal_name
+  >>> from Products.ATContentTypes.tests.atcttestcase import test_home
+
+  Input directory with test files
+  >>> input_dir = os.path.join(test_home, 'input')
+
+  CMF and Plone sites may have different default titles so we set one
+  >>> self.setRoles(['Manager'])
+  >>> self.portal.setTitle('Portal Title')
+  >>> self.setRoles(['Member'])
+
+  Use the member's home folder as play ground for the tests
+  >>> folder = self.folder
+  >>> folder.setTitle('test folder')
+  >>> fpath = '/'.join(folder.getPhysicalPath())
+
+  We need the portal, too
+  >>> portal = self.portal
+  >>> ppath = '/'.join(portal.getPhysicalPath())
+
+  Dates use for If-* requests
+
+  >>> from App.Common import rfc1123_date
+  >>> import time
+  >>> future = time.time()+3600
+  >>> past = time.time()-3600
+
+  For some tests an image is needed.
+
+  >>> input = open(os.path.join(input_dir, 'test.gif'), 'rb')
+  >>> input.seek(0)
+
+  >>> print http(r"""
+  ... PUT /%s/test-image HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... Content-Type: image/gif
+  ... Depth: 0
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> input.close()
+  >>> image = folder['test-image']
+  >>> imgpath = '/'.join(image.getPhysicalPath())
+
+Functional testing patches for stream iterators.
+
+  >>> from ZPublisher.HTTPResponse import HTTPResponse
+  >>> from plone.app.blob.tests.patches import applyPatch
+  >>> from plone.app.blob.tests.patches import setBody
+  >>> applyPatch(HTTPResponse, 'setBody', setBody)
+
+
+HTTP HEAD
+=========
+
+Test for bug http://plone.org/collector/4290
+#4290 HEAD request returns 404 error for Plone folders w/o index_html
+
+According to the bug report a plone folder w/o an object named index_html
+return 404. The correct response code for a HEAD request is either 200 for
+found or 404 for not found
+
+ATFolder
+---------
+
+For the test we have to remove the object 'index_html' if it is in the
+folder.
+
+  >>> if 'index_html' in folder:
+  ...     folder.manage_delObjects('index_html')
+
+  ATFfolder's HEAD method is using defaultView to acquire a view method. Check
+  the viewMethod first.
+
+  >>> view_id = folder.defaultView()
+  >>> view_id
+  'folder_listing'
+  >>> view_method = getattr(folder, view_id)
+  >>> view_method
+  <FSPageTemplate at ...>
+  >>> view_method.HEAD
+  <bound method FSPageTemplate.HEAD of ...>
+
+  Check HEAD w/o an index_html object
+
+  >>> print http(r"""
+  ... HEAD /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (fpath, user_name, user_password))
+  HTTP/1.1 200 OK
+  ...
+  Content-Length: 1
+  ...
+
+  HEAD works with an object named index_html, too. The browserdefault code
+  returns the index_html object and its HEAD method is caleld
+
+  >>> folder.invokeFactory('Document', id='index_html')
+  'index_html'
+  >>> folder.index_html.portal_type
+  'Document'
+
+  >>> print http(r"""
+  ... HEAD /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (fpath, user_name, user_password))
+  HTTP/1.1 200 OK
+  ...
+  Content-Length: 1
+  ...
+
+  Remove index_html for the following tests since index_html overrules every
+  view in set with browser default
+  >>> folder.manage_delObjects('index_html')
+
+  HEAD returns OK even if the view method does not exist. To show this
+  behavior the layout is set to a non existing template.
+
+  >>> pt_tool = self.portal.portal_types
+  >>> ti = pt_tool[folder.portal_type]
+  >>> ti.view_methods += ('non_existing_layout',)
+
+  >>> folder.setLayout('non_existing_layout')
+  >>> folder.defaultView()
+  'non_existing_layout'
+  >>> getattr(folder, folder.defaultView())
+  Traceback (most recent call last):
+  ...
+  AttributeError: ...
+
+  >>> print http(r"""
+  ... HEAD /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (fpath, user_name, user_password))
+  HTTP/1.1 200 OK
+  ...
+  Content-Length: 1
+  ...
+
+Collections
+-------------
+
+  >>> self.setRoles(['Manager'])
+  >>> folder.invokeFactory('Topic', id='topic')
+  'topic'
+  >>> self.setRoles(['Member'])
+  >>> topic = folder.topic
+  >>> topic.portal_type
+  'Topic'
+  >>> tpath = '/'.join(topic.getPhysicalPath())
+
+  A topic w/o a criterion returns OK.
+
+  >>> print http(r"""
+  ... HEAD /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (tpath, user_name, user_password))
+  HTTP/1.1 200 OK
+  ...
+  Content-Length: 1
+  ...
+
+  Add a criterion with a value. Without a value criterion.getCriteriaItems()
+  returns a false value and the query is empty.
+
+  >>> self.setRoles(['Manager'])
+  >>> criterion = topic.addCriterion('getId', 'ATSimpleStringCriterion')
+  >>> criterion.setValue('foo')
+  >>> self.setRoles(['Member'])
+
+  >>> print http(r"""
+  ... HEAD /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (tpath, user_name, user_password))
+  HTTP/1.1 200 OK
+  ...
+  Content-Length: 1
+  ...
+
+Portal root
+-----------
+
+Test HEAD for the portal root object
+
+  For the test we have to remove the object 'index_html' if it is in the
+  folder.
+
+  >>> if 'index_html' in portal:
+  ...     self.setRoles(['Manager'])
+  ...     portal.manage_delObjects(('index_html',))
+  ...     self.setRoles(['Member'])
+
+  >>> print http(r"""
+  ... HEAD /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (ppath, user_name, user_password))
+  HTTP/1.1 200 OK
+  ...
+
+  >>> self.setRoles(['Manager'])
+  >>> portal.invokeFactory('Document', id='index_html')
+  'index_html'
+  >>> portal.index_html.portal_type
+  'Document'
+  >>> self.setRoles(['Member'])
+
+  >>> print http(r"""
+  ... HEAD /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (ppath, user_name, user_password))
+  HTTP/1.1 200 OK
+  ...
+
+ATImage
+-------
+
+  >>> print http(r"""
+  ... HEAD /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (imgpath, user_name, user_password))
+  HTTP/1.1 200 OK
+  Accept-Ranges: none
+  Connection: close
+  Content-Length: 105
+  Content-Type: image/gif
+  Date: ...
+  Etag: ts...
+  Last-Modified: ...
+  <BLANKLINE>
+
+HTTP Range request
+==================
+
+  ATImage is using OFS.Image which support HTTP Range requests. A range
+  request can be used to get a specific range. A common use case is
+  the resuming of a download.
+
+  A range of bytes=0-4 returns the first 5 bytes of the image. The
+  Content-Lenghth header contains the length of the requested range while
+  the Content-Range headers contains informations about the range and the
+  full size of the image. You can read the information as "You got the bytes
+  0 up to 4 of 905 bytes". Also note that the code is 206 and not 200.
+
+  >>> print http(r"""
+  ... GET /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... Range: bytes=0-4
+  ... """ % (imgpath, user_name, user_password))
+  HTTP/1.1 206 Partial Content
+  Accept-Ranges: bytes
+  Content-Disposition: inline; filename="test-image"
+  Content-Length: 5
+  Content-Range: bytes 0-4/105
+  Content-Type: image/gif
+  Last-Modified: ...
+  <BLANKLINE>
+  GIF87
+
+  If-Range is used to check if the object was changed. You really don't want
+  to resume a download when the file was changed. If-Range can contain a
+  RFC 1123 style date.
+
+  >>> print http(r"""
+  ... GET /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... If-Range: %s
+  ... Range: bytes=0-4
+  ... """ % (imgpath, user_name, user_password, rfc1123_date(past)))
+  HTTP/1.1 200 OK
+  Accept-Ranges: bytes
+  Content-Disposition: inline; filename="test-image"
+  Content-Length: 105
+  Content-Type: image/gif...
+  ...
+  <BLANKLINE>
+  GIF87...
+
+  It can also contain an etag. Etags are starting with ts. In order to change
+  the etag I'm altering the title. update() calls reindexObject() which calls
+  notifyModified() which calls http__refreshEtag() ... nice chain, isn't it? :)
+
+  >>> etag = image.http__etag()
+  >>> image.update(title="new title")
+  >>> image.http__etag() != etag
+  True
+
+  >>> print http(r"""
+  ... GET /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... If-Range: %s
+  ... Range: bytes=0-4
+  ... """ % (imgpath, user_name, user_password, etag))
+  HTTP/1.1 200 OK
+  Accept-Ranges: bytes
+  Content-Disposition: inline; filename="test-image"
+  Content-Length: 105
+  Content-Type: image/gif...
+  ...
+  <BLANKLINE>
+  GIF87...
+
+
+HTTP If modified since
+======================
+
+  The If-Modified-Since header can be used to query if a content object has
+  been modified since a date.
+
+  The image was created seconds ago. I'm using a point in time 1h in the
+  future to be sure. The response code is 304.
+
+  >>> print http(r"""
+  ... GET /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... If-Modified-Since: %s
+  ... """ % (imgpath, user_name, user_password, rfc1123_date(future)))
+  HTTP/1.1 304 Not Modified
+  Accept-Ranges: bytes
+  Content-Length: 0
+  Content-Type: image/gif...
+  ...
+
+  The image wasn't there in the past. If modified since returns the
+  image with a response code of 200.
+
+  >>> print http(r"""
+  ... GET /%s HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... If-Modified-Since: %s
+  ... """ % (imgpath, user_name, user_password, rfc1123_date(past)))
+  HTTP/1.1 200 OK
+  Accept-Ranges: bytes
+  Content-Disposition: inline; filename="test-image"
+  Content-Length: 105
+  Content-Type: image/gif...
+  ...
+  <BLANKLINE>
+  GIF87...

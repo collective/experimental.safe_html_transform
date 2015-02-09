@@ -1,0 +1,48 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="plone.app.intid">
+
+  <include package="five.intid" file="base.zcml" />
+  <include package="five.intid" file="cmfdirectoryview.zcml" />
+  <include file="profiles.zcml" />
+
+  <!-- Register intid handlers for all CMF/Plone content -->
+  <configure zcml:condition="installed zope.lifecycleevent.interfaces.IObjectMovedEvent">
+    <subscriber
+        handler="five.intid.intid.addIntIdSubscriber"
+        for="Products.CMFCore.interfaces.IDynamicType
+             zope.lifecycleevent.interfaces.IObjectAddedEvent"
+        />
+    <subscriber
+        handler="five.intid.intid.removeIntIdSubscriber"
+        for="Products.CMFCore.interfaces.IDynamicType
+             zope.lifecycleevent.interfaces.IObjectRemovedEvent"
+        />
+    <subscriber
+        handler="five.intid.intid.moveIntIdSubscriber"
+        for="Products.CMFCore.interfaces.IDynamicType
+             zope.lifecycleevent.interfaces.IObjectMovedEvent"
+        />
+  </configure>
+  <!-- Zope 2.10 compatibility -->
+  <configure zcml:condition="not-installed zope.lifecycleevent.interfaces.IObjectMovedEvent">
+    <subscriber
+        handler="five.intid.intid.addIntIdSubscriber"
+        for="Products.CMFCore.interfaces.IDynamicType
+             zope.lifecycleevent.interfaces.IObjectAddedEvent"
+        />
+    <subscriber
+        handler="five.intid.intid.removeIntIdSubscriber"
+        for="Products.CMFCore.interfaces.IDynamicType
+             zope.lifecycleevent.interfaces.IObjectRemovedEvent"
+        />
+    <subscriber
+        handler="five.intid.intid.moveIntIdSubscriber"
+        for="Products.CMFCore.interfaces.IDynamicType
+             zope.lifecycleevent.interfaces.IObjectMovedEvent"
+        />
+  </configure>
+
+</configure>

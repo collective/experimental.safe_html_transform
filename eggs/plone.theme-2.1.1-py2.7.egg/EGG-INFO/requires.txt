@@ -1,0 +1,10 @@
+setuptools
+zope.component
+zope.interface
+zope.publisher
+zope.traversing
+Products.CMFCore
+Zope2
+
+[test]
+Products.PloneTestCase

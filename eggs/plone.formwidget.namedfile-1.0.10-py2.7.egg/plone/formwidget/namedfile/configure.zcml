@@ -1,0 +1,69 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:z3c="http://namespaces.zope.org/z3c"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    i18n_domain="plone.formwidget.namedfile">
+
+    <include package="z3c.form" file="meta.zcml" />
+    <include package="z3c.form" />
+    <include package="plone.namedfile" />
+    
+    <i18n:registerTranslations directory="locales" />
+
+    <adapter factory=".converter.NamedDataConverter" />
+    <adapter factory=".validator.NamedFileWidgetValidator" />
+
+    <class class=".widget.NamedFileWidget">
+        <require
+            permission="zope.Public"
+            interface=".interfaces.INamedFileWidget"
+        />
+    </class>
+    
+    <class class=".widget.NamedImageWidget">
+        <require
+            permission="zope.Public"
+            interface=".interfaces.INamedImageWidget"
+        />
+    </class>
+
+    <adapter factory=".widget.NamedFileFieldWidget" />
+    <adapter factory=".widget.NamedImageFieldWidget" />
+
+    <z3c:widgetTemplate
+        mode="display"
+        widget=".interfaces.INamedFileWidget"
+        layer="z3c.form.interfaces.IFormLayer"
+        template="file_display.pt"
+        />
+    
+    <z3c:widgetTemplate
+        mode="display"
+        widget=".interfaces.INamedImageWidget"
+        layer="z3c.form.interfaces.IFormLayer"
+        template="image_display.pt"
+        />
+
+    <z3c:widgetTemplate
+        mode="input"
+        widget=".interfaces.INamedFileWidget"
+        layer="z3c.form.interfaces.IFormLayer"
+        template="file_input.pt"
+        />
+
+    <z3c:widgetTemplate
+        mode="input"
+        widget=".interfaces.INamedImageWidget"
+        layer="z3c.form.interfaces.IFormLayer"
+        template="image_input.pt"
+        />
+
+    <browser:page
+        name="download"
+        for=".interfaces.INamedFileWidget"
+        class=".widget.Download"
+        permission="zope2.View"
+        />
+
+</configure>

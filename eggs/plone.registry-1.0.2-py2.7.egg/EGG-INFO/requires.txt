@@ -1,0 +1,8 @@
+setuptools
+ZODB3
+zope.schema
+zope.interface
+zope.component
+zope.dottedname
+zope.event
+zope.testing

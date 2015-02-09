@@ -1,0 +1,4 @@
+
+      [zope2.initialize]
+      Products.PluggableAuthService = Products.PluggableAuthService:initialize
+      

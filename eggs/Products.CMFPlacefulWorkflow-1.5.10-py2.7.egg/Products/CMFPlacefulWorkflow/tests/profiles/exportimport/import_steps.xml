@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<import-steps>
+ <import-step id="portal_placeful_workflow" version="20070608-01"
+              handler="Products.CMFPlacefulWorkflow.exportimport.importWorkflowPolicies"
+              title="Placeful Workflow Policies">
+  <dependency step="workflow"/>
+    Import placeful workflow policies.
+ </import-step>
+</import-steps>

@@ -1,0 +1,65 @@
+Metadata-Version: 1.0
+Name: tempstorage
+Version: 2.12.2
+Summary: A RAM-based storage for ZODB
+Home-page: http://pypi.python.org/pypi/tempstorage
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        A storage implementation which uses RAM to persist objects, much like
+        MappingStorage. Unlike MappingStorage, it needs not be packed to get rid of
+        non-cyclic garbage and it does rudimentary conflict resolution. This is a
+        ripoff of Jim's Packless bsddb3 storage.
+        
+        Changelog
+        =========
+        
+        2.12.2 - 2012-10-14
+        -------------------
+        
+        - Explicitly state distribution dependencies instead of re-using the
+          ZODB test requirements.
+        
+        2.12.1 - 2010-09-29
+        -------------------
+        
+        - Disabled ``check_tid_ordering_w_commit`` test from BasicStorage, as it uses
+          invalid test data.
+        
+        2.12.0 - 2010-09-25
+        -------------------
+        
+        - Require at least ZODB 3.9 and adjusted method signatures to disuse versions.
+        
+        - Expanded dependency on ZODB3 to include the test extra.
+        
+        2.11.3 - 2010-06-05
+        -------------------
+        
+        - Approximate PEP8 compliance.
+        
+        - Split out the ZODB protocol tests from the tests specific to the module.
+          Make the local tests use "normal" unittest conventions.
+        
+        - Comply with repository policy.
+        
+        - Clean imports, docstrings;  add an instance-level hook for GC parms.
+        
+        - Fix a test failure due to never-unghostified root in second connection.
+        
+        2.11.2 - 2009-08-03
+        -------------------
+        
+        - Added change log and readme.
+        
+        - Lauchpad #143736, #271395: fixed AttributeError' on _ltid in TempStorage
+        
+        2.11.1 - 2008-08-05
+        -------------------
+        
+        - Initial release as a stand-alone package.
+        
+Platform: UNKNOWN

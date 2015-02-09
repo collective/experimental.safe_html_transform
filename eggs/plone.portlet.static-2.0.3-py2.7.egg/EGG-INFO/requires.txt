@@ -1,0 +1,14 @@
+setuptools
+plone.portlets
+plone.app.portlets
+plone.app.form>=1.1
+plone.i18n
+zope.component
+zope.formlib
+zope.i18nmessageid
+zope.interface
+zope.schema
+Zope2
+
+[test]
+Products.PloneTestCase

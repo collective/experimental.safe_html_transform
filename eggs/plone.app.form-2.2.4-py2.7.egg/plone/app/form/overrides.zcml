@@ -1,0 +1,36 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+  <include package=".widgets" file="overrides.zcml" />
+
+  <view
+      type="zope.publisher.interfaces.browser.IBrowserRequest"
+      for="zope.formlib.interfaces.IWidgetInputError"
+      provides="zope.formlib.interfaces.IWidgetInputErrorView"
+      factory=".exception.WidgetInputErrorView"
+      permission="zope.Public"
+      />
+  
+  <adapter
+      for="zope.formlib.interfaces.IAction"
+      factory="plone.app.form.render_submit_button"
+      name="render"
+      provides="zope.formlib.namedtemplate.INamedTemplate"
+      />
+
+  <adapter
+      for="zope.formlib.interfaces.IPageForm"
+      factory="plone.app.form.default_named_template_adapter"
+      name="default"
+      provides="zope.formlib.namedtemplate.INamedTemplate"
+      />
+
+  <adapter
+      for="zope.formlib.interfaces.ISubPageForm"
+      factory="plone.app.form.default_subpage_template"
+      name="default"
+      provides="zope.formlib.namedtemplate.INamedTemplate"
+      />
+
+</configure>

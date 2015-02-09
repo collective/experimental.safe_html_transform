@@ -1,0 +1,177 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      lang="en"
+      metal:use-macro="here/prefs_main_template/macros/master"
+      i18n:domain="plone">
+
+<metal:block fill-slot="top_slot">
+<tal:defines tal:define="dummy python:request.set('disable_border',1);
+                                     disable_column_one python:request.set('disable_plone.leftcolumn',0);
+                                     disable_column_two python:request.set('disable_plone.rightcolumn',1);"/>
+        <link rel="stylesheet" href="++resource++plone.app.registry/style.css" type="text/css"
+    tal:attributes="href string:${context/portal_url}/++resource++plone.app.registry/style.css" />
+
+</metal:block>
+
+<body>
+<div id="content" metal:fill-slot="prefs_configlet_content"
+  tal:define="records view/records">
+
+<script type="text/javascript">
+(function($) {
+
+    function prepOverlay(){
+        $('a.recordsEditLink').prepOverlay({
+            subtype: 'ajax',
+            filter: common_content_filter,
+            formselector: 'form:has(div[id^="formfield-form-widgets-value"])',
+            closeselector: '[name="form.buttons.cancel"]',
+            noform: function(el) {
+                var o = $(el);
+                var emsg = o.find('dl.portalMessage.error');
+                if (emsg.length) {
+                    o.children().replaceWith(emsg);
+                    return false;
+                } else {
+                    return 'reload';
+            }}
+        });
+    }
+
+    $().ready(function() {
+
+        /* expand the size of search as needed */
+        $('#recordsContainer').delegate('#searchrow input[name="q"]', 'keypress', function(){
+            var self = $(this);
+            var count = self.val().length + 5;
+            if(count > parseInt(self.attr('size'))){
+                self.attr('size', count);
+            }
+        });
+
+        /* ajax retrieval of paging */
+        $('#recordsContainer').delegate('div.listingBar a', 'click', function(){
+            var self = $(this);
+            $('#kss-spinner').show();
+            $('#recordsContainer').load(self.attr('href') + ' #recordsTable', function(){
+                $('#kss-spinner').hide();
+                prepOverlay();
+            });
+            return false;
+        });
+
+        /* ajax form submission */
+        $('#recordsContainer').delegate('#searchrow form', 'submit', function(e){
+            var self = $(this);
+            $('#kss-spinner').show();
+            $('#recordsContainer').load(
+                $('base').attr('href') + '?' + self.serialize() + ' #recordsTable',
+                function(){
+                    $('#kss-spinner').hide();
+                    $('#searchrow input[name="q"]').trigger('keypress');
+                    prepOverlay();
+                });
+            e.preventDefault();
+            return false;
+        });
+
+        /* force submit on select change */
+        $('#recordsContainer').delegate('#searchrow select', 'change', function(){
+            $('#searchrow form#registry-filter').trigger('submit');
+        });
+
+        /* some init */
+        prepOverlay();
+        $('#searchrow input[name="q"]').trigger('keypress');
+    });
+
+})(jQuery);
+</script>
+
+
+    <a href=""
+       id="setup-link"
+       tal:attributes="href string:$portal_url/plone_control_panel"
+       i18n:translate="">
+       Site Setup
+    </a>
+
+    <h1 class="documentFirstHeading" i18n:translate="heading_registry">Configuration registry</h1>
+
+    <p class="documentDescription" i18n:translate="description_registry">
+        The table below shows record currently managed by the configuration
+        registry. Click on a record to edit it.
+    </p>
+    
+    <div id="content-core">
+        <div id="recordsContainer">
+            <table id="recordsTable" class="listing">
+                <thead>
+                    <tr id="searchrow">
+                        <th colspan="5" class="nosort">
+                            <form tal:define="qp request/qp|nothing;
+                                              q request/q|nothing;" id="registry-filter">
+                                <input name="q" id="q" placeholder="filter by..." size="30"
+                                    i18n:attributes="placeholder"
+                                    tal:attributes="value python: qp or q" />
+                                <input type="submit" value="Filter" i18n:attributes="value" />
+                                <tal:trans i18n:translate="or">or</tal:trans>
+                                <select name="qp" tal:define="prefixes python: view.prefixes.keys();
+                                                              dummy python: prefixes.sort();">
+                                    <option value="" i18n:translate="select_prefix">Select Prefix</option>
+                                    <tal:prefixes tal:repeat="prefix prefixes">
+                                      <option
+                                        tal:define="value python: 'prefix:' + (view.prefixes[prefix] or '')"
+                                        tal:attributes="value value;"
+                                        tal:content="prefix"/>
+                                    </tal:prefixes>
+                                </select>
+                            </form>
+                            <form id="clear-filter">
+                                <button type="submit" i18n:translate="clear_filter">
+                                    Clear filter
+                                </button>
+                            </form>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th i18n:translate="heading_name">Name</th>
+                        <th i18n:translate="heading_title">Title</th>
+                        <th i18n:translate="heading_description">Description</th>
+                        <th i18n:translate="heading_type">Type</th>
+                        <th i18n:translate="heading_value">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tal:loop repeat="record records">
+                        <tr tal:define="oddrow repeat/record/odd; field record/field/originalField | record/field"
+                            tal:attributes="class python:oddrow and 'odd' or 'even'">
+                            <td>
+                                <a class="recordsEditLink"
+                                   tal:content="python:record.__name__.replace('.', ' ')"
+                                   tal:attributes="href string:${context/absolute_url}/edit/${record/__name__}"
+                                   />
+                            </td>
+                            <td tal:content="field/title" />
+                            <td tal:content="field/description" />
+                            <td tal:content="field/__class__/__name__" />
+                            <td tal:content="python: unicode(record.value)"
+                                tal:on-error="string:?" />
+                        </tr>
+                    </tal:loop>
+                </tbody>
+                <tfoot tal:condition="python: records.numpages > 1">
+                    <tr>
+                        <th colspan="5" tal:define="batch records">
+                            <div metal:use-macro="here/batch_macros/macros/navigation" />
+                        </th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,7 @@
+setuptools
+AccessControl
+Acquisition
+ExtensionClass
+Persistence
+ZODB3
+Zope2 >= 2.13.0a1

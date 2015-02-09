@@ -1,0 +1,2 @@
+import browser
+browser   # pyflakes

@@ -1,0 +1,11 @@
+Ingeniweb : test case for CMFPlacefulWorkflow
+
+This is an implementation of ZopeTestCase framework for this product.
+
+To run the tests easily, you can try the following command line from your Zope
+instance root:
+bin/zopectl test -vv -p -m CMFPlacefulWorkflow
+
+or for only test method beginning with test_1:
+bin/zopectl test -vv -p -m CMFPlacefulWorkflow test_1
+

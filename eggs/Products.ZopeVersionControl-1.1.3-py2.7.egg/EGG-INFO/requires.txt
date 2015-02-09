@@ -1,0 +1,7 @@
+setuptools
+zope.interface
+Acquisition
+DateTime
+transaction
+ZODB3
+Zope2

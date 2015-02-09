@@ -1,0 +1,4 @@
+
+      [console_scripts]
+      i18nextract = zope.app.locales.extract:main [extract]
+      

@@ -1,0 +1,86 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+    <!-- Control view (public) -->
+    
+    <browser:page
+        for="*"
+        name="iterate_control"
+        class=".control.Control"
+        permission="zope2.View"
+        allowed_attributes="checkin_allowed checkout_allowed cancel_allowed"
+        />
+
+    <!-- Forms -->
+    
+    <browser:page
+        for="..interfaces.IIterateAware"
+        name="content-checkout"
+        class=".checkout.Checkout"
+        template="checkout.pt"
+        permission="zope2.View"
+        />
+        
+    <browser:page
+        for="..interfaces.IIterateAware"
+        name="content-checkin"
+        class=".checkin.Checkin"
+        template="checkin.pt"
+        permission="cmf.ModifyPortalContent"
+        />
+        
+    <browser:page
+        for="..interfaces.IIterateAware"
+        name="content-cancel-checkout"
+        class=".cancel.Cancel"
+        template="cancel.pt"
+        permission="cmf.ModifyPortalContent"
+        />
+
+    <!-- Information -->
+
+    <browser:page
+       for="..interfaces.IIterateManagedContent"
+       class=".diff.DiffView"
+       name="iterate_diff"
+       template="diff.pt"
+       permission="zope2.View"
+       />
+       
+    <browser:viewlet
+        name="plone.app.iterate.baseline_info"
+        manager="plone.app.layout.viewlets.interfaces.IAboveContent"
+        class=".info.BaselineInfoViewlet"
+        permission="zope2.View" 
+        for="..interfaces.IBaseline"
+        view="plone.app.layout.globals.interfaces.IViewView"
+        />
+    
+    <browser:viewlet
+        name="plone.app.iterate.checkout_info"
+        manager="plone.app.layout.viewlets.interfaces.IAboveContent"
+        class=".info.CheckoutInfoViewlet"
+        permission="zope2.View" 
+        for="..interfaces.IWorkingCopy"
+        view="plone.app.layout.globals.interfaces.IViewView"
+        />
+               
+    <!-- Resources -->
+    
+    <browser:resource
+        name="checkin.png"
+        image="checkin.png"
+        />
+    
+    <browser:resource
+        name="checkout.png"
+        image="checkout.png"
+        />
+        
+    <browser:resource
+        name="cancel-checkout.png"
+        image="cancel.png"
+        />
+    
+</configure>

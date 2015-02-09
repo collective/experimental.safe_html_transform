@@ -1,0 +1,21 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta"
+    i18n_domain="collective.monkeypatcher">
+
+    <meta:directives namespace="http://namespaces.plone.org/profiler">
+        
+        <meta:directive
+            name="profile"
+            schema=".meta.IProfileDirective"
+            handler=".meta.profile"
+            />
+        <meta:directive
+            name="timecall"
+            schema=".meta.ITimeCallDirective"
+            handler=".meta.timecall"
+            />
+            
+    </meta:directives>
+
+</configure>

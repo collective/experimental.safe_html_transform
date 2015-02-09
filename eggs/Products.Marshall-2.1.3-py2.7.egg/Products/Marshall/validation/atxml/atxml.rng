@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+  <start>
+    <ref name="Metadata" />
+  </start>
+
+  <define name="MetaMeta"
+          ns="http://plone.org/ns/archetypes/"
+          xmlns="http://relaxng.org/ns/structure/1.0">
+    <optional>
+      <attribute name="filename" />
+    </optional>
+    <optional>
+      <attribute name="content_type" />
+    </optional>
+    <optional>
+      <attribute name="transfer_encoding" />
+    </optional>
+  </define>
+
+  <define name="DublinCore"
+          xmlns:dc="http://purl.org/dc/elements/1.1/"
+          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
+          xmlns="http://relaxng.org/ns/structure/1.0">
+    <choice>
+      <zeroOrMore>
+        <element name="dc:title"><text /></element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="dc:description">
+          <ref name="MetaMeta" />
+          <text />
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="dc:subject"><text /></element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="dc:contributor"><data type="NMTOKEN" /></element>
+      </zeroOrMore>
+      <oneOrMore>
+        <element name="dc:creator"><data type="NMTOKEN" /></element>
+      </oneOrMore>
+      <zeroOrMore>
+        <element name="dc:language"><data type="language" /></element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="dc:rights">
+          <ref name="MetaMeta" />
+          <text />
+        </element>
+      </zeroOrMore>
+    </choice>
+  </define>
+
+  <define name="DateInfo"
+          xmlns:xmp="adobe:ns:meta"
+          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
+          xmlns="http://relaxng.org/ns/structure/1.0">
+        <zeroOrMore>
+          <element name="xmp:CreateDate"><data type="dateTime" /></element>
+        </zeroOrMore>
+        <zeroOrMore>
+          <element name="xmp:ModifyDate"><data type="dateTime" /></element>
+        </zeroOrMore>
+  </define>
+
+  <define name="ArchetypesFields"
+          ns="http://plone.org/ns/archetypes/"
+          xmlns:note="atxml:annotations"
+          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
+          xmlns="http://relaxng.org/ns/structure/1.0">
+    <element name="field">
+      <note:info>
+        All non-standard Archetypes fields are represented by a 'field'
+        element, their id specified by an attribute 'id'.
+      </note:info>
+      <attribute name="id" />
+      <ref name="MetaMeta" />
+      <choice>
+        <text />
+        <zeroOrMore>
+          <element name="reference">
+            <note:info>
+              References can be made by UID (Archetypes),
+              relative path, or by specifying a group of values
+              that can uniquely identify a piece of content.
+            </note:info>
+            <choice>
+              <zeroOrMore>
+                <element name="uid"><text /></element>
+              </zeroOrMore>
+              <zeroOrMore>
+                <element name="path"><text /></element>
+              </zeroOrMore>
+              <zeroOrMore>
+                <ref name="Metadata" />
+              </zeroOrMore>
+            </choice>
+          </element>
+        </zeroOrMore>
+      </choice>
+    </element>
+  </define>
+
+
+  <define name="Metadata">
+    <element name="metadata" ns="http://plone.org/ns/archetypes/"
+             xmlns:cmf="http://cmf.zope.org/namespaces/default/"
+             datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
+             xmlns="http://relaxng.org/ns/structure/1.0">
+      <!-- does not explicitly allow 'xml:lang' attribute -->
+      <interleave>
+        <optional>
+          <element name="cmf:type"><text /></element>
+        </optional>
+        <optional>
+          <element name="uid"><text /></element>
+        </optional>
+        <zeroOrMore>
+          <ref name="DublinCore" />
+        </zeroOrMore>
+        <zeroOrMore>
+          <ref name="DateInfo" />
+        </zeroOrMore>
+        <zeroOrMore>
+          <ref name="ArchetypesFields" />
+        </zeroOrMore>
+      </interleave>
+    </element>
+  </define>
+
+</grammar>

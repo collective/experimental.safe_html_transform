@@ -1,0 +1,36 @@
+================
+ Link Rendering
+================
+
+`test link rendering as a multiadapter`
+
+wicked uses browser:page to take care of setting up the multiadapter +
+template binding.  Lazy? yes. Future safe? probably better than hand
+rolling.
+
+    >>> from wicked.interfaces import IAmWicked
+    >>> from zope.interface import alsoProvides
+    >>> from Products.Five.tests.testing import manage_addFiveTraversableFolder
+    >>> manage_addFiveTraversableFolder(self.folder, 'testfo', title='folder')
+    >>> context = self.folder.testfo
+    >>> alsoProvides(context, IAmWicked)
+    >>> renderer = self.folder.testfo.restrictedTraverse('@@link_renderer')
+    >>> link=dict(path='/apath',
+    ...           icon='anicon.ico',
+    ...           uid='uid')
+    >>> renderer.load([link], 'Chunk')
+    >>> renderer.section='fieldname'
+    >>> from wicked.testing.xml import xstrip
+    >>> print xstrip(renderer())
+    <span id="fieldname-uid"><a class="link-wiki" href="http://nohost/apath">...Chunk</a></span>...
+
+
+    >>> renderer.load([], 'Chunk 2')
+    >>> print xstrip(renderer())
+    <span...class="" id="fieldname-1"><a class="link-wiki-add" title="Click to add a new page" href="http://nohost/test_folder_1_/testfo/@@wickedadd?Title=Chunk 2&amp;section=fieldname">...Chunk 2<sup>[+]</sup></a></span>...
+
+Test counter::
+
+    >>> renderer.load([], 'Chunk 3')
+    >>> print xstrip(renderer())
+    <span...class="" id="fieldname-2"><a class="link-wiki-add" title="Click to add a new page" href="http://nohost/test_folder_1_/testfo/@@wickedadd?Title=Chunk 3&amp;section=fieldname">...Chunk 3<sup>[+]</sup></a></span>...

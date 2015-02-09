@@ -1,0 +1,13 @@
+setuptools
+zope.interface
+zope.component
+zope.schema
+
+[test]
+plone.testing [zca]
+
+[repoze]
+repoze.zope2
+
+[Zope2.10]
+ZPublisherEventsBackport

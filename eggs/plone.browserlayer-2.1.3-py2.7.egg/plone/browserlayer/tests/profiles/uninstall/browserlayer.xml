@@ -1,0 +1,7 @@
+<layers>
+    <layer name="plone.browserlayer.tests"
+           remove="true" />
+    <!-- remove not existing should not doing more than a log -->
+    <layer name="plone.browserlayer.tests.notexisting"
+           remove="true" />
+</layers>

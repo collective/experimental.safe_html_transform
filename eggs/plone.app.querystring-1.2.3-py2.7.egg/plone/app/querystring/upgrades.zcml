@@ -1,0 +1,34 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup">
+
+  <genericsetup:upgradeStep
+      source="1"
+      destination="2"
+      title="Fix Typo in Registry"
+      description="Migrate registry to fix a typo."
+      profile="plone.app.querystring:default"
+      handler=".upgrades.upgrade_1_to_2_typo_in_registry"
+      />
+
+  <genericsetup:upgradeSteps
+      source="2"
+      destination="3"
+      profile="plone.app.querystring:default">
+    <genericsetup:upgradeDepends
+        title="Add show inactive operation and field"
+        import_profile="plone.app.querystring:upgrade_to_3"
+        />
+  </genericsetup:upgradeSteps>
+
+  <genericsetup:upgradeSteps
+      source="3"
+      destination="4"
+      profile="plone.app.querystring:default">
+    <genericsetup:upgradeDepends
+        title="Fix wrong vocabulary declaration of the show_inactive field"
+        import_profile="plone.app.querystring:upgrade_to_3"
+        />
+  </genericsetup:upgradeSteps>
+
+</configure>

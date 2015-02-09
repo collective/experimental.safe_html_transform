@@ -1,0 +1,7 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+    <!-- This file is no longer necessary, but left here in case people
+         reference it
+      -->
+
+</configure>

@@ -1,0 +1,233 @@
+<dtml-var manage_page_header>
+<dtml-with "_(management_view='Version Control')">
+<dtml-var manage_tabs>
+</dtml-with>
+
+<dtml-if haveRepository>
+
+<dtml-if isUnderVersionControl>
+<!-- object is under version control -->
+
+<p class="form-text">
+This object is under version control. Use the form below to perform 
+versioning related operations on the object. You may also view the 
+<a href="./versionControlLog">activity log</a> for this versioned resource.
+</p>
+
+<dtml-let info=getVersionInfo>
+
+<form action="&dtml-URL1;" method="post">
+<table cellspacing="0" cellpadding="2" border="0">
+
+<dtml-if "info.status == info.CHECKED_IN">
+    <tr>
+      <td align="left" valign="top" nowrap>
+      <div class="form-label">
+      Current Status
+      </div>
+      </td>
+      <td align="left" valign="top">
+      <div class="form-text">
+      <font color="red">
+      checked in <dtml-if isResourceUpToDate>(up to date)<dtml-else
+      >(not up to date)</dtml-if>
+      </font>
+      </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="left" valign="top">
+      <div class="form-label">
+      Version Number
+      </div>
+      </td>
+      <td align="left" valign="top">
+      <div class="form-text">
+      <dtml-var "info.version_id">
+      </div>
+      </td>
+    </tr>
+    <tr>
+      <td align="left" valign="top">
+      </td>
+      <td align="left" valign="top">
+      <div class="form-element">
+      <input class="form-element" type="submit" 
+       name="checkoutResource:method" 
+       value="Checkout" /> 
+      </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="left" valign="top" nowrap>
+      <div class="form-label">
+      <br>
+      Update To...
+      </div>
+      </td>
+      <td align="left" valign="top">
+      <div class="form-element">
+      <br>
+      <select name="selector">
+      <option value="LATEST_VERSION"> latest version</option>
+      <dtml-in getVersionIds>
+      <option value="<dtml-var sequence-item html_quote>"><dtml-var 
+       sequence-item>
+      </dtml-in>
+      </select>
+      </div>
+      </td>
+    </tr>
+    <tr>
+      <td align="left" valign="top">
+      </td>
+      <td align="left" valign="top">
+      <div class="form-element">
+      <input class="form-element" type="submit" 
+       name="updateResource:method" 
+       value="Update" />
+      </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="left" valign="top" nowrap>
+      <div class="form-label">
+      <br>
+      Label Version...
+      </div>
+      </td>
+      <td align="left" valign="top">
+      <div class="form-element">
+      <br>
+      <input class="form-element" type="text" 
+       name="label" size="20"/>
+      <input type="hidden" name="force:int" value="1"> 
+      </div>
+      </td>
+    </tr>
+    <tr>
+      <td align="left" valign="top">
+      </td>
+      <td align="left" valign="top">
+      <div class="form-element">
+      <input class="form-element" type="submit" 
+       name="labelResource:method" 
+       value="Label" />
+      </div>
+      </td>
+    </tr>
+
+</dtml-if>
+
+<dtml-if "info.status == info.CHECKED_OUT">
+    <tr>
+      <td align="left" valign="top" nowrap>
+      <div class="form-label">
+      Current Status
+      </div>
+      </td>
+      <td align="left" valign="top">
+      <div class="form-text">
+      checked out <dtml-if isResourceChanged>(modified)<dtml-else
+      >(not modified)</dtml-if>
+      </div>
+      </td>
+    </tr>
+    <tr>
+      <td align="left" valign="top">
+      <div class="form-label">
+      From Version
+      </div>
+      </td>
+      <td align="left" valign="top">
+      <div class="form-text">
+      <dtml-var "info.version_id">
+      </div>
+      </td>
+    </tr>
+    <tr>
+      <td align="left" valign="top">
+      <div class="form-label">
+      Message
+      </div>
+      </td>
+      <td align="left" valign="top">
+      <textarea name="message" rows="4" cols="40"></textarea>
+      </td>
+    </tr>
+    <tr>
+      <td align="left" valign="top">
+      </td>
+      <td align="left" valign="top">
+      <div class="form-element">
+      <input class="form-element" type="submit" 
+       name="checkinResource:method" 
+       value="Checkin" /> 
+      </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="left" valign="top">
+      </td>
+      <td align="left" valign="top">
+      <div class="form-text">
+      <br>
+      To discard changes to this object and revert to the version that
+      was originally checked out, click the <em>UnCheckout</em> button.
+      </div>
+
+      <div class="form-element">
+      <input class="form-element" type="submit" 
+       name="uncheckoutResource:method" 
+       value="UnCheckout" /> 
+      </div>
+      </td>
+    </tr>
+
+
+</dtml-if>
+
+
+
+</table>
+</form>
+</dtml-let>
+
+<dtml-else>
+<!-- The object is not under version control -->
+
+<p class="form-text">
+This object is <strong>not</strong> under version control. To place
+this object under version control, click the &quot;Apply version 
+control&quot; button below.
+</p>
+
+<form action="applyVersionControl" method="POST">
+<table cellspacing="0" cellpadding="2" border="0">
+  <tr>
+    <td align="left" valign="top">
+    </td>
+    <td align="left" valign="top">
+    <div class="form-element">
+    <input class="form-element" type="submit" name="submit" 
+     value="Apply version control" /> 
+    </div>
+    </td>
+  </tr>
+</table>
+</form>
+
+</dtml-if>
+
+<dtml-else>
+<p class="form-text">
+No version repository was found in the acquisition path of this
+resource. To use version control, create a repository object.
+</p>
+</dtml-if>
+
+<dtml-var manage_page_footer>

@@ -1,0 +1,17 @@
+<configure
+  xmlns="http://namespaces.zope.org/zope">
+
+  <adapter
+      factory=".profile.MarshallRegistryFileExportImportAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemExporter"
+      for=".interfaces.IMarshallRegistry"
+      />
+
+  <adapter
+      factory=".profile.MarshallRegistryFileExportImportAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemImporter"
+      for=".interfaces.IMarshallRegistry"
+      />
+
+</configure>
+

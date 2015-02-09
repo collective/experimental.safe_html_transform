@@ -1,0 +1,22 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:five="http://namespaces.zope.org/five">
+
+  <include package=".browser" />
+  <include package=".exportimport" />
+  <five:registerPackage
+      package="."
+      initialize=".initialize" />
+      
+  <adapter
+      for=".interfaces.IResourceRegistry"
+      name="persistent"
+      factory=".tools.BaseRegistry.PersistentResourceProvider"
+      />
+      
+  <subscriber
+        for=".interfaces.settings.IResourceRegistriesSettings
+              plone.registry.interfaces.IRecordModifiedEvent"
+        handler=".tools.BaseRegistry.cookWhenChangingSettings"
+        />
+
+</configure>

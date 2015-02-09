@@ -1,0 +1,15 @@
+setuptools
+plone.memoize
+plone.session
+plone.i18n
+Products.CMFCore
+Products.GenericSetup
+Products.PluggableAuthService
+Zope2 > 2.12.4
+
+[test]
+Products.PloneTestCase
+Products.Archetypes
+
+[atstorage]
+Products.Archetypes

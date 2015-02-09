@@ -1,0 +1,8 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:zcml="http://namespaces.zope.org/zcml">
+
+  <include zcml:condition="installed five.pt" package="five.pt" />
+  <include file="meta.zcml" />
+  <include package="z3c.jbot.patches" />
+
+</configure>

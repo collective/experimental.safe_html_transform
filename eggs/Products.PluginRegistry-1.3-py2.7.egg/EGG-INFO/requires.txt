@@ -1,0 +1,3 @@
+setuptools
+Zope2 >= 2.12
+Products.GenericSetup

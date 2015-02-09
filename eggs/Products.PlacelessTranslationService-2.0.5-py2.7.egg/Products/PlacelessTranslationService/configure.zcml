@@ -1,0 +1,22 @@
+<configure
+  xmlns="http://namespaces.zope.org/zope"
+  xmlns:i18n="http://namespaces.zope.org/i18n"
+  xmlns:five="http://namespaces.zope.org/five">
+
+  <five:registerPackage package="." initialize=".initialize2" />
+
+  <i18n:registerTranslations directory="locales" />
+
+  <!-- We need to make the request annotatable -->
+
+  <include package="zope.annotation" />
+
+  <class class="ZPublisher.BaseRequest.BaseRequest">
+    <implements interface="zope.annotation.interfaces.IAttributeAnnotatable" />
+  </class>
+
+  <class class="ZPublisher.HTTPRequest.HTTPRequest">
+    <implements interface="zope.publisher.interfaces.browser.IBrowserRequest" />
+  </class>
+
+</configure>

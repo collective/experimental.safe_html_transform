@@ -1,0 +1,73 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone">
+
+    <include file="profiles.zcml" />
+    <include file="upgrades.zcml" />
+
+  <include package="plone.app.contentlisting" />
+  <include package="plone.app.registry" />
+  <include package=".indexmodifiers" />
+
+
+  <genericsetup:upgradeStep
+      source="1"
+      destination="2"
+      title="Fix Typo in Registry"
+      description="Migrate registry to fix a typo."
+      profile="plone.app.querystring:default"
+      handler=".upgrades.upgrade_1_to_2_typo_in_registry"
+      />
+
+  <adapter
+    for="plone.registry.interfaces.IRegistry"
+    factory=".registryreader.QuerystringRegistryReader"
+    />
+
+  <adapter
+    for="plone.registry.interfaces.IRegistry
+         zope.publisher.interfaces.http.IHTTPRequest"
+    factory=".registryreader.QuerystringRegistryReader"
+    />
+
+  <browser:page
+    name="display_query_results"
+    class=".querybuilder.ContentListingView"
+    permission="zope2.View"
+    for="*"
+    template="results.pt"
+    />
+
+  <browser:page
+    name="querybuilderresults"
+    class=".querybuilder.QueryBuilder"
+    permission="zope2.View"
+    for="*"
+    />
+
+  <browser:page
+    name="querybuilder_html_results"
+    class=".querybuilder.QueryBuilder"
+    permission="zope2.View"
+    attribute="html_results"
+    for="*"
+    />
+
+  <browser:page
+    name="querybuildernumberofresults"
+    class=".querybuilder.QueryBuilder"
+    permission="zope2.View"
+    for="*"
+    attribute="number_of_results"
+    />
+
+  <browser:page
+    name="querybuilderjsonconfig"
+    class=".querybuilder.RegistryConfiguration"
+    permission="zope2.View"
+    for="*"
+    />
+
+</configure>

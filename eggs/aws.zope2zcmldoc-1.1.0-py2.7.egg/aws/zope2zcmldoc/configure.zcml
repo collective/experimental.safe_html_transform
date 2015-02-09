@@ -1,0 +1,82 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:five="http://namespaces.zope.org/five"
+   xmlns:i18n="http://namespaces.zope.org/i18n"
+   xmlns:browser="http://namespaces.zope.org/browser"
+   i18n_domain="aws.zope2zcmldoc">
+
+  <five:registerPackage package="." initialize=".initialize" />
+
+  <i18n:registerTranslations directory="locales" />
+
+  <adapter factory="aws.zope2zcmldoc.utils.Languages" />
+
+  <!-- Add/remove control panel -->
+
+  <browser:page
+     for="OFS.interfaces.IApplication"
+     name="install-aws-zope2zcmldoc"
+     class=".utils.Utils"
+     attribute="install"
+     permission="zope2.ViewManagementScreens"
+     />
+
+  <browser:page
+     for="OFS.interfaces.IApplication"
+     name="uninstall-aws-zope2zcmldoc"
+     class=".utils.Utils"
+     attribute="uninstall"
+     permission="zope2.ViewManagementScreens"
+     />
+
+  <!-- ZMI resources -->
+
+  <browser:resource
+     file="zmi/aws-zope2zcmldoc-icon.gif"
+     name="aws-zope2zcmldoc-icon.gif"
+     />
+
+  <five:registerClass
+     class="aws.zope2zcmldoc.controlpanel.ControlPanel"
+     meta_type="ZCML documentation control panel"
+     icon="aws-zope2zcmldoc-icon.gif"
+     permission="zope2.ViewManagementScreens"
+     />
+
+  <!-- ZMI templates -->
+
+  <browser:page
+     name="controlpanel_macros"
+     for="aws.zope2zcmldoc.interfaces.IControlPanel"
+     template="zmi/controlpanel_macros.pt"
+     permission="zope2.ViewManagementScreens"
+     />
+
+  <browser:pages
+     for="aws.zope2zcmldoc.interfaces.IControlPanel"
+     class=".browser.ZMIView"
+     permission="zope2.ViewManagementScreens"
+     >
+
+    <browser:page
+       name="manage_main"
+       template="zmi/manage_main.pt"
+       />
+
+    <browser:page
+       name="view_namespace"
+       template="zmi/view_namespace.pt"
+       />
+
+    <browser:page
+       name="view_directive"
+       template="zmi/view_directive.pt"
+       />
+
+    <browser:page
+       name="view_subdirective"
+       template="zmi/view_subdirective.pt"
+       />
+  </browser:pages>
+
+</configure>

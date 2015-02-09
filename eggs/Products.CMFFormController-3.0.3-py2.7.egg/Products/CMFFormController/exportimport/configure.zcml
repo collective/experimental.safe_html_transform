@@ -1,0 +1,19 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   >
+
+  <adapter
+     factory=".controllerpythonscript.ControllerPythonScriptBodyAdapter"
+     provides="Products.GenericSetup.interfaces.IBody"
+     for="Products.CMFFormController.interfaces.IControllerPythonScript
+          Products.GenericSetup.interfaces.ISetupEnviron"
+     />
+
+  <adapter
+     factory=".controllervalidator.ControllerValidatorBodyAdapter"
+     provides="Products.GenericSetup.interfaces.IBody"
+     for="Products.CMFFormController.interfaces.IControllerValidator
+          Products.GenericSetup.interfaces.ISetupEnviron"
+     />
+
+</configure>

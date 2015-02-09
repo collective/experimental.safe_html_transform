@@ -1,0 +1,6 @@
+<metadata>
+ <version>101</version>
+ <dependencies>
+  <dependency>profile-plone.app.registry:default</dependency>
+ </dependencies>
+</metadata>

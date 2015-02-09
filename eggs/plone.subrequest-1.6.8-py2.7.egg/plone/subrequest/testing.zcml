@@ -1,0 +1,87 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+    <include package="plone.subrequest" />
+
+    <browser:page
+        name="cookie"
+        for="*"
+        class="plone.subrequest.testing.CookieView"
+        permission="zope.Public"
+        />
+
+    <browser:page
+        name="parameter"
+        for="*"
+        class="plone.subrequest.testing.ParameterView"
+        permission="zope.Public"
+        />
+
+    <browser:page
+        name="url"
+        for="*"
+        class="plone.subrequest.testing.URLView"
+        permission="zope.Public"
+        />
+
+    <browser:page
+        name="response-write"
+        for="*"
+        class="plone.subrequest.testing.ResponseWriteView"
+        permission="zope.Public"
+        />
+
+    <browser:page
+        name="error"
+        for="*"
+        class="plone.subrequest.testing.ErrorView"
+        permission="zope.Public"
+        />
+
+    <browser:page
+        name="root"
+        for="OFS.Application.Application"
+        class="plone.subrequest.testing.RootView"
+        permission="zope.Public"
+        />
+
+    <browser:page
+        name="test"
+        for="*"
+        class="plone.subrequest.testing.SubrequestView"
+        permission="zope.Public"
+        />
+
+    <browser:page
+        name="stream"
+        for="*"
+        class="plone.subrequest.testing.StreamIteratorView"
+        permission="zope.Public"
+        />
+
+    <browser:page
+        name="filestream"
+        for="*"
+        class="plone.subrequest.testing.FileStreamIteratorView"
+        permission="zope.Public"
+        />
+
+    <browser:page
+        name="blobstream"
+        for="*"
+        class="plone.subrequest.testing.BlobStreamIteratorView"
+        permission="zope.Public"
+        />
+
+    <browser:defaultView
+        for="OFS.Folder.Folder"
+        name="test"
+        />
+
+    <browser:defaultView
+        for="OFS.Application.Application"
+        name="root"
+        />
+
+</configure>

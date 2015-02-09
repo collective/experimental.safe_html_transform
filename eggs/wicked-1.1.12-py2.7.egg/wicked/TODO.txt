@@ -1,0 +1,13 @@
+===============
+ todo for plip
+===============
+
+
+ui for managing filters
+
+    >>> finish control panel
+
+test integration
+
+  
+

@@ -1,0 +1,16 @@
+TODO.txt
+buildout.cfg
+setup.cfg
+setup.py
+bootstrap/bootstrap.py
+src/zLOG/EventLogger.py
+src/zLOG/__init__.py
+src/zLOG.egg-info/PKG-INFO
+src/zLOG.egg-info/SOURCES.txt
+src/zLOG.egg-info/dependency_links.txt
+src/zLOG.egg-info/not-zip-safe
+src/zLOG.egg-info/requires.txt
+src/zLOG.egg-info/top_level.txt
+src/zLOG/tests/__init__.py
+src/zLOG/tests/test_logging.py
+src/zLOG/tests/testzLog.py

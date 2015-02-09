@@ -1,0 +1,93 @@
+Image handling control panel
+============================
+
+First some initial setup code:
+
+    >>> self.loginAsManager()
+    >>> from zope.component import getUtility
+    >>> from Products.CMFCore.interfaces import IPropertiesTool
+    >>> ptool = getUtility(IPropertiesTool)
+    >>> iprops = ptool.imaging_properties
+    >>> iprops.getProperty('allowed_sizes')
+    ('large 768:768', 'preview 400:400', 'mini 200:200', 'thumb 128:128',
+     'tile 64:64', 'icon 32:32', 'listing 16:16')
+
+Viewing the site control panel
+------------------------------
+
+    >>> self.browser.open('http://nohost/plone/@@imaging-controlpanel')
+    >>> self.browser.url
+    'http://nohost/plone/@@imaging-controlpanel'
+
+Check for the icon to exist:
+
+    >>> self.browser.contents
+    '...<img src="http://nohost/plone/image_icon.gif"...
+     ...Image Handling...'
+
+Click the cancel button:
+
+    >>> self.browser.getControl(name="form.actions.cancel").click()
+    >>> self.browser.url.endswith('plone_control_panel')
+    True
+
+There should be still no changes:
+
+    >>> 'Changes canceled.' in self.browser.contents
+    True
+
+Make some changes
+-----------------
+
+    >>> self.browser.open('http://nohost/plone/@@imaging-controlpanel')
+    >>> self.browser.url.endswith('imaging-controlpanel')
+    True
+
+    >>> self.browser.getControl(name='form.allowed_sizes.0.').value = 'foo 42:42'
+
+Click the save button:
+
+    >>> self.browser.getControl(name="form.actions.save").click()
+    >>> self.browser.url.endswith('imaging-controlpanel')
+    True
+
+We should be informed that something has changed:
+
+    >>> 'Changes saved.' in self.browser.contents
+    True
+
+Make sure the changes have been applied correctly:
+
+    >>> iprops.getProperty('allowed_sizes')[0]
+    u'foo 42:42'
+    >>> from plone.app.imaging.utils import getAllowedSizes
+    >>> getAllowedSizes()
+    {...u'foo': (42, 42)...}
+
+Change the quality
+~~~~~~~~~~~~~~~~~~
+
+    >>> self.browser.open('http://nohost/plone/@@imaging-controlpanel')
+    >>> self.browser.url.endswith('imaging-controlpanel')
+    True
+
+    >>> self.browser.getControl(name='form.quality').value = '42'
+
+Click the save button:
+
+    >>> self.browser.getControl(name="form.actions.save").click()
+    >>> self.browser.url.endswith('imaging-controlpanel')
+    True
+
+We should be informed that something has changed:
+
+    >>> 'Changes saved.' in self.browser.contents
+    True
+
+Make sure the changes have been applied correctly:
+
+    >>> iprops.getProperty('quality')
+    42
+    >>> from plone.app.imaging.utils import getQuality
+    >>> getQuality()
+    42

@@ -1,0 +1,12 @@
+setuptools
+plone.keyring
+plone.protect
+zope.component
+zope.interface
+Products.PluggableAuthService
+Zope2
+
+[test]
+zope.configuration
+zope.publisher
+Products.PloneTestCase

@@ -1,0 +1,40 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone.caching">
+    
+    <include package="five.globalrequest" />
+    
+    <include package="z3c.caching" file="meta.zcml" />
+    <include package="z3c.caching" />
+    
+    <include package="plone.registry" />
+    <include package="plone.transformchain" />
+    
+    <!-- Default lookup -->
+    <adapter factory=".lookup.DefaultRulesetLookup" />
+    
+    <!-- The 'Chain' operation -->
+    <adapter factory=".operations.Chain"   name="plone.caching.operations.chain" />
+    <utility component=".operations.Chain" name="plone.caching.operations.chain" />
+    
+    <!-- Intercepts are performed by raising an exception prior to view
+         invocation. There is a view on this exception which renders the
+         intercepted response.
+     -->
+    <subscriber handler=".hooks.intercept" />
+    <browser:page
+        name="index.html"
+        for=".hooks.Intercepted"
+        class=".hooks.InterceptorResponse"
+        permission="zope2.Public"
+        />
+    
+    <!-- Mutator: plone.transformchain order 12000 -->
+    <adapter factory=".hooks.MutatorTransform" name="plone.caching.mutator" />
+    
+    <!-- Mutator for streaming responses -->
+    <subscriber handler=".hooks.modifyStreamingResponse" />
+    
+</configure>

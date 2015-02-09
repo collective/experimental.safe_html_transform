@@ -1,0 +1,369 @@
+Metadata-Version: 1.1
+Name: plone.app.imaging
+Version: 1.0.11
+Summary: User-configurable, blob-aware image scaling for Plone.
+Home-page: http://pypi.python.org/pypi/plone.app.imaging
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: 
+        
+        Introduction
+        ------------
+        
+        This package tries to factor out and re-use the image scaling code from
+        Archetypes_ into a separate package in order to make it user-configurable
+        and add support for storing the image data into ZODB blobs_.
+        
+          .. _Archetypes: http://plone.org/products/archetypes
+          .. _blobs: http://plone.org/products/plone.app.blob
+        
+        
+        Installation
+        ------------
+        
+        The easiest way to use this package is when working with installations
+        based on `zc.buildout`_.  Here you can simply add the package to your "eggs"
+        and "zcml" options, run buildout and restart your `Plone`_ instance.
+        
+          .. _`zc.buildout`: http://pypi.python.org/pypi/zc.buildout/
+          .. _`Plone`: http://www.plone.org/
+        
+        Alternatively you can use the following configuration file to extend an
+        existing buildout::
+        
+          [buildout]
+          extends = buildout.cfg
+        
+          [instance]
+          eggs += plone.app.imaging
+          zcml += plone.app.imaging
+        
+        After that you should be able to "quick-install" the package via the
+        "Add-on products" section of `Plone`_'s configuration panel ("Site setup").
+        
+        
+        New-style image scales
+        ----------------------
+        
+        `plone.app.imaging` introduces new ways of using image scales in your
+        templates.  There are several variants you can pick from depending on how
+        much flexibility/convenience you need:
+        
+        1. The ``tag`` method generates a complete image tag::
+        
+             <img tal:define="scales context/@@images"
+                  tal:replace="structure python: scales.tag('image',
+                               width=1200, height=800, direction='down')"
+                  />
+        
+           While the first call requires the storage to load the image data
+           and extract information for scaling, consecutive calls are cheap
+           because the metadata is stored for each call signature.
+        
+           The ``direction`` keyword-argument can be used to specify the
+           scaling direction. Additional parameters are rendered as element
+           attributes (typically: "title" and "alt").
+        
+        2. For tag generation using predefined scale names this would look like::
+        
+             <img tal:define="scales context/@@images"
+                  tal:replace="structure python: scales.tag('image', scale='mini')"
+                  />
+        
+           This would use the predefined scale size "mini" to determine the desired
+           image dimensions, but still allow to pass in extra parameters.
+        
+        3. The following traversal syntax is a short-cut for tag generation
+           for predefined image scales::
+        
+             <img tal:replace="structure context/@@images/image/mini" />
+        
+        4. The same syntax may be used for the original image::
+        
+             <img tal:replace="structure context/@@images/image" />
+        
+        5. The ``scale`` method returns an image scale object useful for
+           explicit tag generation::
+        
+             <img tal:define="scales context/@@images;
+                              thumbnail python: scales.scale('image', width=64, height=64);"
+                  tal:condition="thumbnail"
+                  tal:attributes="src thumbnail/url;
+                                  width thumbnail/width;
+                                  height thumbnail/height" />
+        
+           This would create an up to 64 by 64 pixel scaled down version of the image
+           stored in the "image" field.  It also allows for passing in addition
+           parameters support by `plone.scale`_'s ``scaleImage`` function, e.g.
+           ``direction`` or ``quality``.
+        
+           Note that the ``scale`` method loads the actual image data into
+           memory on each invocation.
+        
+           .. _`plone.scale`: http://pypi.python.org/pypi/plone.scale
+        
+        6. The image scale object also implements a ``tag`` method::
+        
+             <img tal:define="scales context/@@images;
+                              scale python: scale.scale('image', width=1200, height=800)"
+                  tal:replace="structure scale/tag" />
+        
+           However, it's recommended to use the ``tag`` method of the image
+           scales view directly because it avoids loading the image into memory.
+        
+        Scaled image quality
+        ~~~~~~~~~~~~~~~~~~~~
+        
+        The quality of scaled images can be controlled through the "Imaging" control
+        panel.
+        
+        This will only take effect for images that have not been scaled yet. To
+        re-scale existing images with an updated quality setting, you'l need to go in
+        the ZMI > ``portal_atct`` > "Image scales" tab, and click "recreate". This
+        may take a very long time!
+        
+        Changelog
+        =========
+        
+        1.0.11 (2014-10-22)
+        -------------------
+        
+         - explicit include zcml of ``z3c.caching`` in order to make testrunner
+           happy
+           [jensens]
+        
+        - Cache image scales using the plone.stableResource ruleset
+          when they are accessed via UID-based URLs.
+          [davisagli]
+        
+        1.0.10 (2014-01-27)
+        -------------------
+        
+        - Generate Progressive JPEG.
+          [kroman0]
+        
+        
+        1.0.9 (2013-06-13)
+        ------------------
+        
+        - Make getQuality always return an integer.
+        
+        
+        1.0.8 (2013-05-23)
+        ------------------
+        
+        - Make the quality of scaled images configurable through the configlet.
+          https://dev.plone.org/ticket/13337
+          [khink]
+        
+        
+        1.0.7 (2013-03-05)
+        ------------------
+        
+        * Avoid hard dependency on ATContentTypes.
+          [davisagli]
+        
+        1.0.6 (2012-04-15)
+        ------------------
+        
+        * Avoid loading an image scale object in order to generate a tag. It's
+          expensive because it loads the image data into memory. The
+          documentation has been updated to reflect that this is the most
+          efficient usage of the API.
+        
+        1.0.5 - 2011-04-03
+        ------------------
+        
+        * Fix test now `scale=None` does not raise exception.
+          [elro]
+        
+        1.0.4 - 2011-03-22
+        ------------------
+        
+        * Add a tag method to @@images to simplify tagging of full sized images.
+          [elro]
+        
+        * Make scale=None return the original image wrapped as an ImageScaling object.
+          [elro]
+        
+        1.0.3 - 2011-02-14
+        ------------------
+        
+        - Avoid breaking on startup if PIL is not present.
+          [davisagli]
+        
+        1.0.2 - 2011-02-10
+        ------------------
+        
+        - Add getAvailableSizes and getImageSize to the @@images view.
+          [elro]
+        
+        1.0.1 - 2011-01-03
+        ------------------
+        
+        - Protect the control panel with a custom permission,
+          "Plone Site Setup: Imaging", instead of the generic "Manage portal".
+          [davisagli]
+        
+        1.0 - 2010-07-18
+        ----------------
+        
+        - Use the standard libraries doctest module.
+          [hannosch]
+        
+        - Update license to GPL version 2 only.
+          [hannosch]
+        
+        1.0b11 - 2010-07-01
+        -------------------
+        
+        - Fix issue with creating scales based on Image objects that are storing their
+          data as chained Pdata objects.
+          [davisagli]
+        
+        - Avoid using the deprecated five:implements directive.
+          [hannosch]
+        
+        1.0b10 - 2010-05-01
+        -------------------
+        
+        - Use plone i18n domain instead of plone.app.imaging domain for the
+          MessageFactory. This closes http://dev.plone.org/plone/ticket/10478
+          [vincentfretin]
+        
+        - Fix dependency on `plone.scale` to get requirements for the scale storage.
+          [witsch]
+        
+        - Fix logic bug in url traversal code for image scales.
+          This fixes http://plone.org/products/plone.app.imaging/issues/1
+          [ramonski, witsch]
+        
+        - Add support for custom scales for "News Item" content.
+          This refs http://dev.plone.org/plone/ticket/10250
+          [pelle, witsch]
+        
+        - Removed dependency declaration for the unused uuid distribution.
+          [hannosch]
+        
+        - Fix control panel definition so that its icon shows up again.
+          [witsch]
+        
+        
+        1.0b9 - 2010-04-10
+        ------------------
+        
+        - Add new syntax options for generating image scales based on ideas
+          borrowed from `plone.scale`, also improving caching and invalidation.
+          [witsch]
+        
+        - Provide sizes for `plone.namedfile` if it's installed.
+          [davisagli]
+        
+        - Restore possibility to define per-field image scale sizes.
+          This refs http://dev.plone.org/plone/ticket/10159
+          [huub_bouma, witsch]
+        
+        
+        1.0b8 - 2010-03-06
+        ------------------
+        
+        - Convert test setup to use `collective.testcaselayer`.
+          [witsch]
+        
+        - Add monkey-patch for `createScales` in order to fix recreation of scales.
+          This refs http://dev.plone.org/plone/ticket/10186
+          [witsch]
+        
+        
+        1.0b7 - 2009-12-03
+        ------------------
+        
+        - Swallow resizing exceptions if that flag is set on the image field.
+          [matthewwilkes]
+        
+        - Add test to make sure traversal to scales in path expressions still works.
+          [davisagli, witsch]
+        
+        
+        1.0b6 - 2009-11-18
+        ------------------
+        
+        - Corrected ill-formed msgid that contained a double quote.
+          [hannosch]
+        
+        
+        1.0b5 - 2009-11-15
+        ------------------
+        
+        - Allow white space within image scale definitions.
+          This fixes http://dev.plone.org/plone/ticket/9207
+          [amleczko]
+        
+        
+        1.0b4 - 2009-10-29
+        ------------------
+        
+        - Refactor default scale handler to make it more reusable for the
+          blob-enabled version in `plone.app.blob`
+          [witsch]
+        
+        
+        1.0b3 - 2009-08-26
+        ------------------
+        
+        - Fix compatibility issue with Plone 4.0.
+          [witsch]
+        
+        - Revert deferral of monkey-patching and traversal adapter registration
+          to package installation time.
+          [witsch]
+        
+        
+        1.0b2 - 2009-07-08
+        ------------------
+        
+        - Register traversal handler locally to avoid problems without the
+          corresponding monkey patch in place.  Please see the second issue in
+          http://plone.org/products/plone.app.blob/issues/19 for more info.
+          [witsch]
+        
+        - Replaced a getUtility with a queryUtility call in getAllowedSizes.
+          [hannosch]
+        
+        
+        1.0b1 - 2009-05-14
+        ------------------
+        
+        - Add fallback for determining available image sizes to avoid breaking
+          sites which haven't installed the package yet.
+          [witsch]
+        
+        
+        1.0a2 - 2008-09-22
+        ------------------
+        
+        - Fix `getAvailableSizes` to not depend on `sizes` field-attribute.
+          [witsch]
+        
+        
+        1.0a1 - 2008-08-12
+        ------------------
+        
+        - Initial version
+          [witsch]
+        
+        - Initial package structure.
+          [zopeskel]
+        
+Keywords: images scaling zodb blob plone
+Platform: Any
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Other Audience
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

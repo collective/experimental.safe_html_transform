@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<import-steps>
+ <import-step id="collective.z3cform.datetimewidget" version="20110521-01"
+              handler="collective.z3cform.datetimewidget.setuphandlers.importVarious"
+              title="collective.z3cform.datetimewidget">
+  Enable plone.app.jquerytools support
+ </import-step>
+</import-steps>

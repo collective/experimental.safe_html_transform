@@ -1,0 +1,9 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:browser="http://namespaces.zope.org/browser"
+   xmlns:xmlrpc="http://namespaces.zope.org/xmlrpc"
+   i18n_domain="zope"
+   >
+
+  <include package="zope.container"/>
+</configure>

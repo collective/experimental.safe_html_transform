@@ -1,0 +1,122 @@
+;-*-Doctest-*-
+================================
+Tests to address migration bugs
+================================
+
+Special cases to look for in fixing migration bugs.
+
+Issue #8784: content owned by no-longer existing member ends up with
+a bogus local roles entry, resulting in anonymous users gaining ownership
+of the content.
+
+    >>> from Products.CMFCore.permissions import ModifyPortalContent
+    >>> from Products.CMFCore.permissions import ManageUsers
+    >>> from Products.PloneTestCase.setup import _createObjectByType
+    >>> self.portal.manage_permission(
+    ...     ModifyPortalContent, ['Manager', 'Owner'], acquire=0)
+
+    Create a 'tempuser' to generate some content, then delete the user
+    prior to migration
+
+    >>> member_id = 'tempuser'
+    >>> self.portal.portal_membership.addMember(member_id, 'secret',
+    ...     ('Member', 'Manager'), [])
+    >>> user = self.portal.acl_users.getUserById(member_id)
+    >>> self.login(member_id)
+
+    >>> bar_doc = _createObjectByType(
+    ...     'Document', self.portal, id='bar', title='Bar')
+    >>> bar_doc.portal_type, bar_doc.getId(), bar_doc.Title()
+    ('Document', 'bar', 'Bar')
+
+    Demonstrate healthy local_roles before the migration
+
+    >>> inner_obj = getattr(bar_doc, 'aq_inner', bar_doc)
+    >>> marker = object()
+    >>> local_roles = getattr(inner_obj, '__ac_local_roles__', marker)
+    >>> member_id in local_roles.keys()
+    True
+    >>> None in local_roles.keys()
+    False
+
+    Delete the member
+
+    >>> self.loginAsPortalOwner()
+    >>> self.portal.portal_membership.deleteMembers([member_id])
+    ('tempuser',)
+
+    Local roles still healthy
+
+    >>> local_roles = getattr(inner_obj, '__ac_local_roles__', marker)
+    >>> member_id in local_roles.keys()
+    False
+    >>> None in local_roles.keys()
+    False
+
+    >>> from transaction import commit
+    >>> commit()
+
+    >>> from Products.contentmigration.archetypes import ATItemMigrator
+    >>> bar_migrator = ATItemMigrator(bar_doc)
+    >>> bar_migrator.dst_portal_type = 'News Item'
+    >>> bar_migrator.dst_meta_type = 'ATNewsItem'
+    >>> bar_migrator.migrate()
+    >>> bar_news = self.portal.bar
+    >>> bar_news.portal_type, bar_news.getId(), bar_news.Title()
+    ('News Item', 'bar', 'Bar')
+
+    Confirm that after the migration, the local roles don't contain
+    the bogus 'None' key
+
+    >>> inner_obj = getattr(bar_news, 'aq_inner', bar_news)
+    >>> local_roles = getattr(inner_obj, '__ac_local_roles__', marker)
+    >>> local_roles is None
+    True
+
+Locked objects should be unlocked before being migrated
+
+    >>> self.loginAsPortalOwner()
+    >>> foo_doc = _createObjectByType(
+    ...     'Document', self.portal, id='foo', title='Foo')
+    >>> foo_doc.portal_type, foo_doc.getId(), foo_doc.Title()
+    ('Document', 'foo', 'Foo')
+    >>> commit()
+
+    >>> foo_doc = self.portal.foo
+    >>> from plone.locking.interfaces import ILockable
+    >>> ILockable(foo_doc).lock()
+    >>> foo_migrator = ATItemMigrator(foo_doc)
+    >>> foo_migrator.dst_portal_type = 'News Item'
+    >>> foo_migrator.dst_meta_type = 'ATNewsItem'
+    >>> foo_migrator.migrate()
+    >>> foo_news = self.portal.foo
+    >>> foo_news.portal_type, foo_news.getId(), foo_news.Title()
+    ('News Item', 'foo', 'Foo')
+
+Objects locked with webdav should also be unlocked before being
+migrated.  We cheat when pretending to be locked by webdav in this
+test by patching the relevant webdav methods.
+
+    >>> self.loginAsPortalOwner()
+    >>> dav_doc = _createObjectByType(
+    ...     'Document', self.portal, id='dav', title='Dav')
+    >>> dav_doc.portal_type, dav_doc.getId(), dav_doc.Title()
+    ('Document', 'dav', 'Dav')
+    >>> commit()
+
+    >>> dav_doc = self.portal.dav
+    >>> _orig_wl_isLocked = dav_doc.wl_isLocked
+    >>> def dummy_isLocked():
+    ...     return True
+    >>> def dummy_clearLocks():
+    ...     dav_doc.wl_isLocked = _orig_wl_isLocked
+    >>> dav_doc.wl_isLocked = dummy_isLocked
+    >>> dav_doc.wl_clearLocks = dummy_clearLocks
+
+    >>> dav_migrator = ATItemMigrator(dav_doc)
+    >>> dav_migrator.dst_portal_type = 'News Item'
+    >>> dav_migrator.dst_meta_type = 'ATNewsItem'
+    >>> dav_migrator.migrate()
+    >>> dav_news = self.portal.dav
+    >>> dav_news.portal_type, dav_news.getId(), dav_news.Title()
+    ('News Item', 'dav', 'Dav')

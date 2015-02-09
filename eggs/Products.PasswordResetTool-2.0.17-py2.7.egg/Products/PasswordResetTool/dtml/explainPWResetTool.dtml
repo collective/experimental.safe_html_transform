@@ -1,0 +1,41 @@
+<dtml-var manage_page_header>
+<dtml-var manage_tabs>
+
+<h3> <code>portal_password_reset</code> Tool </h3>
+
+<p>This tool enables a mechanism for securely resetting user's forgotten passwords.</p>
+
+<h2>Set Expiration Interval</h2>
+<p>
+  Specify the time until timeout of password reset requests in hours. This interval,
+  added to the time a user makes a request, will decide the expiration of the request.
+</p>
+<p>
+  The default is <em>168 hours</em> (one week). If you leave the field blank, the timeout interval
+  will reset to the default.
+</p>
+<form action="manage_setTimeout" method="post">
+  <p>Set timeout interval to <input type="text" name="hours" value="&dtml-getExpirationTimeout;" /> hours.</p>
+  <input type="submit" value="Change" />
+</form>
+
+<h2>Username Check</h2>
+<p>
+  If "username check" is on, users following the confirmation link from their email
+  will be required to re-enter their username. This is to combat anonymous email
+  sniffing attacks and it is <strong>highly recommended</strong> that you leave
+  this <strong>ON</strong> if the portal is publicly accesible.
+</p>
+<form action="manage_toggleUserCheck" method="post">
+  <p>Username check is <strong><dtml-var "checkUser() and 'on' or 'off'"></strong></p>
+  <input type="submit" value="Turn User Check <dtml-var "checkUser() and 'off' or 'on'">" />
+</form>
+
+<h2>Information</h2>
+
+<dtml-let stats=getStats>
+<p>Open reset requests: <dtml-var "stats['open']"></p>
+<p>Expired reset requests: <dtml-var "stats['expired']"> (expired requests deleted after 10 days)</p>
+</dtml-let>
+
+<dtml-var manage_page_footer>

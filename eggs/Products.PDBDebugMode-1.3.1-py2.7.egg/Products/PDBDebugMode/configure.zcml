@@ -1,0 +1,90 @@
+<!-- The Globals module is copied to Products.PDBDebugMode.Globals
+     when debug-mode=on to allow ZCML conditions to match -->
+<configure 
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:zcml="http://namespaces.zope.org/zcml"
+   xmlns:browser="http://namespaces.zope.org/browser"
+   xmlns:monkey="http://namespaces.plone.org/monkey"
+   zcml:condition="installed Products.PDBDebugMode.Globals">
+  
+  <include package="collective.monkeypatcher" file="meta.zcml" />
+  
+  <monkey:patch
+     class="Products.PDBDebugMode.pdblogging.LoggerClass"
+     original="error"
+     replacement=".pdblogging.error"
+     />
+
+  <monkey:patch
+     zcml:condition="installed Products.SiteErrorLog.SiteErrorLog"
+     class="Products.SiteErrorLog.SiteErrorLog.SiteErrorLog"
+     original="raising"
+     replacement=".errorlog.raising" />
+
+  <configure zcml:condition="installed ZPublisher.Publish">
+
+    <configure 
+       zcml:condition="installed Products.PlacelessTranslationService.PatchStringIO">
+      <monkey:patch
+         module="ZPublisher.Publish"
+         original="old_publish"
+         replacement=".runcall.pdb_publish"
+         docstringWarning="False"
+         />
+    </configure>
+
+    <configure 
+       zcml:condition="not-installed Products.PlacelessTranslationService.PatchStringIO">
+      <monkey:patch
+         module="ZPublisher.Publish"
+         original="publish"
+         replacement=".runcall.pdb_publish"
+         docstringWarning="False"
+         />
+    </configure>
+    
+    <monkey:patch
+       zcml:condition="installed Products.ATContentTypes.content.base"
+       class="Products.ATContentTypes.content.base.ATCTMixin"
+       original="initializeArchetype"
+       replacement=".archetypes.initializeATCT"
+       />
+    
+    <monkey:patch
+       zcml:condition="installed Products.Archetypes.ArchetypeTool"
+       class="Products.Archetypes.ArchetypeTool.ArchetypeTool"
+       original="getCatalogsByType"
+       replacement=".archetypes.getCatalogsByType"
+       />
+    
+    <monkey:patch
+       zcml:condition="installed Products.CMFPlone.MigrationTool"
+       class="Products.CMFPlone.MigrationTool.MigrationTool"
+       original="upgrade"
+       replacement=".cmfplone.upgrade"
+       />
+    
+    <monkey:patch
+       zcml:condition="installed Products.ZCatalog.ZCatalog"
+       class="Products.ZCatalog.ZCatalog.ZCatalog"
+       original="catalog_object"
+       replacement=".zcatalog.catalog_object"
+       />
+    
+    <monkey:patch
+       zcml:condition="installed Products.ZCatalog.ZCatalog"
+       class="Products.ZCatalog.ZCatalog.ZCatalog"
+       original="refreshCatalog"
+       replacement=".zcatalog.refreshCatalog"
+       />
+
+    <browser:page
+       name="pdb"
+       for="*"
+       class=".browser.RaiseExceptionView"
+       permission="cmf.ManagePortal"
+       />
+
+  </configure>
+
+</configure>

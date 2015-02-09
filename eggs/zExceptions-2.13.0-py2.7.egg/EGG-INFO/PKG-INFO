@@ -1,0 +1,23 @@
+Metadata-Version: 1.0
+Name: zExceptions
+Version: 2.13.0
+Summary: zExceptions contains common exceptions used in Zope2.
+Home-page: http://pypi.python.org/pypi/zExceptions
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        zExceptions contains common exceptions and helper functions related to
+        exceptions as used in Zope 2.
+        
+        Changelog
+        =========
+        
+        2.13.0 (2010-06-05)
+        -------------------
+        
+        - Released as separate package.
+        
+Platform: UNKNOWN

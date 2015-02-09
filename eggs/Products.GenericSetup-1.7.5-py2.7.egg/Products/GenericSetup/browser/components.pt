@@ -1,0 +1,20 @@
+<h1 tal:replace="structure context/manage_page_header">PAGE HEADER</h1>
+<h2 tal:replace="structure context/manage_tabs">TABS</h2>
+
+<!-- not valid in the body, but works -->
+<style type="text/css">
+ td.label {
+   color: #333333;
+   font-family: Verdana,Helvetica,sans-serif;
+   font-size: 10pt;
+   font-weight: bold;
+   vertical-align: top;
+ }
+.widget textarea {
+   width: 600px;
+ }
+</style>
+
+<br />
+<metal:macro metal:use-macro="view/base_template/macros/form" />
+<h1 tal:replace="structure context/manage_page_footer">PAGE FOOTER</h1>

@@ -1,0 +1,7 @@
+setuptools
+plone.app.contentlisting
+
+[test]
+collective.testcaselayer
+plone.app.testing
+selenium>=2.0a5

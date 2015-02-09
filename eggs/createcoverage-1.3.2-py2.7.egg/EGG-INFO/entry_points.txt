@@ -1,0 +1,4 @@
+[console_scripts]
+createcoverage = createcoverage.script:main
+coverage = coverage:main
+

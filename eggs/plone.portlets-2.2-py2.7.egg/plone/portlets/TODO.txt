@@ -1,0 +1,16 @@
+====================
+plone.portlets to-do
+====================
+
+  o Security
+  
+    - Determine what security declarations need to go in configure.zcml
+
+    - The restrictions on getAddablePortletTypes() is superficial - if you
+      construct the right URL, the adding view will accept it.
+
+  o Design
+    
+      -> blacklist specific portlets?
+        - this requires assignments to have ids that are unique among all
+           acquired portlets

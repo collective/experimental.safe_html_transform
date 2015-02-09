@@ -1,0 +1,69 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone">
+
+  <interface
+      interface=".interfaces.IThemeSpecific"
+      type="zope.publisher.interfaces.browser.IBrowserSkinType"
+      name="Plone Classic Theme"
+      />
+
+  <interface
+      interface=".interfaces.IThemeSpecific"
+      type="zope.publisher.interfaces.browser.IBrowserSkinType"
+      name="Old Plone 3 Custom Theme"
+      />
+
+  <!-- move site actions to portalheader manager -->
+  <browser:viewlet
+      name="plone.site_actions"
+      layer=".interfaces.IThemeSpecific"
+      manager="plone.app.layout.viewlets.interfaces.IPortalHeader"
+      class="plone.app.layout.viewlets.common.SiteActionsViewlet"
+      permission="zope2.View"
+      />
+
+  <!-- move language selector to the portaltop manager -->
+  <configure package="plone.app.i18n">
+      <browser:viewlet
+          name="plone.app.i18n.locales.languageselector"
+          layer="plonetheme.classic.browser.interfaces.IThemeSpecific"
+          manager="plone.app.layout.viewlets.interfaces.IPortalTop"
+          class="plone.app.i18n.locales.browser.selector.LanguageSelector"
+          template="locales/browser/languageselector.pt"
+          permission="zope2.View"
+          />
+  </configure>
+
+  <!-- move personal bar to portaltop manager, and replace template -->
+  <browser:viewlet
+      name="plone.personal_bar"
+      layer=".interfaces.IThemeSpecific"
+      manager="plone.app.layout.viewlets.interfaces.IPortalTop"
+      class="plone.app.layout.viewlets.common.PersonalBarViewlet"
+      template="personal_bar.pt"
+      permission="zope2.View"
+      />
+
+  <!-- move path bar to portaltop manager -->
+  <browser:viewlet
+      name="plone.path_bar"
+      layer=".interfaces.IThemeSpecific"
+      manager="plone.app.layout.viewlets.interfaces.IPortalTop"
+      class="plone.app.layout.viewlets.common.PathBarViewlet"
+      permission="zope2.View"
+      />
+
+  <!-- move keywords below content title -->
+  <configure package="plone.app.layout.viewlets">
+    <browser:viewlet
+        name="plone.belowcontenttitle.keywords"
+        layer="plonetheme.classic.browser.interfaces.IThemeSpecific"
+        manager="plone.app.layout.viewlets.interfaces.IBelowContentTitle"
+        template="keywords.pt"
+        permission="zope2.View"
+        />
+  </configure>
+
+</configure>

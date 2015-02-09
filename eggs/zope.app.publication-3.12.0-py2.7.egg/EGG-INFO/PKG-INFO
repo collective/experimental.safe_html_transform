@@ -1,0 +1,192 @@
+Metadata-Version: 1.1
+Name: zope.app.publication
+Version: 3.12.0
+Summary: Zope publication
+Home-page: http://pypi.python.org/pypi/zope.app.publication
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Publication and traversal components.
+        
+        =======
+        CHANGES
+        =======
+        
+        3.12.0 (2010-09-14)
+        -------------------
+        
+        - Use the standard libraries doctest module.
+        
+        - Include the ``notfound.txt`` test again but reduce its scope to functionality
+          relevant to this distribution.
+        
+        - Notify with IStartRequestEvent at the start of the request publication
+          cycle.
+        
+        3.11.1 (2010-04-19)
+        -------------------
+        
+        - Fix up tests to work with newer zope.app.wsgi release (3.9.0).
+        
+        3.11.0 (2010-04-13)
+        -------------------
+        
+        - Don't depend on zope.app.testing and zope.app.zcmlfiles anymore in
+          the tests.
+        
+        3.10.2 (2010-01-08)
+        -------------------
+        
+        - Lift the test dependency on zope.app.zptpage.
+        
+        
+        3.10.1 (2010-01-08)
+        -------------------
+        
+        - make zope.testing an optional (test) dependency
+        
+        - Fix tests using a newer zope.publisher that requires zope.login.
+        
+        3.10.0 (2009-12-15)
+        -------------------
+        
+        - Moved EndRequestEvent and IEndRequestEvent to zope.publisher.
+        
+        - Moved BeforeTraverseEvent and IBeforeTraverseEvent to zope.traversing.
+        
+        - Removed dependency on zope.i18n.
+        
+        - Import hooks functionality from zope.component after it was moved there from
+          zope.site.
+        
+        - Import ISite from zope.component after it was moved there from
+          zope.location.
+        
+        3.9.0 (2009-09-29)
+        ------------------
+        
+        - An abort within handleExceptions could have failed without logging what
+          caused the error. It now logs the original problem.
+        
+        - Moved registration of and tests for two publication-specific event handlers
+          here from zope.site in order to invert the package dependency.
+        
+        - Declared the missing dependency on zope.location.
+        
+        3.8.1 (2009-06-21)
+        ------------------
+        
+        - Bug fix: The publication traverseName method used ProxyFactory
+          rather than the publication proxy method.
+        
+        3.8.0 (2009-06-20)
+        ------------------
+        
+        - Added a proxy method that can be overridden in subclasses to control
+          how/if security proxies are created.
+        
+        - Replaced zope.deprecation dependency with backward-compatible imports
+        
+        3.7.0 (2009-05-23)
+        ------------------
+        
+        - Moved the publicationtraverse module to zope.traversing, removing the
+          zope.app.publisher -> zope.app.publication dependency (which was a
+          cycle).
+        
+        - Moved IHTTPException to zope.publisher, removing the dependency
+          on zope.app.http.
+        
+        - Moved the DefaultViewName API from zope.app.publisher.browser to
+          zope.publisher.defaultview, making it accessible to other packages
+          that need it.
+        
+        - Look up the application controller through a utility registration
+          rather than a direct reference.
+        
+        3.6.0 (2009-05-18)
+        ------------------
+        
+        - Use ``zope:adapter`` ZCML directive instead of ``zope:view``.
+          This avoid dependency on ``zope.app.component``.
+        
+        - Update imports from ``zope.app.security`` to ``zope.authentication`` and
+          ``zope.principalregistry``.
+        
+        - Use ``zope.browser.interfaces.ISystemError`` to avoid dependency on
+          ``zope.app.exception``.
+        
+        - Refactored tests so they can run successfully with ZODB 3.8 and 3.9.
+        
+        3.5.3 (2009-03-13)
+        ------------------
+        
+        - Adapt to the removal of IXMLPresentation from zope.app.publisher which
+          was removed to adapt to removal of deprecated interfaces from zope.component.
+        
+        3.5.2 (2009-03-10)
+        ------------------
+        
+        - Use ISkinnable.providedBy(request) instead of IBrowserRequest as condition
+          for calling setDefaultSkin. This at the same time removes dependency to
+          the browser part of zope.publisher.
+        
+        - Remove deprecated code.
+        
+        - Use built-in set class instead of the deprecated sets.Set and thus
+          don't cause deprecation warning in Python 2.6.
+        
+        3.5.1 (2009-01-31)
+        ------------------
+        
+        - Import ISite from zope.location.interfaces instead of deprecated place
+          in zope.app.component.interfaces.
+        
+        3.5.0 (2008-10-09)
+        ------------------
+        
+        - Now ``zope.app.publication.zopepublication.ZopePublication`` annotates the
+          request with the connection to the main ZODB when ``getApplication`` is
+          called.
+        
+        - Removed support for non-existent Zope versions.
+        
+        
+        3.4.3 (2007-11-01)
+        ------------------
+        
+        - Removed unused imports.
+        
+        - Resolve ``ZopeSecurityPolicy`` deprecation warning.
+        
+        
+        3.4.2 (2007-09-26)
+        ------------------
+        
+        - Added missing files to egg distribution.
+        
+        
+        3.4.1 (2007-09-26)
+        ------------------
+        
+        - Added missing files to egg distribution.
+        
+        
+        3.4.0 (2007-09-25)
+        ------------------
+        
+        - Initial documented release.
+        
+        - Reflect changes form ``zope.app.error`` refactoring.
+        
+Keywords: zope publication
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3

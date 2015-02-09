@@ -1,0 +1,151 @@
+Metadata-Version: 1.1
+Name: rwproperty
+Version: 1.0
+Summary: Read & write properties
+Home-page: http://www.z3lab.org/sections/blogs/philipp-weitershausen/2006_05_29_pycon-06-lightning-talk
+Author: Philipp von Weitershausen
+Author-email: grok-dev@zope.org
+License: ZPL
+Download-URL: http://codespeak.net/svn/user/philikon/rwproperty#egg=rwproperty-dev
+Description: Read & write properties
+        ========================
+        
+        :Author:   Philipp von Weitershausen
+        :Email:    philikon@philikon.de
+        :License:  Zope Public License, v2.1
+        
+        Motivation
+        ----------
+        
+        Using method decorators and descriptors like ``property``, we can
+        easily create computed attributes:
+        
+          >>> class JamesBrown(object):
+          ...     @property
+          ...     def feel(self):
+          ...         return self._feel
+        
+        An attribute like this cannot be written, though.  You would have to
+        do something like this:
+        
+          >>> class JamesBrown(object):
+          ...     def _getFeel(self):
+          ...         return self._feel
+          ...     def _setFeel(self, feel):
+          ...         self._feel = feel
+          ...     feel = property(_getFeel, _setFeel)
+        
+        The problem with this approach is that it leaves the getter and setter
+        sitting around in the class namespace.  It also lacks the compact
+        spelling of a decorator solution.  To cope with that, some people like
+        to write:
+        
+          >>> class JamesBrown(object):
+          ...     @apply
+          ...     def feel():
+          ...         def get(self):
+          ...             return self._feel
+          ...         def set(self, feel):
+          ...             self._feel = feel
+          ...         return property(get, set)
+        
+        This spelling feels rather cumbersome, apart from the fact that
+        ``apply`` is `going to go away`_ in Python 3000.
+        
+        .. _going to go away: http://www.python.org/peps/pep-3000.html#id24
+        
+        
+        Goal
+        ----
+        
+        There should be a way to declare a read & write property and still use
+        the compact and easy decorator spelling.  The read & write properties
+        should be as easy to use as the read-only property.  We explicitly
+        don't want that immediately called function that really just helps us
+        name the attribute and create a local scope for the getter and setter.
+        
+        
+        Read & write property
+        ---------------------
+        
+        Read & write properties work like regular properties.  You simply
+        define a method and then apply a decorator, except that you now don't
+        use ``@property`` but ``@getproperty`` to mark the getter and
+        ``@setproperty`` to mark the setter:
+        
+          >>> from rwproperty import getproperty, setproperty
+          >>> class JamesBrown(object):
+          ...     @getproperty
+          ...     def feel(self):
+          ...         return self._feel
+          ...     @setproperty
+          ...     def feel(self, feel):
+          ...         self._feel = feel
+        
+          >>> i = JamesBrown()
+          >>> i.feel
+          Traceback (most recent call last):
+          ...
+          AttributeError: 'JamesBrown' object has no attribute '_feel'
+        
+          >>> i.feel = "good"
+          >>> i.feel
+          'good'
+        
+        The order in which getters and setters are declared doesn't matter:
+        
+          >>> from rwproperty import getproperty, setproperty
+          >>> class JamesBrown(object):
+          ...     @setproperty
+          ...     def feel(self, feel):
+          ...         self._feel = feel
+          ...     @getproperty
+          ...     def feel(self):
+          ...         return self._feel
+        
+          >>> i = JamesBrown()
+          >>> i.feel = "good"
+          >>> i.feel
+          'good'
+        
+        Of course, deleters are also possible:
+        
+          >>> from rwproperty import delproperty
+          >>> class JamesBrown(object):
+          ...     @setproperty
+          ...     def feel(self, feel):
+          ...         self._feel = feel
+          ...     @getproperty
+          ...     def feel(self):
+          ...         return self._feel
+          ...     @delproperty
+          ...     def feel(self):
+          ...         del self._feel
+        
+          >>> i = JamesBrown()
+          >>> i.feel = "good"
+          >>> del i.feel
+          >>> i.feel
+          Traceback (most recent call last):
+          ...
+          AttributeError: 'JamesBrown' object has no attribute '_feel'
+        
+        
+        Edge cases
+        ----------
+        
+        There might be a case where you're using a flavour of read & write
+        properties and already have a non-property attribute of the same name
+        defined:
+        
+          >>> class JamesBrown(object):
+          ...     feel = "good"
+          ...     @getproperty
+          ...     def feel(self):
+          ...         return "so good"
+          ...
+          Traceback (most recent call last):
+          ...
+          TypeError: read & write properties cannot be mixed with other attributes except regular property objects.
+        
+Platform: UNKNOWN

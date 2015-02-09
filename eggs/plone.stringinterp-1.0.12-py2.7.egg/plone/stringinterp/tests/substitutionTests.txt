@@ -1,0 +1,424 @@
+Base Substitution Lookup Tests
+==============================
+
+Test and demonstrate looking up string substitutions
+via named adapters.
+
+Setup
+-----
+
+    >>> import re
+    >>> from zope.component import getAdapter, queryAdapter, queryMultiAdapter
+    >>> from plone.stringinterp.interfaces import IStringSubstitution, IStringSubstitutionInfo
+    >>> apage = self.portal['front-page']
+
+    >>> apage.setSubject( ('keyword one', 'keyword two') )
+    >>> apage.setContributors( ('contributor one', 'contributor two') )
+    >>> apage.setLanguage( 'en' )
+    >>> apage.setRights( 'copyright me' )
+
+    >>> from DateTime import DateTime
+    >>> expires = DateTime(2009, 9, 9)
+    >>> apage.setExpirationDate(expires)
+    >>> groups = (('groupreviewers', ()),)
+    >>> users = (
+    ... ('userone', 'User One', 'user@one.com',  ('Manager', 'Member'), ()),
+    ... ('usertwo', 'User Two', 'user@two.com',  ('Member',), ('groupreviewers',)),
+    ... ('userthree', 'User Three', 'user@three.com',  ('Owner', 'Member'), ()),
+    ... ('userfour', 'User Four', 'user@four.com',  ('Member', 'Editor'), ()),
+    ... ('userfive', 'User Five', 'user@five.com',  ('Member', 'Contributor'), ()),
+    ... )
+    >>> self.loginAsPortalOwner()
+    >>> for id, roles in groups:
+    ...     foo = self.portal.portal_groups.addGroup(id, roles=roles)
+    >>> for id, fname, email, roles, groups in users:
+    ...     self.portal.portal_membership.addMember(id, 'secret', roles, [])
+    ...     member = self.portal.portal_membership.getMemberById(id)
+    ...     member.setMemberProperties({'fullname': fname, 'email': email})
+    ...     for groupname in groups:
+    ...         group = self.portal.portal_groups.getGroupById(groupname)
+    ...         group.addMember(id)
+    >>> self.portal.portal_groups.getGroupById(
+    ...     'Reviewers').addMember('groupreviewers')
+    >>> self.login('test_user_1_')
+    >>> apage_localusers = (
+    ... ('userfour', ('Reviewer',)),
+    ... )
+    >>> for id, localroles in apage_localusers:
+    ...     apage.manage_setLocalRoles(id, localroles)
+    >>> self.portal.portal_membership.getAuthenticatedMember().setProperties(email='currentuser@foobar.com')
+    >>> self.portal.portal_membership.getAuthenticatedMember().setProperties(fullname='Current User')
+
+
+Negative Cases
+--------------
+
+We shouldn't get an adapter where we haven't defined one::
+
+Object with no title
+
+    >>> queryAdapter(self.app, IStringSubstitution, 'Title')
+
+Non-existent substitution
+
+    >>> queryAdapter(self.portal, IStringSubstitution, 'NoTitle')
+
+
+
+Listing Available String Substitutions
+--------------------------------------
+
+    We can get a list of all of the available substitutions, ready
+    to use in a template::
+
+    >>> subinfo = queryMultiAdapter((self.portal, self.portal.REQUEST), name=u'stringinterp_info')
+    >>> subinfo
+    <Products.Five.metaclass.SubstitutionInfo object at ...>
+
+    >>> subinfo.substitutionList()[0]['category']
+    u'All Content'
+
+
+Basic Content
+-------------
+
+Ask for an adapter to get the URL::
+
+    >>> adapter = getAdapter(apage, IStringSubstitution, 'absolute_url')
+
+    >>> adapter
+    <plone.stringinterp.adapters.UrlSubstitution object at ...>
+
+    >>> adapter()
+    u'http://nohost/plone/front-page'
+
+'id' is an alias for id::
+
+    >>> getAdapter(apage, IStringSubstitution, 'id')()
+    u'front-page'
+
+
+'parent_id' is an alias for id::
+
+    >>> getAdapter(apage, IStringSubstitution, 'parent_id')()
+    u'plone'
+
+'url' is an alias for absolute_url::
+
+    >>> getAdapter(apage, IStringSubstitution, 'url')()
+    u'http://nohost/plone/front-page'
+
+'parent_url' is container url::
+
+    >>> getAdapter(apage, IStringSubstitution, 'parent_url')()
+    u'http://nohost/plone'
+
+
+Minimal Dublin Core
+-------------------
+
+Title
+
+    >>> getAdapter(apage, IStringSubstitution, 'title')()
+    u'Welcome to Plone'
+
+Parent title
+
+    >>> getAdapter(apage, IStringSubstitution, 'parent_title')()
+    u'Plone site'
+
+
+The rest of Minimal Dublin::
+
+Description
+
+    >>> getAdapter(apage, IStringSubstitution, 'description')()
+    u'Congratulations! You have successfully installed Plone.'
+
+Content type
+
+    >>> getAdapter(apage, IStringSubstitution, 'type')()
+    u'Page'
+
+
+Let's try some non-ASCII::
+
+   >>> apage.setTitle('Plone in Español'.decode('utf8'))
+   >>> getAdapter(apage, IStringSubstitution, 'title')().encode('utf8')
+   'Plone in Espa\xc3\xb1ol'
+
+
+
+Workflow Aware
+--------------
+
+Review State
+
+    >>> getAdapter(apage, IStringSubstitution, 'review_state')()
+    u'visible'
+
+    >>> getAdapter(apage, IStringSubstitution, 'review_state_title')()
+    u'Public draft'
+
+
+IDublinCore
+-----------
+
+Creator
+
+    >>> getAdapter(apage, IStringSubstitution, 'creator')()
+    u'portal_owner'
+
+    >>> apage.setCreators( ('usertwo', 'userfive') )
+    >>> getAdapter(apage, IStringSubstitution, 'creator')()
+    u'usertwo'
+
+Creator Full Name
+
+    >>> getAdapter(apage, IStringSubstitution, 'creator_fullname')()
+    u'User Two'
+
+Creator Email
+
+    >>> getAdapter(apage, IStringSubstitution, 'creator_email')()
+    u'user@two.com'
+
+Creators
+
+    >>> getAdapter(apage, IStringSubstitution, 'creators')()
+    u'usertwo, userfive'
+
+Creators Emails
+
+    >>> getAdapter(apage, IStringSubstitution, 'creators_emails')()
+    u'user@two.com, user@five.com'
+
+Contributors
+
+    >>> getAdapter(apage, IStringSubstitution, 'contributors')()
+    u'contributor one, contributor two'
+
+Contributors Emails
+
+    >>> getAdapter(apage, IStringSubstitution, 'contributors_emails')()
+    u''
+
+    >>> apage.setContributors( ('userthree', 'userfour') )
+    >>> getAdapter(apage, IStringSubstitution, 'contributors_emails')()
+    u'user@three.com, user@four.com'
+
+Subject
+    >>> getAdapter(apage, IStringSubstitution, 'subject')()
+    u'keyword one, keyword two'
+
+Keywords (alias for subject)
+
+    >>> getAdapter(apage, IStringSubstitution, 'keywords')()
+    u'keyword one, keyword two'
+
+Format
+
+    >>> getAdapter(apage, IStringSubstitution, 'format')()
+    u'text/html'
+
+Language
+
+    >>> getAdapter(apage, IStringSubstitution, 'language')()
+    u'en'
+
+Rights
+
+    >>> getAdapter(apage, IStringSubstitution, 'rights')()
+    u'copyright me'
+
+Identifier
+
+    >>> getAdapter(apage, IStringSubstitution, 'identifier')()
+     u'http://nohost/plone/front-page'
+
+
+
+ICatalogableDublinCore
+----------------------
+
+Everything should be in short local time format
+
+Creation Date
+
+    >>> result = getAdapter(apage, IStringSubstitution, 'created')()
+    >>> re.match(r'... \d\d, \d\d\d\d \d\d:\d\d .M$', result) is not None
+    True
+
+Effective Date
+
+    >>> getAdapter(apage, IStringSubstitution, 'effective')()
+    u'???'
+
+
+Expiration Date
+
+    >>> datestring = getAdapter(apage, IStringSubstitution, 'expires')()
+    >>> DateTime(datestring) == expires
+    True
+
+
+Modification Date
+
+    >>> result = getAdapter(apage, IStringSubstitution, 'modified')()
+    >>> re.match(r'... \d\d, \d\d\d\d \d\d:\d\d .M$', result) is not None
+    True
+
+
+IContentish -- emails for members having a role on context
+----------------------------------------------------------
+
+    >>> getAdapter(apage, IStringSubstitution, 'owner_emails')()
+    u'user@three.com'
+
+    >>> getAdapter(apage, IStringSubstitution, 'reviewer_emails')()
+    u'user@two.com, user@four.com'
+
+    >>> getAdapter(apage, IStringSubstitution, 'contributor_emails')()
+    u'user@five.com'
+
+    >>> getAdapter(apage, IStringSubstitution, 'editor_emails')()
+    u'user@four.com'
+
+    >>> getAdapter(apage, IStringSubstitution, 'reader_emails')()
+    u''
+
+    >>> getAdapter(apage, IStringSubstitution, 'manager_emails')()
+    u'user@one.com'
+
+    >>> sorted(getAdapter(apage, IStringSubstitution, 'member_emails')(
+    ...     ).split(', '))
+    [u'currentuser@foobar.com', u'user@five.com', u'user@four.com', u'user@one.com',
+     u'user@three.com', u'user@two.com']
+
+When a user is removed from the user folder, the ownership
+information, local roles, and group memberships for that user can
+remain even though there's no user object available.  The email
+adapters can handle this case.
+
+    >>> self.loginAsPortalOwner()
+    >>> self.portal.portal_membership.deleteMembers(
+    ...     ('usertwo', 'userthree'), delete_localroles=0)
+    ('usertwo', 'userthree')
+    >>> self.login()
+
+    >>> getAdapter(apage, IStringSubstitution, 'owner_emails')()
+    u''
+
+    >>> getAdapter(apage, IStringSubstitution, 'reviewer_emails')()
+    u'user@four.com'
+
+    >>> getAdapter(apage, IStringSubstitution, 'manager_emails')()
+    u'user@one.com'
+
+    >>> sorted(getAdapter(apage, IStringSubstitution, 'member_emails')(
+    ...     ).split(', '))
+    [u'currentuser@foobar.com', u'user@five.com', u'user@four.com', u'user@one.com']
+
+IContentish -- info on current user
+-----------------------------------
+
+    >>> getAdapter(apage, IStringSubstitution, 'user_email')()
+    u'currentuser@foobar.com'
+
+    >>> getAdapter(apage, IStringSubstitution, 'user_fullname')()
+    u'Current User'
+
+    >>> getAdapter(apage, IStringSubstitution, 'user_id')()
+    u'test_user_1_'
+
+
+IContentish -- info on last change, workflow or version
+-------------------------------------------------------
+
+Inspect a version change (the most recent change)
+
+    >>> self.setRoles( ['Owner',] )
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> pr = getToolByName(self.portal, 'portal_repository', None)
+    >>> pr.save(apage, 'change comment')
+
+Initial revision
+
+    >>> getAdapter(apage, IStringSubstitution, 'change_comment')()
+    u'change comment'
+
+Change title
+
+    >>> getAdapter(apage, IStringSubstitution, 'change_title')()
+    u'Edit'
+
+Change type
+
+    >>> getAdapter(apage, IStringSubstitution, 'change_type')()
+    u'versioning'
+
+Change author
+
+    >>> getAdapter(apage, IStringSubstitution, 'change_authorid')()
+    u'test_user_1_'
+
+Let's prove that the very expensive fetching of the change data
+is cached. To do so, I'll publish the item and check that the
+last change comment is unchanged.
+
+    >>> self.setRoles( ['Owner','Reviewer'] )
+    >>> wf_tool = self.portal.portal_workflow
+    >>> wf_tool.doActionFor(apage, 'publish', comment='publish it!')
+
+    >>> getAdapter(apage, IStringSubstitution, 'change_comment')()
+    u'change comment'
+
+Let's create a new object in order to bypass the caching; we'll
+use it to test a workflow change
+
+    >>> self.portal.invokeFactory('Document', 'target')
+    'target'
+
+    >>> apage = self.portal['target']
+    >>> wf_tool = self.portal.portal_workflow
+    >>> wf_tool.doActionFor(apage, 'publish', comment='publish it!')
+
+Review state
+
+    >>> getAdapter(apage, IStringSubstitution, 'review_state')()
+    u'published'
+
+Comment
+
+    >>> getAdapter(apage, IStringSubstitution, 'change_comment')()
+    u'publish it!'
+
+Change title
+
+    >>> getAdapter(apage, IStringSubstitution, 'change_title')()
+    u'Publish'
+
+Change type
+
+    >>> getAdapter(apage, IStringSubstitution, 'change_type')()
+    u'workflow'
+
+Change author
+
+    >>> getAdapter(apage, IStringSubstitution, 'change_authorid')()
+    u'test_user_1_'
+
+
+Portal infos
+------------
+
+Portal title
+
+    >>> getAdapter(apage, IStringSubstitution, 'portal_title')()
+    u'Plone site'
+
+Portal URL
+
+    >>> getAdapter(apage, IStringSubstitution, 'portal_url')()
+    u'http://nohost/plone'
+

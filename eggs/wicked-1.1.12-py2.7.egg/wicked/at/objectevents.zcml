@@ -1,0 +1,16 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:five="http://namespaces.zope.org/five">
+
+    <subscriber
+        for="wicked.interfaces.IWickedBacklink
+             OFS.interfaces.IObjectWillBeRemovedEvent"
+        handler=".subscriber.at_handle_target_deletion"
+        />
+
+    <subscriber
+        for="wicked.interfaces.IWickedTarget
+             zope.lifecycleevent.interfaces.IObjectMovedEvent"
+        handler=".subscriber.at_handle_target_moved"
+        />
+
+</configure>

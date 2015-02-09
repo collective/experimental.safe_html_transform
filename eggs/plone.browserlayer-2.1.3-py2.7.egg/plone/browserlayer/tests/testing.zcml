@@ -1,0 +1,38 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone.browserlayer">
+
+    <genericsetup:registerProfile
+        name="testing"
+        title="Tests for local browser layer support"
+        directory="profiles/testing"
+        description=""
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
+
+    <genericsetup:registerProfile
+        name="uninstall"
+        title="Tests for uninstalling a local browser layer"
+        directory="profiles/uninstall"
+        description=""
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
+
+    <browser:page
+        name="layer-test-view"
+        for="*"
+        layer=".tests.interfaces.IMyProductLayer"
+        template="local.pt"
+        permission="zope.Public"
+        />
+
+    <browser:page
+        name="standard-test-view"
+        for="*"
+        template="standard.pt"
+        permission="zope.Public"
+        />
+
+</configure>

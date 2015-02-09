@@ -1,0 +1,42 @@
+<html metal:use-macro="context/@@standard_macros/page">
+<body>
+
+<metal:slot metal:fill-slot="body" i18n:domain="cmf_default">
+<ul class="errors" tal:condition="view/errors">
+ <li tal:repeat="error view/error_views"><tal:span
+     tal:replace="structure error" /></li>
+</ul>
+
+<h1 tal:content="view/label">EDIT: OBJECT</h1>
+
+<p tal:content="view/description|nothing">DESCRIPTION OF THE FORM.</p>
+
+<form class="form" action="." method="post" enctype="multipart/form-data"
+   tal:attributes="action request/ACTUAL_URL">
+<div class="widgets">
+ <tal:loop tal:repeat="widget view/widgets"
+><div class="widget" tal:condition="not: widget/hide|nothing"
+    tal:define="split widget/split|nothing; hint widget/hint|nothing"
+    tal:attributes="class python: split and 'widget split' or 'widget'">
+  <label tal:attributes="for widget/name; title python: hint or None"
+  ><span class="required" tal:condition="widget/required">*</span
+  ><tal:span tal:content="widget/label" /></label>
+  <div class="field">
+   <div class="data"><tal:span tal:replace="structure widget" /></div
+  ><tal:case tal:condition="widget/error"
+      tal:replace="structure widget/error" /></div>
+ </div
+><tal:span tal:condition="widget/hide|nothing"
+    tal:replace="structure widget/hidden" /></tal:loop>
+</div>
+<div class="clear"></div>
+
+<div class="buttons">
+ <tal:loop tal:repeat="action view/actions"
+    tal:replace="structure action/render" />
+</div>
+</form>
+</metal:slot>
+
+</body>
+</html>

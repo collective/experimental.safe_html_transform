@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<object name="portal_actions" meta_type="CMF Actions Tool">
+ <action-provider name="portal_actions">
+  <action title="Test1" action_id="test1" category="folder"
+     condition_expr=""
+     url_expr="string:${folder_url}/test1" visible="True">
+   <permission>View</permission>
+  </action>
+  <action title="Test2" action_id="test2" category="test_category"
+     condition_expr=""
+     url_expr="string:${object_url}/test2" visible="True">
+   <permission>View</permission>
+  </action>
+ </action-provider>
+</object>

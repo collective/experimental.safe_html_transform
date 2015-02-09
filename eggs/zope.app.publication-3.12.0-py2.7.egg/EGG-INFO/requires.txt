@@ -1,0 +1,25 @@
+zope.interface
+ZODB3
+zope.authentication
+zope.component
+zope.error
+zope.browser>=1.2
+zope.location
+zope.publisher>=3.12.4
+zope.traversing>=3.9.0
+setuptools
+
+[test]
+zope.annotation
+zope.app.appsetup >= 3.14.0
+zope.app.exception
+zope.app.http
+zope.app.wsgi >= 3.9.0
+zope.applicationcontrol>=3.5.0
+zope.browserpage
+zope.login
+zope.password
+zope.principalregistry
+zope.security
+zope.securitypolicy
+zope.site

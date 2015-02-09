@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<dtml-let target__="_.has_key('ObjToDoc__') and ObjToDoc__ or this()">
+
+<dtml-if "REQUEST.has_key('expert__')">
+  <dtml-call "REQUEST.set('expert__', _.int(REQUEST['expert__']))">
+<dtml-elif "REQUEST.has_key('submitted__')">
+  <dtml-call "REQUEST.set('expert__', 0)">
+<dtml-elif "REQUEST.cookies.has_key('DF_expert')">
+  <dtml-call "REQUEST.set('expert__', _.int(REQUEST.cookies['DF_expert']))">
+<dtml-else>
+  <dtml-call "REQUEST.set('expert__', 0)">
+</dtml-if>
+<dtml-if "expert__ != REQUEST.cookies.get('DF_expert')">
+  <dtml-call "RESPONSE.setCookie('DF_expert', '%s' %expert__, path='/')">
+</dtml-if>
+<dtml-if "REQUEST.has_key('filter__')">
+<dtml-elif "REQUEST.cookies.has_key('DF_filter')">
+  <dtml-call "REQUEST.set('filter__', REQUEST.cookies['DF_filter'])">
+<dtml-else>
+  <dtml-call "REQUEST.set('filter__', '')">
+</dtml-if>
+<dtml-if "filter__ != REQUEST.cookies.get('DF_filter')">
+  <dtml-call "RESPONSE.setCookie('DF_filter', filter__, path='/')">
+</dtml-if>
+
+<html><head><title>Documentation for <dtml-var "target__.getId()" html_quote></title>
+<dtml-comment> The following is partially ripped from manage_page_header </dtml-comment>
+<dtml-unless management_page_charset>
+<dtml-call "REQUEST.set('management_page_charset','iso-8859-1')">
+</dtml-unless>
+<meta http-equiv="content-type" content="text/html;charset=&dtml-management_page_charset;" />
+<dtml-call "RESPONSE.setHeader('content-type','text/html;charset='+management_page_charset)">
+<dtml-let ag="_.string.lower(REQUEST.get('HTTP_USER_AGENT', ''))"
+          find="_.string.find"
+          is_nav4="ag[:9]=='mozilla/4' and find(ag,'msie')<0"
+          is_win="find(ag,'win')>=0 and find(ag,'openwin')<0 and find(ag,'mac')<0 and find(ag,'x11')<0"
+          is_msiewin="is_win and find(ag,'msie')>=0"
+          is_camino="find(ag,'camino')>=0"
+          is_mozilla="ag[:8]=='mozilla/' and find(ag,'gecko/')>=0 and not is_camino"
+          use_css="REQUEST.get('zmi_use_css', '1')"
+          zmi_embedded_css="1">
+<dtml-if use_css>
+<dtml-if is_nav4>
+<style type="text/css">
+<!--
+<dtml-var manage_page_style.css missing>
+-->
+</style>
+<dtml-else>
+<link rel="stylesheet" type="text/css" href="<dtml-var BASEPATH1>/manage_page_style.css">
+</dtml-if is_nav4>
+</dtml-if use_css>
+
+<style type="text/css">
+<!--
+body                  { background-color: white; }
+form                  { padding: 0px; margin: 0px; }
+.list-header          { background-color: #6699cc; border: none; }
+.row-hilite           { background-color: #cfcfcf; border: none; }
+.row-normal           { background-color: #efefef; border: none; }
+                              /* t   r    b   l */
+.list-header h3       { padding: 0px 0px  3px 0px; margin: 0px; }
+.list-header p        { padding: 0px 0px 15px 0px; margin: 0px; }
+.list-header .nodoc   { padding: 0px 0px 13px 0px; margin: 0px; }
+.list-header .module  { padding: 0px 0px  6px 0px; margin: 0px; color: black; }
+.row-hilite  p        { padding: 4px 2px  4px 2px; margin: 0px; }
+.row-normal  p        { padding: 4px 2px  4px 2px; margin: 0px; }
+.black                { color: black; }
+.structured-text      { color: #333333; }
+.structured-text h1   { padding: 2px 0px  2px 0px; margin: 0px; font-size: 12pt; color: #333333; }
+.structured-text h2   { padding: 2px 0px  2px 0px; margin: 0px; font-size: 11pt; color: #333333; }
+.structured-text h3   { padding: 2px 0px  2px 0px; margin: 0px; font-size: 10pt; color: #333333; }
+.structured-text h4   { padding: 2px 0px  2px 0px; margin: 0px; font-size: 10pt; color: #333333; font-style: italic; }
+.structured-text h5   { padding: 2px 0px  2px 0px; margin: 0px; font-size: 10pt; color: #555555; font-style: italic; }
+.structured-text h6   { padding: 2px 0px  2px 0px; margin: 0px; font-size: 10pt; color: #555555; font-style: italic; }
+.structured-text ul   { margin-top: 5px; margin-bottom: 5px; font-size: 10pt; color: #333333; }
+.structured-text ol   { margin-top: 5px; margin-bottom: 5px; font-size: 10pt; color: #333333; }
+.structured-text dl   { margin-top: 5px; margin-bottom: 5px; font-size: 10pt; color: #333333; }
+<dtml-if is_msiewin>
+  .filter-box         { padding: 0px; margin: 0px; line-height: 10pt; font-size: 8pt; font-family: Arial,Helvetica,sans-serif; height: 13pt; }
+  .expert-box         { margin-left: 0px; height: 13pt; }
+  .shortp             { padding-top: 0.8em; margin-top: 0px; }
+<dtml-elif is_win>
+  .filter-box         { padding: 0px; margin: 0px; line-height: 10pt; font-size: 8pt; font-family: Arial,Helvetica,sans-serif; }
+</dtml-if>
+<dtml-if is_camino>
+  .filter-box         { padding: 0px; margin: 0px; line-height: 10pt; font-size: 8pt; font-family: Arial,Helvetica,sans-serif; }
+  .expert-box         { margin-top: 1px; margin-left: 0px; height: 10pt; }
+<dtml-elif is_mozilla>
+  .expert-box         { margin-top: 1px; margin-left: 2px; }
+</dtml-if>
+-->
+</style>
+
+<script type="text/javascript">
+<!--
+function clear() {
+  form = document.forms[0]
+  filter = form.elements[0]
+  filter.value = ''
+  form.submit()
+}
+// -->
+</script>
+</head><body bgcolor=white>
+<dtml-var manage_tabs missing>
+
+<p>
+<table border=0 cellspacing=0 cellpadding=0 width=100%>
+<form action="&dtml-URL0;">
+<tr valign="top">
+  <td class="std-text" width=100%>
+    Documentation for <b><dtml-with "target__"><dtml-var meta_type html_quote></dtml-with></b> object
+    <dtml-if "_.hasattr(target__, 'title_and_id')">
+      <b><dtml-var "target__.title_and_id()" html_quote></b>
+    <dtml-else>
+      <b><dtml-var "target__.getId()" html_quote></b>
+    </dtml-if>
+  </td>
+  <td>&nbsp;</td>
+  <td align=right class="std-text" width=1>
+    Filter&nbsp;<br>
+  </td>
+  <td align=right class="std-text" width=1>
+    <input class="filter-box" type="text" name="filter__" value="<dtml-var filter__ html_quote>"size=12><br>
+  </td>
+  <dtml-if filter__>
+    <td align=left class="std-text" width=1>
+      <a href="javascript:clear()">X</a><br>
+    </td>
+  </dtml-if>
+  <td>&nbsp;</td>
+  <td align=right class="std-text" width=1>
+    Expert&nbsp;<br>
+  </td>
+  <td align=right class="std-text" width=1>
+    <input class="expert-box" type=checkbox name=expert__ value="1"<dtml-if expert__> checked</dtml-if> onclick="javascript:submit()"><br>
+  </td>
+</tr>
+<input type=hidden name=submitted__ value=1>
+</form>
+</table>
+
+<p class=shortp>
+<dtml-tree "analyseDocumentation(target__, expert__ and 'programmer' or 'scripter', filter__)">
+  <dtml-let level__=tree-level>
+    </td>
+    <dtml-if "level__==0">
+      <td class="list-header" align="center" colspan="4" width="100%">
+        <h3><dtml-var Name></h3>
+        <dtml-if expert__>
+          <dtml-if Module>
+            <p class=module><dtml-var Module></p>
+          </dtml-if>
+        </dtml-if>
+        <dtml-if Doc>
+	  <span class=structured-text><dtml-var Doc fmt="structured-text"></span>
+        <dtml-else>
+          <p class=nodoc></p>
+        </dtml-if>
+      <dtml-call "REQUEST.set('row__',0)">
+    <dtml-else>
+      <dtml-let td_args__="'class=\x22%s\x22' % (row__ % 2 and 'row-hilite' or 'row-normal')">
+        <td nowrap &dtml.-td_args__; width="20%">
+          <span class="form-element">
+            <p class=black><dtml-var Name></p>
+          </span>
+        </td>
+        <td &dtml.-td_args__; width="20%">
+          <span class="form-element">
+            <dtml-if Permission>
+              <dtml-if "expert__ or Permission != '-- explicit --'"><p class=black><dtml-var Permission><br></p></dtml-if>
+            </dtml-if>
+            <dtml-if Roles><p class=black><dtml-var Roles></p><dtml-else>&nbsp;</dtml-if>
+          </span>
+        </td>
+        <td &dtml.-td_args__; width="20%">
+          <span class="form-element">
+            <dtml-if Args><p class=black><dtml-var Args></p><dtml-else>&nbsp;</dtml-if>
+          </span>
+        </td>
+        <td &dtml.-td_args__; width="40%">
+          <span class="form-element">
+            <dtml-if Doc>
+              <span class=structured-text><dtml-var Doc fmt="structured-text"></span>
+            <dtml-else>
+              <dtml-if Type><p><dtml-var Type></p><dtml-else>&nbsp;</dtml-if>
+            </dtml-if>
+          </span>
+	<dtml-call "REQUEST.set('row__', row__+1)">
+      </dtml-let td_args__>
+    </dtml-if>
+  </dtml-let level__>
+</dtml-tree>
+
+</dtml-let ag>
+</dtml-let target__>
+
+<dtml-var manage_page_footer missing>

@@ -1,0 +1,13 @@
+setuptools
+zope.i18nmessageid
+zope.interface
+
+[test]
+zope.i18n
+zope.tal
+zope.testing
+
+[extract]
+zope.tal
+zope.app.applicationcontrol
+zope.app.appsetup

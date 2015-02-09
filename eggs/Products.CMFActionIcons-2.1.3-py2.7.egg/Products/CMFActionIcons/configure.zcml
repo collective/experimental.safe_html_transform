@@ -1,0 +1,38 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="cmf_default">
+
+  <!-- directories -->
+
+  <cmf:registerDirectory name="actionicons"/>
+
+  <!-- exportimport -->
+
+  <genericsetup:importStep
+      name="action-icons"
+      title="Action Icons (deprecated)"
+      description="Import action icon definitions (folded into CMFDefault >= 2.2.0)"
+      handler="Products.CMFActionIcons.exportimport.importActionIconsTool">
+    <depends name="componentregistry"/>
+  </genericsetup:importStep>
+
+  <genericsetup:exportStep
+      name="action-icons"
+      title="Action Icons (deprecated)"
+      description="Export action icon definitions (folded into CMFDefault >= 2.2.0)"
+      handler="Products.CMFActionIcons.exportimport.exportActionIconsTool"
+      />
+
+  <!-- profiles -->
+
+  <genericsetup:registerProfile
+      name="actionicons"
+      title="CMFActionIcons (deprecated/folded into CMFDefault >= 2.2.0)"
+      description="Adds action icon tool / settings."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      />
+
+</configure>

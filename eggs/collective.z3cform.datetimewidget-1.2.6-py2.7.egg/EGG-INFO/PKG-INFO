@@ -1,0 +1,254 @@
+Metadata-Version: 1.1
+Name: collective.z3cform.datetimewidget
+Version: 1.2.6
+Summary: z3c.form date and datetime widgets
+Home-page: https://github.com/collective/collective.z3cform.datetimewidget
+Author: Rok Garbas
+Author-email: rok@garbas.si
+License: GPL version 2
+Description: Various z3c.form date and datetime widgets
+        ==========================================
+        
+        Improved datetime widgets for z3c.form
+        
+            When the emphasis of the application you are designing is on speed and
+            speed alone, then the single field pattern might be your friend. It's
+            particularly useful for data entry applications in which the person
+            who has to enter the data will have to use the same input form time
+            and time again. 
+        
+        .. _Date Input Diversity: http://www.cornae.org/articles/date-input-diversity
+        
+        
+        The ``collective.z3cform.datetimewidget`` library provides a form framework
+        and widgets. This document ensures that we implement a widget for Date and
+        Datetime field defined in ``zope.schema``. Take a look at the different widget 
+        doctest files for more information about the widgets.
+        
+        
+        TODO
+        ====
+        
+         * create DateDeltaWidget and DatetimeDeltaWidget
+        
+        
+        Contributors
+        ============
+        
+         * Vincent Fretin - vincentfretin
+         * David Glick - davisagli
+         * Rok Garbas - garbas
+         * Carsten Senger - csenger
+         * Róman Joost - romanofski
+         * Héctor Velarde - hvelarde
+        
+        Changelog
+        =========
+        
+        1.2.6 (2014-01-27)
+        ------------------
+        
+        - Determine whether to show am/pm based on the current locale's time format.
+          [davisagli]
+        
+        
+        1.2.5 (2013-07-31)
+        ------------------
+        
+        - Fix package distribution.
+          [hvelarde]
+        
+        
+        1.2.4 (2013-07-31)
+        ------------------
+        
+        - Make Date widget configurable by using the min/max field properties or the
+          default values stored in portal's site properties.
+          [hvelarde]
+        
+        
+        1.2.3 (2013-03-04)
+        ------------------
+        
+        - Removed hard-coded styling for calendar popup icon. Leave this to the dateinput.css
+          from plone.app.jquerytools, which was being applied anyway.
+          [smcmahon]
+        
+        
+        1.2.2 (2013-01-13)
+        ------------------
+        
+         * Fixes potential round trip traceback when converting the date(time)
+           values to a date(time) object. Happens if integrated with
+           collective.z3cform.wizard.
+           https://github.com/collective/collective.z3cform.datetimewidget/issues/2
+           [romanofski]
+        
+        
+        1.2.1 (2012-10-10)
+        ------------------
+        
+         * Make sure DOM is ready before activating the dateinput jQuery plugin.
+           This was causing Internet Explorer 7 to fail.
+           [rafaelbco]
+        
+        
+        1.2.0 (2012-06-15)
+        ------------------
+        
+         * Fix day names. Also respect the first day of the week from the current
+           locale. This fixes http://code.google.com/p/dexterity/issues/detail?id=272
+           [davisagli]
+        
+         * Use viewpagetemplatefile from zope.browserpage. This breaks compatibility
+           with Zope < 2.13 and Plone < 4.1 in order to minimize dependencies.
+           [hannosch]
+        
+        1.1.1 (2011-09-24)
+        ------------------
+        
+         * Fix conditional for the GS profile.
+           [davisagli]
+        
+        1.1 (2011-09-12)
+        ----------------
+        
+         * Fix validation errors so they are caught and correctly reported by z3c.form.
+           [davisagli]
+        
+         * Added a GS profile (conditionally loaded in configure.zcml if generic
+           setup is installed) to enable the plone.app.jquerytools css & js support
+           for dateinput popup.
+           [smcmahon]
+        
+         * Made js for dateinput popup check for jQuery().dateinput before invoking
+           it. Changed from $ to jQuery.
+           [smcmahon]
+        
+         * IE was baulking on a missing closing parenthesis.
+           [danjacka]
+        
+        
+        1.0.5 (2011-06-28)
+        ------------------
+        
+         * Change more $ to jQuery.
+           [danjacka]
+        
+         * Fix month selection issue with the date input widget.  Previously, due
+           to the leading zero, months < 10 weren't being selected when picking a
+           date on the calendar widget.
+           [davidjb]
+        
+         * Fix date offset issue for default dates on the jQuery date input widget.
+           Providing the default value as a JavaScript Date(yyyy, mm, dd) required
+           months to be in the range of 0 to 11 but outputting as Date("yyyy/mm/dd")
+           works as expected.
+           [davidjb]
+        
+         * Fix issue with jQuery date input widget not being displayed when
+           an incomplete date was entered.
+           [davidjb]
+        
+         * Avoid error fetching widget values when no year or day was entered.
+           [davisagli]
+        
+         * Made js for dateinput popup check for jQuery().dateinput before invoking
+           it. Changed from $ to jQuery.
+           [smcmahon]
+        
+         * removed trailing comma in JavaScript dict (which broke Internet Explorer)
+           [Brainix]
+        
+        1.0.4 (2011-01-19)
+        ------------------
+        
+         * fixed show_jquerytools_dateinput_js for DatetimeWidget [awello]
+         * fix time-dependent test [davisagli]
+        
+        1.0.3 (2011-01-03)
+        ------------------
+        
+         * Should use None for tal:attributes (Chameleon compatibility) [rossp]
+         * Added options for calendar (via jquery.tools.dateinput) [garbas]
+        
+        1.0.2 (2010-07-20)
+        ------------------
+        
+         * Fix invalid XML (Chameleon compatibility) [wichert]
+        
+        1.0.1 (2010-06-30)
+        ------------------
+        
+         * add show_today_link to the IDateWidget interface [csenger]
+         * Italian translation added [garbas]
+        
+        1.0 (2010-04-18)
+        ----------------
+        
+         * extract values in HIDDEN_MODE and add test for extract() [csenger]
+         * fix handling of AM/PM in DateTimeWidget and add test [csenger]
+        
+        0.1a9 (2009-09-07)
+        ------------------
+        
+         * provide french translation [vincentfretin]
+        
+        0.1a8 (2009-09-04)
+        ------------------
+        
+         * provide english, german, slovenian, spanish, portugal, croatian,
+           serbian(latin&cyrilic) translations [garbas]
+        
+        0.1a7 (2009-09-04)
+        ------------------
+        
+         * MonthYearWidget added [garbas]
+         * spliting widget.py script into script for each widget [garbas]
+         * only using one hidden/display template [garbas]
+         * show_today_link widget option which is inserting current date into fields
+           using plain javascript
+        
+        0.1a6 (2009-06-05)
+        ------------------
+        
+         * intendation problem again, this just isnt my day, tests passing [garbas]
+        
+        0.1a5 (2009-06-05)
+        ------------------
+        
+         * intendation problem, didn't set new vim setup properly :P [garbas]
+        
+        0.1a4 (2009-06-05)
+        ------------------
+        
+         * MANIFEST.in file fixed, now includes README.txt and HISTORY.txt [garbas]
+        
+        0.1a3 (2009-06-05)
+        ------------------
+        
+         * widget was not showing values from request [garbas]
+         * ISSUE 1: SOLVED [garbas]
+           After some testing I have seen that some validations are missing, therefore
+           I get an error when adding values like '99' into the year field:
+           "ValueError: year=99 is before 1900; the datetime strftime() methods require
+           year >= 1900"
+        
+        
+        0.1a2 (2009-05-28)
+        ------------------
+        
+         * Register the widgets for custom interfaces that we apply to the standard
+           datetime fields, to work around a problem with ZCML conflicting with
+           z3c.form. [davisagli]
+        
+        0.1a1 (2009-05-11)
+        ------------------
+        
+         * Initial release
+        
+        
+Keywords: z3cform datetime widget
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

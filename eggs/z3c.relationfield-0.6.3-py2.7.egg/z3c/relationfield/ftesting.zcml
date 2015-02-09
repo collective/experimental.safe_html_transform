@@ -1,0 +1,17 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   i18n_domain="z3c.relationfield"
+   package="z3c.relationfield"
+   >
+
+  <include package="zope.app.zcmlfiles" file="meta.zcml" />
+  <include package="zope.securitypolicy" file="meta.zcml" />
+
+  <include package="zope.app.zcmlfiles" />
+  <include package="zope.app.authentication" />
+  <include package="zope.app.keyreference" />
+  <include package="zope.app.intid" />
+
+  <include package="z3c.relationfield" />
+
+</configure>

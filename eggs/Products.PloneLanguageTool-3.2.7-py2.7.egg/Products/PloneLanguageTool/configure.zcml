@@ -1,0 +1,29 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:five="http://namespaces.zope.org/five">
+
+  <include file="profiles.zcml"/>
+
+  <five:deprecatedManageAddDelete
+      class=".LanguageTool.LanguageTool" />
+
+  <cmf:registerDirectory
+      name="skins"
+      directory="skins"
+      recursive="True"
+      />
+
+  <adapter
+      factory=".exportimport.LanguageToolXMLAdapter"
+      provides="Products.GenericSetup.interfaces.IBody"
+      for=".interfaces.ILanguageTool
+           Products.GenericSetup.interfaces.ISetupEnviron"
+      />
+
+  <adapter
+      factory=".LanguageTool.NegotiateLanguage"
+      for="* *"
+      />
+
+</configure>

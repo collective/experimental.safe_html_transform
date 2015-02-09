@@ -1,0 +1,19 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           xmlns:five="http://namespaces.zope.org/five">
+
+    <include package=".exportimport" />
+
+    <class class=".manager.ManageViewlets">
+        <implements interface="plone.app.layout.globals.interfaces.IViewView" />
+    </class>
+
+    <browser:page
+        for="*"
+        name="manage-viewlets"
+        class=".manager.ManageViewlets"
+        template="manage-viewlets.pt"
+        permission="cmf.ManagePortal"
+        />
+
+</configure>

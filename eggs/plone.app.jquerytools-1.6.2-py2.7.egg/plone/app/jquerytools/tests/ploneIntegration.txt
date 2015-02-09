@@ -1,0 +1,62 @@
+Introduction
+------------
+
+Setup the test framework::
+
+    >>> from zope.component import getMultiAdapter
+    >>> from plone.testing import z2
+
+    >>> from plone.testing.z2 import Browser
+    >>> from Testing.ZopeTestCase import user_password
+    >>> with z2.zopeApp() as app:
+    ...     browser = Browser(app)
+    >>> portal_url = 'http://nohost/plone'
+
+We should already be installed::
+
+    >>> import plone.app.jquerytools
+
+
+Javascript Resource and View
+----------------------------
+
+Open the main JS code item as a resource::
+
+    >>> browser.open(portal_url+'/++resource++plone.app.jquerytools.js')
+
+And, make sure it's got our code in it::
+
+    >>> '$.tools' in browser.contents
+    True
+
+
+Open the overlay helper code item as a resource::
+
+    >>> browser.open(portal_url+'/++resource++plone.app.jquerytools.overlayhelpers.js')
+
+And, make sure it's got our code in it::
+
+    >>> print browser.contents
+    /*****************
+    <BLANKLINE>
+       jQuery Tools overlay helpers.
+    ...
+
+
+Open the plugins item as a resource::
+
+    >>> browser.open(portal_url+'/++resource++plone.app.jquerytools.plugins.js')
+
+And, make sure it's got our code in it::
+
+    >>> '$.tools.scrollable' in browser.contents
+    True
+
+
+Open the test page::
+
+    >>> browser.open(portal_url+'/@@p.a.jqt.testPage')
+
+    >>> browser.contents.find("Test AJAX Form Popup") > 0
+    True
+

@@ -1,0 +1,64 @@
+Metadata-Version: 1.1
+Name: zope.structuredtext
+Version: 3.5.1
+Summary: StructuredText parser
+Home-page: http://pypi.python.org/pypi/zope.structuredtext
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: ``zope.structuredtext`` README
+        ==============================
+        
+        This package provides a parser and renderers for the classic Zope
+        "structured text" markup dialect (STX).  STX is a plain text markup in
+        which document structure is signalled primarily by identation
+        
+        Please see ``docs/index.rst`` for the documentation.
+        
+        ``zope.structuredtext`` Changelog
+        =================================
+        
+        3.5.1 (2010-12-03)
+        ------------------
+        
+        - Removed antique copyright assertions in regression texts, in conformance
+          with repository policy.
+        
+        
+        3.5.0 (2010-04-30)
+        ------------------
+        
+        - Updated docs to conform to ZTK / Sphinx usage.
+        
+        - LP #120376:  Output valid html for non-ASCII characters.
+        
+        
+        3.4.0 (2007/09/01)
+        ------------------
+        
+        - Public release for completeness of Zope 3.4.
+        
+        
+        3.2.0 (2006/01/05)
+        ------------------
+        
+        - Corresponds to the verison of the ``zope.structuredtext`` package shipped
+          as part of the Zope 3.2.0 release.
+        
+        - Only coding style / documentation changes.
+        
+        
+        3.0.0 (2004/11/07)
+        ------------------
+        
+        - Corresponds to the verison of the ``zope.structuredtext`` package shipped
+          as part of the Zope X3.0.0 release.
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Software Development

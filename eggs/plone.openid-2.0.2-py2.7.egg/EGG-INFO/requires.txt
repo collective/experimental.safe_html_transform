@@ -1,0 +1,7 @@
+setuptools
+python-openid >=2.2.1,<2.3dev
+transaction
+Acquisition
+Products.PluggableAuthService
+ZODB3
+Zope2

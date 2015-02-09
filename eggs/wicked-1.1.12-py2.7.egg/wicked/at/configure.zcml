@@ -1,0 +1,68 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:browser="http://namespaces.zope.org/browser"
+   xmlns:wicked="http://namespaces.openplans.org/wicked"
+   xmlns:five="http://namespaces.zope.org/five">
+
+   <include package="wicked" />
+
+   <five:registerPackage package="wicked.at"
+       initialize="wicked.at.zope2.initialize" />
+
+   <adapter factory=".zope2.at_uid"/>
+
+   <wicked:decorate-at-field
+      fieldclass=".field.WikiField"
+      />
+
+   <class class=".field.WikiField">
+      <implements interface="wicked.at.interfaces.IAmATWickedField" />
+   </class>
+
+   <adapter factory="wicked.at.backlink.ATBacklinkManager"
+       permission="zope2.Public" />
+
+   <adapter factory="wicked.at.seeker.AdvQueryMatchingSeeker"
+       permission="zope2.Public" />
+
+   <!-- adapters to handle AT value 'object' irregularities -->
+   <!-- @@ no specific tests for these -->
+   <adapter factory="wicked.at.field.fileupload_to_string" />
+   <adapter factory="wicked.at.field.baseunit_to_string" />
+
+   <browser:pages
+      for="wicked.interfaces.IAmWicked"
+      class="wicked.at.link.ATWickedAdd"
+      permission='zope.Public'>
+
+     <browser:page
+       name='wickedadd'
+       attribute='add_content' />
+
+     <browser:page
+       name='wickedaddmenu'
+       attribute='addMenu' />
+
+   </browser:pages>
+
+   <browser:page
+      for="wicked.interfaces.IAmWicked"
+      name='link_renderer'
+      permission='zope.Public'
+      template='../wicked_link.pt'
+      allowed_attributes="howmany
+                          multiple
+                          chunk
+                          singlelink
+                          links
+                          count"
+      class='.link.BasicFiveLink'
+      />
+
+   <!-- events -->
+
+   <include file="objectevents.zcml" />
+
+   <subscriber handler=".link.handle_at_newcontent" />
+
+</configure>

@@ -1,0 +1,87 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2011-03-21 20:23+0000\n"
+"PO-Revision-Date: 2011-03-04 12:30-0300\n"
+"Last-Translator: Davi Lima <davilima6@gmail.com>\n"
+"Language-Team: Simples Consultoria <products@simplesconsultoria.com.br>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"Language-Code: pt-br\n"
+"Language-Name: Brazilian Portuguese\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: DOMAIN\n"
+"Generated-By: zope/app/translation_files/extract.py\n"
+
+#: ../crud/crud.py:337
+msgid "Add"
+msgstr "Adicionar"
+
+#: ../crud/crud.py:263
+msgid "Apply changes"
+msgstr "Aplicar mudanças"
+
+#: ../fieldsets/extensible.py:55
+msgid "Default"
+msgstr "Padrão"
+
+#: ../crud/crud.py:302
+msgid "Delete"
+msgstr "Apagar"
+
+#: ../crud/crud.py:219
+msgid "Edit"
+msgstr "Editar"
+
+#: ../crud/crud.py:362
+msgid "Item added successfully."
+msgstr "Item adicionado com sucesso."
+
+#: ../crud/crud.py:213
+msgid "Next"
+msgstr "Próximo"
+
+#: ../crud/crud.py:269
+msgid "No changes made."
+msgstr "Nenhuma mudança foi feita."
+
+#: ../crud/crud.py:322
+msgid "Please select items to delete."
+msgstr "Por favor escolha os itens que devem ser excluídos."
+
+#: ../crud/crud.py:204
+msgid "Previous"
+msgstr "Anterior"
+
+#: ../crud/crud.py:268
+msgid "Some of your changes could not be applied."
+msgstr "Algumas de suas mudanças não puderam ser aplicadas."
+
+#: ../crud/crud.py:306
+msgid "Successfully deleted items."
+msgstr "Itens excluídos com sucesso."
+
+#: ../crud/crud.py:267
+msgid "Successfully updated"
+msgstr "Atualizado com sucesso"
+
+#: ../crud/crud.py:316
+msgid "Unable to remove one or more items."
+msgstr "Impossível remover um ou mais itens."
+
+#. Default: "(Required)"
+#: ../templates/macros.pt:55
+msgid "label_required"
+msgstr "(Obrigatório)"
+
+#: ../crud/crud.py:149
+msgid "select"
+msgstr "Selecione"
+
+#. Default: "Required"
+#: ../templates/macros.pt:55
+msgid "title_required"
+msgstr "Obrigatório"
+

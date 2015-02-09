@@ -1,0 +1,22 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:zcml="http://namespaces.zope.org/zcml"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           >
+
+    <browser:page
+        for="*"
+        name="p.a.jqt.testForm"
+        class=".tests.browser.TestForm"
+        template="templates/testForm.pt"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="*"
+        name="p.a.jqt.testPage"
+        class=".tests.browser.TestForm"
+        template="templates/testPage.pt"
+        permission="zope2.View"
+        />
+
+</configure>

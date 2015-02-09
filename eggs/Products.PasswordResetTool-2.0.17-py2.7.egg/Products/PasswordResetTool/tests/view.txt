@@ -1,0 +1,25 @@
+Test passwordreset BrowserView 
+
+    >>> from Products.PloneTestCase import PloneTestCase as PTC
+    >>> from Products.Five.testbrowser import Browser
+    >>> browser = Browser()
+    >>> browser.handleErrors = False
+    >>> browser.open('http://nohost/plone/')
+
+    Setup Plone email sender
+
+    >>> self.portal.email_from_name=u'Old\u0159ich a Bo\u017eena'
+    >>> self.portal.email_from_address='smith@example.com'
+    >>> self.portal.title=u'Koko\u0159\xedn Portal'
+    
+    Check view methods
+    
+    >>> view = self.portal.restrictedTraverse('@@passwordreset_view')
+    >>> view.encoded_mail_sender()
+    '"=?utf-8?q?Old=C5=99ich_a_Bo=C5=BEena?=" <smith@example.com>'
+
+    >>> view.registered_notify_subject()
+    u'User Account Information for Koko\u0159\xedn Portal'
+
+    >>> view.mail_password_subject()
+    u'Password reset request'

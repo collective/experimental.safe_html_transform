@@ -1,0 +1,32 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone.app.intid">
+
+    <genericsetup:registerProfile
+        name="default"
+        title="plone.app.intid: install utility"
+        directory="profiles/default"
+        description="Extension profile to install an intid utility in a Plone site"
+        for="Products.CMFCore.interfaces.ISiteRoot"
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
+
+    <genericsetup:importStep
+        name="import-intid-util"
+        title="Import IntId Utility"
+        description="Import intid utility."
+        handler=".setuphandlers.installIntIds">
+      <depends name="toolset"/>
+    </genericsetup:importStep>
+
+    <genericsetup:importStep
+        name="intid-register-content"
+        title="Register content with IntId utility"
+        description="Register all plone content with intid utility."
+        handler=".setuphandlers.registerContent">
+      <depends name="catalog"/>
+      <depends name="import-intid-util"/>
+    </genericsetup:importStep>
+
+</configure>

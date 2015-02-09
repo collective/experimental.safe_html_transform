@@ -1,0 +1,90 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Gesundesleben Theme\n"
+"POT-Creation-Date: 2009-08-05 09:11+0000\n"
+"PO-Revision-Date: 2008-07-01 11:46+0100\n"
+"Last-Translator: Daniel Widerin <daniel.widerin@kombinat.at>\n"
+"Language-Team: Deutsch <plone-i18n@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language-Code: de\n"
+"Language-Name: Deutsch\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: plone.z3cform\n"
+"X-Is-Fallback-For: de-at de-li de-lu de-ch de-de\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: AUSTRIA\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: ../crud/crud.py:335
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: ../crud/crud.py:263
+msgid "Apply changes"
+msgstr "Aktualisieren"
+
+#: ../fieldsets/extensible.py:55
+msgid "Default"
+msgstr ""
+
+#: ../crud/crud.py:302
+msgid "Delete"
+msgstr "Löschen"
+
+#: ../crud/crud.py:219
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: ../crud/crud.py:361
+msgid "Item added successfully."
+msgstr "Element wurde hinzugefügt."
+
+#: ../crud/crud.py:213
+msgid "Next"
+msgstr ""
+
+#: ../crud/crud.py:269
+msgid "No changes made."
+msgstr "Keine Änderungen festgestellt."
+
+#: ../crud/crud.py:322
+msgid "Please select items to delete."
+msgstr "Bitte wählen Sie ein zu löschendes Element."
+
+#: ../crud/crud.py:204
+msgid "Previous"
+msgstr ""
+
+#: ../crud/crud.py:268
+msgid "Some of your changes could not be applied."
+msgstr "Einige Ihrer Änderungen konnten nicht angewendet werden."
+
+#: ../crud/crud.py:306
+msgid "Successfully deleted items."
+msgstr "Element(e) wurden erfolgreich gelöscht."
+
+#: ../crud/crud.py:267
+msgid "Successfully updated"
+msgstr "Erfolgreich aktualisiert"
+
+#: ../crud/crud.py:316
+msgid "Unable to remove one or more items."
+msgstr ""
+
+#. Default: "(Required)"
+#: ../macros.pt:47
+msgid "label_required"
+msgstr "(Erforderlich)"
+
+#: ../crud/crud.py:149
+msgid "select"
+msgstr "Wählen"
+
+#. Default: "Required"
+#: ../macros.pt:47
+msgid "title_required"
+msgstr "Erforderlich"
+

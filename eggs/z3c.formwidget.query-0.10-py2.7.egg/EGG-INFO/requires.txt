@@ -1,0 +1,10 @@
+setuptools
+z3c.form >= 2.6.0
+zope.interface
+zope.schema
+zope.component
+zope.i18nmessageid
+
+[test]
+zope.testing
+z3c.form [test]

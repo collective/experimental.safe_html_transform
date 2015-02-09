@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:syn="http://purl.org/rss/1.0/modules/syndication/"
+  xmlns="http://purl.org/rss/1.0/"
+  xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:i18n="http://xml.zope.org/namespaces/i18n">
+
+<tal:block
+    tal:define="portal context/plone_portal_state/portal;
+                items python: [f for f in context.results()]">
+
+<channel rdf:about="" tal:attributes="rdf:about request/URL">
+  <title tal:content="portal/title">The title</title>
+  <link tal:content="portal/absolute_url" />
+  <description tal:content="portal/description" />
+  <image tal:attributes="rdf:resource string:${context/portal_url}/logo.png" />
+
+  <items>
+    <rdf:Seq>
+      <tal:block repeat="item python: items">
+        <rdf:li rdf:resource=""
+                tal:attributes="rdf:resource item/getURL" />
+      </tal:block>
+    </rdf:Seq>
+  </items>
+
+</channel>
+
+<tal:block repeat="item python: items">
+  <item rdf:about="" tal:attributes="rdf:about item/getURL">
+    <title tal:content="item/Title" />
+    <link tal:content="item/getURL" />
+    <description tal:content="item/Description" />
+    <dc:date tal:content="item/published/HTML4|item/modified/HTML4">Published or last modified date if no published date</dc:date>
+    <dc:type tal:content="item/portal_type">Type</dc:type>
+  </item>
+</tal:block>
+
+</tal:block>
+</rdf:RDF>

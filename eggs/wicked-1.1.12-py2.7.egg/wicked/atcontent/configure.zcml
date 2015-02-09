@@ -1,0 +1,10 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five">
+
+    <include package="wicked.at" />
+
+    <five:registerPackage package="wicked.atcontent"
+                          initialize="wicked.atcontent.zope2.initialize" />
+
+</configure>

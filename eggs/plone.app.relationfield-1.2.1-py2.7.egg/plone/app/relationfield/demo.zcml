@@ -1,0 +1,17 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone.app.relationfield">
+  
+  <!-- Demo Page -->
+
+  <class class="plone.dexterity.content.DexterityContent">
+    <implements interface=".demo.ITestForm" />
+  </class>
+                
+  <browser:page for="*"
+                name="test-relation-widget"
+                class=".demo.TestView"
+                permission="cmf.ModifyPortalContent"
+                />
+</configure>

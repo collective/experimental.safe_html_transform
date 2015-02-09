@@ -1,0 +1,32 @@
+Method Not Allowed errors
+=========================
+
+If we get a request with a method that does not have a corresponding
+view,  HTTP 405 Method Not Allowed response is returned:
+
+  >>> from zope.app.wsgi.testlayer import http
+
+  >>> print http(r"""
+  ... FROG / HTTP/1.1
+  ... """)
+  HTTP/1.0 405 Method Not Allowed
+  Content-Length: 18
+  Allow: DELETE, OPTIONS, PUT
+  ...
+
+  >>> print http(r"""
+  ... DELETE / HTTP/1.1
+  ... """)
+  HTTP/1.0 405 Method Not Allowed
+  ...
+
+
+The request below should return 405, but instead crashes with a TypeError,
+when the view tries to adapt context to IWriteFile.
+
+#   >>> print http(r"""
+#   ... PUT / HTTP/1.1
+#   ... Authorization: Basic mgr:mgrpw
+#   ... """, handle_errors=False)
+#   HTTP/1.1 405 Method Not Allowed
+#   ...

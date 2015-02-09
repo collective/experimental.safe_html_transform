@@ -1,0 +1,45 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:z3c="http://namespaces.zope.org/z3c"
+    i18n_domain="z3c.form">
+
+  <class class=".orderedselect.OrderedSelectWidget">
+    <require
+        permission="zope.Public"
+        interface="z3c.form.interfaces.IOrderedSelectWidget"
+        />
+  </class>
+
+  <adapter
+      factory=".orderedselect.SequenceSelectFieldWidget"
+      />
+
+  <adapter
+      factory=".orderedselect.SequenceChoiceSelectFieldWidget"
+      for="zope.schema.interfaces.IList
+           zope.schema.interfaces.IChoice
+           z3c.form.interfaces.IFormLayer"
+      />
+
+  <adapter
+      factory=".orderedselect.SequenceChoiceSelectFieldWidget"
+      for="zope.schema.interfaces.ITuple
+           zope.schema.interfaces.IChoice
+           z3c.form.interfaces.IFormLayer"
+      />
+
+  <z3c:widgetTemplate
+      mode="display"
+      widget="z3c.form.interfaces.IOrderedSelectWidget"
+      layer="z3c.form.interfaces.IFormLayer"
+      template="orderedselect_display.pt"
+      />
+
+  <z3c:widgetTemplate
+      mode="input"
+      widget="z3c.form.interfaces.IOrderedSelectWidget"
+      layer="z3c.form.interfaces.IFormLayer"
+      template="orderedselect_input.pt"
+      />
+
+</configure>

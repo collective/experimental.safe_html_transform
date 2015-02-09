@@ -1,0 +1,90 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:browser="http://namespaces.zope.org/browser"
+   xmlns:five="http://namespaces.zope.org/five"
+   xmlns:wicked="http://namespaces.openplans.org/wicked">
+
+  <include package="wicked.at" />
+
+  <wicked:decorate-at-field
+     fieldclass="Products.Archetypes.Field.TextField"
+     />
+
+  <!-- ATDocument -->
+
+  <wicked:atschema-fields-implement
+     atclass="Products.ATContentTypes.content.document.ATDocument"
+     fields="text"
+     implements="wicked.at.interfaces.IAmATWickedField"
+     />
+
+  <!-- ATEvent -->
+
+  <wicked:atschema-fields-implement
+     atclass="Products.ATContentTypes.content.event.ATEvent"
+     fields="text"
+     implements="wicked.at.interfaces.IAmATWickedField"
+     />
+
+  <!-- ATNewsItem -->
+
+  <wicked:atschema-fields-implement
+     atclass="Products.ATContentTypes.content.newsitem.ATNewsItem"
+     fields="text"
+     implements="wicked.at.interfaces.IAmATWickedField"
+     />
+
+  <!-- views -->
+  <!-- portal factory add view -->
+  <!--
+  <browser:pages
+     for="Products.ATContentTypes.interface.IATContentType"
+     class="wicked.at.link.ATPortalFactoryAdd"
+     permission="zope.Public"
+     >
+
+    <browser:page
+       name="wickedadd"
+       attribute="add_content"
+       />
+
+  </browser:pages>
+  -->
+
+  <browser:pages
+     for="Products.ATContentTypes.interface.IATContentType"
+     class="wicked.at.link.ATWickedAdd"
+     permission="zope.Public"
+     >
+
+    <browser:page
+       name="wickedadd"
+       attribute="add_content"
+       />
+
+     <browser:page
+	name="wickedaddmenu"
+	attribute="addMenu"
+	/>
+  </browser:pages>
+
+
+  <browser:page
+     for="Products.ATContentTypes.interface.IATContentType"
+     name="link_renderer"
+     permission="zope.Public"
+     template="../wicked_link.pt"
+     allowed_attributes="howmany
+			 multiple
+			 chunk
+			 singlelink
+			 links
+			 count"
+     class="wicked.at.link.BasicFiveLink"
+     />
+
+   <!-- subscriber
+      factory="wicked.txtfilter.backlink_handler"
+      provides="wicked.fieldevent.IFieldValueSetter" /-->
+
+</configure>

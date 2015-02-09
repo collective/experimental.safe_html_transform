@@ -1,0 +1,9 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <utility
+      factory="plone.keyring.keymanager.KeyManager"
+      provides="plone.keyring.interfaces.IKeyManager"
+      />
+
+</configure>

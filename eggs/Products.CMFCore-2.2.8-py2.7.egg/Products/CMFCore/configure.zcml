@@ -1,0 +1,18 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <include package="five.localsitemanager" />
+
+  <include file="permissions.zcml"/>
+
+  <include package=".browser"/>
+
+  <include package=".exportimport"/>
+
+  <include file="content.zcml"/>
+
+  <include file="event.zcml"/>
+
+  <include file="tool.zcml"/>
+
+</configure>

@@ -1,0 +1,14 @@
+setuptools
+zope.interface
+zope.component
+zope.security [untrustedpython]
+zope.tales
+zope.tal
+zope.i18n
+zope.i18nmessageid
+zope.traversing
+
+[test]
+zope.testing
+zope.proxy
+zope.security

@@ -1,0 +1,136 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone">
+
+  <include package="plone.app.querystring" />
+
+  <cmf:registerDirectory name="querywidget" />
+
+  <genericsetup:registerProfile
+    name="default"
+    title="Querywidget"
+    directory="profiles/default"
+    description="An Archetypeswidget to create persistent searchqueries. This is used by plone.app.collection."
+    provides="Products.GenericSetup.interfaces.EXTENSION"
+    />
+
+  <genericsetup:registerProfile
+    name="test_fixture"
+    title="Querywidget (Test profile)"
+    directory="profiles/test_fixture"
+    provides="Products.GenericSetup.interfaces.EXTENSION"
+    for="Products.CMFPlone.interfaces.ITestCasePloneSiteRoot"
+    />
+
+  <browser:resource
+    name="archetypes.querywidget.querywidget.js"
+    permission="zope2.View"
+    file="querywidget.js"
+    />
+
+  <browser:resource
+    name="archetypes.querywidget.querywidget.css"
+    permission="zope2.View"
+    file="querywidget.css"
+    />
+
+  <browser:page
+      name="datepickerconfig"
+      permission="zope2.View"
+      for="*"
+      class="archetypes.querywidget.views.datepickerconfig"
+      />
+
+  <browser:page
+      name="archetypes-querywidget-removecriterialink"
+      permission="zope2.View"
+      for="*"
+      template="templates/remove_criteria_link.pt"
+      />
+
+  <browser:page
+      name="archetypes-querywidget-emptywidget"
+      permission="zope2.View"
+      for="*"
+      template="templates/empty_widget.pt"
+      class=".views.WidgetTraverse"
+      allowed_attributes="macros"
+      />
+
+  <browser:page
+      name="archetypes-querywidget-stringwidget"
+      permission="zope2.View"
+      for="*"
+      template="templates/string_widget.pt"
+      class=".views.WidgetTraverse"
+      allowed_attributes="macros"
+      />
+
+  <browser:page
+      name="archetypes-querywidget-datewidget"
+      permission="zope2.View"
+      for="*"
+      template="templates/date_widget.pt"
+      class=".views.WidgetTraverse"
+      allowed_attributes="macros"
+      />
+
+  <browser:page
+      name="archetypes-querywidget-daterangewidget"
+      permission="zope2.View"
+      for="*"
+      template="templates/date_range_widget.pt"
+      class=".views.WidgetTraverse"
+      allowed_attributes="macros"
+      />
+
+  <browser:page
+      name="archetypes-querywidget-selectionwidget"
+      permission="zope2.View"
+      for="*"
+      template="templates/selection_widget.pt"
+      class=".views.SelectWidget"
+      allowed_attributes="macros"
+      />
+
+  <browser:page
+      name="archetypes-querywidget-multipleselectionwidget"
+      permission="zope2.View"
+      for="*"
+      template="templates/multiple_selection_widget.pt"
+      class=".views.MultiSelectWidget"
+      allowed_attributes="macros"
+      />
+
+  <browser:page
+      name="archetypes-querywidget-referencewidget"
+      permission="zope2.View"
+      for="*"
+      template="templates/reference_widget.pt"
+      class=".views.WidgetTraverse"
+      allowed_attributes="macros"
+      />
+
+  <browser:page
+      name="archetypes-querywidget-relativedatewidget"
+      permission="zope2.View"
+      for="*"
+      template="templates/relative_date_widget.pt"
+      class=".views.WidgetTraverse"
+      allowed_attributes="macros"
+      />
+
+  <browser:page
+      name="archetypes-querywidget-relativepathwidget"
+      permission="zope2.View"
+      for="*"
+      template="templates/relative_path_widget.pt"
+      class=".views.WidgetTraverse"
+      allowed_attributes="macros"
+      />
+
+
+</configure>

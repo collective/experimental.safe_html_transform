@@ -1,0 +1,517 @@
+Metadata-Version: 1.1
+Name: Products.PloneLanguageTool
+Version: 3.2.7
+Summary: PloneLanguageTool allows you to set the available languages in your Plone site, select various fallback mechanisms, and control the use of flags for language selection and translations.
+Home-page: http://pypi.python.org/pypi/Products.PloneLanguageTool
+Author: Hanno Schlichting
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL
+Description: Overview
+        ========
+        
+        PloneLanguageTool allows you to set the available languages in your Plone
+        site, select various fallback mechanisms, and control the use of flags
+        for language selection and translations.
+        
+        Credits
+        -------
+        
+        PloneLanguageTool was built by:
+        
+        - Jodok Batlogg, "Solution2U":http://solution2u.net
+        
+        - Simon Eisenmann, "Struktur AG":http://www.strukturag.com
+        
+        - Geir Baekholt, "Jarn AS":http://www.jarn.com
+        
+        - Alexander Limi, "Jarn AS":http://www.jarn.com
+        
+        - Helge Tesdal, "Jarn AS":http://www.jarn.com
+        
+        - Dorneles Tremea, "Jarn AS":http://www.jarn.com
+        
+        - Hanno Schlichting, "Jarn AS":http://www.jarn.com
+        
+        Parts of development sponsored by Learning Lab Denmark, donated by
+        Plone Solutions.
+        
+        Changelog
+        =========
+        
+        3.2.7 (2013-01-17)
+        ------------------
+        
+        - Registered ILanguageTool interface to LanguageTool
+          by CMFCore.utils.registerToolInterface
+          [gborelli]
+        
+        
+        3.2.6 (2012-12-09)
+        ------------------
+        
+        - Do not try to get content language for resources that are not
+          content. Fixes http://dev.plone.org/plone/ticket/11263
+          [keul]
+        
+        
+        3.2.5 (2012-07-02)
+        ------------------
+        
+        - Update getSite import location.
+          [hannosch]
+        
+        
+        3.2.4 (2012-01-26)
+        ------------------
+        
+        - Prevent UnboundLocalError for unassigned variable lang when
+          switchLanguage is called without parameters.
+          [weberlar]
+        
+        - Remove versions.txt.
+          [esteele]
+        
+        3.2.3 - 2011-07-12
+        ------------------
+        
+        - Avoid UnboundLocalError on langsCookie.
+          Fixes http://dev.plone.org/plone/ticket/11976
+          [WouterVH]
+        
+        3.2.2 - 2011-05-20
+        ------------------
+        
+        - Handle Language() returning an empty string (for dexterity objects).
+          [elro]
+        
+        3.2.1 - 2011-05-20
+        ------------------
+        
+        - Support content language negotiation when virtual hosting beneath the site
+          root.
+          [elro]
+        
+        - Support content language negotiation using virtual host subpath (_vh_name)
+          urls.
+          [elro]
+        
+        - Avoid setting up the language twice when virtual hosting at the site root.
+          [elro]
+        
+        3.2.0 - 2011-05-18
+        ------------------
+        
+        - Factor out language negotiation to a multi-adapter on (site, request) to
+          INegotiateLanguage.
+          [elro]
+        
+        - Simplify LanguageBinding.setLanguageBindings with list.append.
+          [elro]
+        
+        3.1.0 - 2011-05-12
+        ------------------
+        
+        - Make ``set_cookie_everywhere`` default to False on new sites. Most sites
+          have only a single language and setting cookies for anonymous users hurts
+          cacheing.
+          [elro]
+        
+        3.0.9 - 2011-02-28
+        ------------------
+        
+        - Add option ``set_cookie_everywhere``.  This allows us to set cookies
+          only if 'set_language' is present as a request parameter, i.e. if an
+          explicit request was made by the user to set their language.
+          [nouri]
+        
+        3.0.8 - 2010-08-04
+        ------------------
+        
+        - Update tests to avoid using reserved `id` attribute on the test case.
+          [davisagli]
+        
+        3.0.7 - 2010-07-28
+        ------------------
+        
+        - Added "(Required for the language selector viewlet to be rendered.)" to the
+          label "Use cookie for manual override.".
+          [kleist]
+        
+        3.0.6 - 2010-06-13
+        ------------------
+        
+        - Avoid deprecation warnings under Zope 2.13.
+          [hannosch]
+        
+        - Use the canonical ``VHM`` as the id of the virtual host monster. In
+          Zope >= 2.12.7 the id is not configurable anymore.
+          [hannosch]
+        
+        3.0.5 - 2010-06-03
+        ------------------
+        
+        - Fix html syntax error (Chameleon compatibility).
+          [wichert]
+        
+        - Fix condition to not call setLanguageCookie() if the cookie language
+          is already set. Cosmetic fix as setLanguageCookie() does the same check
+          already. [csenger]
+        
+        
+        3.0.4 - 2009-11-13
+        ------------------
+        
+        - Let the content language negotiator handle an ISiteRoot.
+          [hannosch]
+        
+        - Mirco-optimization in getContentLanguage.
+          [hannosch]
+        
+        - Use PATH_INFO instead of PATH_TRANSLATED in the content language negotiator.
+          [hannosch]
+        
+        - Remove possibility of infinite recursion in setLanguageBindings.
+          [lrowe]
+        
+        3.0.3 - 2009-09-05
+        ------------------
+        
+        - Backported c79174 from trunk. Avoid deprecation warnings for InitializeClass.
+          [hannosch]
+        
+        3.0.2 - 2009-07-06
+        ------------------
+        
+        - Added tests for virtual hosting and content negotiator. Noted
+          incompatibility between content based negotiator and virtual hosting for
+          anything except the Plone site object itself.
+          [hannosch]
+        
+        - In content negotiator, check for IContentish before looking up Language,
+          otherwise chop off url parts and try again.
+          [tesdal]
+        
+        3.0.1 - 2009-04-15
+        ------------------
+        
+        - Fixed test setup so it doesn't mess with CMFTestCase's default layers.
+          [stefan]
+        
+        - Fixed content language negotiator to work in a virtual hosting environment.
+          This closes http://dev.plone.org/plone/ticket/7794.
+          [hannosch, erral, wigwam]
+        
+        3.0 - 2009-02-20
+        ----------------
+        
+        - Deprecated the isTranslatable method of the language tool. This is the
+          only place that relies on LinguaPlone's ITranslatable interface.
+          [hannosch]
+        
+        - Reformat changelog and update package metadata.
+          [hannosch]
+        
+        - Changed default value for display_flags to false. In most settings a
+          language to country flag association is not desirable.
+          [hannosch]
+        
+        - Update tests to be based on a minimal CMFTestCase setup and remove
+          dependencies on CMFPlone code.
+          [hannosch]
+        
+        - The ITranslatable interface is gone from CMFPlone. Provide our own
+          dummy version if LinguaPlone is not installed.
+          [hannosch]
+        
+        - Add option to restrict cookie negotiation to authenticated users.
+          [stefan]
+        
+        - Added `showSelector` API to tool. This API is called to determine
+          visibility of the language selector viewlet. See plone.app.i18n.
+          [stefan]
+        
+        - Added subdomain negotiator.
+          [stefan]
+        
+        - Hide the deprecation warning about the moved ITranslatable interface
+          for our own code.
+          [hannosch]
+        
+        - Added an UI option for setting the content language negotiator.
+          [hannosch]
+        
+        2.1 - 2007-12-31
+        ----------------
+        
+        - Added metadata.xml to GenericSetup profile.
+          [hannosch]
+        
+        - Added BBB code for the ITranslatable interface now part of LinguaPlone.
+          [hannosch]
+        
+        - Merge content language-based negotiator from psol-content-language
+          branch from tesdal.
+          [wichert]
+        
+        - Add missing GenericSetup import and export step registration.
+          [wichert]
+        
+        2.0 - 2007-08-09
+        ----------------
+        
+        - No changes.
+          [hannosch]
+        
+        2.0rc1 - 2007-07-09
+        -------------------
+        
+        - Changed the default for start_neutral. We don't start with neutral
+          content anymore.
+          [hannosch]
+        
+        - Removed registration of the language tool as an utility. It acquires
+          the REQUEST from self.
+          [hannosch]
+        
+        - Fixed path language negotiator to work with combined language codes.
+          This closes http://dev.plone.org/plone/ticket/6661.
+          [hannosch]
+        
+        - Deprecated the old-style portlet_language portlet. It has been moved to
+          the plone_deprecated layer in CMFPlone and will be removed in Plone 4.0.
+          [hannosch]
+        
+        - Removed the prefs_languages template in favor of a new formlib-based
+          control panel in plone.app.controlpanel.
+          [hannosch]
+        
+        - Updated some of the attributes on the language tool.
+          [hannosch]
+        
+        - Fixed a KeyError while disabling country-specific language variants when
+          the default language was a combined language code. This closes
+          http://dev.plone.org/plone/ticket/6605.
+          [hannosch]
+        
+        - Minor template corrections to prefs_languages.
+          [hannosch]
+        
+        2.0b4 - 2007-05-05
+        ------------------
+        
+        - Removed the five:registerPackage statement again. It causes problems in a
+          ZEO environment.
+          [hannosch]
+        
+        - Added missing i18n markup to the prefs panel.
+          [hannosch]
+        
+        2.0b3 - 2007-05-01
+        ------------------
+        
+        - Use getToolByName to get the portal_properties tool.
+          [wichert]
+        
+        - Use English as default language if we can not find the properties tool.
+          This can occur when browsing an unmigrated site through the ZMI.
+          [wichert]
+        
+        - Content which is still being created is not translatable.
+          [wichert]
+        
+        - Ported ccTLD negotiation logic over from the 1.x branch.
+          [wichert]
+        
+        2.0b2 - 2007-03-23
+        ------------------
+        
+        - Added GS extension profile for product installation.
+          [hannosch]
+        
+        - Added Zope3 interface to the language tool and use it for the
+          registerToolInterface method.
+          [hannosch]
+        
+        2.0b1 - 2007-03-05
+        ------------------
+        
+        - Integration and refactoring into plone.i18n / plone.app.i18n packages.
+          [hannosch]
+        
+        1.6 - 2007-04-22
+        ----------------
+        
+        - Fix javascript bug that prevented the 'flagless' language selection
+          drop down from having an effect.  FireBug complained: "this.options is
+          not a function" and indeed it is an array.
+          [maurits]
+        
+        - Added a ccTLD based language negotiator.
+          [wichert]
+        
+        - Added note about deprecation of the local language and country addition
+          functionality and the corresponding methods. According to
+          http://dev.plone.org/plone/ticket/6006 and
+          http://dev.plone.org/plone/ticket/6007 these never worked anyways.
+          [hannosch]
+        
+        1.5 - 2006-12-15
+        ----------------
+        
+        - Fixed bug in request language negotiation. If the tool is configured not
+          to use combined language codes, we have to use the basic language code in
+          all places. This closes http://dev.plone.org/plone/ticket/5804 and
+          http://dev.plone.org/plone/ticket/5941.
+          [hannosch]
+        
+        - Added missing Chamorro language to the basic listing.
+          This closes http://dev.plone.org/plone/ticket/5836.
+          [hannosch]
+        
+        - Removed obsolete testSkeleton.
+          [hannosch]
+        
+        - Changed the native Name of 'rm' to 'Rumantsch'.
+          [jensens]
+        
+        1.4 - 2006-09-08
+        ----------------
+        
+        - Changed the browser language based negotiation to recognize combined
+          language codes as the base language if only the base language is allowed
+          and specified in the browser. So if the browser requests the site in
+          'de-de' and only 'de' is allowed for the site, it is recognized as 'de'.
+          If the usage of combined language codes is explicitly enabled this
+          fallback is not applied, so you can still have full control over combined
+          codes as well. This closes http://dev.plone.org/plone/ticket/5784.
+          [hannosch]
+        
+        1.3 - 2006-06-17
+        ----------------
+        
+        - Use the Norwegian flag for Nynorsk.
+          [limi]
+        
+        - Removed all accidentally added country flags in 16x16 PNG format again
+          and converted them to 14x11 GIF format. Transparent PNG don't work in IE.
+          [limi]
+        
+        - Fixed changing supported languages in the control panel. It silently
+          failed for the case of only one resulting supported language.
+          [hannosch]
+        
+        - Fixed displaying flags in the portlet_languages by using
+          getFlagForLanguageCode.
+          [jladage]
+        
+        - Cleaned up switchLanguage.py because it contained a lot of I18NLayer
+          specific code. I added the original file to I18NLayer. Also changed .gif
+          to .png in the portlet_languages.
+          [jladage]
+        
+        - Readded flag for Esperanto, we use flag-eo.png as there's no country code.
+          This closes http://dev.plone.org/plone/ticket/5547.
+          [hannosch]
+        
+        1.2 - 2006-06-01
+        ----------------
+        
+        - Readded flag for Basque country, currently we use flag-eu.png as there's
+          no official country code in the ISO 3166 standard.
+          This closes http://dev.plone.org/plone/ticket/5522.
+          [hannosch]
+        
+        - Use Central African Republic (cf) flag for Sangho (sg). This closes
+          http://dev.plone.org/plone/ticket/5339.
+          [hannosch]
+        
+        - Removed the unused i18n folder.
+          [hannosch]
+        
+        1.1 - 2006-05-15
+        ----------------
+        
+        - Avoid DeprecationWarning for product_name.
+          [hannosch]
+        
+        - Replaced the available language selector in the preference panel with a
+          new one, which shows both the original and the english language names as
+          well as the country flag which might be used for the language switcher
+          and the language code. It is possible to sort on any of these criteria as
+          well as on the 'selected' status by clicking on the table heading.
+          [hannosch] [limi]
+        
+        - Removed all language flags in 15x12 GIF format and replaced them with
+          16x16 PNG country flags. These are named flag-<country code>.png. The
+          country codes follow the ISO 3166 standard. The mapping of flags to
+          languages is now more flexibly handled through a new underlying format in
+          availablelanguages.py, which would allow to map the same flag to more than
+          one language without having to duplicate the file as it was needed with
+          the former approach.
+          [hannosch] [limi]
+        
+        1.0 - 2006-03-19
+        ----------------
+        
+        - Added a Welsh flag.
+          [russf]
+        
+        - Adding flags for Bosnia and Serbia. Jakub Steiner, you rock!
+          [limi]
+        
+        - Converted some runtime tests to doctests.
+          [hannosch]
+        
+        - Fixed Latvian language name. Thanks to Michael Dexter for the heads up.
+          [deo]
+        
+        0.9 - 2005-12-18
+        ----------------
+        
+        - Fix http://trac.plone.org/plone/ticket/4959 - if the default language was
+          not contained in the supported languages the config form showed a false
+          default language and the form had to be saved again to get the desired
+          result. Now in this special case the default language is set to the first
+          supported language.
+          [hannosch]
+        
+        - Added removeCountry and removeLanguage methods as counterpart for the
+          corresponding add-methods. Added some basic tests.
+          [hannosch]
+        
+        - Added start_neutral content language setting. Now you can control
+          if the content should start as language neutral or in the current
+          selected language.
+          [deo]
+        
+        - Fix http://plone.org/collector/4815 - misspelled i18n msgid
+          [hannosch]
+        
+        0.8 - 2005-10-08
+        ----------------
+        
+        - Fixed two missing i18n tags in portlet_languages.pt
+          [hannosch]
+        
+        - Fixed http://plone.org/collector/4774 - missing i18n tags in
+          prefs_languages.pt
+          [hannosch]
+        
+        - Fixed http://plone.org/collector/4681 - fixed missing p-tag in
+          portal_languages/manage_configForm
+          [hannosch]
+        
+        - i18n: moved all files to PloneTranslations and added README.txt
+          [hannosch]
+        
+        0.7 - 2005-09-04
+        ----------------
+        
+        - See ChangeLog for details on former releases
+        
+Keywords: Zope CMF Plone i18n l10n flags
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Programming Language :: Python

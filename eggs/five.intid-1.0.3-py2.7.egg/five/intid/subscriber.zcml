@@ -1,0 +1,18 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <subscriber
+     handler=".intid.addIntIdSubscriber"
+     for="persistent.IPersistent
+          zope.lifecycleevent.interfaces.IObjectAddedEvent"
+      />
+  <subscriber
+      handler=".intid.removeIntIdSubscriber"
+      for="persistent.IPersistent
+           zope.lifecycleevent.interfaces.IObjectRemovedEvent"
+      />
+  <subscriber
+      handler=".intid.moveIntIdSubscriber"
+      for="OFS.interfaces.ITraversable
+           zope.lifecycleevent.interfaces.IObjectMovedEvent"
+      />
+</configure>

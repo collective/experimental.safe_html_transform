@@ -1,0 +1,138 @@
+<component prefix="Products.ATContentTypes.configuration.datatype">
+
+   <sectiontype name="mxtidy" attribute="mxtidy" keytype="identifier" datatype=".MxTidy">
+    <description format="plain">
+      Section for mxTidy related configuration
+    </description>
+    <key name="enable" datatype="boolean" required="no" default="true">
+      <description format="plain">
+        Enable mxTidy?
+      </description>
+    </key>
+    <key name="drop_font_tags" datatype="boolean" required="no" default="true">
+      <description>
+        XXX
+      </description>
+    </key>
+    <key name="drop_empty_paras" datatype="boolean" required="no" default="true">
+      <description>
+        XXX
+      </description>
+    </key>
+    <key name="input_xml" datatype="boolean" required="no" default="false">
+      <description>
+        XXX
+      </description>
+    </key>
+    <key name="output_xhtml" datatype="boolean" required="no" default="true">
+      <description>
+        XXX
+      </description>
+    </key>
+    <key name="quiet" datatype="boolean" required="no" default="true">
+      <description>
+        XXX
+      </description>
+    </key>
+    <key name="show_warnings" datatype="boolean" required="no" default="true">
+      <description>
+        XXX
+      </description>
+    </key>
+    <key name="indent_spaces" datatype="boolean" required="no" default="true">
+      <description>
+        XXX
+      </description>
+    </key>
+    <key name="word_2000" datatype="boolean" required="no" default="true">
+      <description>
+        XXX
+      </description>
+    </key>
+    <key name="wrap" datatype="integer" required="no" default="72">
+      <description>
+        XXX
+      </description>
+    </key>
+    <key name="tab_size" datatype="integer" required="no" default="4">
+      <description>
+        XXX
+      </description>
+    </key> 
+    <key name="char_encoding" datatype="string" required="no" default="raw">
+      <description>
+        XXX
+      </description>
+    </key> 
+  </sectiontype>
+
+  <sectiontype name="feature" keytype="identifier" datatype=".Feature">
+    <description format="plain">
+      Section for a feature
+    </description>
+    <key name="enable" datatype="boolean" required="yes">
+      <description format="plain">
+        enable the feature?
+      </description>
+    </key>
+  </sectiontype>
+  
+  <sectiontype name="contenttypes">
+    <description format="plain">
+      Section content types of an archetype
+    </description>
+    <key name="default" attribute="default_content_type" datatype="string"
+        required="no" default="text/html">
+      <description>
+         XXX
+      </description>
+    </key>
+    <multikey name="allowed" attribute="allowed_content_types" datatype="string"
+        required="no">
+      <description>
+         XXX
+      </description>
+      <default>
+        allowed text/html
+      </default>
+    </multikey>
+  </sectiontype>
+
+  <sectiontype name="archetype" keytype="identifier" datatype=".Archetype">
+    <description format="plain">
+      An archetype type information
+    </description>
+    <section name="*" attribute="contenttypes" type="contenttypes"
+       required="no" />
+       
+    <key name="max_file_size" attribute="max_file_size" datatype="byte-size-in-mb"
+         default="0" required="no" />
+    <key name="max_image_dimension" attribute="max_image_dimension"
+         datatype="image-dimension-or-no" default="no" required="no" />
+    <key name="allow_document_upload" attribute="allow_document_upload"
+         datatype="boolean" default="yes" required="no" /> 
+    
+  </sectiontype>
+
+  <sectiontype name="pil_config" attribute="pil_config" keytype="identifier">
+    <description format="plain">
+        PIL configuration for resizing and rotation
+    </description>
+    <key name="quality" datatype="integer" required="no" default="90">
+      <description>
+        Quality settings (0-100)
+      </description>
+    </key>
+    <key name="resize_algo" datatype="pil-algo" required="no" default="antialias">
+      <description>
+        filter algorithm for resizing: 'NEAREST', 'BILINEAR', 'BICUBIC', 'ANTIALIAS'
+      </description>
+    </key>
+    <!--key name="rotation_algo" datatype="pil-algo" required="no" default="bicubic">
+      <description>
+        filter algorithm for rotation: 'NEAREST', 'BILINEAR', 'BICUBIC'
+      </description>
+    </key-->
+  </sectiontype>
+</component>
+

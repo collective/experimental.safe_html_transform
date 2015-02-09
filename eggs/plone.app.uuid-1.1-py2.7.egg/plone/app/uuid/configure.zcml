@@ -1,0 +1,20 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone.app.uuid">
+    
+    <include package="plone.uuid" />
+    <include package="plone.indexer" />
+    
+    <!-- Install indexer -->
+    <adapter factory=".indexer.uuidIndexer" name="UID" />
+    
+    <!-- Register utility views -->
+    <browser:view
+        for="*"
+        name="redirect-to-uuid"
+        class=".browser.RedirectToUUIDView"
+        permission="zope.Public"
+        />
+    
+</configure>

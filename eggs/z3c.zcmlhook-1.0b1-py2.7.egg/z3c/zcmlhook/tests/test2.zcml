@@ -1,0 +1,16 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:zcml="http://namespaces.zope.org/zcml">
+
+    <include package="z3c.zcmlhook" file="meta.zcml" />
+
+    <zcml:customAction
+        handler="z3c.zcmlhook.tests.test_zcml.test_fn1"
+        order="1"
+        />
+
+    <zcml:customAction
+        handler="z3c.zcmlhook.tests.test_zcml.test_fn2"
+        order="-1"
+        />
+
+</configure>

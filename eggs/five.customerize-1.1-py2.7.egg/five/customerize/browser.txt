@@ -1,0 +1,132 @@
+Viewing TTWViewTemplates through-the-web
+========================================
+
+Set Up
+------
+
+Make this test available as a module so that stuff defined in here can
+be pickled properly:
+
+    >>> from zope.testing import module
+    >>> module.setUp(test, name='five.customerize.browsertest')
+
+
+Making a site
+-------------
+
+    >>> uf = app.acl_users
+    >>> _ignore = uf._doAddUser('manager', 'r00t', ['Manager'], [])
+
+Create the test browser we'll be using:
+
+    # BBB Zope 2.12
+    >>> try:
+    ...     from Testing.testbrowser import Browser
+    ... except ImportError:
+    ...     from Products.Five.testbrowser import Browser
+
+    >>> browser = Browser()
+    >>> browser.addHeader('Authorization', 'Basic manager:r00t')
+
+Make a folder to use as a local site for component registration:
+
+    >>> browser.open('http://localhost/manage_addProduct/OFSP/folderAdd')
+    >>> browser.getControl(name='id').value = 'folder'
+    >>> browser.getControl('Add').click()
+    >>> browser.getLink('folder').click()
+
+We can turn it into a site by using the ``components.html`` view:
+
+    >>> browser.open('http://localhost/folder/components.html')
+    >>> browser.getControl('Make site').click()
+
+Create and a TTWViewTemplate instance as a view in our site manager:
+XXX: We should be able to do this TTW
+
+    >>> from zope.interface import Interface
+    >>> from OFS.interfaces import IObjectManager
+    >>> from zope.publisher.interfaces.browser import IDefaultBrowserLayer
+    >>> from five.customerize.zpt import TTWViewTemplate
+    >>> template = TTWViewTemplate('ttwtemplate', 'hello')
+    >>> t_id = app.folder._setObject('ttwtemplate', template)
+    >>> sm = app.folder.getSiteManager()
+    >>> sm.registerAdapter(template, (IObjectManager, IDefaultBrowserLayer),
+    ...                    Interface, name='myttwtemplate.html')
+    >>> import transaction
+    >>> transaction.commit()
+
+Let's see if we can view it:
+
+    >>> browser.handleErrors = False
+    >>> browser.open('http://localhost/folder/myttwtemplate.html')
+    >>> print browser.contents
+    hello
+
+Now we edit our view template TTW:
+
+    >>> browser.open('http://localhost/folder/ttwtemplate/pt_editForm')
+    >>> browser.getControl(name='text:text').value = '''\
+    ... <span tal:replace="context/getId"/>
+    ... <span tal:replace="request/foo"/>
+    ... <span tal:replace="python:repr(view)"/>'''
+    >>> browser.getControl('Save Changes').click()
+    >>> browser.open('http://localhost/folder/myttwtemplate.html?foo=bar')
+    >>> print browser.contents
+    folder
+    bar
+    None
+
+Make and register a view that we can customize with a TTWViewTemplate:
+
+    >>> from Products.Five.browser import BrowserView
+    >>> class TestView(BrowserView):
+    ...     """A view class"""
+    ...     __name__ = 'mystaticview.html'
+    ...     def foo_method(self):
+    ...         return 'baz'
+    ...
+    ...     def __call__(self):
+    ...         return 'Original View'
+
+    >>> from zope.component import provideAdapter
+    >>> provideAdapter(TestView, (IObjectManager, IDefaultBrowserLayer),
+    ...                    Interface, name='mystaticview.html')
+    >>> browser.open('http://localhost/folder/mystaticview.html')
+    >>> print browser.contents
+    Original View
+
+Pass that view to the constructor for a new TTWViewTemplate, and register
+it locally to override the static view:
+
+    >>> template = TTWViewTemplate('ttwtemplate2', 'Not so static',
+    ...                             view=TestView)
+    >>> t_id = app.folder._setObject('ttwtemplate2', template)
+    >>> sm = app.folder.getSiteManager()
+    >>> sm.registerAdapter(template, (IObjectManager, IDefaultBrowserLayer),
+    ...                    Interface, name='mystaticview.html')
+
+Now we browse the view to ensure that is has changed:
+
+    >>> browser.open('http://localhost/folder/mystaticview.html')
+    >>> print browser.contents
+    Not so static
+
+Edit the template to make it dynamic and see if we have access to the
+view methods:
+
+    >>> browser.open('http://localhost/folder/ttwtemplate2/pt_editForm')
+    >>> browser.getControl(name='text:text').value = '''\
+    ... Customized
+    ... <span tal:replace="view/foo_method"/>'''
+    >>> browser.getControl('Save Changes').click()
+    >>> browser.open('http://localhost/folder/mystaticview.html')
+    >>> print browser.contents
+    Customized
+    baz
+
+Clean up:
+---------
+
+    >>> module.tearDown(test, name='five.customerize.browsertest')
+    >>> from zope.testing.cleanup import cleanUp
+    >>> cleanUp()

@@ -9,6 +9,8 @@
 
     <include package=".browser" />
 
+    <include package="plone.app.registry" />
+ 
     <genericsetup:registerProfile
         name="default"
         title="experimental.safe_html_transform"
@@ -17,6 +19,7 @@
         provides="Products.GenericSetup.interfaces.EXTENSION"
         />
 
+    
     <genericsetup:importStep
         name="experimental.safe_html_transform-postInstall"
         title="experimental.safe_html_transform post_install import step"

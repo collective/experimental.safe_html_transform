@@ -1,0 +1,6 @@
+<metadata>
+  <version>0.1</version>
+  <dependencies>
+    <dependency>profile-plone.app.querystring:default</dependency>
+  </dependencies>
+</metadata>

@@ -1,0 +1,8 @@
+setuptools
+zope.interface
+zope.schema
+zope.security
+zope.dottedname
+plone.supermodel>=1.1dev
+plone.z3cform
+z3c.form

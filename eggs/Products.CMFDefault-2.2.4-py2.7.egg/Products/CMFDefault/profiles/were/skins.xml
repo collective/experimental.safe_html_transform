@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<object name="portal_skins" meta_type="CMF Skins Tool" allow_any="False"
+   cookie_persistence="False" default_skin="Basic"
+   request_varname="portal_skin">
+ <object name="werebear" meta_type="Filesystem Directory View"
+    directory="Products.CMFDefault:skins/werebear"/>
+ <skin-path name="were" based-on="Basic">
+  <layer name="werebear" insert-after="custom"/>
+ </skin-path>
+</object>

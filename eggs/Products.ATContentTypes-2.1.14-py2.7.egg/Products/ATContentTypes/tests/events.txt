@@ -1,0 +1,64 @@
+Events in Archetypes
+====================
+
+This doctest makes sure that at relevant places in the Archetypes /
+ATContentTypes code, events are fired. To test events, we'll set up an event
+handler that listens for object events for `IBaseObject`:
+
+  >>> from pprint import pprint
+  >>> from StringIO import StringIO
+  >>> from Products.Archetypes.tests.utils import makeContent, aputrequest
+  >>> from Products.Archetypes.interfaces import IBaseObject
+  >>> from zope.component.interfaces import IObjectEvent
+
+
+  >>> class Handler:
+  ...     def __init__(self):
+  ...         self.got = []
+  ...     def __call__(self, *args):
+  ...         self.got.append(args)
+  ...     def print_and_flush(self):
+  ...         print "%s events:" % len(self.got)
+  ...         pprint(self.got)
+  ...         self.got = []
+  >>> handler = Handler()
+
+  >>> from zope.component import getGlobalSiteManager
+  >>> gsm = getGlobalSiteManager()
+  >>> gsm.registerHandler(handler, [IBaseObject, IObjectEvent], event=False)
+
+Creating an AT object will a couple of events:
+
+  >>> d = makeContent(self.folder, portal_type='Document', id='a')
+  >>> handler.print_and_flush() #doctest: +ELLIPSIS
+  5 events:
+  [(<ATDocument at /.../Members/test_user_1_/a>,
+    <zope.lifecycleevent.ObjectCreatedEvent object at ...>),
+   (<ATDocument at /.../Members/test_user_1_/a>,
+    <Products.DCWorkflow.events.BeforeTransitionEvent object at ...>),
+   (<ATDocument at /.../Members/test_user_1_/a>,
+    <Products.DCWorkflow.events.AfterTransitionEvent object at ...>),
+   (<ATDocument at /.../Members/test_user_1_/a>,
+    <zope.lifecycleevent.ObjectAddedEvent object at ...>),
+   (<ATFolder at /.../Members/test_user_1_>,
+    <zope.container.contained.ContainerModifiedEvent object at ...>)]
+
+Calling `processForm`, which is what happens on submitting a form,
+will fire the modified event:
+
+  >>> d.processForm()
+  >>> handler.print_and_flush() #doctest: +ELLIPSIS
+  1 events:
+  [(<ATDocument at /.../Members/test_user_1_/a>,
+    <Products.Archetypes.event.ObjectInitializedEvent object at ...>)]
+
+Doing a `PUT` request will also fire the modified event:
+
+  >>> contents = StringIO('some contents')
+  >>> request = aputrequest(contents, 'text/plain')
+  >>> request.processInputs()
+  >>> ignore = d.PUT(request, request.RESPONSE)
+  >>> handler.print_and_flush() #doctest: +ELLIPSIS
+  1 events:
+  [(<ATDocument at /.../Members/test_user_1_/a>,
+    <Products.Archetypes.event.WebDAVObjectEditedEvent object at ...>)]

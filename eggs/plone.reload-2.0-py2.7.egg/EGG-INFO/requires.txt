@@ -1,0 +1,11 @@
+setuptools
+zope.component
+zope.interface
+zope.processlifetime
+zope.publisher
+zope.site
+zope.testing
+Zope2 >= 2.12
+
+[cmf]
+Products.CMFCore

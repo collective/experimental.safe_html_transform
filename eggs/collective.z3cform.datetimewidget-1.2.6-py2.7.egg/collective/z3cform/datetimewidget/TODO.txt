@@ -1,0 +1,5 @@
+dateinput popup is lacking styling -- requires the dateinput.css from plone.app.jquerytools
+
+Baseline widget should be internationalized.
+
+Enabling jqt dateinput should be doc'd. Turn on in plone.app.dexterity?

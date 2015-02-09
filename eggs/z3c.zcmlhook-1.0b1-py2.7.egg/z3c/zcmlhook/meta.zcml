@@ -1,0 +1,15 @@
+<configure 
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directives namespace="http://namespaces.zope.org/zcml">
+    
+    <meta:directive
+        name="customAction"
+        schema=".zcml.ICustomActionDirective"
+        handler=".zcml.customAction"
+        />
+  
+  </meta:directives>
+
+</configure>

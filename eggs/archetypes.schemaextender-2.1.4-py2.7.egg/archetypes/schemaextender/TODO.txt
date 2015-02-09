@@ -1,0 +1,15 @@
+================================
+To-do: archetypes.schemaextender
+================================
+
+ o Test, test, test! We need to find out when this breaks. ;)
+
+Investigate:
+------------
+
+ o Explicit ordering of adapters (e.g. by interface specificity)
+
+ o At the moment, users must subclass fields and mix in ExtensionField.
+   We could either ship with or generate on-the-fly a field type for
+   each of the standard Archetypes fields. However, we should have tests
+   covering all fields in that case.

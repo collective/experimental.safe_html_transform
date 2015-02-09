@@ -1,0 +1,93 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      tal:omit-tag="">
+<div lang="en"
+     xml:lang="en"
+     i18n:domain="plone">
+
+  <fieldset tal:condition="options/value | nothing">
+    <legend i18n:translate="label_currentselection">Current selection</legend>
+    <div tal:define="term options/value">
+      <input type="hidden" value=""
+             tal:attributes="name string:${options/name}:default" />
+      <input type="checkbox"
+             checked="checked"
+             tal:attributes="name string:${options/name};
+                             value term/token" />
+      <span tal:content="term/title" 
+            tal:attributes="title term/description | nothing"/>
+      <span class="discreet" 
+            tal:condition="term/description | nothing"
+            tal:content="term/description" />
+    </div>
+  </fieldset>
+
+  <input type="text"
+         value=""
+         tal:define="name string:${options/name}.query" 
+         tal:attributes="name name;
+                         id options/name;
+                         value request/?name | default" />
+
+  <input type="submit"
+         class="searchButton"
+         value="Search"
+         i18n:attributes="value label_search;"
+         tal:attributes="name string:${options/name}.search" />
+
+  <fieldset tal:condition="options/results | nothing">
+    <legend i18n:translate="label_searchresults">Search results</legend>
+
+    <div style="margin-bottom: 0.5em">
+        <div tal:repeat="term options/results">
+
+          <input type="submit"
+                 value="Parent"
+                 class="context"
+                 tal:define="parent_token term/parent_token | nothing"
+                 tal:condition="python: parent_token is not None"
+                 i18n:attributes="value label_parent;"
+                 tal:attributes="name string:${options/name}.browse.${parent_token}" />
+
+          <input type="radio"
+                 tal:attributes="name string:${options/name};
+                                 value term/token" />
+          <span tal:attributes="title term/description | nothing"
+                tal:content="term/title">title</span>
+
+          <span class="discreet" 
+                tal:condition="term/description | nothing"
+                tal:content="term/description" />
+
+          <input type="submit"
+                 class="context"
+                 value="Browse"
+                 tal:condition="term/browse_token|nothing"
+                 i18n:attributes="value label_browse;"
+                 tal:attributes="name string:${options/name}.browse.${term/browse_token}" />
+
+        </div>
+        <p tal:condition="options/results_truncated"
+             i18n:translate="">
+          There are more search results, narrow your search.
+        </p>
+    </div>
+
+    <div class="formControls">
+        <input type="hidden" value="y"
+               tal:attributes="name string:${options/name}.displayed" />
+
+        <input type="submit"
+               class="standalone"
+               value="Update"
+               i18n:attributes="value label_update;"
+               tal:attributes="name string:${options/name}.update" />
+    </div>
+
+  </fieldset>
+
+
+</div>
+</html>

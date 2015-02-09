@@ -1,0 +1,177 @@
+Metadata-Version: 1.1
+Name: z3c.jbot
+Version: 0.7.2
+Summary: Drop-in template overrides.
+Home-page: http://pypi.python.org/pypi/z3c.jbot
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        The ``z3c.jbot`` (or "Just a bunch of templates") package allows easy
+        customization of existing templates and images. It works on Zope 2 and
+        Zope 3.
+        
+        The Chameleon rendering engine is supported [#]_.
+        
+        Use of this package adds a small (2-3 ms per request on Plone) to the
+        total application response time.
+        
+        .. [#] To enable Chameleon on Zope 2, use the ``five.pt`` package (CMF-apps like Plone should use ``cmf.pt`` which adds full support).
+        
+        Usage
+        -----
+        
+        To override a particular file, first determine its *canonical
+        filename*. It's defined as the path relative to the package within
+        which the file is located; directory separators are replaced with
+        dots.
+        
+        Example:
+        
+          Suppose you want to override: /plone/app/layout/viewlets/logo.pt
+        
+          You would use the filename:   plone.app.layout.viewlets.logo.pt
+        
+        Simply drop the file in a directory and register that directory for
+        use with jbot using a ZCML-directive::
+        
+          <include package="z3c.jbot" file="meta.zcml" />
+        
+          <browser:jbot
+              directory="<path>"
+              layer="<layer>" />
+        
+        Templates in views, viewlets and portlets
+        -----------------------------------------
+        
+        Any template that is defined as a class-attribute can be overriden
+        using jbot, e.g. those used in views, viewlets and portlets. The
+        template overrides may be registered for any request layer or only a
+        specific layer.
+        
+        CMF objects
+        -----------
+        
+        Any skin-object (e.g. images, templates) on the file system (directory
+        views) can be overridden.
+        
+        Author
+        ------
+        
+        Malthe Borch <mborch@gmail.com>
+        
+        Changes
+        =======
+        
+        0.7.2 (2014-04-22)
+        ------------------
+        
+        - Fix issue where zope.browserpage.viewpagetemplatefile.ViewPageTemplateFile
+          was not using jbot overrides.
+          [davisagli]
+        
+        0.7.1 (2012-01-09)
+        ------------------
+        
+        - Fixed an issue where multiple registrations against the same layer
+          would cause only one registration (decided randomly) to have effect.
+        
+          The lookup code now uses the specification resolution order to query
+          for override registrations in order of specialization.
+          [malthe]
+        
+        0.7 (2012-01-05)
+        ----------------
+        
+        - Fixed issue where templates being patched by ``five.pt`` would not
+          get properly jbotted.
+        
+        - Use ``five.pt`` if available. [malthe]
+        
+        - Fixed an issue where tests would fail on Zope 2.10. [malthe]
+        
+        0.6.3 (2010-09-07)
+        ------------------
+        
+        - Fixed compatibility with Plone 3.x. [malthe]
+        
+        0.6.2 (2010-02-17)
+        ------------------
+        
+        - Downgrade log messages to debug level. In normal operation they don't contain
+          any valuable information. [hannosch]
+        
+        - Prefer zope.site over zope.app.component if it is available. [hannosch]
+        
+        0.6.1 (2010-02-09)
+        ------------------
+        
+        - Fix bungled release [optilude]
+        
+        0.6.0 (2010-02-09)
+        ------------------
+        
+        - Zope 2.12 compatibility. [malthe]
+        
+        - Added support for automatic configuration. [malthe]
+        
+        - Fixed layer specialization ordering. [malthe]
+        
+        0.5.3 (2009-10-31)
+        ------------------
+        
+        - ZCML-directive is now called ``jbot``. [malthe]
+        
+        0.5.2 (2009-10-23)
+        ------------------
+        
+        - Fixed issue where an exception would be raised if a view was not an
+          acquirer, while the context was. [gweis]
+        
+        0.5.1 (2009-10-19)
+        ------------------
+        
+        - Acquisition-wrap template instance, if applicable. This fixes an
+          issue on Zope 2.10 where legacy code would break.
+        
+        0.5 (2009-10-16)
+        ----------------
+        
+        - Added support for CMF skin objects.
+        
+        0.4 (2009-10-15)
+        ----------------
+        
+        - Added Chameleon-support.
+        
+        - Reimplemented override logic; the total usage cost is now reduced to
+          an insignificant amount. Meanwhile, only templates that are defined
+          as class-attributes (e.g. on views, viewlets and portlets) can be
+          overriden.
+        
+        0.3 (2009-09-26)
+        ----------------
+        
+        - Improved test coverage.
+        
+        - Refactored code, improving performance.
+        
+        - Fixed issue with multiple layers.
+        
+        0.2 (2008-07-14)
+        ----------------
+        
+        - Added layer support.
+        
+        0.1 (2007-11-27)
+        ----------------
+        
+        - Initial public release.
+        
+Keywords: page template override
+Platform: UNKNOWN
+Classifier: Framework :: Zope2
+Classifier: Framework :: Zope3
+Classifier: Programming Language :: Python

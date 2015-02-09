@@ -1,0 +1,217 @@
+<div class="QueryWidget"
+     tal:define="fieldName view/name;
+                 widget nocall:view;"
+     tal:attributes="data-fieldname fieldName"
+     i18n:domain="plone">
+
+    <div tal:define="config widget/getConfig;
+         indexes config/indexes;
+         rows python:widget.value or [];
+         sortable_indexes config/sortable_indexes;
+         addindexselected python:request.has_key('addindex') and request.addindex != '';
+         addoperatorselected python:request.has_key('addoperator') and request.addoperator != ''">
+      <script tal:replace="structure widget/js"/>
+
+        <tal:counter tal:define="dummy python:request.set('querystringwidgetcounter', 0)"/>
+        <tal:row repeat="row rows">
+            <div class="criteria"
+                 tal:condition="python:not request.has_key('removecriteria.%s' % repeat['row'].index) and
+                                       row.i in indexes">
+                <div class="queryindex">
+                    <input type="hidden" name="form.widgets.query.i:records"
+                           tal:attributes="name python:str(fieldName)+'.i:records'; value row/i" />
+                    <span tal:content="python:indexes[row.i]['title']"/>
+                </div>
+
+                <div class="queryoperator">
+                    <input type="hidden" name="form.widgets.query.o:records"
+                           tal:attributes="name python:str(fieldName)+'.o:records'; value row/o" />
+                    <span tal:content="python:indexes[row.i]['operators'][row.o]['title']"/>
+                </div>
+
+                <input class="querywidget queryvalue stringWidget"
+                       autocomplete="off" type="text" name="form.widgets.query.v:records"
+                       tal:attributes="name python:str(fieldName)+'.v:records'; value python:row['v']"
+                       tal:condition="python:indexes[row.i]['operators'][row.o]['widget'] == 'StringWidget'"/>
+
+                <dl class="querywidget queryvalue multipleSelectionWidget"
+                    tal:condition="python:indexes[row.i]['operators'][row.o]['widget'] == 'MultipleSelectionWidget'">
+                    <dt class="hiddenStructure">
+                        <span class="arrowDownAlternative">&#09660;</span>
+                        <span class="multipleSelectionWidgetTitle" i18n:translate="">Select&hellip;</span>
+                    </dt>
+                    <dd>
+                        <tal:values repeat="index python:indexes[row.i]['values'].keys()">
+                            <label>
+                                <input type="checkbox" name="form.widgets.query.v:records:list"
+                                       tal:attributes="name python:str(fieldName)+'.v:records:list'; value python:index.decode('utf-8');
+                                       checked python: row.has_key('v') and index in row.v and 'checked' or nothing"/>
+                                <span tal:content="python:indexes[row.i]['values'][index]['title']"/>
+                            </label>
+                        </tal:values>
+                    </dd>
+                </dl>
+
+                <dl class="querywidget referenceWidget"
+                    tal:condition="python:indexes[row.i]['operators'][row.o]['widget'] == 'ReferenceWidget'">
+                    <dt class="hiddenStructure" i18n:translate="">Select&hellip;</dt>
+                    <dd>
+                        <input class="queryvalue" autocomplete="off" type="text" name="form.widgets.query.v:records" tal:attributes="name python:str(fieldName)+'.v:records'; value python:row['v']" />
+                    </dd>
+                </dl>
+
+                <input class="querywidget queryvalue dateWidget date"
+                       autocomplete="off" type="text" name="form.widgets.query.v:records"
+                       tal:attributes="name python:str(fieldName)+'.v:records'; value python:row['v']"
+                       tal:condition="python:indexes[row.i]['operators'][row.o]['widget'] == 'DateWidget'"/>
+
+                <div class="querywidget queryvalue dateRangeWidget"
+                     tal:condition="python:indexes[row.i]['operators'][row.o]['widget'] == 'DateRangeWidget'">
+                    <input class="date" autocomplete="off" type="text" name="form.widgets.query.v:records:list"
+                           tal:attributes="name python:str(fieldName)+'.v:records:list'; value python:row['v'][0]"/>
+                    <span> and </span>
+                    <input class="date" autocomplete="off" type="text" name="form.widgets.query.v:records:list"
+                           tal:attributes="name python:str(fieldName)+'.v:records:list'; value python:row['v'][1]"/>
+                </div>
+
+		<div class="querywidget relativeDateWidget"
+		     tal:condition="python:indexes[row.i]['operators'][row.o]['widget'] == 'RelativeDateWidget'">
+		     <input class="queryvalue" autocomplete="off" type="text" name="form.widgets.query.v:records"
+			    tal:attributes="name python:str(fieldName)+'.v:records'; value python:row['v']"/>
+		     <span i18n:translate="">days</span>
+		</div>
+		
+                <input class="querywidget queryvalue relativePathWidget"
+                       autocomplete="off" type="text" name="form.widgets.query.v:records"
+                       tal:attributes="name python:str(fieldName)+'.v:records'; value python:row['v']"
+                       tal:condition="python:indexes[row.i]['operators'][row.o]['widget'] == 'RelativePathWidget'"/>
+
+                <div class="querywidget queryvalue emptyWidget"
+                     tal:condition="python:indexes[row.i]['operators'][row.o]['widget'] == None">
+                     &nbsp;
+                </div>
+
+                <input type="submit" class="removecriteria discreet" value="Remove line"
+                       i18n:translate="removeline"
+                       tal:attributes="name python:'removecriteria.%s' % request.get('querystringwidgetcounter')"/>
+                <tal:counter tal:define="dummy python:request.set('querystringwidgetcounter', request.get('querystringwidgetcounter') + 1)"/>
+            </div>
+        </tal:row>
+
+        <div class="criteria" tal:condition="python: addindexselected and addoperatorselected">
+
+            <div class="queryindex">
+                <input type="hidden" name="form.widgets.query.i:records"
+                       tal:attributes="name python:str(fieldName)+'.i:records'; value context/REQUEST/form/addindex" />
+                <span tal:content="python:indexes[request.form['addindex']]['title']"/>
+            </div>
+
+            <div class="queryoperator">
+                <input type="hidden" name="form.widgets.query.o:records"
+                       tal:attributes="name python:str(fieldName)+'.o:records';value context/REQUEST/form/addoperator" />
+                <span tal:content="python:indexes[request.form['addindex']]['operators'][request.form['addoperator']]['title']"/>
+            </div>
+
+            <input class="querywidget queryvalue stringWidget"
+                   autocomplete="off" type="text" name="form.widgets.query.v:records" value=""
+                   tal:attributes="name python:str(fieldName)+'.v:records'"
+               tal:condition="python:indexes[request.form['addindex']]['operators'][request.form['addoperator']]['widget'] == 'StringWidget'" />
+
+            <dl class="querywidget queryvalue multipleSelectionWidget"
+                tal:condition="python:indexes[request.form['addindex']]['operators'][request.form['addoperator']]['widget'] == 'MultipleSelectionWidget'">
+                <dt class="hiddenStructure" i18n:translate="">Select&hellip;</dt>
+                <dd>
+                    <tal:values repeat="index python:indexes[request.form['addindex']]['values'].keys()">
+                        <label>
+                            <input type="checkbox" name="form.widgets.query.v:records:list" tal:attributes="name python:str(fieldName)+'.v:records:list'; value python:index.decode('utf-8')" />
+                            <span tal:content="python:indexes[request.form['addindex']]['values'][index]['title']"/>
+                        </label>
+                    </tal:values>
+                </dd>
+            </dl>
+
+            <div class="querywidget referenceWidget"
+                 tal:condition="python:indexes[request.form['addindex']]['operators'][request.form['addoperator']]['widget'] == 'ReferenceWidget'">
+                <dl>
+                    <dt class="hiddenStructure" i18n:translate="">Select&hellip;</dt>
+                    <dd><input class="queryvalue" autocomplete="off" tal:attributes="name python:str(fieldName)+'.v:records';" type="text" name="form.widgets.query.v:records" /></dd>
+                </dl>
+            </div>
+
+            <div class="querywidget queryvalue dateWidget"
+                 tal:condition="python:indexes[request.form['addindex']]['operators'][request.form['addoperator']]['widget'] == 'DateWidget'">
+                <input autocomplete="off" type="text" class="queryvalue" tal:attributes="name python:str(fieldName)+'.v:records';" name="form.widgets.query.v:records" />
+		
+            </div>
+
+            <div class="querywidget queryvalue dateRangeWidget"
+                 tal:condition="python:indexes[request.form['addindex']]['operators'][request.form['addoperator']]['widget'] == 'DateRangeWidget'">
+                <input autocomplete="off" type="text" tal:attributes="name python:str(fieldName)+'.v:records:list';" name="form.widgets.query.v:records:list" />
+                <span> and </span>
+                <input autocomplete="off" type="text" tal:attributes="name python:str(fieldName)+'.v:records:list';" name="form.widgets.query.v:records:list" />
+            </div>
+
+            <input class="querywidget queryvalue relativePathWidget"
+                   autocomplete="off" type="text" name="form.widgets.query.v:records" tal:attributes="name python:str(fieldName)+'.v:records';" value=""
+                   tal:condition="python:indexes[request.form['addindex']]['operators'][request.form['addoperator']]['widget'] == 'RelativePathWidget'" />
+
+            <input type="submit" name="removecriteria" class="removecriteria discreet"
+                   i18n:translate="removeline"
+                   value="Remove line" />
+        </div>
+
+        <div class="criteria">
+            <label for="addindex" class="hiddenStructure">Add criterion</label>
+
+            <select class="addIndex" name="addindex" id="addindex" tal:condition="python: not(addindexselected) or addoperatorselected">
+                <option value="" selected="selected" i18n:translate="">Select&hellip;</option>
+                <tal:index repeat="groupName python:config['groupedIndexes'].keys()">
+                    <optgroup tal:attributes="label python:groupName">
+                        <option tal:repeat="index python:config['groupedIndexes'][groupName]"
+                                tal:content="python:index[0]"
+                                tal:attributes="value python:index[1]"/>
+                    </optgroup>
+                </tal:index>
+            </select>
+
+            <div class="addIndex" tal:condition="python: addindexselected and not(addoperatorselected)">
+                <input type="hidden" name="addindex"
+                      tal:attributes="value context/REQUEST/form/addindex"/>
+
+                <span tal:content="python:indexes[request.form['addindex']]['title']"/>
+            </div>
+
+            <select class="addOperator" name="addoperator" tal:condition="python: addindexselected and not(addoperatorselected)">
+                <option value="" selected="selected" i18n:translate="">Select&hellip;</option>
+                <tal:index repeat="index python:indexes[request.form['addindex']]['operators'].keys()">
+                    <option tal:attributes="value index;"
+                            tal:content="python:indexes[request.form['addindex']]['operators'][index]['title']">Index</option>
+                </tal:index>
+            </select>
+
+            <input type="submit" value="Add" i18n:translate="addterm" name="form.button.addcriteria" class="context addIndexButton"/>
+        </div>
+
+        <div class="sortingField">
+            <div class="formHelp"><!-- --></div>
+            <label for="sort_on" i18n:translate="">
+            Sort on
+            </label>
+            <select name="sort_on" id="sort_on">
+                <tal:index repeat="index python:sortable_indexes.keys()">
+                    <option tal:attributes="value index; selected python:(request.has_key('sort_on') and request.sort_on == index) and 'selected' or nothing"
+                            tal:content="python:sortable_indexes[index]['title']">Index</option>
+                </tal:index>
+            </select>
+
+            <input type="checkbox" name="sort_order" value="reverse" checked="checked" id="sort_order"/>
+            <label for="sort_order" i18n:translate="">Reversed order</label>
+        </div>
+
+        <label class="previewresultsLabel" i18n:translate="">Preview</label>
+        <div class="previewresults" tal:content="structure python:widget.SearchResults()">
+        </div>
+    </div>
+
+</div>
+

@@ -1,0 +1,3 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+  <test test_string="f.h has been loaded" />
+</configure>

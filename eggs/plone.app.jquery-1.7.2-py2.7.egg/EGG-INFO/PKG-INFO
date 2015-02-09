@@ -1,0 +1,23 @@
+Metadata-Version: 1.1
+Name: plone.app.jquery
+Version: 1.7.2
+Summary: jQuery integration for Plone
+Home-page: http://pypi.python.org/pypi/plone.app.jquery
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: Introduction
+        ============
+        
+        plone.app.jquery adds `jquery`_ library to Plone.
+        
+        .. _`jquery`: http://jquery.com
+        
+Keywords: Plone jQuery
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

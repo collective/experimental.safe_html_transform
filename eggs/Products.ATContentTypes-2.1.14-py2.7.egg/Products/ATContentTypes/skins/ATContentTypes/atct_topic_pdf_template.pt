@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<template
+         xmlns:tal="http://xml.zope.org/namespaces/tal"
+         xmlns:metal="http://xml.zope.org/namespaces/metal"
+         xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+         tal:attributes="filename string:${here/id}.pdf"
+         pagesize="LETTER"
+         landscape="0"
+         showboundary="1"
+         leftmargin="0.5in"
+         rightmargin="0.5in"
+         topmargin="0.5in"
+         bottommargin="0.5in"
+         allowsplitting="1">
+
+  <stylesheet>
+   <paragraphstyle name="Table" fontname="Helvetica" fontsize="10" alignment="center" valign="middle"/>
+   <paragraphstyle name="Text" fontname="Helvetica" fontsize="12" alignment="center" valign="top"/>
+   <paragraphstyle name="PortalTitle" fontname="Helvetica-Bold" fontsize="16" alignment="center" valign="top"/>
+   <paragraphstyle name="TopicTitle" fontname="Helvetica" fontsize="14" alignment="center" valign="top"/>
+
+   <tablestyle name="ATCTTable">
+     <stylecmd expr="('ALIGN', (0,0), (-1,-1), 'LEFT')"/>
+     <stylecmd expr="('ALIGN', (0,0), (-1,0), 'CENTER')"/>
+     <stylecmd expr="('VALIGN', (0,0), (-1,-1), 'MIDDLE')"/>
+     <stylecmd expr="('FONT', (0,1), (-1,-1), 'Helvetica', 10)"/>
+     <stylecmd expr="('LINEBELOW', (0,0), (-1,0), 1, colors.black)"/>
+     <stylecmd expr="('FONT', (0,0), (-1,0), 'Helvetica-Bold', 10)"/>
+   </tablestyle>
+
+  </stylesheet>
+
+  <pagetemplate id="Page" nextid="Page" startframe="page">
+   <static>
+    <infostring align="center" x="4.25in" y= "0.33in" size="10"
+            font="Helvetica" color="(0,0,0)">Page %(page)s
+    </infostring>
+
+   </static>
+
+   <frame  id="page"
+           nextid="table"
+           x="0.5in"
+           y="0.5in"
+           width="7.25in"
+           height="10.0in"
+         showboundary="0"/>
+  </pagetemplate>
+
+</template>

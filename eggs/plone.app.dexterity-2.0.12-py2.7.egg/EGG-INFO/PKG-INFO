@@ -1,0 +1,852 @@
+Metadata-Version: 1.1
+Name: plone.app.dexterity
+Version: 2.0.12
+Summary: Dexterity is a content type framework for CMF applications, with particular emphasis on Plone. It can be viewed as an alternative to Archetypes that is more light-weight and modular.
+Home-page: http://plone.org/products/dexterity
+Author: Martin Aspeli, David Glick, et al
+Author-email: dexterity-development@googlegroups.com
+License: GPL
+Description: .. contents:: Table of Contents
+        
+        
+        Introduction
+        ============
+        
+        Dexterity wants to make some things really easy. These are:
+        
+        * Create a "real" content type entirely through-the-web without having to
+          know programming.
+        * As a business user, create a schema using visual or through-the-web tools,
+          and augment it with adapters, event handlers, and other Python code written
+          on the filesystem by a Python programmer.
+        * Create content types in filesystem code quickly and easily, without losing
+          the ability to customise any aspect of the type and its operation later if
+          required.
+        * Support general "behaviours" that can be enabled on a custom type in a
+          declarative fashion. Behaviours can be things like title-to-id naming,
+          support for locking or versioning, or sets of standard metadata with
+          associated UI elements.
+        * Easily package up and distribute content types defined through-the-web, on
+          the filesystem, or using a combination of the two.
+        
+        Philosophy
+        ==========
+        
+        Dexterity is designed with a specific philosophy in mind. This can be
+        summarised as follows:
+        
+        Reuse over reinvention
+          As far as possible, Dexterity should reuse components and technologies that
+          already exist. More importantly, however, Dexterity should reuse concepts that
+          exist elsewhere. It should be easy to learn Dexterity by analogy, and to work
+          with Dexterity types using familiar APIs and techniques.
+        
+        Small over big
+          Mega-frameworks be damned. Dexterity consists of a number of specialised
+          packages, each of which is independently tested and reusable. Furthermore, 
+          packages should have as few dependencies as possible, and should declare their
+          dependencies explicitly. This helps keep the design clean and the code 
+          manageable.
+        
+        Natural interaction over excessive generality
+          The Dexterity design was driven by several use cases that express the way in 
+          which we want people to work with Dexterity. The end goal is to make it easy 
+          to get started, but also easy to progress from an initial prototype to a 
+          complex set of types and associated behaviours through step-wise learning and 
+          natural interaction patterns. Dexterity aims to consider its users - be they 
+          business analysts, light integrators or Python developers, and be they new or 
+          experienced - and cater to them explicitly with obvious, well-documented, 
+          natural interaction patterns.
+        
+        Real code over generated code
+          Generated code is difficult to understand and difficult to debug when it 
+          doesn't work as expected. There is rarely, if ever, any reason to scribble 
+          methods or 'exec' strings of Python code.
+        
+        Zope 3 over Zope 2
+          Although Dexterity does not pretend to work with non-CMF systems, as many 
+          components as possible should work with plain Zope 3, and even where there are 
+          dependencies on Zope 2, CMF or Plone, they should - as far as is practical - 
+          follow Zope 3 techniques and best practices. Many operations (e.g. managing 
+          objects in a folder, creating new objects or manipulating objects through a 
+          defined schema) are better designed in Zope 3 than they were in Zope 2.
+        
+        Zope concepts over new paradigms
+          We want Dexterity to be "Zope-ish". Zope is a mature, well-designed (well, 
+          mostly) and battle tested platform. We do not want to invent brand new 
+          paradigms and techniques if we can help it.
+        
+        Automated testing over wishful thinking
+          "Everything" should be covered by automated tests. Dexterity necessarily has a 
+          lot of moving parts. Untested moving parts tend to come loose and fall on 
+          people's heads. Nobody likes that.
+        
+        Getting started
+        ===============
+        
+        Please read the `installation guide`_ to get Dexterity up and running.
+        
+        .. _`installation guide`: http://developer.plone.org/reference_manuals/external/plone.app.dexterity/install.html
+        
+        Then log in to Plone, go to Site Setup, and go to the ``Dexterity Types``
+        control panel to get started creating content types through the web.
+        
+        Or read the `Dexterity Developer Manual`_ to get started developing
+        Dexterity content types on the filesystem.
+        
+        The 2.0.x release series of Dexterity is compatible with
+        and included with Plone 4.3.
+        
+        Upgrading
+        =========
+        
+        If you are upgrading from a previous release of Dexterity, you need to:
+        
+        1. Update your buildout with the new versions (or extend the updated KGS),
+           and re-run it.
+        2. Restart Zope.
+        3. Go to the Add-ons control panel in Plone Site Setup, and run the
+           upgrade steps for "Dexterity Content Types" if there are any available.
+        
+        Documentation
+        =============
+        
+        Various documentation is available:
+        
+        * `Dexterity Developer Manual`_
+        * `How to create reusable behaviors for Dexterity types`_
+        
+        .. _`Dexterity Developer Manual`: http://developer.plone.org/reference_manuals/external/plone.app.dexterity
+        .. _`How to create reusable behaviors for Dexterity types`: http://developer.plone.org/reference_manuals/external/plone.app.dexterity/behaviors
+        
+        The following documents are not Dexterity-specific, but will likely be useful
+        to users of Dexterity:
+        
+        * `Schema-driven forms manual`_
+        * `five.grok manual`_
+        
+        .. _`Schema-driven forms manual`: http://developer.plone.org/reference_manuals/external/plone.app.dexterity/schema-driven-forms
+        .. _`five.grok manual`: http://developer.plone.org/reference_manuals/external/plone.app.dexterity/five-grok
+        
+        
+        Mailing list
+        ============
+        
+        The `dexterity-development group`_ provides a place to discuss development
+        and use of Dexterity.
+        
+        .. _`dexterity-development group`: http://groups.google.com/group/dexterity-development
+        
+        Issue tracker
+        =============
+        
+        Please report issues via the `Plone issue tracker`_.
+        
+        .. _`Plone issue tracker`: https://dev.plone.org/
+        
+        Support
+        =======
+        
+        Dexterity use questions may be answered via `Plone's support channels`_.
+        
+        .. _`Plone's support channels`: http://plone.org/support
+        
+        Contributing
+        ============
+        
+        Most Dexterity code is owned by the `Plone Foundation`_ and maintained in the
+        `Plone github repository`_. We're happy to share commit access so that you can
+        share code with us, but first you must sign the `Plone contributor agreement`_.
+        
+        .. _`Plone Foundation`: http://plone.org/foundation
+        .. _`Plone github repository`: http://github.com/plone
+        .. _`Plone contributor agreement`: http://plone.org/foundation/contributors-agreement
+        
+        Dexterity wouldn't be possible without the hard work of a lot of people, including:
+        
+        * Martin Aspeli
+        * Jian Aijun
+        * Wichert Akkerman
+        * Jonas Baumann
+        * David Brenneman
+        * Joel Burton
+        * Vincent Fretin
+        * Rok Garbas
+        * Anthony Gerrard
+        * Nathan van Gheem
+        * David Glick
+        * Craig Haynal
+        * Wouter Vanden Hove
+        * Jean-Michel Francois
+        * Jim Fulton
+        * Jamie Lentin
+        * Alex Limi
+        * Steve McMahon
+        * Jason Mehring
+        * Alec Mitchell
+        * Daniel Nouri
+        * Ross Patterson
+        * Maurits van Rees
+        * Lennart Regebro
+        * Laurence Rowe
+        * Israel Saeta Perez
+        * Hanno Schlichting
+        * Christian Schneider
+        * Carsten Senger
+        * Jon Stahl
+        * Eric Steele
+        * Gaudenz Steinlin
+        * Dorneles Tremea
+        * Sean Upton
+        * Sylvain Viollon
+        * Matthew Wilkes
+        * Matt Yoder
+        * Andi Zeidler
+        * Hector Velarde
+        * Giacomo Spettoli
+        
+        (Please add your name if we have neglected to.)
+        
+        Release Notes
+        =============
+        
+        Dexterity 2.0 is a major release of Dexterity. It has focused on getting
+        Dexterity included in Plone core, by cleaning things up and making
+        dependencies that are not ready for primetime optional.
+        
+        Grok-style configuration no longer included by default
+        ------------------------------------------------------
+        
+        Dexterity 1.0 included ``five.grok`` to allow configuring components via
+        Python directives rather than in separate XML-based ZCML files.  It also
+        included two packages, ``plone.directives.form`` and
+        ``plone.directives.dexterity``, to provide some grok-style directives for
+        Dexterity-specific features.
+        
+        The Dexterity authors still like grok and believe it makes it easier to learn
+        how to customize Plone.  However, it has been turned into an optional feature
+        so that Dexterity has a chance to enter Plone core even if the Plone framework
+        team doesn't want to add grok to the already complex stack.
+        
+        To include these three grok-related packages when you install Dexterity,
+        enable the "grok" extra::
+        
+          [instance]
+          eggs =
+              plone.app.dexterity [grok]
+        
+        By the way, a number of schema directives from ``plone.directives.form`` that
+        used to require grok to work have been reimplemented so that they work without
+        grok. In particular, the ``Schema`` class and the ``model``, ``fieldset``,
+        and ``primary`` directives were moved to ``plone.supermodel.model``. The
+        ``omitted``, ``no_omit``, ``mode``, ``widget``, ``order_before``,
+        ``order_after``, ``read_permission``, and ``write_permission`` directives were
+        moved to ``plone.autoform.directives``.  There are aliases in the old locations
+        so you don't need to update existing code, but you can switch to the new
+        locations if you're trying to avoid depending on grok.
+        
+        Relation support no longer included by default
+        ----------------------------------------------
+        
+        Dexterity 1.0 included support for object relations based on the zc.relation
+        catalog and plone.app.relationfield, as well as a behavior
+        (``plone.app.dexterity.behaviors.related.IRelatedItems``) providing a
+        generic list of related items based on that implementation.
+        
+        Since this feature was added to Dexterity, we discovered that it will be hard
+        to support this type of relation well in Zope 2 until Zope 2 is setting
+        __parent__ pointers everywhere. In addition, we encountered some problems with
+        using interfaces as keys in the zc.relation catalog. And Dexterity gained
+        support for the Archetypes reference engine in
+        ``plone.app.referenceablebehavior``. As a result of these factors, the
+        zc.relation approach to object relationships will not be included in Dexterity or Plone core for the time being.
+        
+        VERY IMPORTANT: If you are upgrading a site with Dexterity 1.0 to Dexterity
+        2.0, it will break unless you install plone.app.relationfield, since your
+        database contains persistent intid and relations utilities. The easiest way
+        to include plone.app.relationfield is to install plone.app.dexterity with
+        the "relations" extra::
+        
+          [instance]
+          eggs =
+              plone.app.dexterity [relations]
+        
+        Using relations via plone.app.relationfield
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
+        If you were relying on the support for relations, you can re-enable support
+        by installing the ``plone.app.relationfield`` package. You need to add it to
+        your package's install_requires in setup.py::
+        
+          install_requires=[
+              'plone.app.relationfield',
+              ]
+        
+        Make sure your package is including its ZCML in configure.zcml::
+        
+          <include package="plone.app.relationfield" />
+        
+        And install its GenericSetup profile as a dependency in your package's metadata.xml::
+        
+          <dependencies>
+            <dependency>profile-plone.app.relationfield:default</dependency>
+          </dependencies>
+        
+        If you have any content types using the IRelatedItems behavior, you should
+        update them to import the behavior from the new location::
+        
+          <property name="behaviors">
+              <element value="plone.app.relationfield.behavior.IRelatedItems" />
+          </property>
+        
+        Content tree and Autocomplete widgets no longer included by default
+        -------------------------------------------------------------------
+        
+        In Dexterity 1.0, the widgets in ``plone.formwidget.autocomplete`` and
+        ``plone.formwidget.contenttree`` were installed as dependencies of
+        ``plone.app.dexterity``. In Dexterity 2.0 they are no longer installed
+        by default, because they are not used by any of the included behaviors
+        or made available via the through-the-web content type editor at this
+        time.
+        
+        If you use these widgets, make sure your package lists them as
+        dependencies in setup.py, loads their ZCML in configure.zcml, and
+        activates their GenericSetup profiles as dependencies in metadata.xml.
+        
+        Changelog for plone.app.dexterity
+        =================================
+        
+        2.0.12 (2014-09-07)
+        -------------------
+        
+        - Don't throw an error if allowed_content_types is none or missing.
+          Fix https://github.com/plone/plone.app.contenttypes/issues/91
+          [pbauer]
+        
+        - PLIP #13705: Remove <base> tag.
+          [frapell]
+        
+        
+        2.0.11 (2013-12-07)
+        -------------------
+        
+        - Fixed Add view URL of cloned content type.
+          Refs http://dev.plone.org/ticket/13776.
+          [thomasdesvenain]
+        
+        - Add robot testing environment and first robot test.
+          [cedricmessiant]
+        
+        - Better string normalization when setting type id from type title
+          (change accented or special characters with corresponding letters).
+          [cedricmessiant]
+        
+        - Show a warning when editing the default page of a folder.
+          [davisagli]
+        
+        
+        
+        2.0.10 (2013-09-16)
+        -------------------
+        
+        - Fix determination of allowed types so it checks permission in
+          the context of the original folder when inheriting allowed
+          types.
+          [davisagli]
+        
+        
+        2.0.9 (2013-08-13)
+        ------------------
+        
+        - Add documentation for defaultFactory tag in XML ref.
+          [smcmahon]
+        
+        - Removed line breaks within documentation URLs in modeleditor.py.
+          [smcmahon]
+        
+        - Fixed XML export so that GenericSetup's parser can successfully parse it
+          later on at install time.
+          [zupo]
+        
+        - Use @@ploneform-render-widget to render widgets in display mode.
+          [cedricmessiant]
+        
+        - Call the IBasic description field 'Summary' and give it
+          help text that is actually helpful.
+          [davisagli]
+        
+        - Don't show the 'Allow Discussion' field on an item's default view.
+          [davisagli]
+        
+        
+        2.0.8 (2013-05-23)
+        ------------------
+        
+        - Add XML Model Editor based on plone.resourceditor. If plone.resourceditor
+          is available, this is exposed by an "Edit XML Field Model" button on
+          the fields tab of a content type -- if the content type is editable TTW.
+          [smcmahon]
+        
+        - Added catalan translations [sneridagh]
+        
+        
+        2.0.7 (2013-04-09)
+        ------------------
+        
+        - Fix bug in determining whether to show the allowed contained type
+          fields.
+          [ericof]
+        
+        - Let the behavior INameFromFileName also set the title from the filename
+          if the type has such a field and it is left empty.
+          [pbauer]
+        
+        - Updated french translations.
+          [thomasdesvenain]
+        
+        
+        2.0.6 (2013-04-06)
+        ------------------
+        
+        - Add missing translation strings.
+          [vincentfretin]
+        
+        
+        2.0.5 (2013-04-06)
+        ------------------
+        
+        - Updated pt_BR translation [ericof]
+        
+        
+        2.0.4 (2013-03-05)
+        ------------------
+        
+        - Add zh_TW translation [TsungWei Hu]
+        
+        - Add support for constraining container allowed content types using
+          the "Restrictions" form in the add menu.  Merged from Patrick
+          Gerken's (@do3cc) work in plone.app.contenttypes.
+          [rpatterson]
+        
+        - When a new type is added, redirect to the fields tab as the next view.
+          [davisagli]
+        
+        - Don't show the short name as a field on the type overview page.
+          [davisagli]
+        
+        - Remove the 'Container' checkbox when adding a new type, and default
+          to creating a container.
+          [davisagli]
+        
+        - Tweaks to type control panel based on user testing.
+          [davisagli]
+        
+        - Set default language for a new content item based on the language of
+          its container.
+          [frapell]
+        
+        - Fixed i18n of "Contents" in folder default view.
+          [vincentfretin]
+        
+        - Added Ukrainian translations
+          [kroman0]
+        
+        
+        2.0.3 (2013-01-17)
+        ------------------
+        
+        - Nothing changed yet.
+        
+        
+        2.0.2 (2013-01-01)
+        ------------------
+        
+        - Added French translations
+          [cedricmessiant]
+        
+        - The behavior controlpanel now correctly invalidates any modified FTIs.
+          [malthe]
+        
+        - I18n improved by adding many missing strings
+          [giacomos]
+        
+        - better graphical integration in the control panel
+          [giacomos]
+        
+        - Allow discussion behavior added.
+          [timo]
+        
+        
+        2.0.1 (2012-08-31)
+        ------------------
+        
+        - Update MANIFEST.in to correct packaging error.
+          [esteele]
+        
+        
+        2.0 (2012-08-30)
+        ----------------
+        
+        - DC metadata fields are now correctly encoded and decoded (from byte
+          strings to unicode and vice versa). Currently, UTF-8 is assumed.
+          [malthe]
+        
+        - Use lxml instead of elementtree.
+          [davisagli]
+        
+        - Use ViewPageTemplateFile from zope.browserpage.
+          [hannosch]
+        
+        - Add upgrade step to make sure that only uninstalling plone.app.intid will
+          remove the intids utility.
+          [davisagli]
+        
+        - Fix traversal over the types context so that skin items used by widgets
+          can be acquired.
+          [davisagli]
+        
+        - Provide an ``additionalSchemata`` property on the schema context so the
+          schema editor can include a preview of fields from behaviors.
+          [davisagli]
+        
+        - Give a more explicit warning before deleting content types that have existing
+          instances.
+          [davisagli]
+        
+        - Add validation to prevent giving a type the same name as an existing type.
+          [davisagli]
+        
+        - Make sure the title and description of new FTIs are stored encoded,
+          and with a default i18n domain of 'plone'.
+          [davisagli]
+        
+        - Add overview tab for each type in the control panel.
+          [davisagli]
+        
+        - Added Sphinx source for the Dexterity Developer manual.
+          [giacomos]
+        
+        - Added Italian translation.
+          [giacomos]
+        
+        - Internationalized content type settings pages,
+          I18N fixes,
+          messages extraction,
+          French translations.
+          [thomasdesvenain]
+        
+        - Added Spanish translation.
+          [hvelarde]
+        
+        - Install the profile from collective.z3cform.datetimewidget to enable the
+          Jquery Tools date picker for date/time fields.
+          [davisagli]
+        
+        - Bugfix: Make sure type short names are validated.
+          [davisagli]
+        
+        - Bugfix: Fix display of type descriptions in the types control panel.
+          [davisagli]
+        
+        - Bugfix: Make sure subject can still be retrieved as unicode for the
+          categorization behavior now that the Subject accessor returns a bytestring.
+          [davisagli]
+        
+        - Add intro message to Dexterity control panel.
+          [jonstahl, davisagli]
+        
+        - Grok support is now an optional "grok" extra. Use this if you want
+          ``five.grok``, ``plone.directives.form``, and ``plone.directives.dexterity``.
+          See the release notes for more information. The behaviors in this package
+          were updated to work without using grok.
+          [davisagli]
+        
+        - plone.formwidget.autocomplete and plone.formwidget.contenttree are no longer
+          included by default. See the release notes for more information.
+          [davisagli]
+        
+        - Moved the 'Related Items' behavior to plone.app.relationfield.
+          plone.app.relationfield is no longer installed as a dependency. See the
+          release notes for more information including how to update your package if it
+          depends on relation support or the 'Related Items' behavior.
+          IMPORTANT: You must install plone.app.relationfield on sites that are being
+          upgraded from Dexterity 1.0 to Dexterity 2.0, or the site will break.
+          [davisagli]
+        
+        - Converted tests to plone.app.testing-based setup. The old PloneTestCase-based
+          test case classes and layer are now deprecated.
+          [davisagli]
+        
+        - Remove ++resource++plone.app.dexterity.overlays.css from the CSS registry.
+          [davisagli]
+        
+        - Removed support for Plone 3 / CMF 2.1 / Zope 2.10.
+          [davisagli]
+        
+        - Update dependencies and imports as appropriate for Zope 2.12 & Zope 2.13
+          [davisagli]
+        
+        - Remove CDATA section from "browser\types_listing.pt" (in HTML5: allowed only in SVG/MathML namespaces).
+          [kleist]
+        
+        1.0 - 2011-05-20
+        ----------------
+        
+        - Fix publishing dates DateTime/datetime conversions so as not to drift by the
+          timezone delta every save.
+          [elro]
+        
+        - Make sure cloned types get a new factory.
+          [davisagli]
+        
+        - Don't override overlay CSS in Plone 4.
+          [davisagli]
+        
+        - Fixed cloning of types with a period (.) in their short name.
+          [davisagli]
+        
+        - Allow specifying a type's short name when adding a type.
+          [davisagli]
+        
+        - Make sure the Basic metadata adapter accesses the content's title attribute
+          directly so it doesn't get encoded. Also make sure encoded data can't be set
+          via this adapter.
+          [davisagli]
+        
+        1.0rc1 - 2011-04-30
+        -------------------
+        
+        - Added upgrade step to install new javascript from
+          plone.formwidget.autocomplete
+          [davisagli]
+        
+        - Added basic support for making TTW changes to schemas defined in filesystem
+          models and code. (Note: This feature will not actually work until some further
+          changes are completed in plone.dexterity.)
+        
+          In order to support this change, the event handling to serialize schema changes
+          was revised. We now register a single event handler for the SchemaModifiedEvent
+          raised for the schema context. This allows us to keep track of the FTI
+          that changes need to be serialized to on the schema context. The
+          serializeSchemaOnFieldEvent and serializeSchemaOnSchemaEvent handlers were
+          removed from the serialize module and replaced by serializeSchemaContext. The
+          serializeSchema helper remains but is deprecated.
+          [davisagli]
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        - Add "export" button to types editor. Exports GS-style zip archive of type
+          info for selected types.
+          [stevem]
+        
+        - Fix old jquery alias in types_listing.pt. This closes
+          http://code.google.com/p/dexterity/issues/detail?id=159
+          [davisagli]
+        
+        - Make display templates fill content-core on Plone 4.
+          [elro]
+        
+        - Add ids to the group fieldsets on display forms.
+          [elro]
+        
+        - Exclude from navigation behavior should be restricted to IDexterityContent.
+          [elro]
+        
+        
+        1.0b4 - 2011-03-15
+        ------------------
+        
+        - Add a "Name from file name" behavior.
+          [elro]
+        
+        - Remove the NameFromTitle behavior factory, it is not necessary.
+          [elro]
+        
+        - Add "Next previous navigation" and "Next previous navigation toggle"
+          behaviors.
+          [elro]
+        
+        - Add an "Exclude from navigation" behavior.
+          [lentinj]
+        
+        - Put the folder listing within a fieldset.
+          [lentinj]
+        
+        
+        1.0b3 - 2011-02-11
+        ------------------
+        
+        - Add a navigation root behavior.
+          [elro]
+        
+        - Fix decoding error when an encoded description is stored in the FTI.
+          [davisagli]
+        
+        - Avoid empty <div class="field"> tag for title and description in
+          item.pt and container.pt.
+          [gaudenzius]
+        
+        - Add locales structure for translations with cs , de, es, eu, fr, ja, nl, pt_BR
+          [toutpt]
+        
+        - Update french translation
+          [toutpt]
+        
+        
+        1.0b2 - 2010-08-05
+        ------------------
+        
+        - Fix several XML errors in templates. Needed for Chameleon compatibility.
+          [wichert]
+        
+        - cloning a type through the dexterity UI in the control panel did not work
+          if the type had a hyphen in it's name. This fixes
+          http://code.google.com/p/dexterity/issues/detail?id=126
+          [vangheem]
+        
+        
+        1.0b1 - 2010-04-20
+        ------------------
+        
+        - Require plone.app.jquerytools for the schema editor UI, and make sure it is
+          installed when upgrading.
+          [davisagli]
+        
+        - Remove unused schemaeditor.css.
+          [davisagli]
+        
+        - Omit the metadata fields except on edit and add forms.
+          [davisagli]
+        
+        - Enable the "Name from title" behavior for new types, by default.
+          [davisagli]
+        
+        - Include plone.formwidget.namedfile so that File upload and Image fields are
+          available out of the box.  You must explicitly include z3c.blobfile in your
+          environment if you want blob-based files.
+          [davisagli]
+        
+        - Added a DexterityLayer that can be used in tests.
+          [davisagli]
+        
+        - Fix issue with the BehaviorsForm accidentally polluting the title of the
+          z3c.form EditForm 'Apply' button.
+          [davisagli]
+        
+        - Add upgrades folder and make sure plone.app.z3cform profile gets installed
+          on upgrades from previous versions of Dexterity.
+          [davisagli]
+        
+        - Depend on the plone.app.z3cform profile, to make sure the Plone browser layer
+          for z3c.form gets installed.
+          [davisagli]
+        
+        - Avoid relying on acquisition to get the portal_url for links in the type
+          listing table.
+          [davisagli]
+        
+        
+        1.0a7 - 2010-01-08
+        ------------------
+        
+        - Make sure the Dublin Core fieldsets appear in the same order as they
+          do in AT content.
+          [davisagli]
+        
+        - Make sure the current user is loaded as the default creator for the
+          IOwnership schema in an add form.
+          [davisagli]
+        
+        - Include behavior descriptions on the behavior edit tab.
+          [davisagli]
+        
+        - IBasic behavior: set missing_value of description-field to u'' . The
+          description should never be None (live_search would not work any more).
+          [jbaumann]
+        
+        - Fix issue where traversing to a nonexistent type name in the types control
+          panel did not raise NotFound.
+          [davisagli]
+        
+        - Make it possible to view the fields of non-editable schemata.
+          [davisagli]
+        
+        - Tweaks to the tabbed_forms template used for the types control panel.
+          [davisagli]
+        
+        
+        1.0a6 - 2009-10-12
+        ------------------
+        
+        - Add plone.app.textfield as a dependency. We don't use it directly in this
+          package, but users of Dexterity should have it installed and available.
+          [optilude]
+        
+        - Use some default icons for new types.
+          [davisagli]
+        
+        - Show type icons in type listing if available.
+          [davisagli]
+        
+        - Removed 'container' field from the types listing in the control panel
+          (it wasn't working).
+          [davisagli]
+        
+        - Add message factories to titles and descriptions of metadata schema fields.
+          Fixes http://code.google.com/p/dexterity/issues/detail?id=75.
+          [optilude]
+        
+        - Patch listActionInfos() instead of listActions() in order to get the
+          folder/add category into the actions list. This avoids a problem with
+          the 'actions.xml' export handler exporting the folder/add category
+          incorrectly. Fixes http://code.google.com/p/dexterity/issues/detail?id=78
+          [optilude]
+        
+        
+        1.0a5 - 2009-07-26
+        ------------------
+        
+        - Explicitly include overrides.zcml from plone.app.z3cform.
+          [optilude]
+        
+        
+        1.0a4 - 2009-07-12
+        ------------------
+        
+        - Changed API methods and arguments to mixedCase to be more consistent with
+          the rest of Zope. This is a non-backwards-compatible change. Our profuse
+          apologies, but it's now or never. :-/
+        
+          If you find that you get import errors or unknown keyword arguments in your
+          code, please change names from foo_bar too fooBar, e.g. serialize_schema()
+          becomes serializeSchema().
+          [optilude]
+        
+        
+        1.0a3 - 2009-06-07
+        ------------------
+        
+        - Updated use of <plone:behavior /> directive to match plone.behavior 1.0b4.
+          [optilude]
+        
+        
+        1.0a2 - 2009-06-01
+        ------------------
+        
+        - Remove superfluous <includeOverrides /> in configure.zcml which would cause
+          a problem when the package is loaded via z3c.autoinclude.plugin
+          [optilude]
+        
+        
+        1.0a1 - 2009-05-27
+        --------------------
+        
+        - Initial release
+        
+Keywords: plone ttw dexterity schema interface
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Development Status :: 5 - Production/Stable

@@ -1,0 +1,37 @@
+#searchrow th{
+    padding:0;
+    margin:0;
+}
+
+#searchrow form{
+    padding: 5px;
+}
+
+#searchrow input{
+    font-size: 16px;
+    padding: 3px;
+}
+
+#searchrow select{
+    margin-top: 7px;
+}
+
+#searchrow button{
+    margin: 4px;
+    cursor: pointer;
+    padding: 4px;
+}
+
+#searchrow button a{
+    margin: 5px;
+    color: black;
+}
+
+#registry-filter{
+    float: left;
+}
+
+#clear-filter{
+    float: right;
+}
+

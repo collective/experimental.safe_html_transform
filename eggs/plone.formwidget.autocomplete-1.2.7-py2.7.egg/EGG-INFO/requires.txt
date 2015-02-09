@@ -1,0 +1,3 @@
+setuptools
+z3c.formwidget.query
+plone.z3cform >= 0.7.4

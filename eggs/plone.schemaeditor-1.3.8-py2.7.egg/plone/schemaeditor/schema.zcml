@@ -1,0 +1,31 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <class class="zope.schema.Bool">
+    <implements interface=".schema.IBool" />
+  </class>
+
+  <class class="zope.schema.Float">
+    <implements interface=".schema.IFloat" />
+  </class>
+
+  <class class="zope.schema.Datetime">
+    <implements interface=".schema.IDatetime" />
+  </class>
+
+  <class class="zope.schema.Date">
+    <implements interface=".schema.IDate" />
+  </class>
+
+  <class class="zope.schema.Choice">
+    <implements interface=".schema.IChoice" />
+  </class>
+
+  <adapter
+      factory="z3c.form.browser.textlines.TextLinesFieldWidgetFactory"
+      for=".schema.ITextLinesField
+           zope.schema.interfaces.ITextLine
+           z3c.form.interfaces.IFormLayer"
+      />
+
+</configure>

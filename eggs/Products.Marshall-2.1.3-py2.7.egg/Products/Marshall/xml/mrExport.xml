@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<marshall-registry xmlns:tal="http://xml.zope.org/namespaces/tal">
+ <predicate
+    id="PREDICATE_ID"
+    title="PREDICATE_TITLE"
+    expression="PREDICATE_EXPRESSION"
+    component="PREDICATE_COMPONENT"
+    predicate_name="PREDICATE_NAME"
+    tal:repeat="pt context/listPredicates"
+    tal:attributes="id pt/id;
+                    title pt/title;
+                    expression pt/expression;
+                    component pt/component;
+                    predicate_name pt/predicate_name">
+  <xml-settings
+    tal:condition="pt/xml_settings|nothing"
+    tal:attributes="element-name pt/xml_settings/element_name;
+                    element-ns pt/xml_settings/element_ns;
+                    attr-name pt/xml_settings/attr_name;
+                    attr-ns pt/xml_settings/attr_ns;
+                    value pt/xml_settings/value"
+    />
+ </predicate>
+</marshall-registry>

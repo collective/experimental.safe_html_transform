@@ -1,0 +1,5 @@
+setuptools
+zope.container
+zope.lifecycleevent
+zope.schema
+zope.traversing

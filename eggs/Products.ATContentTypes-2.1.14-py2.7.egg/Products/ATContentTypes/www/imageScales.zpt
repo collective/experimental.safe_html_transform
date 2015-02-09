@@ -1,0 +1,39 @@
+<tal:header tal:replace="structure here/manage_page_header|nothing">Header</tal:header>
+<tal:message tal:define="manage_tabs_message options/manage_tabs_message | request/manage_tabs_message | nothing"
+    tal:replace="structure here/manage_tabs">Tabs</tal:message>
+<tal:body tal:define="submitted request/submitted  | nothing;
+    ">
+
+ <tal:form tal:condition="not: submitted">
+
+  <h3>Recreate image scales. </h3>
+
+  <p>Archetypes creates the scales of an image when the image data is uploaded.
+  If you have installed PIL later or if you have added/removed some scales you
+  have to create resp. recreate the scales. Please note that you shouldn't
+  remove a scale from the field definition. If you want to have a scale
+  removed set its value to <code>(0, 0)</code>.
+  </p>
+  
+  <p>This function recreates the scales of the <code>'image'</code> field of 
+  all portal types listed in <code>image_types</code> in the property tab.
+  Neither other portal types nor other fields are affected. The recreation
+  process is using a catalog query so make sure your catalog is up to date.
+  </p>
+  
+  <p><em>This may take a very long time!</em></p>
+ 
+  <form method="put" action="" tal:attributes="action string:manage_imageScales">
+    <input type="hidden" name="submitted" value="1" />
+    <input type="submit" name="submit" value="recreate" />
+  </form>
+
+ </tal:form>
+ <tal:recreating tal:condition="submitted">
+   <h3>Recreating image scales. </h3>
+
+   <pre tal:content="here/recreateImageScales"/>
+ </tal:recreating>
+
+</tal:body>
+<tal:footer tal:replace="structure here/manage_page_footer|nothing">footer</tal:footer>

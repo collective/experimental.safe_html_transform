@@ -1,0 +1,1 @@
+zope/proxy/_zope_proxy_proxy.so

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<export-steps>
+ <export-step id="portal_placeful_workflow"
+              handler="Products.CMFPlacefulWorkflow.exportimport.exportWorkflowPolicies"
+              title="Placeful Workflow Policies">
+   Export placeful workflow policies.
+ </export-step>
+</export-steps>

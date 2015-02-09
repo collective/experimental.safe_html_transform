@@ -1,0 +1,75 @@
+<td metal:define-macro="action_icon_cell"
+    tal:define="id action/id | action/name | string:unknown;
+                clean_id python:id.replace( ' ', '_' );
+                category action/category | string:uncategorized;
+                url action/url;
+                title action/title | id;
+               "
+    tal:attributes="title title;
+                    id string:${category}X${clean_id};
+                   " >
+    <a tal:define="icon  action/icon | nothing"
+        tal:attributes="href url;
+                        title title;
+                    "
+        ><img src="icon" width="16" height="16" border="0"
+            tal:attributes="src string:${portal_url}/${icon};
+                            alt title;
+                            " /></a>
+</td>
+
+<div metal:define-macro="horizontal_strip" >
+ <table class="mainActions" cellpadding="3" cellspacing="2" border="1">
+  <tr tal:define="atool    here/portal_actions;
+                  aitool   nocall: here/portal_actionicons;
+                  actions  python: aitool(atool.listFilteredActionsFor(here));
+                  oactions actions/object;
+                  factions actions/folder;
+                  wactions actions/workflow;
+                  gactions actions/global;
+                  nactions python: factions + oactions + gactions;
+                 ">
+
+   <tal:action tal:repeat="action nactions">
+    <td metal:use-macro="here/actionicons_macros/macros/action_icon_cell" />
+   </tal:action>
+
+    <td tal:content="wf_state"> Private </td>
+
+   <tal:action tal:repeat="action wactions">
+    <td metal:use-macro="here/actionicons_macros/macros/action_icon_cell" />
+   </tal:action>
+
+  </tr>
+ </table>
+</div>
+
+<div metal:define-macro="vertical_strip" >
+<table class="mainActions" cellpadding="3" cellspacing="2" border="1"
+       tal:define="atool    here/portal_actions;
+                   aitool   nocall: here/portal_actionicons;
+                   actions  python: aitool(atool.listFilteredActionsFor(here));
+                   oactions actions/object;
+                   factions actions/folder;
+                   wactions actions/workflow;
+                   gactions actions/global;
+                   nactions python: factions + oactions + gactions;
+                  ">
+
+ <tr tal:repeat="action nactions">
+  <td metal:use-macro="here/actionicons_macros/macros/action_icon_cell" />
+ </tr>
+
+ <tr>
+  <td tal:content="wf_state">
+    Private
+  </td>
+ </tr>
+
+ <tr tal:repeat="action wactions">
+  <td metal:use-macro="here/actionicons_macros/macros/action_icon_cell" />
+ </tr>
+
+</table>
+
+</div>

@@ -1,0 +1,26 @@
+Metadata-Version: 1.0
+Name: ZopeUndo
+Version: 2.12.0
+Summary: ZODB undo support for Zope2.
+Home-page: http://pypi.python.org/pypi/ZopeUndo
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        This package is used to support the Prefix object that Zope 2 uses for the
+        undo log. It is a separate package only to aid configuration management.
+        
+        This package is included in Zope 2. It can be used in a ZEO server to allow
+        it to support Zope 2's undo log , without pulling in all of Zope 2.
+        
+        Changelog
+        =========
+        
+        2.12.0 (2010-04-05)
+        -------------------
+        
+        - Released as separate package.
+        
+Platform: UNKNOWN

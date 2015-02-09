@@ -1,0 +1,27 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directives namespace="http://namespaces.zope.org/z3c">
+
+    <meta:directive
+        name="widgetTemplate"
+        schema=".zcml.IWidgetTemplateDirective"
+        handler=".zcml.widgetTemplateDirective"
+        />
+
+    <meta:directive
+        name="widgetLayout"
+        schema=".zcml.IWidgetTemplateDirective"
+        handler=".zcml.widgetLayoutTemplateDirective"
+        />
+
+    <meta:directive
+        name="objectWidgetTemplate"
+        schema=".zcml.IObjectWidgetTemplateDirective"
+        handler=".zcml.objectWidgetTemplateDirective"
+        />
+
+  </meta:directives>
+
+</configure>

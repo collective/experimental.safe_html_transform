@@ -1,0 +1,44 @@
+<configure
+  xmlns="http://namespaces.zope.org/zope"
+  xmlns:five="http://namespaces.zope.org/five"
+  xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+  i18n_domain="plone">
+
+  <five:registerPackage package="." initialize=".initialize" />
+
+  <include package="archetypes.querywidget" />
+  <include package="plone.app.contentlisting" />
+  <include package=".browser" />
+  
+  <genericsetup:registerProfile
+    name="default"
+    title="plone.app.collection"
+    directory="profiles/default"
+    description="Adds support for new style collections to Plone"
+    provides="Products.GenericSetup.interfaces.EXTENSION"
+    />
+
+  <!-- hide profiles for our widget/field dependencies -->
+  <utility
+    factory=".integration.HiddenProfiles"
+    name="plone.app.collection"
+    provides="Products.CMFPlone.interfaces.INonInstallable" />
+
+  <utility
+    factory=".integration.HiddenProfiles"
+    name="plone.app.collection"
+    provides="Products.CMFQuickInstallerTool.interfaces.INonInstallable" />
+
+  <permission
+    id="plone.app.collection.addCollection"
+    title="plone.app.collection: Add Collection"
+    />
+
+  <class class=".collection.Collection">
+    <require
+      permission="zope2.View"
+      interface=".interfaces.ICollection"
+      />
+  </class>
+
+</configure>

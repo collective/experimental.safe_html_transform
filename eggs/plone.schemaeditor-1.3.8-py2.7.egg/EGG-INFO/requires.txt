@@ -1,0 +1,16 @@
+setuptools
+Zope2
+zope.component
+zope.container
+zope.interface
+zope.lifecycleevent
+zope.schema
+zope.publisher
+z3c.form
+plone.z3cform
+plone.autoform
+
+[test]
+plone.app.dexterity
+plone.app.testing
+plone.app.robotframework

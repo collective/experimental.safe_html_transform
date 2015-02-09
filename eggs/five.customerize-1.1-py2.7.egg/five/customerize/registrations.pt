@@ -1,0 +1,87 @@
+<h1 tal:replace="structure context/manage_page_header" />
+<h1 tal:replace="structure context/manage_tabs" />
+
+<tal:var define="global registrations view/viewRegistrations" />
+
+<tal:if condition="registrations">
+<p class="form-help">This view template has been registered as a view
+in the following ways:</p>
+
+<form action="unregister"
+      tal:attributes="action string:${context/absolute_url}/unregister">
+<table cellspacing="0" cellpadding="2" border="0">
+  <tr class="list-header">
+    <td align="left" valign="top" width="16">&nbsp;</td>
+    <td><div class="form-label">For</div></td>
+    <td><div class="form-label">Request Type</div></td>
+    <td><div class="form-label">Name</div></td>
+  </tr>
+
+  <tr tal:repeat="reg registrations">
+    <td><input type="checkbox" name="index" value=""
+               tal:attributes="value repeat/reg/index" /></td>
+    <td><div class="list-item"
+             tal:content="python:reg.required[0].__identifier__">for</div></td>
+    <td><div class="list-item"
+             tal:content="python:reg.required[1].__identifier__">type</div></td>
+    <td><div class="list-item"
+             tal:content="reg/name">...</div></td>
+  </tr>
+
+  <tr>
+    <td></td>
+    <td colspan="3"><input type="submit" value="Unregister" /></td>
+  </tr>
+</table>
+</form>
+
+<p></p>
+
+</tal:if>
+<tal:else condition="not:registrations">
+<p class="form-help">This template is not registered as a view.</p>
+</tal:else>
+
+<p class="form-help">Register this template as a view:</p>
+
+<form action="register"
+      tal:attributes="action string:${context/absolute_url}/register">
+
+<table>
+  <tr>
+    <td><div class="form-label">For</div></td>
+    <td><select name="for_name" size="1">
+          <option tal:repeat="name view/getAllInterfaceNames"
+                  tal:content="name"
+                  tal:attributes="value name" />
+        </select></td>
+  </tr>
+
+  <tr>
+    <td><div class="form-label">Request Type</div></td>
+    <td><select name="type_name" size="1">
+          <option tal:repeat="name view/getRequestInterfaceNames"
+                  tal:content="name"
+                  tal:attributes="value name" />
+        </select></td>
+  </tr>
+
+  <tr>
+    <td><div class="form-label">Name</div></td>
+    <td><input type="text" name="name" size="30" /></td>
+  </tr>
+
+  <tr>
+    <td><div class="form-label">Comment</div></td>
+    <td><textarea name="comment" cols="30" rows="5"></textarea></td>
+  </tr>
+
+  <tr>
+    <td></td>
+    <td><input type="submit" value="Register" /></td>
+  </tr>
+</table>
+
+</form>
+
+<h1 tal:replace="structure context/manage_page_footer" />

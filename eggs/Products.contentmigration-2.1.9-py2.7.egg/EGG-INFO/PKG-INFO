@@ -1,0 +1,264 @@
+Metadata-Version: 1.1
+Name: Products.contentmigration
+Version: 2.1.9
+Summary: A generic content migration framework for Plone.
+Home-page: http://pypi.python.org/pypi/Products.contentmigration
+Author: Martin Aspeli (and others)
+Author-email: plone-developers@lists.sourceforge.net
+License: LGPL
+Description: Content migration utilities
+        ===========================
+        
+        by Martin Aspeli <optilude@gmx.net> and others
+        
+        Released under the GNU Lesser General Public License (LGPL) version 2.0
+        
+        This is a generic content migration framework, which should help you write
+        your own content migrations. It has no UI and no value on its own, but
+        makes it easy to write certain type of content migrations.
+        
+        This replaces the ATContentTypes migration framework, and provide three useful
+        extensions:
+        
+        * A CustomQueryWalker can be used to specify a more specific catalog query
+          for a walker to use (e.g. which content to actually migrate). This can
+          be used with any migrator.
+        
+        * A BaseInlineMigrator is similar to BaseMigrator, but does not migrate by
+          copying the old object to a temporary location, creating a new object and
+          applying migration methods. Instead, migration methods are applied in-place.
+          This simplifies the code significantly, because attributes, local roles etc.
+          does not need to be copied over.
+        
+          Note that whereas BaseMigrator works in terms of self.old and self.new as
+          the objects being migrated, BaseInlineMigrator only has a single object,
+          stored in self.obj. This can be used with any walker.
+        
+        * An extension of this class called FieldActionMigrator uses the
+          action-based migration framework for Archetypes fields, found in field.py.
+          Please refer to that file for full details, but briefly, you specify a list
+          of attributes to migrate at the storage level, instructing the migrator
+          whether to rename, transform, unset or change the storage for an attribute.
+        
+        Please see the docstrings in walker.py, migrator.py and field.py for full
+        details. For examples, see tests/cmtc.py and tests/testATFieldMigration.py.
+        
+        Changelog
+        =========
+        
+        2.1.9 (2014-09-07)
+        ------------------
+        
+        - Migrate translated items when plone.app.multilingual or LinguaPlone present.
+          [pbauer]
+        
+        2.1.8 (2014-04-14)
+        ------------------
+        
+        - Changed all old-style to new-style classes for easier method overloading from
+          derived classes.
+          [thet]
+        
+        
+        2.1.7 (2014-01-27)
+        ------------------
+        
+        - Nothing changed yet.
+        
+        
+        2.1.6 (2013-09-23)
+        ------------------
+        
+        - Unlock items with webdav.
+          [maurits]
+        
+        
+        2.1.5 (2013-07-15)
+        ------------------
+        
+        - Keep redirections from plone.app.redirect when migrating.
+          [maurits]
+        
+        
+        2.1.4 (2013-04-06)
+        ------------------
+        
+        - Default to position 0 if folder position is not assigned.
+          [kroman0, pbauer]
+        
+        
+        2.1.3 (2013-03-05)
+        ------------------
+        
+        - Modify UIDMigrator so that it also works for items which
+          provides IMutableUUID.
+          [pabo]
+        
+        
+        2.1.2 (2012-12-21)
+        ------------------
+        
+        - When Joe is the Creator of an object and Jane is the Owner, make
+          sure Joe stays the Creator after migrating.
+          [maurits]
+        
+        
+        2.1.1 (2012-04-15)
+        ------------------
+        
+        - Migrate marker interfaces.
+          Fixes http://dev.plone.org/ticket/11424
+          [maurits]
+        
+        - Migrate extension fields too (archetypes.schemaextender).
+          [maurits]
+        
+        - Use obj.__parent__ instead of obj getParentNode() for Zope trunk
+          compatibility.
+          [elro]
+        
+        2.1.0 (2011-10-06)
+        ------------------
+        
+        - Add support for a `limit` option for the catalog based walkers, so it only
+          tries to load up to `limit` items at a time, defaulting to no limit.
+          [hannosch]
+        
+        - Catch attribute errors during `brain.getObject` and log them instead of
+          breaking the upgrade.
+          [hannosch]
+        
+        2.0.3 (2011-08-11)
+        ------------------
+        
+        - Undo patch correctly
+          [jfroche]
+        
+        2.0.2 (2011-08-10)
+        ------------------
+        
+        - Fix migration for folder containing an object (which is often the case) by patching the 'notifyWorkflowCreated' method on WorkflowAware class
+          [jfroche]
+        
+        - Fix for folderish items, also use ATItemMigratorMixin
+          [jfroche]
+        
+        - Add local buildout config
+          [jfroche]
+        
+        - Use module name, not the full file path, to register with the logging module.
+          [mj]
+        
+        2.0.1 - 2010-12-08
+        ------------------
+        
+        - Unlock locked objects prior to migrating them.
+          [ggozad]
+        
+        2.0 - 2010-07-18
+        ----------------
+        
+        - No changes.
+        
+        2.0b1 - 2010-06-13
+        ------------------
+        
+        - Avoid deprecation warnings under Zope 2.13.
+          [hannosch]
+        
+        - Added support for archetypes.schemaextender >= 2.0 and disable the schema
+          cache during migrations.
+          [hannosch]
+        
+        2.0a3 - 2009-11-15
+        ------------------
+        
+        - Fix issue with my adjustment to the _createObjectByType function where the
+          portal_type wasn't getting set properly in Plone 3.
+          [davisagli]
+        
+        
+        2.0a2 - 2009-11-15
+        ------------------
+        
+        - Make the _createObjectByType function call the _constructInstance method
+          of the FTI, rather than trying to duplicate its logic.  This adds
+          compatibility with CMF 2.2.
+          [davisagli]
+        
+        
+        2.0a1 - 2009-11-14
+        ------------------
+        
+        - Avoid zope.app dependencies.
+          [hannosch]
+        
+        - Use Zope interfaces from `OFS` and `Archetypes`.
+          [witsch]
+        
+        
+        1.2 - 2009-08-09
+        ----------------
+        
+        - Fix tests to run on Plone 3.3.
+          [witsch]
+        
+        - Fix issue with leftover local role assignments for deleted users.
+          [pbugni, rossp]
+        
+        
+        1.1 - 2009-03-05
+        ----------------
+        
+        - Add missing imports in various places.
+          [wichert]
+        
+        - Fix a bug in the permission migration logic, which caused the Manager
+          role to gain all permissions.
+          [ivo, wichert]
+        
+        
+        1.0 - 2008-09-17
+        ----------------
+        
+        - Update documentation to fit the code.
+          [pbugni]
+        
+        - Modify CatalogWalker to root the search at the portal passed in. This
+          makes it possible to only migrate in parts of a site.
+          [wichert]
+        
+        - Correct path handling, cleanup classifiers, make short description short.
+          [wichert]
+        
+        - Use standard naming convention for the contentmigration package.
+          [wichert]
+        
+        - Be more graceful with schema mismatches.
+          [wichert]
+        
+        - Replaced deprecated transaction.commit(1) with
+          transaction.savepoint(optimistic=True).
+          [stonor]
+        
+        
+        1.0b4 - 2007-06-11
+        ------------------
+        
+        - Add import for os so egg can be built.
+          [derek_richardson]
+        
+        - Added missing `configure.zcml`.
+          [witsch]
+        
+        - Reorganize contentmigration trunk for eggification. If you are using the
+          trunk as a product, pin to the previous revision or change your external
+          to use src/Products/contentmigration.
+          [derek_richardson]
+        
+        - First eggified release.
+        
+Keywords: Plone Archetypes ATContentTypes
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python

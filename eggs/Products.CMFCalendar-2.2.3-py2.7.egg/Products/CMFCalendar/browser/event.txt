@@ -1,0 +1,63 @@
+Event Views
+-----------
+
+Set up site, user and Event.
+
+    >>> from zope.site.hooks import setSite
+    >>> setSite(app.site)
+    >>> uf = app.site.acl_users
+    >>> _ignored = uf._doAddUser('mgr', 'mgrpw', ['Manager'], [])
+    >>> from AccessControl.SecurityManagement import newSecurityManager
+    >>> newSecurityManager(None, uf.getUser('mgr').__of__(uf))
+    >>> id = app.site.invokeFactory(type_name='Event', id='myEvent')
+
+Create the browser object we'll be using.
+
+    # BBB for Zope 2.12
+    >>> try:
+    ...     from Testing.testbrowser import Browser
+    ... except ImportError:
+    ...     from Products.Five.testbrowser import Browser
+
+    >>> browser = Browser()
+    >>> browser.handleErrors = False
+    >>> browser.addHeader('Authorization', 'Basic mgr:mgrpw')
+
+Use the edit form with invalid input.
+
+    >>> browser.open('http://localhost/site/myEvent/@@edit.html')
+    >>> browser.getControl('[[cmf_calendar][From]]').value = 'a'
+    >>> browser.getControl('[[cmf_default][Change]]').click()
+    >>> '[[zope][There were errors]]' in browser.contents
+    True
+    >>> '[[zope][Invalid datetime data]]' in browser.contents
+    True
+
+Use the edit form with valid input.
+
+    >>> browser.getControl('[[cmf_calendar][From]]').value = '2006 11 6  12:00:00 '
+    >>> browser.getControl('[[cmf_default][Change]]').click()
+    >>> '[[zope][There were errors]]' in browser.contents
+    False
+
+Look at the result:
+
+    >>> browser.open('http://localhost/site/myEvent/@@view.html')
+    >>> '2006 11 6  12:00:00 ' in browser.contents
+    True
+
+Validate iCal
+    >>> browser.open('http://localhost/site/myEvent/@@view.ics')
+    >>> print browser.headers
+    Status: 200...
+    Content-Disposition: filename=cmf.ics
+    Content-Length: 0
+    Content-Type: text/iCal
+    
+Validate vCal
+    >>> browser.open('http://localhost/site/myEvent/@@view.vcs')
+    >>> print browser.headers
+    Status: 200...
+    Content-Disposition: filename=cmf.vcs
+    Content-Length: 0
+    Content-Type: text/vCal

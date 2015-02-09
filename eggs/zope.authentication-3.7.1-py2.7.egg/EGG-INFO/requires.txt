@@ -1,0 +1,7 @@
+setuptools
+zope.browser
+zope.component>=3.6.0
+zope.i18nmessageid
+zope.interface
+zope.schema
+zope.security

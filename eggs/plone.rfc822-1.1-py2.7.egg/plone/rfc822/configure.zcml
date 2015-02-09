@@ -1,0 +1,70 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="plone.rfc822">
+    
+    <!-- Standard IFromUnicode marshaler -->
+    <adapter factory=".defaultfields.UnicodeFieldMarshaler" />
+    
+    <!-- Text, TextLine, Password, SourceText may be ASCII safe -->
+    <adapter
+        for="* zope.schema.interfaces.IText"
+        factory=".defaultfields.UnicodeValueFieldMarshaler"
+        />
+
+    <!-- Bool and Choice omit to declare that they supports IFromUnicode in zope.schema 3.3 -->
+    <adapter
+        for="* zope.schema.interfaces.IBool"
+        factory=".defaultfields.ASCIISafeFieldMarshaler"
+        />
+    <adapter
+        for="* zope.schema.interfaces.IChoice"
+        factory=".defaultfields.UnicodeValueFieldMarshaler"
+        />
+    
+    <!-- Int, Float, and Decimal are ASCII safe -->
+    <adapter
+        for="* zope.schema.interfaces.IInt"
+        factory=".defaultfields.ASCIISafeFieldMarshaler"
+        />
+    <adapter
+        for="* zope.schema.interfaces.IFloat"
+        factory=".defaultfields.ASCIISafeFieldMarshaler"
+        />
+    <adapter
+        for="* zope.schema.interfaces.IDecimal"
+        factory=".defaultfields.ASCIISafeFieldMarshaler"
+        />
+        
+    <!-- Somehow this is necessary because these are in _bootstrapfields -->
+    <adapter
+        for="* zope.schema.Text"
+        factory=".defaultfields.UnicodeValueFieldMarshaler"
+        />
+    <adapter
+        for="* zope.schema.TextLine"
+        factory=".defaultfields.UnicodeValueFieldMarshaler"
+        />
+    <adapter
+        for="* zope.schema.Password"
+        factory=".defaultfields.UnicodeValueFieldMarshaler"
+        />
+    <adapter
+        for="* zope.schema.Int"
+        factory=".defaultfields.ASCIISafeFieldMarshaler"
+        />
+        
+    <adapter factory=".defaultfields.BytesFieldMarshaler" />
+    <adapter factory=".defaultfields.DatetimeMarshaler" />
+    <adapter factory=".defaultfields.DateMarshaler" />
+    <adapter factory=".defaultfields.TimedeltaMarshaler" />
+    <adapter factory=".defaultfields.CollectionMarshaler" />
+    
+    <!-- Configure plone.supermodel handler if available -->
+    <utility zcml:condition="installed plone.supermodel"
+        factory=".supermodel.PrimaryFieldMetadataHandler"
+        name="plone.rfc822.marshal"
+        />
+
+</configure>

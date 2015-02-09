@@ -1,0 +1,416 @@
+Metadata-Version: 1.1
+Name: plone.app.iterate
+Version: 2.1.12
+Summary: check-out/check-in staging for Plone
+Home-page: http://pypi.python.org/pypi/plone.app.iterate
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: Summary
+        =======
+        
+        iterate is a Plone add-on that allows one to utilize a checkin / checkout
+        procedure for content editing. It integrates in versioning, locking, and
+        utilizes Zope technology like adapters and events to allow for easy
+        customization.
+        
+        Features
+        ========
+        
+          - versioning utilizing cmf editions
+          - locking using zope dav locks
+          - pluggable behavior for policies via adapters
+          - observable behavior via events
+          - specialized handling for archetypes references
+          - simple, clean integration with the plone user interface
+        
+        Use Cases
+        =========
+        
+        iterate was designed to solve/enable the following use cases.
+        
+        Collaborative Document Editing Scenario
+        ---------------------------------------
+        
+        Workgroup or person working on a document, the ability to checkout and lock a document
+        allows for a editing cycle, without concern of overwrites, and with an audit trail of
+        versions.
+        
+        Publish/Modify/Review Cycles on a CMS
+        -------------------------------------
+        
+        A common theme in content management, is publishing a web document, and then needing
+        to revise it but not to change the published web content, till the modified document
+        has undergone a review cycle.
+        
+        Iterate Lifecycle via the User Interface
+        ========================================
+        
+        iterate integrates with the plone user interface mainly through the actions menu.
+        it adds three conditional actions to the menu.. checkout, checkin, and cancel checkout. 
+        
+        checkout form
+        -------------
+        
+        on this form a user is asked to which location they wish to checkout
+        the current content, the vocabulary of checkouts is overridable via template
+        customization and is currently the current folder, and the user's home
+        folder. if the content is not yet versioned, versioning is applied and
+        a new version is created before the checkout is performed. an adapter
+        is utilized to perform the checkout mechanics and an object lifecycle 
+        event is generated with the baseline ( origin ) and checkout as
+        attributes. the adapter is responsible for effecting a copy of the
+        content to the checkout location and taking a lock on the origin content.
+        whether this form and action are active on a given piece of content
+        depends on the iterate policy adapter found for this content.
+        
+        checkouts have some system additional properties, versioning and workflow.
+        they can be versioned independently of the baseline, with only changes 
+        from the latest version being merged into the baseline on
+        checkin. they can undergoe separate workflows different from the
+        baseline content. (this last feature requires some customization see 
+        docs/workflow.rst ).
+        
+        checkout status form
+        --------------------
+        
+        visually checkouts are distinguished by an extra document icon (next
+        to sendto, and rss links). clicking on this icon will lead to a
+        checkout status page. which allows for looking at information
+        regarding the checkout itself, such as when the checkout was
+        performed and by whom. 
+        
+        checkin form
+        ------------
+        
+        a user is asked for a checkin message. on checkin the working copy is
+        merged into the baseline, and a new version of the baseline is
+        created, and the baseline is unlocked.
+        
+        cancel checkout
+        ---------------
+        
+        a confirmation dialog is displayed, if the checkout is canceled the
+        working copy is destroyed, and the baseline is unlocked.
+        
+        
+        Credits
+        =======
+        
+         Kapil Thangavelu <hazmat@objectrealms.net> 
+        
+         Benjamin Saller <bcsaller@objectrealms.net>
+        
+         icons from tortoisesvn project ( http://tigris.org )
+        
+        License
+        =======
+        
+         GPL, see license.txt for details
+        
+        Changelog
+        =========
+        
+        2.1.12 (2014-02-19)
+        -------------------
+        
+        - Information messages can be hidden from user who checked out content when
+          using a placeful workflow, see: https://dev.plone.org/ticket/13852
+          [anthonygerrard]
+        
+        - Replaced the "Locked" label with "Warning"
+          [rristow]
+        
+        2.1.11 (2014-01-27)
+        -------------------
+        
+        - Nothing changed yet.
+        
+        
+        2.1.10 (2013-03-05)
+        -------------------
+        
+        - Fixed error on checking in the working copy of an object linked in it's
+          parent rich text field, see: https://dev.plone.org/ticket/13462
+          [radekj]
+        
+        
+        2.1.9 (2013-01-13)
+        ------------------
+        
+        - Nothing changed yet.
+        
+        
+        2.1.8 (2012-10-03)
+        ------------------
+        
+        - Unmark both the baseline and the working copy on checkin so that dexterity
+          content is properly unmarked.
+          [cewing]
+        
+        
+        2.1.7 (2012-08-04)
+        ------------------
+        
+        - Allow browser view templates to be defined and thus overridden in ZCML.
+          [rpatterson]
+        
+        
+        2.1.6 (2012-06-29)
+        ------------------
+        
+        - Import events from zope.lifecycleevent.
+          [hannosch]
+        
+        - Fix permissions check in parent folder working copy locator.
+          [mitchellrj]
+        
+        
+        2.1.5 (2012-03-16)
+        ------------------
+        
+        - Don't declare IIterateAware as an extension of Archetypes' IReferenceable,
+          because there are other implementations (such as the one for Dexterity)
+          that don't use Archetypes references.
+          [davisagli]
+        
+        - Make sure permissions of working copy workflow get applied when checking
+          out content, fixes http://dev.plone.org/ticket/12780
+          [anthonygerrard]
+        
+        
+        2.1.4 (2011-11-24)
+        ------------------
+        
+        - Preserve content contents UIDs when checking a folder back in.  This
+          prevents breaking linking by UID in the editor.
+          [rossp]
+        
+        - Fix a problem with items added to a checked out folder not being
+          visible after checkin.  Fixes #12257.
+          [rossp]
+        
+        - Preserve the folder order position from the item originally checked
+          out when checking it back in.
+          [rossp]
+        
+        - Allow user of check'd out content to also see the checkout info so
+          a contributor can see that he already has a page checked out
+          easily.
+          [vangheem]
+        
+        
+        2.1.3 (2011-08-31)
+        ------------------
+        
+        - Remove rogue div tag from diff.pt. This fixes
+          http://dev.plone.org/plone/ticket/11249
+          [danjacka]
+        
+        2.1.2 - 2011-06-02
+        ------------------
+        
+        - Include Products.CMFCore for Plone 4.1 compatibility.
+          [thomasdesvenain, WouterVH]
+        
+        2.1.1 - 2011-05-13
+        ------------------
+        
+        - Fixed an issue where our subscriber always expected a coci_created attribute
+          to be available at the policy.
+          [erico_andrei]
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        - Viewing a working copy or an original of a checkout does not raise
+          AttributeError anymore. Anyway, we log a warning because a Manager should do
+          something about this. Fixes http://dev.plone.org/plone/ticket/8723
+          [glenfant]
+        
+        
+        2.1 - 2011-02-25
+        ----------------
+        
+        - No changes.
+        
+        
+        2.1a2 - 2011-02-14
+        ------------------
+        
+        - Fixed stale catalog entries appearing for references of merged
+          content.
+          [maurits]
+        
+        - Fixed minor test failure for ``_doAddUser``.
+          [maurits]
+        
+        
+        2.1a1 - 2011-01-18
+        ------------------
+        
+        - Test Products.CMFPlone version to set default permission, keeping 4.0
+          compatibility - the next release can be 2.0.1 again.
+          [elro]
+        
+        - Add autoinclude entry point.
+          [elro]
+        
+        - Update permission defaults for Plone 4.1's Site Administrator role.
+          [elro]
+        
+        
+        2.0 - 2010-07-18
+        ----------------
+        
+        - Fixed the info viewlet to show only the date, and not the time.
+          The issue was introduced because ulocalized_time changed its parameters order.
+          This closes http://dev.plone.org/plone/ticket/10759.
+          [vincentfretin]
+        
+        - Update license to GPL version 2 only.
+          [hannosch]
+        
+        - Add id="content" for the content divs. Else theming with deliverance gets
+          harder.
+          [do3cc]
+        
+        
+        2.0b2 - 2010-06-03
+        ------------------
+        
+        - Add naive upgrade step that reinstalls the product.
+          [davisagli]
+        
+        - Set action icons via icon_expr on the actions, to avoid deprecation warnings
+          in Plone 4.
+          [davisagli]
+        
+        
+        2.0b1 - 2010-02-17
+        ------------------
+        
+        - Declare all package dependencies.
+          [hannosch]
+        
+        - Updated diff.pt to follow recent markup conventions.
+          References #9981
+          [spliter]
+        
+        
+        1.2.5 - 2010-01-03
+        ------------------
+        
+        - Fixed an undefined ``current_page_url`` variable in diff.pt. This closes
+          http://dev.plone.org/plone/ticket/9819.
+          [hannosch]
+        
+        
+        1.2.4 - 2008-12-21
+        ------------------
+        
+        - Added profiles/default/metadata.xml (version 120: lets leave plenty room in
+          case any profile changes are needed on the 1.1 branch).
+          [maurits]
+        
+        - Avoid a test dependency on quick installer.
+          [hannosch]
+        
+        - Use our own PloneMessageFactory. We don't depend on CMFPlone anymore.
+          [hannosch]
+        
+        - Specified package dependencies.
+          [hannosch]
+        
+        - Made the tests independent of default content.
+          [hannosch]
+        
+        
+        1.2.3 - 2008-11-14
+        ------------------
+        
+        - Fix assumption in control view: not every context object is
+          IReferenceable. This fixes http://dev.plone.org/plone/ticket/8737
+          [nouri]
+        
+        
+        1.2.2 - 2008-11-13
+        ------------------
+        
+        - Fix action conditions for the nth time; this time it's an
+          over-ambitious "Cancel check-out" permission.  This fixes
+          http://dev.plone.org/plone/ticket/8735
+          [nouri]
+        
+        
+        1.2.1 - 2008-11-11
+        ------------------
+        
+        - Refine permissions fix from 1.2.0 and make tests pass again:
+        
+          Don't require Modify Portal Content (MPC) permission on the
+          original to check out, which was omitted in the fix for 1.2.0.
+        
+          Don't require MPC on the original for canceling of checkout, only
+          require it on the working copy.
+          [nouri]
+        
+        - Fix missing internationalization (#8608 thanks to Vincent Fretin)
+          [encolpe]
+        
+        
+        1.2.0 - 2008-10-24
+        ------------------
+        
+        - Allow users without modify content permissions (but with the iterate
+          check out permission) to check out items, and only allow them to
+          check in back again only when they have modify content permissions.
+          [nouri]
+        
+        
+        1.1.5 - 2008-08-18
+        ------------------
+        
+        - Fixed typo in subscribers/workflow.py. This fixes
+          https://dev.plone.org/plone/ticket/8035.
+          [dunlapm]
+        
+        - Added i18n of status messages. This fixes part of
+          http://dev.plone.org/plone/ticket/8022.
+          [naro]
+        
+        
+        1.1.0 - 2008-04-20
+        ------------------
+        
+        - Fixed dodgy test in test_iterate.py that was dependent on semantics of
+          default workflow.
+          [optilude]
+        
+        - Fixed i18n markup and updated some messages. This closes
+          http://dev.plone.org/plone/ticket/7958.
+          [hannosch]
+        
+        - Updated i18n:domain in templates to the plone domain. There's no need for a
+          iterate domain.
+          [hannosch]
+        
+        - Use README.txt and HISTORY.txt for the package's long description.
+          [wichert]
+        
+        - Remove unneeded initialize method from __init__
+          [wichert]
+        
+        
+        1.0 - 2007-08-17
+        ----------------
+        
+        - First release
+        
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

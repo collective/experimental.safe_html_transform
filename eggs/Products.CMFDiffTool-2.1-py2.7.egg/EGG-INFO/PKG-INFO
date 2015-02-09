@@ -1,0 +1,241 @@
+Metadata-Version: 1.1
+Name: Products.CMFDiffTool
+Version: 2.1
+Summary: Diff tool for Plone
+Home-page: http://pypi.python.org/pypi/Products.CMFDiffTool
+Author: Brent Hendricks
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL
+Description: Overview
+        ========
+        
+        Diff tool for Plone.
+        
+        Dexterity
+        ---------
+        
+        To enable versioning for a Dexterity content type you need to:
+        
+        1. Install `plone.app.versioningbehavior`_ and use it on your content type.
+        2. Enable versioning for the type in the types control panel.
+        3. Install this package.
+        4. Go to the ``portal_diff`` tool ZMI page.
+        5. Add ``Compound Diff for Dexterity types`` for your content type. ``Field name`` can be anything,
+           e.g: "any".
+        
+        You can enable versioning on Dexterity content types without these
+        steps, but then you'll have to add the correct "diff type" for each
+        field of your content type.
+        
+        .. References
+        .. _`Products.CMFDiffTool`: http://pypi.python.org/pypi/Products.CMFDiffTool
+        .. _Dexterity: http://pypi.python.org/pypi/plone.app.dexterity
+        .. _`plone.app.versioningbehavior`: http://pypi.python.org/pypi/plone.app.versioningbehavior
+        
+        Changelog
+        =========
+        
+        2.1 (2013-05-26)
+        ----------------
+        
+        - Nothing changed yet.
+        
+        
+        2.0.2 (2013-03-05)
+        ------------------
+        
+        - Merge Rafael Oliveira's (@rafaelbco) Dexterity support from
+          collective.dexteritydiff.
+          [rpatterson]
+        
+        
+        2.0.1 (2012-09-01)
+        ------------------
+        
+        - Adjust test assertions to match new diff output in Python 2.7.
+          [hannosch]
+        
+        2.0 - 2010-07-15
+        ----------------
+        
+        - Make TextDiff more defensive in parsing. This fixes
+          http://dev.plone.org/plone/ticket/10716 and
+          http://dev.plone.org/plone/ticket/10737.
+          [davidblewett]
+        
+        2.0b3 - 2010-05-20
+        ------------------
+        
+        - Added filename to BinaryDiff, TextDiff and CMFDTHtmlDiff.
+          [davidblewett]
+        
+        - Added i18n support for filename.
+          [davidblewett]
+        
+        - Updated code + test cases to use os.linesep instead of hard-coding them.
+          [davidblewett]
+        
+        - Updated TextDiff to use the splitlines string method instead of
+          splitting on a hard-coded value.
+          [davidblewett]
+        
+        - Fix test failure as a result of string field diff assignment change.
+          [alecm]
+        
+        2.0b2 - 2010-04-28
+        ------------------
+        
+        - Added inline diff view for simple text fields.
+          [alecm]
+        
+        - Added blob support to ATCompoundDiff.
+          [davidblewett]
+        
+        
+        2.0b1 - 2009-12-27
+        ------------------
+        
+        - Added missing test dependency.
+          [hannosch]
+        
+        2.0a1 - 2009-11-14
+        ------------------
+        
+        - Use unicode in diff generation, now that Python's difflib supports it.
+          [alecm]
+        
+        - Adjusted interface test to zope.interface-style interfaces.
+          [hannosch]
+        
+        - Use new-style utility setup for portal_diff instead of the toolset handling.
+          [hannosch]
+        
+        - Added the z3c.autoinclude entry point so this package is automatically loaded
+          on Plone 3.3 and above.
+          [hannosch]
+        
+        - Add encoding declaration in python files
+          [encolpe]
+        
+        - Removed the persistent version of the changeset type.
+          [hannosch]
+        
+        - Declare package dependencies and fixed deprecation warnings for use
+          of Globals.
+          [hannosch]
+        
+        - Added GS import step registration to the product. It was only registered
+          as part of the CMFPlone base profile.
+          [hannosch]
+        
+        - Use the real BadRequest exception instead of relying on a string exception.
+          [hannosch]
+        
+        - Purged old Zope 2 Interface interfaces for Zope 2.12 compatibility.
+          [elro]
+        
+        0.5.2 - 2009-07-08
+        ------------------
+        - Fix #9355: Support generalized schema extension for AT fields.
+          [alecm]
+        
+        0.5.1 - 2009-06-19
+        ------------------
+        - Fix #9092: Support archetypes schema extension for ATCompoundDiff.
+          [alecm]
+        
+        0.5 - 2009-05-16
+        ----------------
+        
+        - Fix #9108: EncodingDecodeError in TextDiff.html_diff
+          [encolpe]
+        
+        0.5b1 - 2009-03-07
+        ------------------
+        
+        - Move CMF skin layer registration to zcml.
+          [wichert]
+        
+        - Move GenericSetup step registration to zcml.
+          [wichert]
+        
+        0.4 - 2008-10-06
+        ----------------
+        
+        - Switch to egg-based releases.
+          [hannosch]
+        
+        - Added GS import step registration to the product. It was only registered
+          as part of the CMFPlone base profile.
+          [hannosch]
+        
+        0.3.6 - 2008-04-20
+        ------------------
+        
+        - Added protection against missing diff_tool in the exportimport handler.
+          [hannosch]
+        
+        - Added metadata.xml file to the profile.
+          [hannosch]
+        
+        0.3.5 - 2007-12-02
+        ------------------
+        
+        - Don't assume there's a portal_type for objects.
+          Fixes http://dev.plone.org/plone/ticket/7295
+          [alecm]
+        
+        - Fixed issue causing diffs to break for folders that switched between
+          inside and outside ref modifiers.
+          [alecm]
+        
+        - Make ChangeSet compatible with CMF trunk.
+          [wiggy]
+        
+        - Updated componentregisty.xml to new style.
+          [hannosch]
+        
+        0.3.4 - 2007-06-08
+        ------------------
+        
+        - Fixed i18n markup in at_changeset.pt.
+          [hannosch]
+        
+        0.3.3 - 2007-03-05
+        ------------------
+        
+        - Removed default config for ATCT types, it goes in Plone now
+          [alecm]
+        
+        0.3.2 - 2007-03-05
+        ------------------
+        
+        - Added default config for ATCT types
+          [alecm]
+        
+        0.3.1 - 2007-02-09
+        ------------------
+        
+        - Removed useless status message.
+          [hannosch]
+        
+        - Added ZCML layer setup for tests
+          [alecm]
+        
+        0.3 - 2006-10-02
+        ----------------
+        
+        - Product installation is now based on a GenericSetup extension profile.
+          [hannosch]
+        
+        - Code modernization for Python 2.4 / CMF 1.6.
+          [hannosch]
+        
+        - Initial version.
+          [brentmh]
+        
+        
+        
+Keywords: Diff Plone
+Platform: UNKNOWN
+Classifier: Framework :: Plone

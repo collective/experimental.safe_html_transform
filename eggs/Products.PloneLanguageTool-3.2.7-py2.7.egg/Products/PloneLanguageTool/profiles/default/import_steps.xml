@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<import-steps>
+ <import-step id="languagetool" version="20070615-01"
+           handler="Products.PloneLanguageTool.exportimport.importLanguageTool"
+           title="Plone Language Tool">
+  <dependency step="toolset"/>
+  Import language settings.
+ </import-step>
+</import-steps>
+

@@ -1,0 +1,21 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <include package="zope.traversing" />
+
+  <adapter
+      for="*"
+      factory="Products.Five.traversable.FiveTraversable"
+      provides="zope.traversing.interfaces.ITraversable"
+      />
+
+  <adapter
+      for="*"
+      factory="zope.traversing.adapters.Traverser"
+      provides="zope.traversing.interfaces.ITraverser"
+      />
+
+  <class class="ZPublisher.HTTPRequest.HTTPRequest">
+      <implements interface="zope.publisher.interfaces.browser.IBrowserRequest" />
+  </class>
+
+</configure>

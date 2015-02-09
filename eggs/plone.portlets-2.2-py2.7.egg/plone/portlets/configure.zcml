@@ -1,0 +1,20 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+    <include package="zope.annotation" />
+    
+    <adapter factory=".assignable.localPortletAssignmentMappingAdapter" />
+    <adapter factory=".assignable.LocalPortletAssignmentManager" />
+    <adapter factory=".assignable.BlockingLocalPortletAssignmentManager" />
+
+    <adapter factory=".retriever.PortletRetriever" />
+    <adapter factory=".retriever.PlacelessPortletRetriever" />
+    
+    <adapter factory=".manager.PortletManagerRenderer" />
+
+    <adapter factory=".settings.portletAssignmentSettingsFactory"/>
+
+    <subscriber handler=".events.dispatchToComponent" />
+    <subscriber handler=".events.registerPortletManagerRenderer" />
+    <subscriber handler=".events.unregisterPortletManagerRenderer" />
+
+</configure>

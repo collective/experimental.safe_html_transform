@@ -1,0 +1,39 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+           i18n_domain="cmfeditions">
+
+  <genericsetup:importStep
+      name="cmfeditions_various"
+      handler="Products.CMFEditions.setuphandlers.importVarious"
+      title="Various CMFEditions Settings"
+      description="CMFEditions specific settings">
+    <depends name="toolset" />
+    <depends name="typeinfo" />
+  </genericsetup:importStep>
+
+
+  <adapter
+      factory=".repository.RepositoryToolXMLAdapter"
+      provides="Products.GenericSetup.interfaces.IBody"
+      for="Products.CMFEditions.interfaces.IRepository.IRepositoryTool
+           Products.GenericSetup.interfaces.ISetupEnviron"
+      />
+
+  <genericsetup:importStep
+      name="repositorytool"
+      title="CMFEditions Repository Tool"
+      description="Import repository tool's settings."
+      handler=".repository.importRepositoryTool">
+    <depends name="toolset" />
+    <depends name="typeinfo" />
+    <depends name="cmfeditions_various" />
+  </genericsetup:importStep>
+
+  <genericsetup:exportStep
+      name="repositorytool"
+      title="CMFEditions Repository Tool"
+      description="Export repository tool's settings."
+      handler=".repository.exportRepositoryTool"
+      />
+
+</configure>

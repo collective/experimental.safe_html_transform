@@ -1,0 +1,33 @@
+Metadata-Version: 1.0
+Name: Products.OFSP
+Version: 2.13.2
+Summary: General Zope 2 help screens.
+Home-page: http://pypi.python.org/pypi/Products.OFSP
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        OFSP provides the general Zope 2 help.
+        
+        Changelog
+        =========
+        
+        2.13.2 (2010-07-25)
+        -------------------
+        
+        - Moved the registration of OFS types back into this packages `initialize`
+          function to avoid test setup problems with installPackage in ZopeTestCase.
+        
+        2.13.1 (2010-07-11)
+        -------------------
+        
+        - Added a ``configure.zcml`` to automatically load the OFS package.
+        
+        2.13.0 (2010-07-10)
+        -------------------
+        
+        - Released as separate package.
+        
+Platform: UNKNOWN

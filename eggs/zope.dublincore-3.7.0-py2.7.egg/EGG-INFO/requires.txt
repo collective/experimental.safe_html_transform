@@ -1,0 +1,13 @@
+setuptools
+pytz
+zope.component
+zope.datetime
+zope.interface
+zope.lifecycleevent
+zope.location
+zope.schema
+zope.security
+
+[test]
+zope.testing
+zope.annotation

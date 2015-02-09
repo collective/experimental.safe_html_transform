@@ -1,0 +1,5 @@
+setuptools
+AccessControl
+transaction
+Zope2 >= 2.13.0a1
+zope.component

@@ -1,0 +1,225 @@
+Metadata-Version: 1.1
+Name: plone.protect
+Version: 2.0.2
+Summary: Security for browser forms
+Home-page: http://pypi.python.org/pypi/plone.protect
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: BSD
+Description: Introduction
+        ============
+        
+        This package contains utilities that can help to protect parts of Plone
+        or applications build on top of the Plone framework.
+        
+        
+        1. Restricting to HTTP POST
+        ===========================
+        
+        a) Using decorator
+        ------------------
+        
+        If you only need to allow HTTP POST requests you can use the *PostOnly*
+        checker::
+        
+          from plone.protect import PostOnly
+          from plone.protect import protect
+        
+          @protect(PostOnly)
+          def manage_doSomething(self, param, REQUEST=None):
+              pass
+        
+        This checker only operators on HTTP requests; other types of requests
+        are not checked.
+        
+        b) Passing request to a function validator
+        ------------------------------------------
+        
+        Simply::
+        
+            from plone.protect import PostOnly
+        
+            ...
+            PostOnly(self.context.REQUEST)
+            ...
+        
+        2. Form authentication (CSRF)
+        =============================
+        
+        A common problem in web applications is Cross Site Request Forgery or CSRF.
+        This is an attack method in which an attacker tricks a browser to do a HTTP
+        form submit to another site. To do this the attacker needs to know the exact
+        form parameters. Form authentication is a method to make it impossible for an
+        attacker to predict those parameters by adding an extra authenticator which
+        can be verified.
+        
+        Generating the token
+        --------------------
+        
+        To use the form authenticator you first need to insert it into your form.
+        This can be done using a simple TAL statement inside your form::
+        
+          <span tal:replace="structure context/@@authenticator/authenticator"/>
+        
+        this will produce a HTML input element with the authentication information.
+        
+        Validating the token
+        --------------------
+        
+        a) ZCA way
+        **********
+        
+        Next you need to add logic somewhere to verify the authenticator. This
+        can be done using a call to the authenticator view. For example::
+        
+           authenticator=getMultiAdapter((context, request), name=u"authenticator")
+           if not authenticator.verify():
+               raise Unauthorized
+        
+        b) Using decorator
+        ******************
+        
+        You can do the same thing more conveniently using the ``protect`` decorator::
+        
+          from plone.protect import CheckAuthenticator
+          from plone.protect import protect
+        
+          @protect(CheckAuthenticator)
+          def manage_doSomething(self, param, REQUEST=None):
+              pass
+        
+        c) Passing request to a function validator
+        ******************************************
+        
+        Or just::
+        
+            from plone.protect import CheckAuthenticator
+        
+            ...
+            CheckAuthenticator(self.context.REQUEST)
+            ...
+        
+        Protect decorator
+        =================
+        
+        The most common way to use plone.protect is through the ``protect``
+        decorator. This decorator takes a list of *checkers* as parameters: each
+        checker will check a specific security aspect of the request. For example::
+        
+          from plone.protect import protect
+          from plone.protect import PostOnly
+        
+          @protect(PostOnly)
+          def SensitiveMethod(self, REQUEST=None):
+              # This is only allowed with HTTP POST requests.
+        
+        This **relies** on the protected method having a parameter called **REQUEST (case sensitive)**.
+        
+        Customized Form Authentication
+        -------------------------------
+        
+        If you'd like use a different authentication token for different forms,
+        you can provide an extra string to use with the token::
+        
+          <tal:authenticator tal:define="authenticator context/@@authenticator">
+            <span tal:replace="structure python: authenticator.authenticator('a-form-related-value')"/>
+          </tal:authenticator>
+        
+        To verify::
+        
+          authenticator=getMultiAdapter((context, request), name=u"authenticator")
+          if not authenticator.verify('a-form-related-value'):
+              raise Unauthorized
+        
+        With the decorator::
+          
+          from plone.protect import CustomCheckAuthenticator
+          from plone.protect import protect
+        
+          @protect(CustomCheckAuthenticator('a-form-related-value'))
+          def manage_doSomething(self, param, REQUEST=None):
+              pass
+        
+        Changelog
+        =========
+        
+        2.0.2 (2012-12-09)
+        ------------------
+        
+        - Use constant time comparison to verify the authenticator. This is part of the
+          fix for https://plone.org/products/plone/security/advisories/20121106/23
+          [davisagli]
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        - Add ability to customize the token created.
+          [vangheem]
+        
+        
+        2.0 - 2010-07-18
+        ----------------
+        
+        - Update license to BSD following board decision.
+          http://lists.plone.org/pipermail/membership/2009-August/001038.html
+          [elro]
+        
+        2.0a1 - 2009-11-14
+        ------------------
+        
+        - Removed deprecated AuthenticateForm class and zope.deprecation dependency.
+          [hannosch]
+        
+        - Avoid deprecation warning for the sha module in Python 2.6.
+          [hannosch]
+        
+        - Specify package dependencies
+          [hannosch]
+        
+        1.1 - 2008-06-02
+        ----------------
+        
+        - Add an optional GenericSetup profile to make it easier to install
+          plone.protect.
+          [mj]
+        
+        1.0 - 2008-04-19
+        ----------------
+        
+        - The protect decorator had a serious design flaw which broke it. Added
+          proper tests for it and fixed the problems.
+          [wichert]
+        
+        1.0rc1 - 2008-03-28
+        -------------------
+        
+        - Rename plone.app.protect to plone.protect: there is nothing Plone-specific
+          about the functionality in this package and it really should be used outside
+          of Plone as well.
+          [wichert]
+        
+        - Made utils.protect work with Zope >= 2.11.
+          [stefan]
+        
+        1.0b1 - March 7, 2008
+        ---------------------
+        
+        - Refactor the code to offer a generic protect decorator for methods
+          which takes a list of checkers as options. Add checkers for both the
+          authenticator verification and HTTP POST-only.
+          [wichert]
+        
+        1.0a1 - January 27, 2008
+        ------------------------
+        
+        - Initial release
+          [wichert]
+        
+Keywords: zope security CSRF
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

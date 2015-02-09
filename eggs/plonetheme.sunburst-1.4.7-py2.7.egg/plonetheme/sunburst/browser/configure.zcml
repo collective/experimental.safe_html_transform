@@ -1,0 +1,22 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone">
+
+    <!-- 'Sunburst Theme' Zope 3 browser layer -->
+    <interface
+        interface=".interfaces.IThemeSpecific"
+        type="zope.publisher.interfaces.browser.IBrowserSkinType"
+        name="Sunburst Theme"
+        />
+
+    <!-- Sunburst special view -->
+    <browser:page
+        for="*"
+        name="sunburstview"
+        class=".sunburstview.SunburstView"
+        permission="zope.Public"
+        allowed_interface=".interfaces.ISunburstView"
+        />
+
+</configure>

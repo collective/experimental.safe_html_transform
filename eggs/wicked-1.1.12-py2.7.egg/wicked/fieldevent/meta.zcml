@@ -1,0 +1,16 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta">
+  <meta:directives namespace="http://namespaces.openplans.org/wicked">
+    <meta:directive
+       name="decorate-at-field"
+       schema=".meta.IATFieldDecoratorDirective"
+       handler=".meta.decorate_at_field"
+     />
+    <meta:directive
+       name="atschema-fields-implement"
+       schema=".meta.IATSchemaFieldsImplementDirective"
+       handler=".meta.schemafields_implement"
+     />
+  </meta:directives>
+</configure>

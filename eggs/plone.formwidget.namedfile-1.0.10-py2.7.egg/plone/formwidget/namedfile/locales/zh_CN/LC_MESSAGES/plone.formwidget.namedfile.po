@@ -1,0 +1,60 @@
+# plone.formwidget.namedfile.
+# Jian Aijun <jianaijun@gmail.com>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: plone.formwidget.namedfile\n"
+"POT-Creation-Date: 2010-11-15 10:00+0000\n"
+"PO-Revision-Date: 2011-07-05 09:05+0800\n"
+"Last-Translator: Jian Aijun <jianaijun@gmail.com>\n"
+"Language-Team: Plone i18n <plone-i18n@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: plone.formwidget.namedfile\n"
+
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/validator.py:8
+msgid "No file provided."
+msgstr "没有提供文件。"
+
+#. Default: "Keep existing file"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/file_input.pt:47
+msgid "file_keep"
+msgstr "保持现有文件"
+
+#. Default: "Remove existing file"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/file_input.pt:60
+msgid "file_remove"
+msgstr "删除现有的文件"
+
+#. Default: "Replace with new file"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/file_input.pt:72
+msgid "file_replace"
+msgstr "替换为新文件"
+
+#. Default: "Keep existing image"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/image_input.pt:52
+msgid "image_keep"
+msgstr "保持现有图片"
+
+#. Default: "Remove existing image"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/image_input.pt:65
+msgid "image_remove"
+msgstr "删除现有的图片"
+
+#. Default: "Replace with new image"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/image_input.pt:77
+msgid "image_replace"
+msgstr "替换为新图片"
+
+#. Default: "No file"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/file_display.pt:27
+msgid "no_file"
+msgstr "没有文件"
+
+#. Default: "No image"
+#: plone.formwidget.namedfile/plone/formwidget/namedfile/image_display.pt:31
+msgid "no_image"
+msgstr "没有图片"
+

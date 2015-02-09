@@ -1,0 +1,15 @@
+setuptools
+zope.interface
+zope.component
+zope.schema
+zope.intid
+five.intid
+plone.app.intid
+z3c.form
+z3c.relationfield>=0.4.2
+z3c.formwidget.query
+plone.autoform
+plone.formwidget.contenttree
+plone.supermodel
+Products.CMFCore
+plone.rfc822

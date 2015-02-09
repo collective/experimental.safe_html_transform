@@ -1,0 +1,14 @@
+setuptools
+zope.annotation
+zope.component
+zope.i18nmessageid
+zope.interface
+Products.CMFCore
+Products.GenericSetup
+Acquisition
+DateTime
+Zope2
+
+[test]
+zope.testing
+plone.app.testing

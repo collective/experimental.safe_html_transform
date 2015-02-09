@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<action-icons>
+ <action-icon category="folder" action_id="folderContents"
+              title="Folder Contents" priority="0"
+              icon_expr="folder_icon.png"/>
+ <action-icon category="object" action_id="folderContents"
+              title="Folder Contents" priority="0"
+              icon_expr="folder_icon.png"/>
+ <action-icon category="object" action_id="view"
+              title="View" priority="1"
+              icon_expr="preview_icon.png"/>
+ <action-icon category="object" action_id="edit"
+              title="Edit" priority="2"
+              icon_expr="edit_icon.png"/>
+ <action-icon category="object" action_id="metadata"
+              title="Metadata" priority="3"
+              icon_expr="metadata_icon.png"/>
+ <action-icon category="object" action_id="localroles"
+              title="Local Roles" priority="3"
+              icon_expr="user_icon.png"/>
+ <action-icon category="global" action_id="undo"
+              title="Undo" priority="6"
+              icon_expr="user_icon.png"/>
+ <action-icon category="object" action_id="syndication"
+              title="Syndication" priority="4"
+              icon_expr="user_icon.png"/>
+ <action-icon category="workflow" action_id="submit"
+              title="Submit" priority="0"
+              icon_expr="submit_icon.png"/>
+ <action-icon category="workflow" action_id="reject"
+              title="Reject" priority="1"
+              icon_expr="reject_icon.png"/>
+ <action-icon category="workflow" action_id="retract"
+              title="Retract" priority="1"
+              icon_expr="retract_icon.png"/>
+ <action-icon category="workflow" action_id="approve"
+              title="Approve" priority="2"
+              icon_expr="approve_icon.png"/>
+</action-icons>

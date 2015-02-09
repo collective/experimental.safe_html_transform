@@ -1,0 +1,30 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
+      lang="en-US"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      metal:use-macro="context/main_template/macros/master">
+  <head><title></title></head>
+  <body>
+    <metal:content-core fill-slot="content-core"
+	 tal:define="portal_type python:context.getPortalTypeName().lower();
+	 view_template python:'%s_view' % portal_type;
+	 view_macros python:path('context/%s/macros|nothing' % view_template);
+	 body_macro view_macros/body|nothing;
+	 errors python:request.get('errors', {})">
+      <metal:block define-macro="content-core">
+
+    	<div tal:condition="not:body_macro"
+    	     tal:define="fields python: context.Schema().filterFields(isMetadata=0); dummy python: fields.reverse();"
+    	     tal:repeat="field fields">
+    	  <span metal:use-macro="python: context.widget(field.getName(), mode='view', use_label=1)"/>
+    	</div>
+
+    	<div tal:condition="body_macro">
+    	  <metal:block use-macro="body_macro" />
+    	</div>
+
+      </metal:block>
+    </metal:content-core>
+  </body>
+</html>

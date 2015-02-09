@@ -1,0 +1,11 @@
+setuptools
+zope.intid
+zope.component
+zope.event
+zope.interface
+zope.lifecycleevent
+zope.keyreference
+zope.site
+zope.location
+five.localsitemanager
+Zope2 >= 2.13

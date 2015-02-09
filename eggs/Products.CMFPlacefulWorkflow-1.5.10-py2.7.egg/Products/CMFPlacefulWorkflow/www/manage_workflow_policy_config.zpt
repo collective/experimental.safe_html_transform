@@ -1,0 +1,72 @@
+<h1 tal:replace="structure here/manage_page_header">Header</h1>
+<h2 tal:define="manage_tabs_message options/manage_tabs_message | nothing"
+    tal:replace="structure here/manage_tabs">Tabs</h2>
+
+<h3>Manage workflow policy configuration</h3>
+
+<p class="form-help">
+Workflow Policy Configurations for this folder and below.
+</p>
+
+<form action="manage_makeChanges" method="POST"
+      tal:define="policies here/portal_placeful_workflow/objectValues">
+<table cellspacing="0" cellpadding="2" border="1">
+  <tr>
+    <td align="left" valign="middle">
+      <div class="form-label">Workflow Policy in this folder</div>
+    </td>
+    <td align="left" valign="top">
+
+      <input type="radio" name="workflow_policy_in" id="cb_in_default_policy" value=""
+             tal:attributes="checked python:test(here.getPolicyInId() == '', 'checked', None)"/>
+      <label for="cb_default_policy">No policy: fallback to above policy or default site policy</label><br/>
+
+      <tal:block tal:repeat="policy policies">
+        <input type="radio" name="workflow_policy_in" id="cb_in_value" value=""
+               tal:attributes="value policy/getId;
+                               id string:cb_in_${policy/getId};
+                               checked python:test(policy.getId() == here.getPolicyInId(), 'checked', None)"/>
+        <label for="cb_in_value"
+               tal:attributes="for string:cb_in_${policy/getId};"
+               tal:content="policy/title_or_id"></label><br/>
+      </tal:block>
+
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="middle">
+      <div class="form-label">Workflow Policy below this folder</div>
+    </td>
+    <td align="left" valign="top">
+
+      <input type="radio" name="workflow_policy_below" id="cb_below_default_policy" value=""
+             tal:attributes="checked python:test(here.getPolicyBelowId() == '', 'checked', None)"/>
+      <label for="cb_default_policy">No policy: fallback to above policy or default site policy</label><br/>
+
+      <tal:block tal:repeat="policy policies">
+        <input type="radio" name="workflow_policy_below" id="cb_below_value" value=""
+               tal:attributes="value policy/getId;
+                               id string:cb_below_${policy/getId};
+                               checked python:test(policy.getId() == here.getPolicyBelowId(), 'checked', None)"/>
+        <label for="cb_below_value"
+               tal:attributes="for string:cb_below_${policy/getId};"
+               tal:content="policy/title_or_id"></label><br/>
+      </tal:block>
+    </td>
+  </tr>
+</table>
+<table cellspacing="0" cellpadding="2" border="0">
+  <tr>
+    <td align="left" valign="top">
+    </td>
+    <td align="left" valign="top">
+    <div class="form-element">
+    <input class="form-element" type="submit" name="submit"
+           value="Save Changes" />
+    </div>
+    </td>
+  </tr>
+</table>
+</form>
+
+<h1 tal:replace="structure here/manage_page_footer">Footer</h1>

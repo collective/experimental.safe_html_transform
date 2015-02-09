@@ -1,0 +1,14 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="plone.app.textfield">
+
+  <class class=".RichText">
+    <implements interface=".editor.IRichText" />
+  </class>
+
+    <utility
+        name="plone.app.textfield.RichText"
+        component=".editor.RichTextFactory"
+        />
+
+</configure>

@@ -1,0 +1,63 @@
+Metadata-Version: 1.1
+Name: plone.synchronize
+Version: 1.0.1
+Summary: Simple decorators to support synchronized methods
+Home-page: http://pypi.python.org/pypi/plone.synchronize
+Author: Martin Aspeli
+Author-email: optilude@gmail.com
+License: BSD
+Description: Introduction
+        ============
+        
+        This package provides a simple decorator to help synchronize methods across
+        threads, to avoid problems of concurrent access.
+        
+        It can be used like this::
+        
+            from threading import Lock
+            from plone.synchronize import synchronized
+            
+            class StupidStack(object):
+            
+                _elements = [] # not thread safe
+                _lock = Lock()
+                
+                @synchronized(_lock)
+                def push(self, item):
+                    self._elements.append(item)
+                
+                @synchronized(_lock)
+                def pop(self):
+                    last = self._elements[-1]
+                    del self._elements[-1]
+                    return last
+        
+        The decorator takes care of calling lock.acquire() just before the method
+        is executed, and lock.release() just after. If an exception is raised in the
+        method, the lock will still be released.
+        
+        Changelog
+        =========
+        
+        1.0.1 - 2011-05-20
+        ------------------
+        
+        * Add license metadata.
+          [davisagli]
+        
+        1.0 - 2011-04-30
+        ----------------
+        
+        * No changes
+        
+        1.0b1 - 2009-03-30
+        ------------------
+        
+        * Initial release
+        
+        
+Keywords: synchronized lock decorator
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: License :: OSI Approved :: BSD License

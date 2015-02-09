@@ -1,0 +1,10 @@
+bugs:
+  - backport changes to five.customerize
+
+improvements:
+  - direct link from viewlet manager
+  - link/button in reg listing to delete customized versions again
+  - group views/viewlets
+
+five.customerize:
+  - unregister with two checkboxes checked needs to be fixed

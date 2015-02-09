@@ -1,0 +1,22 @@
+#rules_table_form .state-disabled .icon-contentrule-enabled-assigned,
+#rules_table_form .state-disabled .icon-contentrule-enabled-unassigned{
+    display: none;
+}
+
+#rules_table_form .assignment-unassigned .icon-contentrule-enabled-assigned{
+    display: none;
+}
+
+#rules_table_form .assignment-assigned .icon-contentrule-enabled-unassigned{
+    display: none;
+}
+
+#rules_table_form .state-disabled .btn-rule-disable {
+    display: none;
+}
+#rules_table_form .state-enabled .btn-rule-enable {
+    display: none;
+}
+.filter-option{
+	white-space: nowrap;
+}

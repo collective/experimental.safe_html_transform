@@ -1,0 +1,114 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: aws.zope2zcmldoc\n"
+"POT-Creation-Date: 2011-11-01 21:19+0000\n"
+"PO-Revision-Date: 2011-11-02 08:27-0400\n"
+"Last-Translator: Leonardo J. Caballero G. <leonardocaballero@gmail.com>\n"
+"Language-Team: Spanish <plone-conosur@lists.plone.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"Language-Code: es\n"
+"Language-Name: Spanish\n"
+"Preferred-Encodings: latin1 utf-8\n"
+"Domain: aws.zope2zcmldoc\n"
+"X-Is-Fallback-For: es-ar es-bo es-cl es-co es-cr es-do es-ec es-es es-sv es-gt es-hn es-mx es-ni es-pa es-py es-pe es-pr es-us es-uy es-ve\n"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/view_directive.pt:22
+msgid "'${directive}' directive"
+msgstr "directiva '${directive}'"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/view_subdirective.pt:26
+msgid "'${subdirective}' Subdirective"
+msgstr "Sub-directiva '${subdirective}' "
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/controlpanel_macros.pt:19
+msgid "Attributes"
+msgstr "Atributos"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/controlpanel_macros.pt:24
+msgid "Default"
+msgstr "Por defecto"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/controlpanel_macros.pt:50
+msgid "Defined in: ${zcml_source}"
+msgstr "Definido en: ${zcml_source}"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/controlpanel_macros.pt:26
+msgid "Description"
+msgstr "Descripción"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/view_namespace.pt:17
+msgid "Directives of ${url-namespace}"
+msgstr "Directivas de ${url-namespace}"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/controlpanel_macros.pt:53
+msgid "Handler: ${python_handler}"
+msgstr "Manejador: ${python_handler}"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/manage_main.pt:25
+msgid "Important notes:"
+msgstr "Notas importante:"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/controlpanel_macros.pt:48
+msgid "Misc"
+msgstr "Misceláneo"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/controlpanel_macros.pt:23
+msgid "Name"
+msgstr "Nombre"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/manage_main.pt:9
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/view_directive.pt:9
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/view_namespace.pt:9
+msgid "Namespaces"
+msgstr "Espacio de nombres"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/controlpanel_macros.pt:20
+msgid "Required attributes are in <strong>bold</strong>."
+msgstr "Los atributos requeridos estan en <strong>negrita</strong>."
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/view_directive.pt:26
+msgid "Subdirectives:"
+msgstr "Subdirectivas:"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/controlpanel_macros.pt:17
+msgid "Summary"
+msgstr "Resumen"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/controlpanel_macros.pt:25
+msgid "Type"
+msgstr "Tipo"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/controlpanel.py:30
+msgid "ZCML Documentation"
+msgstr "Documentación ZCML"
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/utils.py:57
+msgid "ZCML doc panel added. Click the 'Back' button of your browser."
+msgstr "Agregado el panel de documentación ZCML. Haga clic al botón 'Atrás' en su navegador Web."
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/utils.py:65
+msgid "ZCML doc panel removed. Click the 'Back' button of your browser."
+msgstr "Removido el panel de documentación ZCML. Haga clic al botón 'Atrás' en su navegador Web."
+
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/controlpanel.py:34
+msgid "ZCML documentation"
+msgstr "Documentación ZCML"
+
+#. Default: "With Zope 2.12 and earlier versions, we do not and can not provide the documentation of directives of the <strong>'zcml'</strong> namespace (http://namespaces.zope.org/zcml). It's built-in nature does not provide the required reflectivity."
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/manage_main.pt:27
+msgid "important_note_1"
+msgstr "Con Zope 2.12 y versiones anteriores, nosotros no podemos proporcionar la documentación de las directivas de los espacio de nombres <strong>'zcml'</strong> (http://namespaces.zope.org/zcml). Este está construido en la naturaleza que no proporciona la necesaria flexibilidad."
+
+#. Default: "Potential errors or typos in directive descriptions are not 'issues' of 'aws.zope2zcmldoc' component, as we display the docs that are provided by these directives definitions. Please report these issues to the author of the component that provides the ZCML directive."
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/zmi/manage_main.pt:33
+msgid "important_note_2"
+msgstr "Los posibles errores o erratas en las descripciones de la directiva no son 'problemas' del componente 'aws.zope2zcmldoc', como muestra la documentación que son proporcionados por estas definiciones directivas. Por favor, informe de estas cuestiones al autor del componente que ofrece la directiva ZCML."
+
+#. Default: "(Not available)"
+#: aws.zope2zcmldoc/aws/zope2zcmldoc/browser.py:159
+msgid "not_available"
+msgstr "(No disponible)"
+

@@ -1,0 +1,25 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope" 
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone">
+
+    <five:registerPackage package="." />
+
+    <browser:page
+        name="batch_macros"
+        for="*"
+        permission="zope.Public"
+        class=".browser.BatchMacrosView"
+        template="batch_macros.pt"
+        />
+
+    <browser:page
+        name="batchnavigation"
+        for="*"
+        permission="zope.Public"
+        class=".browser.PloneBatchView"
+        template="batchnavigation.pt"
+        />
+
+</configure>

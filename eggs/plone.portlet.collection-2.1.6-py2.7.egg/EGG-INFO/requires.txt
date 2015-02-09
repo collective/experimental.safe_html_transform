@@ -1,0 +1,9 @@
+setuptools
+plone.memoize
+plone.portlets
+plone.app.portlets
+plone.app.vocabularies
+plone.app.form
+
+[test]
+plone.app.testing

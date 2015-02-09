@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<action-icons xmlns:tal="http://xml.zope.org/namespaces/tal">
+ <action-icon
+    category="%s"
+    action_id="%s"
+    title="%s"
+    priority="%d"
+    icon_expr="%s"
+    tal:repeat="info context/listActionIconInfo"
+    tal:attributes="category info/category;
+                    action_id info/action_id;
+                    title info/title;
+                    priority info/priority;
+                    icon_expr info/icon_expr;
+                   "
+    />
+</action-icons>

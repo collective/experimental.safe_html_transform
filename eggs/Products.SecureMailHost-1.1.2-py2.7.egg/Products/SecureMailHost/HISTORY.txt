@@ -1,0 +1,152 @@
+Changelog for SecureMailHost
+
+   (name of developer listed in brackets)
+
+SecureMailHost 1.1.2 - Released September 9, 2009
+
+    - Avoid deprecation warnings for the use of Globals.
+      [hannosch]
+
+SecureMailHost 1.1.1 - Released August 23, 2007
+
+    - First release as a package.
+      [hannosch]
+
+SecureMailHost 1.1 - Released July 10, 2007
+
+    - Use isinstance to check for types and update code to handle unicode
+      email addresses.
+      [wichert, optilude, hannosch]
+
+    - Made secureSend method handle message text passed in as Unicode. We
+      encode it in the given charset now.
+      [hannosch]
+
+    - Raise an exception if someone tries to send mail without specifying a
+      proper SMTP server.
+      [wichert]
+
+SecureMailHost 1.0.5 - Released April 22, 2007
+
+    - Added a property noTLS to disable SSL. This closes
+      http://dev.plone.org/plone/ticket/5342.
+      [fenestro, hannosch]
+
+SecureMailHost 1.0.4 - Released May 15, 2006
+
+    - For mail servers that refuse the EHLO command we try HELO instead now.
+      This closes http://dev.plone.org/plone/ticket/4924.
+      [hannosch]
+
+    - Undeprecated the send and sendTemplate methods. These are part of the
+      generic MailHost API and you are allowed to use them. Note that they do
+      not provide all the features of SecureMailHost right now.
+      [hannosch]
+
+SecureMailHost 1.0.3 - Released March 19, 2006
+
+    - Fixed list->string conversion for recipients list, it's now possible to
+      have multiple addressees in to, cc and bcc headers.
+      [jenner]
+
+    - Fixed handling of non-ascii recipients when a email.Message.Message class
+      is handed to secureSend; charset can now be set to the correct encoding
+      without raising an error.
+      [mj]
+
+SecureMailHost 1.0.2 - Released December 18, 2005
+
+    - Fixed tests and update documentation.
+      [hannosch]
+
+    - Fixed a typo and minor cleanup.
+      [sidnei]
+
+    - Fixed incorrect error output.
+      [rafrombrc]
+
+    - Make id optional so SecureMailHost can be setup from CMFSetup.
+      [bmh]
+
+SecureMailHost 1.0.1 - Released August 7, 2005
+
+    - Fixed problem when smtpserver supports TLS but the local Python
+      installation does not support SSL.
+      https://trac.plone.org/plone/ticket/4406
+      [batlogg] [alecm]
+
+SecureMailHost 1.0.0 - Released July 29, 2005
+
+    - Fixed [ 1156733 ] Mails aren't sent to CC and BCC. Addresses in mcc and 
+      mbcc weren't added to the recipient list.
+      [tiran]
+
+    - Made unit tests bin/zopectl test compatible
+      [tiran]
+
+    - Fixed http://plone.org/collector/4173 and 4201 email adresses are
+      RFC 2822 compliant now.
+      [hannosch]
+
+SecureMailHost 1.0-rc1 - Released March 02, 2005
+
+    - Fixed [ 1047475 ] message-ids not RFC 2822 compliant. SMH is using
+      email.Utils.make_msgid with the fqdn as additional argument.
+      [tiran]
+
+    - Ripped off the py_compatible module and the threaded feature from SMH.
+      py_compatible isn't required any more because Plone needs Zope 2.7.4
+      with the new email package and the threaded feature is too experimental.
+      [tiran]
+
+SecureMailHost 1.0-rc1 - Released January 27, 2005
+
+    - usernames in email address now encoded by email.Header
+      This is especially important for Chinese and other languanges.
+      [panjunyong]
+
+SecureMailHost 0.2-rc3 - Released July 19, 2004
+
+    - Changed email package test to import test. This allowes the manual
+      installation of the email package into site-packages.
+   
+    - More compat for python 2.1 in tests/
+
+SecureMailHost 0.2-rc2 - Released July 15, 2004
+
+    - Made SecureMailHost compatible with Python 2.1 (True, False ...)
+
+    - Added python compatibility for email package. email 2.5.5 is automagically
+      loaded if no email package is found. If an email package < 2.5.4 is found
+      SecureMailHost is raising a RuntimeError.
+
+    - Shipping releases with email package 2.5.5.
+
+    - Added copyright headers and LICENSE.txt file for ZPL 2.1.
+
+SecureMailHost 0.2-rc1 - Released July 9, 2004
+
+    - Better logging at multiple places like awaking thread, sending mail ...
+
+    - Mail object supports str() and repr() and has a new method called info()
+      which returns some useful informations about the email
+
+    - Queue supports len()
+
+    - Automagically start threading if ASYNC is used and queue isn't empty.
+
+    - Fixed a problem with not showing user and password in the edit template
+
+SecureMailHost 0.2-beta2 - Released May 24, 2004
+
+    - Multiple small fixes to make the old send() method run
+      [longsleep, tiran]
+
+SecureMailHost 0.2-beta1 - Released May 24, 2004
+
+    - First beta testing version
+      [tiran]
+
+    - Implemented all the new stuff like async thread, mailer class, starttls ...
+      [tiran]
+

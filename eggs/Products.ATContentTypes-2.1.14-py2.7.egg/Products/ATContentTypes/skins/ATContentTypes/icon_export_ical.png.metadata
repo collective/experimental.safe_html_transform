@@ -1,0 +1,3 @@
+[default]
+title=iCal export
+cache=HTTPCache

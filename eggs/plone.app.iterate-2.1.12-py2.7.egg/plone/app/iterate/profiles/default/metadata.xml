@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<metadata>
+  <!-- When this version is updated, be sure to update the target version
+       of the 'upgrade_by_reinstall' upgrade step, or (better) add a real
+       upgrade step that only makes necessary changes. -->
+  <version>121</version>
+</metadata>

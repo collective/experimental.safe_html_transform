@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plonetest">
+
+<browser:view
+    for=".test_browserdefault.IDummy"
+    provides="zope.publisher.interfaces.browser.IBrowserView"
+    permission="zope2.Public"
+    name="zope3_view"
+    title="Zope3 Test View"
+    menu="plone_displayviews"
+    />
+
+</configure>

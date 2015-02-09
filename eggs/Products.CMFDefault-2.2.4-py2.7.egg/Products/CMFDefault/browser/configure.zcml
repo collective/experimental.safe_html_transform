@@ -1,0 +1,164 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+  <browser:page
+      for="Products.CMFCore.interfaces.IFolderish"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="view.html"
+      class=".folder.FolderView"
+      template="templates/folder.pt"
+      permission="zope2.View"
+      />
+
+  <utility
+      component=".folder.contents_delta_vocabulary"
+      name="cmf.contents delta vocabulary"
+      provides="zope.schema.interfaces.IVocabularyFactory"
+      />
+
+  <browser:page
+      for="Products.CMFCore.interfaces.IFolderish"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="edit.html"
+      class=".folder.ContentsView"
+      permission="cmf.ListFolderContents"
+      />
+
+  <adapter factory=".metadata.MinimalMetadataSchemaAdapter"/>
+
+  <browser:page
+      for="Products.CMFCore.interfaces.IMutableMinimalDublinCore"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="properties.html"
+      class=".metadata.MinimalMetadataEditView"
+      permission="zope2.ManageProperties"
+      />
+
+  <adapter factory=".metadata.MetadataSchemaAdapter"/>
+
+  <browser:page
+      for="Products.CMFCore.interfaces.IMutableDublinCore"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="properties.html"
+      class=".metadata.MetadataEditView"
+      permission="cmf.ModifyPortalContent"
+      />
+
+  <adapter factory=".document.DocumentSchemaAdapter"/>
+
+  <utility
+      component=".document.TextFormatVocabularyFactory"
+      name="cmf.AvailableTextFormats"
+      />
+
+  <browser:page
+      for="..interfaces.IDocument"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="view.html"
+      class=".document.DocumentView"
+      template="templates/document.pt"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="..interfaces.IMutableDocument"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="edit.html"
+      class=".document.DocumentEditView"
+      permission="cmf.ModifyPortalContent"
+      />
+
+  <adapter factory=".newsitem.NewsItemSchemaAdapter"/>
+
+  <browser:page
+      for="..interfaces.IMutableNewsItem"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="edit.html"
+      class=".newsitem.NewsItemEditView"
+      permission="cmf.ModifyPortalContent"
+      />
+
+  <adapter factory=".link.LinkSchemaAdapter"/>
+
+  <adapter
+      name="cmf.link"
+      factory=".link.LinkAddView"
+      />
+
+  <browser:page
+      for="..interfaces.ILink"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="view.html"
+      class=".link.LinkView"
+      template="templates/link.pt"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="..interfaces.IMutableLink"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="edit.html"
+      class=".link.LinkEditView"
+      permission="cmf.ModifyPortalContent"
+      />
+
+  <adapter factory=".favorite.FavoriteSchemaAdapter"/>
+
+  <adapter
+      name="cmf.favorite"
+      factory=".favorite.FavoriteAddView"
+      />
+
+  <browser:page
+      for="..interfaces.IMutableFavorite"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="edit.html"
+      class=".favorite.FavoriteEditView"
+      permission="cmf.ModifyPortalContent"
+      />
+
+  <adapter factory=".file.FileSchemaAdapter"/>
+
+  <adapter
+      name="cmf.file"
+      factory=".file.FileAddView"
+      />
+
+  <adapter
+      name="cmf.image"
+      factory=".file.FileAddView"
+      />
+
+  <browser:page
+      for="..interfaces.IMutableFile"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="edit.html"
+      class=".file.FileEditView"
+      permission="cmf.ModifyPortalContent"
+      />
+
+  <browser:page
+      for="*"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="form_widget"
+      template="templates/form_widgets.pt"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="*"
+      layer="..interfaces.ICMFDefaultSkin"
+      name="batch_widget"
+      template="templates/batch_widgets.pt"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="*"
+      name="ursine_globals"
+      class=".ursa.UrsineGlobals"
+      permission="zope.Public"
+      />
+
+</configure>

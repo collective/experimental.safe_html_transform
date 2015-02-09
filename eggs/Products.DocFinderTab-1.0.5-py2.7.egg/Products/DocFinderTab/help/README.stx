@@ -1,0 +1,68 @@
+Release Notes
+
+    DocFinderTab
+
+Description
+
+    You can use the **Doc** tab to ask Zope for documentation about its objects.
+
+    This product makes Dieter Maurer's 
+    <a href="http://www.dieter.handshake.de/pyprojects/zope/DocFinder.html" target=_blank>DocFinder</a>
+    available from a ZMI management tab.  
+
+    DocFinder's introspection capabilities make it an important part of the Zopista's 
+    toolbox:
+
+    - Find out how a certain product works.<br> *Tip: Try DocFinder on the CMF!*
+
+    - View an object's public and private interfaces.<br> *Instant reference documentation!*
+
+    - Debug permission related problems.
+
+    - ...
+
+    By default, DocFinder will extract the following information from a Zope object:
+
+    - **Class** (and base class) names, and docstrings.
+
+    - **Attribute** names, roles, arguments, and docstrings.
+
+    DocFinder treats docstrings as structured text. This allows you to put nicely formatted 
+    documentation right into the source files, while having it instantly availabe TTW.
+
+Controls
+
+    The information is presented in a tree. You can expand/collapse individual nodes by clicking the plus/minus icons.
+
+    To enjoy the full functionality of the controls you should have cookies and JavaScript enabled.
+
+    Filter
+
+        You can specify a regular expression that will be used to filter attribute names. 
+        Hit the return key to submit the form.
+
+        When a filter is set, clicking the blue X control will clear the filter string.
+
+    Expert
+
+        In expert mode DocFinder returns additional information of interest to the 
+        Python programmer. This includes:
+
+        - The **module** a class has been loaded from.
+
+        - The **private attributes** of a class, i.e. attributes not accessible from restricted (TTW) code.
+
+Permission Names
+
+    Since Zope 2.7 DocFinder returns the names of **permissions** protecting individual attributes.
+
+    In earlier versions you had to start Zope with 'ZOPE_SECURITY_POLICY' set to 'PYTHON' to
+    see the permission names.
+
+    If no permission name is available, DocFinder will indicate the presence of
+    explicit security declarations for the respective attributes (expert mode only).
+
+Security
+
+    You can control access to the **Doc** tab via the *View documentation* permission.
+

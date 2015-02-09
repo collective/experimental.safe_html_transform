@@ -1,0 +1,26 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml">
+
+  <adapter
+      for="zope.publisher.interfaces.browser.IBrowserRequest"
+      provides=".interfaces.IStatusMessage"
+      factory=".adapter.StatusMessage"
+      />
+
+  <class class=".message.Message">
+      <allow interface=".interfaces.IMessage" />
+  </class>
+
+  <!-- We need to make the request annotatable for this to work -->
+
+  <configure zcml:condition="installed ZPublisher">
+
+    <include package="zope.annotation" />
+
+    <class class="ZPublisher.BaseRequest.BaseRequest">
+      <implements interface="zope.annotation.interfaces.IAttributeAnnotatable" />
+    </class>
+
+  </configure>
+
+</configure>

@@ -1,0 +1,88 @@
+Metadata-Version: 1.0
+Name: ExtensionClass
+Version: 2.13.2
+Summary: Metaclass for subclassable extension types
+Home-page: http://pypi.python.org/pypi/ExtensionClass
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: ExtensionClass and ExtensionClass-related packages
+        ==================================================
+        
+        ExtensionClass
+        --------------
+        
+        This package provides a metaclass that allows classes implemented in
+        extension modules to be subclassed in Python.  Unless you need
+        ExtensionClasses for legacy applications (e.g. Zope 2), you probably
+        want to use Python's new-style classes (available since Python 2.2).
+        
+        ComputedAttribute
+        -----------------
+        
+        This package provides a way to attach attributes to an
+        ``ExtensionClass`` or instance that are computed by calling a
+        callable.  This works very much like ``property`` known from new-style
+        classes, except that a ``ComputedAttribute`` can also be attached to
+        an instance and that it honours ExtensionClass semantics (which is
+        useful for retaining Acquisition wrappers, for example).
+        
+        MethodObject
+        ------------
+        
+        This package lets you attach additional "methods" to ExtensionClasses.
+        These "methods" are actually implemented by subclassing the
+        ``MethodObject.Method`` class and implementing the ``__call__`` method
+        there.  Instances of those classes will be bound to the instances
+        they're attached to and will receive that instance object as a first
+        parameter (after ``self``).
+        
+        
+        Changelog
+        =========
+        
+        2.13.2 (2010-06-16)
+        -------------------
+        
+        - LP #587760: Handle tp_basicsize correctly.
+        
+        2.13.1 (2010-04-03)
+        -------------------
+        
+        - Removed undeclared testing dependency on zope.testing.
+        
+        - Removed cruft in ``pickle/pickle.c`` related to removed ``__getnewargs__``.
+        
+        2.13.0 (2010-02-22)
+        -------------------
+        
+        - Avoid defining ``__getnewargs__`` as not to defeat the ZODB persistent
+          reference optimization. Refs https://bugs.launchpad.net/zope2/+bug/143657.
+          In order to take advantage of this optimization, you need to re-save your
+          objects.
+        
+        2.12.0 (2010-02-14)
+        -------------------
+        
+        - Removed old build artifacts and some metadata cleanup.
+        
+        - Added support for method cache in ExtensionClass. Patch contributed by
+          Yoshinori K. Okuji. See https://bugs.launchpad.net/zope2/+bug/486182.
+        
+        2.11.3 (2009-08-02)
+        -------------------
+        
+        - Further 64-bit fixes (Python 2.4 compatibility).
+        
+        2.11.2 (2009-08-02)
+        -------------------
+        
+        - Fixed 64-bit compatibility issues for Python 2.5.x / 2.6.x.  See 
+          http://www.python.org/dev/peps/pep-0353/ for details.
+        
+        2.11.1 (2009-02-19)
+        -------------------
+        
+        - Initial egg release.
+        
+Platform: UNKNOWN

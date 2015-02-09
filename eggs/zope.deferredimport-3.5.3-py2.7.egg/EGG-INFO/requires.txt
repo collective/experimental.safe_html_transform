@@ -1,0 +1,5 @@
+setuptools
+zope.proxy
+
+[test]
+zope.testing

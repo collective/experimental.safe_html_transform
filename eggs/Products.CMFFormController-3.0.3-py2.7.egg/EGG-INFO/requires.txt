@@ -1,0 +1,12 @@
+setuptools
+zope.interface
+zope.structuredtext
+zope.tales
+Products.CMFCore
+Products.GenericSetup
+Acquisition
+transaction
+Zope2
+
+[test]
+Products.PloneTestCase

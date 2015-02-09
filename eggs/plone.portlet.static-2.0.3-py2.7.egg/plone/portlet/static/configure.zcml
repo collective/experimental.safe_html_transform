@@ -1,0 +1,35 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="plone">
+
+    <five:registerPackage package="." />
+    
+    <genericsetup:registerProfile
+       name="default"
+       title="Static text portlet"
+       directory="profiles/default"
+       description="A simple portlet that displays static HTML"
+       provides="Products.GenericSetup.interfaces.EXTENSION"
+       />
+       
+     <permission
+       id="plone.portlet.static.AddStaticPortlet"
+       title="plone.portlet.static: Add static portlet"
+       />
+ 
+     <!-- Register the portlet -->
+     <plone:portlet
+         name="plone.portlet.static.Static"
+         interface=".static.IStaticPortlet"
+         assignment=".static.Assignment"
+         view_permission="zope2.View"
+         edit_permission="plone.portlet.static.AddStaticPortlet"
+         renderer=".static.Renderer"
+         addview=".static.AddForm"
+         editview=".static.EditForm"
+         />
+
+</configure>

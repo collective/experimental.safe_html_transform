@@ -1,0 +1,29 @@
+<html metal:use-macro="context/@@standard_macros/page">
+<head>
+
+<metal:slot fill-slot="style_slot">
+<tal:span tal:replace="structure context/getBaseTag" />
+</metal:slot>
+
+</head>
+<body>
+
+<metal:slot metal:fill-slot="body" i18n:domain="cmf_default">
+<h1 id="DesktopTitle" tal:content="view/title">Document Title</h1>
+
+<div id="DesktopDescription" tal:content="view/description">Document
+ Description goes here.</div>
+
+<metal:macro metal:use-macro="context/content_byline/macros/byline" />
+
+<p i18n:translate="">Link:
+ <a href="" tal:attributes="href view/url" tal:content="view/url"
+    i18n:name="link">http://www.zope.org</a></p>
+
+<div class="Discussion" tal:condition="context/viewThreadsAtBottom|nothing">
+ <tal:span tal:replace="structure context/viewThreadsAtBottom" />
+</div>
+</metal:slot>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+setuptools
+zope.interface
+zope.location
+zope.testing
+ZODB3

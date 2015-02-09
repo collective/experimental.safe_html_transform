@@ -1,0 +1,7 @@
+setuptools
+plone.namedfile
+z3c.form
+plone.z3cform >= 0.7.4
+
+[test]
+z3c.form [test]

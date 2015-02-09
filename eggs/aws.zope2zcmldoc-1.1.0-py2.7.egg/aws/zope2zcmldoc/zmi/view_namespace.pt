@@ -1,0 +1,34 @@
+<html metal:use-macro="context/@@controlpanel_macros/macros/master"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      lang="en"
+      i18n:domain="aws.zope2zcmldoc">
+
+  <metal:main-slot fill-slot="body">
+    <p class="location-bar">
+      <a href="@@manage_main" i18n:translate="">Namespaces</a> &gt;
+      <strong tal:content="view/this_namespace">
+        http://namespaces.zope.org/some_ns
+      </strong>
+      <metal:to-english-macro
+         use-macro="context/@@controlpanel_macros/macros/to_english" />
+    </p>
+    <p i18n:translate="">Directives of
+      <span class="form-mono" tal:content="view/this_namespace" i18n:name="url-namespace">
+        http://namespaces.zope.org/some_ns
+      </span>
+    </p>
+    <ul>
+      <tal:loop repeat="directive view/list_directives">
+        <li>
+          <a href="#"
+             tal:attributes="href directive/view_url"
+             tal:content="directive/name">
+            foo
+          </a>
+        </li>
+      </tal:loop>
+    </ul>
+  </metal:main-slot>
+</html>

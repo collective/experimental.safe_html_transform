@@ -1,0 +1,18 @@
+setuptools
+Products.CMFPlone
+plone.app.contentmenu
+plone.app.dexterity>=2.0.7
+plone.app.relationfield
+plone.formwidget.querystring
+plone.namedfile [blobs]
+plone.app.versioningbehavior
+
+[test]
+lxml
+plone.app.testing[robot]
+plone.app.robotframework
+Products.ATContentTypes
+Products.contentmigration
+
+[atrefs]
+plone.app.referenceablebehavior

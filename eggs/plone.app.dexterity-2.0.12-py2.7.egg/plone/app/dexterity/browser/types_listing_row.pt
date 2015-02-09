@@ -1,0 +1,34 @@
+<tal:block define="tups view/getCombinedWidgets;
+                   niceTitles view/getNiceTitles"
+           repeat="tup tups">
+
+  <td tal:define="error python:tup[0].error;
+                  idx repeat/tup/index"
+      tal:attributes="class python:'field' + (error and ' error' or '') + (tup[0].__name__ == 'view_item_count' and ' count' or '')">
+    <tal:block repeat="widget tup">
+
+    <img
+       tal:define="fti view/getContent;
+                   icon fti/getIcon;
+                   portal_url context/context/context/portal_url"
+       tal:condition="python:icon and idx == 1"
+       tal:attributes="src string:${portal_url}/${icon};"
+       width="16"
+       height="16"
+       />
+
+    <a href=""
+       tal:define="link python:view.context.context.link(view.getContent(), widget.field.__name__)"
+       tal:omit-tag="python:widget.mode == 'input' or link is None"
+       tal:attributes="href link">
+
+      <span class="error" tal:omit-tag="not:error">
+        <div tal:condition="error" tal:replace="structure error/render" />
+        <input type="text" tal:replace="structure widget/render" />
+      </span>
+
+    </a>
+    </tal:block>
+
+  </td>
+</tal:block>

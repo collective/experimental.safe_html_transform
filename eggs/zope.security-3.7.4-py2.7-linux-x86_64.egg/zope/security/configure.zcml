@@ -1,0 +1,21 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <utility
+      component=".permission.PermissionsVocabulary"
+      provides="zope.schema.interfaces.IVocabularyFactory"
+      name="Permissions"
+      />
+
+  <utility
+      component=".permission.PermissionIdsVocabulary"
+      provides="zope.schema.interfaces.IVocabularyFactory"
+      name="Permission Ids"
+      />
+
+  <class class=".permission.Permission">
+    <allow interface=".interfaces.IPermission" />
+  </class>
+
+  <include file="permissions.zcml" />
+
+</configure>

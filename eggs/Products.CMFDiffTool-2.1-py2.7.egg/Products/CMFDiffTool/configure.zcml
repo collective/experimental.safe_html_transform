@@ -1,0 +1,16 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:i18n="http://namespaces.zope.org/i18n"
+           xmlns:zcml="http://namespaces.zope.org/zcml"
+           xmlns:cmf="http://namespaces.zope.org/cmf" >
+
+  <include zcml:condition="installed five.globalrequest"
+           package="five.globalrequest" />
+
+  <include package=".exportimport" />
+
+  <include file="profiles.zcml"/>
+
+  <!-- Translations -->
+  <i18n:registerTranslations directory="locales" />
+
+</configure>

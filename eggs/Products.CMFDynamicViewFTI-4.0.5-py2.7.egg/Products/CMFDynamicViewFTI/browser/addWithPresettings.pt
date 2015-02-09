@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+</head>
+<body>
+
+<h1 tal:content="view/title">FORM TITLE</h1>
+
+<p class="form-help" tal:content="view/description">DESCRIPTION TEXT.</p>
+
+<form action="." method="post"
+   tal:attributes="action request/ACTUAL_URL">
+<table cellspacing="0" cellpadding="2" border="0">
+ <tr>
+  <td>
+   <div class="form-label">ID</div>
+  </td>
+  <td>
+   <input type="text" name="add_input_name" size="40" />
+  </td>
+ </tr>
+ <tr tal:condition="view/getProfileInfos">
+  <td>
+   <div class="form-label">Presettings</div>
+  </td>
+  <td>
+   <select name="settings_id">
+    <option value="" selected="selected">(None)</option>
+    <optgroup label="PROFILE_TITLE"
+       tal:repeat="profile view/getProfileInfos"
+       tal:attributes="label profile/title">
+     <option value="SETTINGS_ID"
+             tal:repeat="obj_id profile/obj_ids"
+             tal:attributes="value string:${profile/id}/${obj_id}"
+             tal:content="obj_id">OBJ ID</option></optgroup>
+   </select>
+  </td>
+ </tr>
+ <tr>
+  <td>
+   &nbsp;
+  </td>
+  <td>
+   <input class="form-element" type="submit" name="submit_add" value="Add" /> 
+  </td>
+ </tr>
+</table>
+</form>
+
+</body>
+</html>

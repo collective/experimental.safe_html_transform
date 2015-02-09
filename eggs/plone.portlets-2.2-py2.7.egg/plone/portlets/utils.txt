@@ -1,0 +1,62 @@
+=============
+Portlet utils
+=============
+
+The portlets need a hash that can play as an id in the html
+page. For this, a pair of symetric hash and unhash functions 
+is provided.
+
+  >>> from plone.portlets.utils import hashPortletInfo, unhashPortletInfo
+
+Usage
+-----
+
+Suppose the following portlet information dict:
+
+  >>> info = dict(
+  ...     manager = 'plone.leftcolumn',
+  ...     category = 'context',
+  ...     key = '/new1',
+  ...     name = 'login',
+  ...     )
+
+Let's make the hash of this. The hash is returned and is
+also put into the info dict.
+
+  >>> hash = hashPortletInfo(info)
+  >>> hash == info['hash']
+  True
+
+If we reverse the operation, we get back the original info
+dict.
+
+  >>> info2 = unhashPortletInfo(hash)
+  >>> info2 == info
+  True
+
+Constraints
+-----------
+
+The hash must only contain any characters acceptable in a
+html id. We should only allow the characters a-zA-Z0-9 . (We
+could actually allow -, but it's even better not to.)
+
+For the sake of the example, we put stranger characters into
+the dictionary, mainly /-+_@ should be tested. 
+
+  >>> info = dict(
+  ...     manager = 'plone.leftcolumn',
+  ...     category = 'context',
+  ...     key = '/new1-+_@',
+  ...     name = 'login',
+  ...     )
+
+  >>> hash = hashPortletInfo(info)
+
+Now, let's check it only contains the allowed characters:
+
+  >>> import re
+  >>> re_allowed = re.compile(r'^[a-zA-Z0-9]*$')
+  >>> re_allowed.match(hash) is not None
+  True
+

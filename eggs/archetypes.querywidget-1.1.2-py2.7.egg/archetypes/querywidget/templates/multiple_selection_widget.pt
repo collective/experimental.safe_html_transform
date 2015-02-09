@@ -1,0 +1,40 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      i18n:domain="plone">
+
+    <body>
+         <metal:widget define-macro="widget"
+            tal:define="fieldName fieldName|string:query;
+                        index index|nothing;
+                        widget_view nocall:context/@@archetypes-querywidget-multipleselectionwidget;
+                        values potential_values|python:widget_view.getValues(index);
+                        sorted_values_keys python:widget_view.getSortedValuesKeys(values);
+                        value value|nothing">
+
+            <dl class="querywidget queryvalue multipleSelectionWidget">
+                <dt>
+                    <span class="arrowDownAlternative">&#09660;</span>
+                    <span class="multipleSelectionWidgetTitle" i18n:translate="">Select&hellip;</span>
+                </dt>
+                <dd>
+                    <tal:values repeat="index sorted_values_keys">
+                        <label>
+                            <input type="checkbox" name="query.v:records:list"
+                                   tal:attributes="name python:str(fieldName)+'.v:records:list';
+                                                   value index;
+                                                   checked python: value and index in value and 'checked' or nothing"/>
+                            <span tal:content="python:values[index]['title']"/>
+                        </label>
+                    </tal:values>
+                </dd>
+            </dl>
+        </metal:widget>
+    </body>
+</html>
+
+
+
+
+

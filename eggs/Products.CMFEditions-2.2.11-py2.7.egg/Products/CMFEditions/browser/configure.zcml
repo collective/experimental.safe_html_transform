@@ -1,0 +1,39 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+    <browser:page
+        for="*"
+        name="history"
+        class=".diff.DiffView"
+        permission="CMFEditions.AccessPreviousVersions"
+        />
+
+    <configure zcml:condition="installed Products.Archetypes">
+      <browser:viewlet
+          name="cmfeditions.versioningfields"
+          manager="Products.Archetypes.interfaces.IEditAfterFieldsets"
+          template="edit.pt"
+          permission="cmf.ModifyPortalContent"
+          />
+    </configure>
+
+    <browser:page
+        for="*"
+        name="candiff"
+        class=".diff.CanDiff"
+        attribute="can_diff"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="*"
+        name="get_macros"
+        class=".utils.GetMacros"
+        attribute="get_macros"
+        permission="zope2.View"
+        />
+
+</configure>
+

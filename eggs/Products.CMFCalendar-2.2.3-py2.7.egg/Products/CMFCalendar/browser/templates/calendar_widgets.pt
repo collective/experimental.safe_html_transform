@@ -1,0 +1,68 @@
+<html metal:use-macro="context/@@standard_macros/page">
+<body>
+
+<metal:slot metal:fill-slot="body" i18n:domain="cmf_calendar">
+ <div metal:define-macro="calendarBox"
+     class="CalendarBox"
+     tal:define="calendar_box_view context/@@calendar_box_view;
+                 yearmonth calendar_box_view/getMonthAndYear;
+                 year python:yearmonth[0];
+                 month python:yearmonth[1];
+                 weeks python:context.portal_calendar.getEventsForCalendar(month=month, year=year);">
+
+    <div metal:define-slot="title" class="CalendarTitle"
+       i18n:translate="">CMF Calendar</div>
+
+    <!-- The calendar, rendered as a table -->
+    <table cellspacing="0" cellpadding="0" border="1">
+    <tr><td>
+
+    <table cellpadding="2" cellspacing="0" border="0" class="calendar">
+
+        <!-- The headers. The month with links either side -->
+        <tr>
+         <th>
+          <a href="#" class="CalendarArrow"
+             tal:attributes="href python: calendar_box_view.getPreviousMonthLink(request.URL0, month, year)">&laquo;</a>
+         </th>
+         <th colspan="5" tal:define="date python:context.ZopeTime(int(year), int(month), 1)">
+          <tal:span tal:content="python:date.strftime('%B').capitalize()"
+             i18n:translate="">January</tal:span
+         > <tal:span tal:content="python:date.year()">2000</tal:span>
+         </th>
+         <th>
+          <a href="#" class="CalendarArrow"
+             tal:attributes="href python: calendar_box_view.getNextMonthLink(request.URL0, month, year)">&raquo;</a>
+         </th>
+        </tr>
+
+        <!-- The week days across the top -->
+        <tr tal:define="weekdays context/portal_calendar/getDays">
+         <tal:loop tal:repeat="weekday weekdays"
+        ><td class="weekdays" tal:content="weekday" i18n:translate="">
+          Su
+         </td></tal:loop>
+        </tr>
+
+        <!-- The actual days with in the weeks -->
+        <tr tal:repeat="week weeks">
+         <tal:loop tal:repeat="day week"
+        ><td class="event"
+            tal:define="daynumber day/day;
+                        datestring python:'%d/%0.2d/%0.2d' % (year, month, daynumber);"
+            tal:attributes="class python: calendar_box_view.getDaysClass(daynumber, month, year, day['event'])">
+          <a tal:omit-tag="not: day/event"
+             tal:attributes="href string:${portal_url}/calendar_day.html?date=${datestring}"
+             tal:content="python:daynumber or default"> &nbsp;</a>
+         </td></tal:loop>
+        </tr>
+        
+    </table>
+    </td></tr>
+    </table>
+    
+ </div>
+</metal:slot>
+
+</body>
+</html>

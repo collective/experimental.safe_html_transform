@@ -1,0 +1,10 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="plone.behavior">
+
+    <utility
+        component=".vocab.BehaviorsVocabularyFactory"
+        name="Behaviors"
+        />
+
+</configure>

@@ -1,0 +1,54 @@
+=============================
+Date and Time Data Converters
+=============================
+
+The normal z3c.form data converters for dates and datetimes format the entire
+date as a string representation in the current locale.  But the widgets in
+this package work with individual components of the date/time, which is easiest
+if we provide our own data converters that keep the components separate. (We
+can't simply provide a null converter that passes the date values into and out
+of the widget unchanged, because z3c.form does not catch validation errors while
+extracting a widget's value.)
+
+Let's set up a date field, date widget, and a converter adapting both of them.
+
+    >>> from zope.schema import Date
+    >>> from collective.z3cform.datetimewidget import DateWidget
+    >>> from collective.z3cform.datetimewidget.converter import DateDataConverter
+    >>> from collective.z3cform.datetimewidget.tests import TestRequest
+    >>> field = Date()
+    >>> request = TestRequest()
+    >>> widget = DateWidget(request)
+    >>> converter = DateDataConverter(field, widget)
+
+Now we can convert field values to widget values.
+  
+    >>> from datetime import date
+    >>> converter.toWidgetValue(date(2009, 5, 10))
+    (2009, 5, 10)
+
+A value of None results in a tuple of empty strings.
+
+    >>> converter.toWidgetValue(None)
+    ('', '', '')
+
+We can also convert widget values to field values.
+
+    >>> converter.toFieldValue(('2009', '5', '10'))
+    datetime.date(2009, 5, 10)
+
+If any of the widget value components is missing, a value of None will be
+returned.
+
+    >>> converter.toFieldValue(('', '5', '10')) is None
+    True
+
+If all of the widget value components are present but they don't correspond to
+a valid date, a validation error will be raised.
+
+    >>> converter.toFieldValue(('2009', '42', '42'))
+    Traceback (most recent call last):
+    ...
+    DateValidationError
+
+

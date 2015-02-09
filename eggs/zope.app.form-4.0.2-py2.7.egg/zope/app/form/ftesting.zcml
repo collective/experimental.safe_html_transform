@@ -1,0 +1,46 @@
+<configure
+  xmlns="http://namespaces.zope.org/zope"
+  xmlns:browser="http://namespaces.zope.org/browser"
+  i18n_domain="zope"
+  package="zope.app.form"
+  >
+
+  <include package="zope.browserpage" file="meta.zcml" />
+  <include package="zope.component" file="meta.zcml" />
+  <include package="zope.i18n" file="meta.zcml" />
+  <include package="zope.security" file="meta.zcml" />
+  <include package="zope.app.publication" file="meta.zcml" />
+
+  <include package="zc.sourcefactory" />
+  <include package="zope.container" />
+  <include package="zope.i18n" />
+  <include package="zope.principalregistry" />
+  <include package="zope.publisher" />
+  <include package="zope.security" />
+  <include package="zope.site" />
+  <include package="zope.traversing" />
+
+  <include package="zope.app.appsetup" />
+  <include package="zope.app.publication" />
+
+  <securityPolicy
+      component="zope.security.simplepolicies.PermissiveSecurityPolicy" />
+
+  <browser:page
+      name="standard_macros"
+      for="*"
+      class="zope.app.form.browser.macros.FormMacros"
+      allowed_interface="zope.interface.common.mapping.IItemMapping"
+      permission="zope.Public" />
+
+  <browser:page
+      name="view_macros"
+      for="*"
+      permission="zope.View"
+      template="tests/test_macros.pt" />
+
+  <include package="zope.app.form.browser" file="meta.zcml" />
+  <include package="zope.app.form.browser" />
+  <include package="zope.app.form.browser.tests" file="i18n.zcml" />
+
+</configure>

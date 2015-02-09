@@ -1,0 +1,92 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:gs="http://namespaces.zope.org/genericsetup"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="plone">
+
+<!--
+    <i18n:registerTranslations directory="locales"/>
+-->
+
+    <include package="plone.resource" file="meta.zcml" />
+
+    <include package="plone.resource" />
+    <include package="plone.resourceeditor" />
+    <include package="five.globalrequest" />
+    <include package="plone.transformchain" />
+    <include package="plone.app.registry" />
+    <include package="diazo" file="diazo-debug.zcml" />
+
+    <include package=".browser" />
+    <include package=".exportimport" />
+    <include package=".plugins" />
+
+    <gs:registerProfile
+        name="default"
+        title="Diazo theme support"
+        description="Installs a control panel to allow on-the-fly theming with Diazo"
+        directory="profiles/default"
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
+
+    <gs:upgradeStep
+        title="Update registry"
+        source="*"
+        destination="1000"
+        handler=".upgrade.update_registry"
+        sortkey="1"
+        profile="plone.app.theming:default"
+        />
+
+    <gs:upgradeStep
+        title="Combine Theming control panels"
+        source="1000"
+        destination="1001"
+        handler=".upgrade.update_controlpanel"
+        sortkey="2"
+        profile="plone.app.theming:default"
+        />
+
+    <!-- Transform order 8850 - apply theme transform -->
+    <adapter
+        name="plone.app.theming.transform"
+        factory=".transform.ThemeTransform"
+        />
+
+    <subscriber
+        for=".interfaces.IThemeSettings
+              plone.registry.interfaces.IRecordModifiedEvent"
+        handler=".transform.invalidateCache"
+        />
+
+    <!-- Set X-Theme-Enabled header in the request if theming is enabled -->
+    <subscriber
+        for="Products.CMFCore.interfaces.ISiteRoot
+             zope.traversing.interfaces.IBeforeTraverseEvent"
+        handler=".header.setHeader"
+        />
+
+    <!-- Resource traverser -->
+    <adapter
+        name="theme"
+        for="* zope.publisher.interfaces.IRequest"
+        provides="zope.traversing.interfaces.ITraversable"
+        factory=".traversal.ThemeTraverser"
+        />
+
+    <!-- Themes -->
+    <plone:static
+        type="theme"
+        name="template"
+        directory="themes/template"
+        />
+    <plone:static
+        type="theme"
+        name="example"
+        directory="themes/example"
+        />
+
+</configure>

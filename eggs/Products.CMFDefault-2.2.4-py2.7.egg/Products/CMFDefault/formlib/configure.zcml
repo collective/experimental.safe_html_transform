@@ -1,0 +1,16 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <adapter
+      factory=".widgets.EmailInputWidget"
+      permission="zope.Public"
+      />
+
+  <adapter
+      factory=".widgets.FileUploadWidget"
+      permission="zope.Public"
+      />
+
+  <adapter factory=".form.FallbackAddView" />
+
+</configure>

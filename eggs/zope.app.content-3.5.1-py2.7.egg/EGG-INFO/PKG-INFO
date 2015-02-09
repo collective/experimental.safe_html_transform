@@ -1,0 +1,45 @@
+Metadata-Version: 1.1
+Name: zope.app.content
+Version: 3.5.1
+Summary: Zope Content Type
+Home-page: http://cheeseshop.python.org/pypi/zope.app.content
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: This package defines an ``IInterface`` that allows the developer to mark
+        interfaces as content types.
+        
+        
+        =======
+        CHANGES
+        =======
+        
+        3.5.1 (2010-12-21)
+        ------------------
+        
+        - Replace ``zope.app.component`` dependency with ``zope.componentvocabulary``.
+        
+        
+        3.5.0 (2010-09-20)
+        ------------------
+        
+        - Moved ``zope.app.interface.queryType`` to ``zope.app.content.queryType``
+          to inverse dependency.
+        
+        
+        3.4.0 (2007-10-11)
+        ------------------
+        
+        - Initial release independent of the main Zope tree.
+        
+Keywords: zope3 content type
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3

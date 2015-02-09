@@ -1,0 +1,85 @@
+Metadata-Version: 1.1
+Name: plone.app.intid
+Version: 1.0.3
+Summary: Installation and migration support for five.intid within Plone/CMF
+Home-page: https://github.com/plone/plone.app.intid
+Author: Alec Mitchell
+Author-email: apm13@columbia.edu
+License: GPL
+Description: Introduction
+        ============
+        
+        This package provides a Generic Setup extension profile that will
+        install an IntId utility in a CMF portal.  Additionally, it registers
+        intid handlers for the standard object events on CMF content.  Finally,
+        it finds existing CMF content in the portal and registers it with the
+        IntId utility.
+        
+        Installation notes
+        ------------------
+        
+        Installation for Plone 3.3 requires plone.app.intid <= 1.0b3 and
+        five.intid <= 0.4.3.
+        
+        Changelog
+        =========
+        
+        1.0.3 (2014-02-25)
+        ------------------
+        
+        - Make the test setup independent from basic content types in the
+          PLONE_FIXTURE.
+          [timo]
+        
+        
+        1.0.2 (2012-12-17)
+        ------------------
+        
+        - removing zope.app.container as dependency and importing events interfaces
+          from zope.lifecycle
+          [garbas]
+        
+        - intid/setuphandlers.py: Removed blacklisted and unused interface
+          IDynamicType from query. Closes http://dev.plone.org/ticket/11946.
+          [kleist]
+        
+        
+        1.0.1 (2012-06-15)
+        ------------------
+        
+        - Fixed registration of pre existing contents in the intids utility
+          [gborelli]
+        
+        - Added setup tests
+          [gborelli]
+        
+        1.0 (2012-02-20)
+        ----------------
+        
+        - Remove includeOverride for five.intid. [thet]
+        
+        - Fix import step intid-register-content to register content
+          in all Languages if LinguaPlone is installed. [csenger]
+        
+        1.0b3 2010-02-27
+        -------------------
+        
+        - Made compatible with Plone 3.3
+          [alecm]
+        
+        1.0b2 2010-02-22
+        -------------------
+        
+        - fixed dependecy of import profiles
+          [naro]
+        
+        1.0b1 2010-02-07
+        -------------------
+        
+        - Initial release
+          [alecm]
+        
+Keywords: plone zope five intid
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python

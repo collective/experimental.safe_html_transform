@@ -1,0 +1,281 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2013-04-06 15:36+0000\n"
+"PO-Revision-Date: 2011-05-20 15:13+0800\n"
+"Last-Translator: retsu <retsuyam@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"Language-Code: ja\n"
+"Language-Name: Japanese\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: plone.app.dexterity\n"
+"X-Is-Fallback-For: ja-jp\n"
+
+#: ../interfaces.py:87
+msgid "# of items"
+msgstr ""
+
+#: ../browser/add_type.py:12
+msgid "Add Content Type"
+msgstr "コンテンツタイプを追加"
+
+#: ../browser/types_listing.pt:82
+msgid "Add New Content Type…"
+msgstr "新しいコンテンツタイプを追加..."
+
+msgid "Adds Dublin Core metadata fields (equals Basic metadata + Categorization + Effective range + Ownership)"
+msgstr "ダブリンコアメタデータフィールド（基本メタデータ＋カテゴリ＋有効期間＋所有権）"
+
+msgid "Adds a title and description"
+msgstr "タイトルと説明を追加"
+
+msgid "Adds creator, contributor, and rights fields"
+msgstr "作者、貢献者、権利といったフィールドを追加"
+
+msgid "Adds keywords and language setting"
+msgstr "キーワードと言語設定を追加"
+
+#: ../behaviors/discussion.py:30
+msgid "Allow discussion"
+msgstr ""
+
+#: ../behaviors/discussion.py:31
+msgid "Allow discussion for this content object."
+msgstr ""
+
+msgid "Allow items to be excluded from navigation"
+msgstr ""
+
+msgid "Allow items to have next previous navigation enabled"
+msgstr "アイテムについて、次・前ナビゲーションを有効にする"
+
+#: ../interfaces.py:75
+msgid "Allowed Content Types"
+msgstr ""
+
+msgid "Assign an effective and/or expiration date"
+msgstr "有効日付または満了日付を割り当てる"
+
+msgid "Automatically generate short URL name for content based on its initial title"
+msgstr "コンテンツの最初のタイトルを基にして、コンテンツの短いURL名を自動生成する"
+
+msgid "Automatically generate short URL name for content based on its primary field file name"
+msgstr "コンテンツの主要フィールドファイル名を基にして、コンテンツの短いURL名を自動生成する"
+
+msgid "Basic metadata"
+msgstr "基本メタデータ"
+
+#: ../browser/behaviors.py:58
+#: ../browser/layout.py:16
+msgid "Behaviors"
+msgstr "振る舞い"
+
+#: ../browser/behaviors.py:60
+msgid "Behaviors successfully updated."
+msgstr "振る舞いが更新されました"
+
+#: ../browser/types.py:58
+msgid "Clone"
+msgstr "複製"
+
+#: ../browser/clone_type.py:11
+msgid "Clone Content Type"
+msgstr "コンテンツタイプを複製する"
+
+msgid "Configures various components needed for full Dexterity support."
+msgstr ""
+
+#: ../interfaces.py:57
+msgid "Container"
+msgstr "コンテナ"
+
+#: ../interfaces.py:52
+msgid "Description"
+msgstr "説明"
+
+#: ../browser/types.py:247
+#: ../profiles/default/actions.xml
+#: ../profiles/default/controlpanel.xml
+msgid "Dexterity Content Types"
+msgstr "Dexterityコンテンツタイプ"
+
+#: ../browser/types.py:214
+msgid "Dexterity content types"
+msgstr "Dexterityコンテンツタイプ"
+
+msgid "Dublin Core metadata"
+msgstr "ダブリンコアメタデータ"
+
+msgid "Effective range"
+msgstr "有効期間"
+
+msgid "Enable next previous navigation for all items of this type"
+msgstr "このタイプのアイテムについて、次・前ナビゲーションを有効にする"
+
+msgid "Exclude From navigation"
+msgstr "ナビゲーションから除外する"
+
+#: ../browser/types.py:83
+msgid "Export Schema Models"
+msgstr "スキーマモデルをエクポート"
+
+#: ../browser/types.py:71
+msgid "Export Type Profiles"
+msgstr "タイププロファイルをエクスポート"
+
+#: ../browser/fields.py:9
+#: ../browser/layout.py:15
+msgid "Fields"
+msgstr "フィールド"
+
+#: ../interfaces.py:64
+msgid "Filter Contained Types"
+msgstr ""
+
+#: ../interfaces.py:58
+msgid "Items of this type will be able to contain other items."
+msgstr "このタイプのアイテムは、他のアイテムを含めることができます"
+
+msgid "Make all items of this type a navigation root"
+msgstr ""
+
+msgid "Name from file name"
+msgstr "ファイル名からの名前"
+
+msgid "Name from title"
+msgstr "タイトルからの名前"
+
+msgid "Navigation root"
+msgstr "ナビゲーションルート"
+
+msgid "Next previous navigation"
+msgstr "次・前ナビゲーション"
+
+msgid "Next previous navigation toggle"
+msgstr "次・前ナビゲーションのトグル"
+
+#: ../behaviors/discussion.py:17
+msgid "No"
+msgstr ""
+
+#: ../browser/behaviors.py:61
+msgid "No changes were made."
+msgstr "何も変更されていません"
+
+#: ../browser/layout.py:14
+#: ../browser/overview.py:32
+msgid "Overview"
+msgstr ""
+
+#: ../browser/types.py:63
+msgid "Please select a single type to clone."
+msgstr "複製するタイプをひとつ選んでください"
+
+#: ../browser/types.py:69
+msgid "Please select a type to clone."
+msgstr "複製するタイプをひとつ選んでください"
+
+#: ../browser/types.py:76
+msgid "Please select types to export."
+msgstr "エクスポートするタイプを選んでください（複数選択可）"
+
+#: ../interfaces.py:25
+msgid "Please use only letters, numbers, and the following characters: .-_"
+msgstr "文字、数字、記号 \".\", \"-\", \"_\" だけを使うようにしてください"
+
+#: ../browser/behaviors.py:59
+msgid "Select the behaviors to enable for this content type."
+msgstr "このコンテンツタイプに対して有効にする振る舞いを選んでください"
+
+#: ../behaviors/discussion.py:25
+#: ../behaviors/exclfromnav.py:13
+#: ../behaviors/nextprevious.py:27
+msgid "Settings"
+msgstr "設定"
+
+#: ../interfaces.py:45
+msgid "Short Name"
+msgstr "ショートネーム"
+
+#: ../browser/types.py:176
+msgid "The following custom content types are available for your site."
+msgstr "次のカスタムコンテンツタイプがあなたのサイトで利用できます"
+
+#: ../interfaces.py:98
+msgid "There is already a content type named '${name}'"
+msgstr ""
+
+#: ../interfaces.py:41
+msgid "Type Name"
+msgstr "タイプ名"
+
+#: ../browser/add_type.py:47
+msgid "Type added successfully."
+msgstr "タイプが追加されました"
+
+#: ../browser/clone_type.py:28
+msgid "Type cloned successfully."
+msgstr "タイプが複製されました"
+
+#: ../interfaces.py:46
+msgid "Used for programmatic access to the type."
+msgstr "プログラム的にタイプにアクセスするのに使われます"
+
+#: ../behaviors/discussion.py:16
+msgid "Yes"
+msgstr ""
+
+#. Default: "Click the \"Add Content Type\" button to begin creating  a new custom content type."
+#: ../browser/types.py:179
+msgid "help_addcontenttype_button"
+msgstr "新しいカスタムコンテンツタイプを作り始めるには、「コンテンツタイプを追加」ボタンをクリックします"
+
+#. Default: "If selected, this item will not appear in the navigation tree"
+#: ../behaviors/exclfromnav.py:18
+msgid "help_exclude_from_nav"
+msgstr "選ばれると、このアイテムはナビゲーションツリーに現れなくなります"
+
+#. Default: "This enables next/previous widget on content items contained in this folder."
+#: ../behaviors/nextprevious.py:32
+msgid "help_nextprevious"
+msgstr "このフォルダに含まれるコンテンツアイテムについて、次・前ウィジェットを有効にします。"
+
+#. Default: "All content types"
+#: ../browser/overview.pt:24
+msgid "label_all_content_types"
+msgstr ""
+
+#. Default: "Contained items"
+#: ../browser/overview.pt:9
+msgid "label_contained_items"
+msgstr ""
+
+#. Default: "Exclude from navigation"
+#: ../behaviors/exclfromnav.py:17
+msgid "label_exclude_from_nav"
+msgstr "ナビゲーションから除外"
+
+#. Default: "Items of this type can act as a folder containing other items.What content types should be allowed inside?"
+#: ../interfaces.py:65
+msgid "label_filter_contained_types"
+msgstr ""
+
+#. Default: "Enable next previous navigation"
+#: ../behaviors/nextprevious.py:31
+msgid "label_nextprevious"
+msgstr "次・前ナビゲーションを有効化"
+
+#. Default: "No content types"
+#: ../browser/overview.pt:18
+msgid "label_no_content_types"
+msgstr ""
+
+#. Default: "Some content types:"
+#: ../browser/overview.pt:30
+msgid "label_some_content_types"
+msgstr ""
+

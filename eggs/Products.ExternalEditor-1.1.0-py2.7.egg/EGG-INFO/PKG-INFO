@@ -1,0 +1,729 @@
+Metadata-Version: 1.1
+Name: Products.ExternalEditor
+Version: 1.1.0
+Summary: Zope External Editor
+Home-page: http://pypi.python.org/pypi/Products.ExternalEditor
+Author: Chris McDonough
+Author-email: chrism@plope.com
+License: ZPL 2.1
+Description: Zope External Editor
+        ====================
+        
+        The Zope External Editor is a new way to integrate Zope more seamlessly with
+        client-side tools. It has the following features:
+        
+            - Edit objects locally, directly from the ZMI.
+        
+            - Works with any graphical editor application that can open a file from the 
+              command line, including: emacs, gvim, xemacs, nedit, gimp, etc.
+        
+            - Automatically saves changes back to Zope without ending the editing session.
+        
+            - Associate any client-side editor application with any Zope object by
+              meta-type or content-type. Both text and binary object content can be
+              edited.
+        
+            - Locks objects while they are being edited. Automatically unlocks them when
+              the editing session ends.
+        
+            - Can add file extensions automatically to improve syntax highlighting or 
+              file type detection.
+        
+            - Works with basic auth, cookie auth and Zope versions. Credentials are
+              automatically passed down to the helper application. No need to
+              reauthenticate.
+        
+            - https support (Openssl required)
+        
+        Using It
+        --------
+        
+        Use of the application is about as easy as using the ZMI once your browser
+        is configured (see the installation instructions). To edit an object
+        externally, just click on the pencil icon next to the object in the ZMI.
+        The object will be downloaded and opened using the editor application you
+        have chosen (you will be prompted the first time to choose an editor). 
+        
+        You edit the object just like any other file. When you save the changes in
+        your editor, they are automatically uploaded back to Zope in the
+        background. While the object is open in your editor, it is locked in Zope
+        to prevent concurrent editing. When you end your editing session (ie you
+        close your editor) the object is unlocked.
+        
+        How it Works
+        ------------
+        
+        Ok, so this all sounds a bit too good to be true, no? So how the heck does
+        it work anyway? First I'll give you a block diagram::
+        
+            +------------+     +------------+     +---------+        +------+
+            | Editor App | <-- | Helper App | <-- | Browser | <-/ /- | Zope |
+            +------------+     +------------+     +---------+        +------+
+                        ^       ^     ^                                ^
+                         \     /       \                              /
+                          v   v         -----------------------/ /----
+                         -------
+                        / Local \
+                        \  File /
+                         -------
+        
+        Now the key to getting this to work is solving the problem that the editor
+        cannot know about Zope, and must only deal with local files. Also, there is
+        no standard way to communication with editors, so the only communication
+        channel can be the local file which contains the object's content or code.
+        
+        It is trivial to get the browser to fire up your editor when you download
+        a particular type of data with your browser. But that does you little good,
+        since the browser no longer involves itself once the data is downloaded. It
+        just creates a temp file and fires off the registered application, passing
+        it the file path. Once the editor is running, it is only aware of the local
+        file, and has no concept of where it originated from.
+        
+        To solve this problem, I have developed a helper application whose job is
+        essentially two-fold:
+        
+            - Determine the correct editor to launch for a given Zope object
+        
+            - Get the data back into Zope when the changes are saved
+        
+        So, let's take a step by step look at how it works:
+        
+            1. You click on the external editor link (the pencil icon) in the Zope 
+               management interface.
+               
+            2. The product code on the server creates a response that encapsulates the
+               necessary meta-data (URL, meta-type, content-type, cookies, etc) and the
+               content of the Zope object, which can be text or binary data. The
+               response has the contrived content-type "application/x-zope-edit".
+        
+            3. The browser receives the request, and finds our helper application
+               registered for "application/x-zope-edit". It saves the response data 
+               locally to disk and spawns the helper app to process it.
+        
+            4. The helper app, reads its config file and the response data file. The
+               meta-data from the file is parsed and the content is copied to a new
+               temporary file. The appropriate editor program is determined based on
+               the data file and the configuration.
+               
+            5. The editor is launched as a sub-process of the helper app, passing it the
+               file containing the content data.
+               
+            6. If so configured, the helper app sends a WebDAV lock request back to Zope
+               to lock the object.
+               
+            7. Every so often (if so configured), the helper app stats the content file
+               to see if it has been changed. If so, it sends an HTTP PUT request
+               back to Zope containing the new data.
+               
+            8. When the editor is closed, the content file is checked one more time and
+               uploaded if it has changed. Then a WebDAV unlock request is sent to Zope.
+               
+            9. The helper application exits.
+        
+        Configuration
+        -------------
+        
+        The helper application supports several configuration options, each of
+        which can be triggered in any combination of object meta-type, content-type
+        or domain. This allows you to create appropriate behavior for different
+        types of Zope objects and content or even different servers. The
+        configuration file is stored in the file  "~/.zope-external-edit" (Unix) or
+        "~\ZopeEdit.ini" (Windows). If no configuration file is found when the
+        helper application starts, a default config file is created in your home
+        directory.
+        
+        The configuration file follows the standard Python ConfigParser format,
+        which is pretty much like the old .ini file format from windows. The file
+        consists of sections and options in the following format::
+        
+            [section 1]
+            option1 = value
+            option2 = value
+        
+            [section 2]
+            ...
+        
+        Options
+        -------
+        
+        The available options for all sections of the config file are:
+        
+            editor -- Command line or plugin name used to invoke the editor
+            application. On Windows, if no editor setting is found for an object you
+            edit, the helper app will search the file type registry for an
+            appropriate editor based on the content-type or file extension of the
+            object (which can be specified using the extension option below). By
+            default, the file path of the local file being edited is appended to
+            this command line. To insert the file path in the middle of your
+            command, use "$1" for Unix and "%1" for Windows respectively.
+        
+            save_interval -- (float) The interval in seconds that the helper 
+            application checks the edited file for changes.
+        
+            use_locks -- (1 or 0) Whether to use WebDAV locking. The user editing must
+            have the proper WebDAV related permissions for this to work.
+            
+            always_borrow_locks -- (1 or 0) When use_locks is enabled this features
+            suppresses warnings when trying to edit an object you have already locked.
+            When enabled, external editor will always "borrow" the existing lock token
+            instead of doing the locking itself. This is useful when using CMFStaging
+            for instance. If omitted, this option defaults to 0.
+        
+            cleanup_files -- (1 or 0) Whether to delete the temp files created.
+            WARNING the temp file coming from the browser contains authentication
+            information and therefore setting this to 0 is a security risk,
+            especially on shared machines. If set to 1, that file is deleted at the
+            earliest opportunity, before the editor is even spawned. Set to 0 for
+            debugging only.
+        
+            extension -- (text) The file extension to add to the content file. Allows
+            better handling of images and can improve syntax highlighting.
+        
+            temp_dir -- (path) Path to store local copies of object data being
+            edited. Defaults to operating system temp directory. *Note: this setting
+            has no apparent effect on Windows* 8^(
+            
+            long_file_name -- (1 or 0) Whether to include the whole path to the 
+            object including the hostname in the file name (the default) or just the
+            id of the object being edited. Turn this option off for shorter file
+            names in your editors, and for editors that don't like long names.
+        
+            file_name_separator -- (string) Character or characters used to separate
+            path elements in long files names used by external editor. Defaults to
+            a comma (,). This must be a legal character for use in file names on
+            your platorm (i.e., don't use a path separator character!). This option
+            is ignored if 'long_file_name' is set to 0.
+        
+        Sections
+        --------
+        
+        The sections of the configuration file specify the types of objects and
+        content that the options beneath them apply to.
+        
+        There is only one mandatory section '[general]', which should define all
+        of the above options that do not have a default value. If no other
+        section defines an option for a given object, the general settings are
+        used.
+        
+        Additional sections can apply to a particular domain, content-type or
+        meta-type. Since objects can have all these properties, the options are
+        applied in this order of precedence.
+        
+            - `[content-type:text/html]` -- Options by whole content-type come first.
+        
+            - `[content-type:text/*]` -- Options by major content-type come second.
+        
+            - `[meta-type:File]` -- Options by Zope meta-type are third.
+        
+            - `[domain:www.mydomain.com]` -- Options by domain follow. Several
+              sections can be added for each domain level if desired.
+        
+            - `[general]` -- General options are last.
+        
+        This scheme allows you to specify an extension by content-type, the
+        editor by meta-type, the locking settings by domain and the remaining 
+        options under general for a given object.
+        
+        Editor Plugins
+        --------------
+        
+        For tighter client-side integration, external editor has a plugin system
+        that allows it to interact directly with supported applications.
+        
+        On Windows this generally means using COM to invoke the application, open
+        the content file and wait for the user to save and close the file. Because
+        each application has different remote scripting capabilities and APIs,
+        editor specific plugins must be written tailored to each supported
+        application and platform.
+        
+        This system allows external editor to efficiently connect to running
+        applications without relaunching them and therefore fully support MDI 
+        environments. The following applications currently have plugin support::
+        
+            Application       Platform    Plugin Module Name(s)
+            ===================================================
+            HomeSite          Windows     homesite5, homesite
+            Dreamweaver       Windows     dreamweaver	
+            Photoshop         Windows     photoshp, photoshop
+            MS Word           Windows     winword, word
+            MS Excel          Windows     excel
+            MS Powerpoint     Windows     powerpnt, powerpoint
+        
+        External editor will attempt to load a plugin for any application before
+        using the general editor control method. It does this by matching the
+        name of the application executable file (sans extension) in the editor
+        command line with the available plugins. 
+        
+        Because plugins do not require the path of the editor application to work,
+        you can simply specify the plugin module name for your editor in the
+        configuration file if desired. For example, to specify Photoshop for all
+        image files, use add the following section to your config file
+        (ZopeEdit.ini on Windows)::
+        
+            [content-type:image/*]
+            editor=photoshop
+        
+        This is only a shortcut and specifying the full application path will
+        still use the plugin where possible.
+        
+        Plugin Notes
+        ------------
+        
+        Photoshop -- Photoshop's COM API is quite limited, and external editor
+        cannot detect that you have closed a file until you exit the entire
+        application (it can still detect saves). Therefore you may want to turn 
+        off DAV locking (use_locks=0) or borrow locks (always_borrow_locks=1)
+        when using it.
+        
+        Dreamweaver -- External editor cannot detect when you have finished 
+        editing a single file. Objects edited with Dreamweaver will remain
+        locked on the server until you exit the application. As with Photoshop
+        above, you may want to turn off locking for Dreamweaver.
+        
+        If your favorite editor needs a plugin because the general support is
+        not good enough, please let me know. Keep in mind that I must be able to
+        run a copy of the application in order to develop a plugin for it. So, 
+        unless the application is free, or a full demo is available for download
+        I won't be able to help much. Plugins are not difficult to write, and I
+        encourage you to write one for your favorite editor, start by reading
+        one of the existing ones. I am happy to include third-party plugins with
+        the distribution.
+        
+        Permissions
+        -----------
+        
+        External editing is governed by the permission "Use external editor".
+        Users with this permission can launch external editor from editable
+        objects. In order to save changes, users will need additional permissions
+        appropriate for the objects they are editing.
+        
+        If users wish to use the built-in locking support, they must have the
+        "WebDAV access", "WebDAV Lock items" and "WebDAV Unlock items" permissions
+        for the objects they are editing.
+        
+        If these permissions are not set in Zope, then the helper application will
+        receive unauthorized errors from Zope which it will present to the user.
+          
+        Integrating with External Editor
+        --------------------------------
+        
+        The external editor product in zope installs a globally available object
+        that can format objects accessible through FTP/DAV for use by the helper
+        application. You can take advantage of this functionality easily in your
+        own content management applications.
+        
+        Say you have an FTP editable object, "document", in a Zope folder named
+        "my_stuff". The URL to view the object would be::
+        
+            http://zopeserver/my_stuff/document
+        
+        The URL to kick off the external editor on this document would be::
+        
+            http://zopeserver/my_stuff/externalEdit_/document
+        
+        Now, this may look a bit odd to you if you are used to tacking views on to
+        the end of the URL. Because `externalEdit_` is required to work on Python
+        Scripts and Page Templates, which swallow the remaining path segments on
+        the URL following themselves, you must put the call to `externalEdit_`
+        *directly before* the object to be edited. You could do this in ZPT using
+        some TAL in a Page Template like::
+        
+            <a href='edit' 
+               attributes='href
+               string:${here/aq_parent/absolute_url}/externalEdit_/${here/getId}'>
+               Edit Locally
+            </a>
+        
+        As an alternative, you can also pass the path the object you want to edit
+        directly to the `externalEdit_` object when you call its index_html method.
+        It can be called either directly by URL or from a python script.
+        `externalEdit_` will return the proper response data for the object to edit.
+        Here are some examples::
+        
+            http://zopeserver/externalEdit_?path=/my_stuff/document
+        
+            return context.externalEdit_.index_html(
+                context.REQUEST, context.RESPONSE, path='/my_stuff/document')
+        
+        When integrating External Editor with a CMS that already uses DAV
+        locks, it will, by default allow users to borrow locks made on the server
+        after displaying a confirmation dialog box. Although you can make this
+        automatic by specifying 'always_borrow_locks = 1' in the External Editor
+        config file, it may be desireable to make this the default behavior when
+        using that server. To facilitate this, you can specify that locks 
+        should be automatically borrowed in the URL (New in 0.7)::
+        
+            http://zopeserver/my_stuff/externalEdit_/document?borrow_lock=1
+        
+        External Editor also defines a global method that you can call to insert
+        pencil icon links for appropriate objects. The method automatically checks
+        if the object supports external editing and whether the user has the "Use
+        external editor" permission for that object. If both are true, it returns
+        the HTML code to insert the external editor icon link. Otherwise it returns
+        an empty string.
+        
+        The method is 'externalEditLink_(object)'. The object argument is the
+        object to create the link for if appropriate. Here is some example page
+        template code that inserts links to objects in the current folder and the
+        external editor icon where appropriate::
+        
+            <div tal:repeat="object here/objectValues">
+              <a href="#" 
+                 tal:attributes="href object/absolute_url"
+                 tal:content="object/title_or_id">Object Title</a>
+              <span tal:replace="structure python:here.externalEditLink_(object)" />
+            </div>
+        
+        Conclusion
+        ----------
+        
+        I hope you enjoy using this software. If you have any comments, suggestions
+        or would like to report a bug, send an email to the author:
+        
+        Casey Duncan
+        Changelog
+        =========
+        
+        1.1.0 - 2010-12-01
+        ------------------
+        
+        - Added support for unaware mimetype browser - we now add the .zem extension no 
+          matter what the user-agent
+          
+        - Modified the cache's parameters - special case for MSIE
+        
+        - Corrected and added tests
+        
+        - Moved the sources of the client to another package : collective.zopeedit
+        
+        
+        1.0 - 2010-07-01
+        ----------------
+        
+        - Update manage_main, manage_tabs, and findResult monkey patches to include
+          fixes from Zope 2.12.
+        
+        
+        1.0a2 - 2009-11-13
+        ------------------
+        
+        - Removed imports from Globals.
+        
+        - Purged old Zope 2 Interface interfaces for Zope 2.12 compatibility.
+        
+        
+        1.0a1 - 2008-03-05
+        ------------------
+        
+        - Updated package metadata to be usable as a package.
+        
+        
+        01/03/2007 - 0.9.3
+        ------------------
+        
+        - Fixed issue with 'manage_FTPget' overriding the 'Content-Type'
+          header.
+        
+        - Only run ExpandEnvironmentStrings on win32 systems.
+        
+        
+        9/14/2006 - 0.9.2
+        -----------------
+        
+        - Added 'skip_data' option to make External Editor send out only
+          the metadata part and skip appending data to the 'body'.
+        
+        - Add a simple callback registry that can be used to add extra
+          metadata headers or set special response headers when a file is
+          edited through External Editor.
+        
+        - Use rfc822.Message for parsing the metadata of the file being
+          edited.
+        
+        - Don't emit a warning about deprecated 'methods' in Zope >= 2.10.
+        
+        - Fixed acquisition issue in manage_main.dtml to sync up with the
+          same fix applied to Zope.
+        
+        
+        6/23/2005 - 0.9.1
+        -----------------
+        
+        - Older pyc files for plugins were included in the 0.9 release.
+          This version has the most up to date plugins.
+        
+        
+        6/20/2005 - 0.9
+        ---------------
+        
+        - When using the Excel plugin, errors were seen by users like
+          "TypeError: This object does not support enumeration".  We now
+          make the user deal with these.
+        
+        - When using the Excel plugin, errors were intermittently raised to the
+          user in the form "Fatal error: <unknown>.Path" and the user could
+          subsequently not save the document back to Zope because the
+          external editor process had quit.
+        
+        - Changes to documents intermittently may not have been saved back to Zope
+          when using any plugin that involved COM (Word, Excel, Powerpoint, etc).
+        
+        - If Word was exited before a user actively saved, if there were
+          outstanding changes in the document being edited, those changes
+          would not be saved to the server despite the user answering
+          "yes" to the "do you want to save before you exit" dialog
+          presented by Word.
+        
+        - The "title" attribute of the object being externally edited is
+          now available within the set of headers returned by EE to the
+          zopeedit client.
+        
+        - Detecting whether the client has External Editor installed from
+          within IE using JavaScript or VBScript is now possible, assuming
+          that the client software is installed via the InnoSetup
+          installer.  See "win32/ocx.txt" for more info.
+        
+        - External Editor now compatible with objects that return a
+          "filestream iterator" in Zope 2.7.1+. (if upgrading: this fix
+          does not require an update to EE client, just the EE Zope
+          product).
+        
+        - Properly escape hyphens in man page. Thanks to Federico Sevilla III.
+        
+        - Check if the editor was launched before locking the file in Zope. This
+          prevents errors if the editor is closed before the lock request 
+          completes.
+        
+        - Do not ask the user what editor to use on Posix platforms. Instead just
+          tell the user to edit the config file. The askstring()
+          function does not work with a hidden root Tk window in Python 2.3.4.
+          Thanks to Christopher Mann.
+        
+        
+        7/13/04 - 0.8
+        -------------
+        
+        - Add external editor icon to ZMI breadcrumbs for editable objects.
+        
+        - Compiled windows helper app binary using Python 2.3.4, Pythonwin build
+          163 and py2exe 0.5.
+        
+        - Add Dreamweaver plugin contributed by Manuel Aristarann. Thanks also
+          to Anton Stonor.
+        
+        - Add ZMI support for Zope 2.7's ordered folder objects.      
+        
+        - Fix bug detecting basic auth info from older versions of CookieCrumber.
+          Thanks to David D. Smith and Federico Sevilla III.
+        
+        - Workaround IE browser error when running over SSL. Thanks to 
+          Marc-Aurele Darche.
+        
+        - Add ".zem" file extension support for MacOS X (especially Mac IE),
+          to ease helper app integration where MIME support is lacking. Thanks
+          to Zac Bir.
+        
+        - Added "long_file_name" and "file_name_separator" config options.
+        
+        - Fixed bug which happened under Win32 when editing an Excel file
+          using the Excel plugin where the symptom was a "Call was
+          rejected by callee" COM error. Thanks to Chris McDonough.
+        
+        
+        4/23/04 - 0.7.2
+        ---------------
+        
+        - Change default configuration to use .txt extension for text/plain only. 
+          Add extensions for css and javascript files.
+        
+        - Fixed packaging bug in Windows binary which disabled several plugins.
+          This fixes "Editor did not launch properly" errors for MSOffice
+          among others.
+        
+        - Fixed a bug where very short editing sessions where no changes were
+          made could make EE think the editor never launched. Thanks to Maik Ihde.
+        
+        11/7/03 - 0.7.1
+        ---------------
+        
+        - Fix encoding bug in windows binary. Thanks to Chris McDonough.
+        
+        - Added tip for configuring IE to save files over SSL. Thanks to
+          Jonah Bossewitch.
+        
+        
+        4/1/03 - 0.7
+        ------------
+        
+        - Added working distutils setup for Unix.
+        
+        - You can now specify from the server that the helper app should
+          borrow a lock by passing borrow_lock=1 via the request, thus
+          suppressing the dialog box which appears by default. Thanks
+          to Shane Hathaway.
+        
+        - Improved open file check in Word and Powerpoint plugins 
+          thanks to Yura Petrov.
+        
+        - Added plugins for Microsoft Word, Excel and Powerpoint.
+        
+        - Added the man page from the Debian distro. Thanks go out to
+          Federico Sevilla III and Andreas Tille
+        
+        
+        11/02/02 - 0.6
+        --------------
+        
+        - Built Windows helper app using Python 2.2.2 and PythonWin 148.
+        
+        - The `externalEdit_` object now accepts a path argument to the object to
+          edit, allowing URLs like: `http://zope/externalEdit_?path=/some/object.`
+          This allows external editor to play better with applications making use
+          of traversal magic of their own. Thanks to Tres Seaver.
+        
+        - Fixed NameError bug in unlock retry code. Thanks to Federico Sevilla III.
+        
+        - Added a workaround for non-compliant SSL servers. The software now
+          silently ignores "EOF occurred in violation of protocol" errors coming
+          from httplib. Thanks to Christopher Deckard.
+        
+        - Removed stderr writes to cure "Invalid File Descriptor" errors on
+          Windows. Thanks to Martijn Peters.
+        
+        - Added Photoshop plugin (win32)
+        
+        - Added HomeSite plugin (win32)
+        
+        - Added win32 editor plugin support for the helper application.
+        
+        
+        8/19/02 - 0.5
+        -------------
+        
+        - Added patch for Zope find template so that you can use external editor
+          directly from find results in the ZMI. Thanks to Jim Washington.
+        
+        - Factored out external editor link generator. Product now registers
+          a global method `externalEditLink_` which can be called to generate
+          the external editor icon link for any object.
+        
+        - External editing is now governed by the "Use external editor" permission
+          to allow non-managers to use it. Users must also have the permissions to
+          edit/modify the objects they edit, plus do WebDAV locking if desired.
+          Thanks to Reineke and others.
+        
+        - Unix editor command line parsing is much more robust now and properly
+          handles quoted arguments. You can also specify the "$1" placeholder in the
+          editor command to denote where the content file name is inserted. If
+          omitted it is appended to the end of the command line. "%1" continues to
+          work similarly for Windows. Thanks to Marc St-Jean.
+        
+        - Fixed bug editing large (chunked) files and images. External editor now
+          streams their data properly to the client. Thanks to all the users who
+          reported various symptoms of this bug.
+        
+        - Fixed bug editing objects inside a Squishdot site. Thanks to Kevin Salt.
+        
+        - Added the capability to borrow exising DAV locks. This allows external
+          editor to play well with other systems using locks, such as CMFStaging. A
+          new configuration flag, always_borrow_locks can be set to suppress the
+          borrow lock warning dialog when editing.
+        
+        - Fixed auth bug when product was used with mysqlUserFolder. Thanks to
+          ViNiL.
+        
+        
+        6/30/02 - 0.4.2
+        ---------------
+        
+        - Added SSL support to Windows binary package. Thanks to Federico 
+          Sevilla III
+        
+        
+        6/29/02 - 0.4.1
+        ---------------
+        
+        - Fixed dangling dav lock bug on fatal errors. Thanks to Marc St-Jean.
+        
+        - Fixed content_type bug, now checks if it is callable. Thanks to Arnaud 
+          Bienvenu.
+        
+        - Fixed bug with editing binary data on Windows. Thanks to Eric Kamm.
+        
+        - Fixed bug setting the editor on Posix platforms.
+        
+        
+        6/24/02 - 0.4
+        -------------
+        
+        - Added --version command line argument
+        
+        - Made manage_FTPget the default source for the editable content, instead
+          of document_src which was broken for CMF Wiki Pages.
+        
+        - Fixed Windows "body_file" bug.
+        
+        - Added binary build support for Windows using py2exe and Inno setup.
+        
+        - Fixed Windows config file locator. It now looks in the program directory
+          and then the user's home directory (if specified)
+        
+        - Fixed bug in Windows registry editor lookup.
+        
+        
+        6/16/02 - 0.3
+        -------------
+        
+        - Improved behavior when saving after lock attempts fail.
+        
+        - Now works on Windows (applause) using Pythonwin. Much overall
+          refactoring to abstract process control. Thanks to Oliver Deckmyn,
+          Gabriel Genellina and Arno Gross for testing, patches and suggestions.
+        
+        - Added "temp_dir" configuration option for specifying a different
+          temp file directory then the OS default. Also further improved 
+          temp file name generation.
+        
+        - Added support for domain specific configuration options.
+        
+        - Fixed trailing newline bug in encoded auth data coming from
+          CookieCrumbler. Thanks to Harald Koschinski.
+        
+        - You can now pass command line arguments to the editor in the config file,
+          or wrap the editor in an xterm without using a shell script.
+          
+        - Rewrote "Editor did not launch" error message so it makes more sense.
+        
+        - Fixed https detection bug. External editor is now tested and working with
+          https. Many thanks to Hans-Dieter Stich and Martin Groenemeyer for their 
+          assistance and ideas.
+        
+        - Made it possible to edit objects that are methods of ZClasses. Thanks to
+          Jim Washington
+        
+        - Refactored link generation code in manage_main so that it uses
+          the parent's absolute_url rather than URL1. Thanks to
+          Jim Washington
+        
+        - Removed implicit save in Configuration class destructor
+        
+        - Added caching headers to prevent client-side caching of edit data.
+          Thanks to Gabriel Genellina for pointing this out.
+        
+        - Added improved support for editing CMF documents
+        
+        - Eliminated spurious "Editor did not launch" errors on short sessions
+          or when other errors occurred.
+        
+        5/16/02 - 0.2
+        -------------
+        
+        - Fixed product uninstallation bug
+        
+        5/15/02 - 0.1
+        -------------
+        
+        - Initial release
+        
+Platform: UNKNOWN
+Classifier: Framework :: Zope2

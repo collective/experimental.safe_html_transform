@@ -1,0 +1,220 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone">
+
+    <!-- needed since Plone 4.1 to use cmf permissions in ZCML declaration. -->
+
+    <include package="Products.CMFCore" file="permissions.zcml"
+             xmlns:zcml="http://namespaces.zope.org/zcml"
+             zcml:condition="have plone-41" />
+
+    <!-- Portal type condition -->
+
+    <adapter factory=".portaltype.PortalTypeConditionExecutor" />
+
+    <browser:page
+      for="plone.app.contentrules.browser.interfaces.IRuleConditionAdding"
+      name="plone.conditions.PortalType"
+      class=".portaltype.PortalTypeAddForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <browser:page
+      for="plone.app.contentrules.conditions.portaltype.IPortalTypeCondition"
+      name="edit"
+      class=".portaltype.PortalTypeEditForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <plone:ruleCondition
+        name="plone.conditions.PortalType"
+        title="Content type"
+        description="Apply only when the current content object is of a particular type"
+        for="*"
+        event="zope.component.interfaces.IObjectEvent"
+        addview="plone.conditions.PortalType"
+        editview="edit"
+        schema=".portaltype.IPortalTypeCondition"
+        factory=".portaltype.PortalTypeCondition"
+        />
+
+    <!-- File extension condition -->
+
+    <adapter factory=".fileextension.FileExtensionConditionExecutor" />
+
+    <browser:page
+      for="plone.app.contentrules.browser.interfaces.IRuleConditionAdding"
+      name="plone.conditions.FileExtension"
+      class=".fileextension.FileExtensionAddForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <browser:page
+      for="plone.app.contentrules.conditions.fileextension.IFileExtensionCondition"
+      name="edit"
+      class=".fileextension.FileExtensionEditForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <plone:ruleCondition
+        name="plone.conditions.FileExtension"
+        title="File Extension"
+        description="Apply only to a particular file extension"
+        for="*"
+        event="zope.component.interfaces.IObjectEvent"
+        addview="plone.conditions.FileExtension"
+        editview="edit"
+        schema=".fileextension.IFileExtensionCondition"
+        factory=".fileextension.FileExtensionCondition"
+        />
+
+    <!-- Workflow state condition (for any object) -->
+
+    <adapter factory=".wfstate.WorkflowStateConditionExecutor" />
+
+    <browser:page
+      for="plone.app.contentrules.browser.interfaces.IRuleConditionAdding"
+      name="plone.conditions.WorkflowState"
+      class=".wfstate.WorkflowStateAddForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <browser:page
+      for="plone.app.contentrules.conditions.wfstate.IWorkflowStateCondition"
+      name="edit"
+      class=".wfstate.WorkflowStateEditForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <plone:ruleCondition
+        name="plone.conditions.WorkflowState"
+        title="Workflow state"
+        description="Apply only to a objects in a particular workflow state"
+        for="*"
+        event="zope.component.interfaces.IObjectEvent"
+        addview="plone.conditions.WorkflowState"
+        editview="edit"
+        schema=".wfstate.IWorkflowStateCondition"
+        factory=".wfstate.WorkflowStateCondition"
+        />
+
+    <!-- Workflow transition condition (for any object) -->
+
+    <adapter factory=".wftransition.WorkflowTransitionConditionExecutor" />
+
+    <browser:page
+      for="plone.app.contentrules.browser.interfaces.IRuleConditionAdding"
+      name="plone.conditions.WorkflowTransition"
+      class=".wftransition.WorkflowTransitionAddForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <browser:page
+      for="plone.app.contentrules.conditions.wftransition.IWorkflowTransitionCondition"
+      name="edit"
+      class=".wftransition.WorkflowTransitionEditForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <plone:ruleCondition
+        name="plone.conditions.WorkflowTransition"
+        title="Workflow transition"
+        description="Apply only when the executed transition was as specified"
+        for="*"
+        event="Products.CMFCore.interfaces.IActionSucceededEvent"
+        addview="plone.conditions.WorkflowTransition"
+        editview="edit"
+        schema=".wftransition.IWorkflowTransitionCondition"
+        factory=".wftransition.WorkflowTransitionCondition"
+        />
+
+    <!-- Group condition -->
+    <adapter factory=".group.GroupConditionExecutor" />
+
+    <browser:page
+      for="plone.app.contentrules.browser.interfaces.IRuleConditionAdding"
+      name="plone.conditions.Group"
+      class=".group.GroupAddForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <browser:page
+      for="plone.app.contentrules.conditions.group.IGroupCondition"
+      name="edit"
+      class=".group.GroupEditForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <plone:ruleCondition
+        name="plone.conditions.Group"
+        title="User's group"
+        description="Apply only when the current user is in the given group"
+        for="*"
+        event="*"
+        addview="plone.conditions.Group"
+        editview="edit"
+        schema=".group.IGroupCondition"
+        factory=".group.GroupCondition"
+        />
+
+    <!-- Role condition -->
+    <adapter factory=".role.RoleConditionExecutor" />
+
+    <browser:page
+      for="plone.app.contentrules.browser.interfaces.IRuleConditionAdding"
+      name="plone.conditions.Role"
+      class=".role.RoleAddForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <browser:page
+      for="plone.app.contentrules.conditions.role.IRoleCondition"
+      name="edit"
+      class=".role.RoleEditForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <plone:ruleCondition
+        name="plone.conditions.Role"
+        title="User's role"
+        description="Apply only when the current user has the given role"
+        for="*"
+        event="*"
+        addview="plone.conditions.Role"
+        editview="edit"
+        schema=".role.IRoleCondition"
+        factory=".role.RoleCondition"
+        />
+
+    <!-- TALES expression condition -->
+
+    <adapter factory=".talesexpression.TalesExpressionConditionExecutor" />
+
+    <browser:page
+      for="plone.app.contentrules.browser.interfaces.IRuleConditionAdding"
+      name="plone.conditions.TalesExpression"
+      class=".talesexpression.TalesExpressionAddForm"
+      permission="cmf.ManagePortal"
+      />
+
+    <browser:page
+      for=".talesexpression.ITalesExpressionCondition"
+      name="edit"
+      class=".talesexpression.TalesExpressionEditForm"
+      permission="cmf.ManagePortal"
+      />
+
+    <plone:ruleCondition
+        name="plone.conditions.TalesExpression"
+        title="TALES expression"
+        description="Apply only when the result of a TALES expression is True"
+        for="*"
+        event="*"
+        addview="plone.conditions.TalesExpression"
+        editview="edit"
+        schema=".talesexpression.ITalesExpressionCondition"
+        factory=".talesexpression.TalesExpressionCondition"
+        />
+
+</configure>

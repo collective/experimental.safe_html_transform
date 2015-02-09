@@ -1,0 +1,99 @@
+This tests a roundtrip of customizing, changing and deleting a template-based
+view via the ZMI:
+
+  >>> self.setRoles(('Manager',))
+  >>> browser = self.getBrowser(loggedIn=True)
+
+First we go directly to the portal tool used to manage the view
+customizations and check the overview of all registered views:
+
+  >>> browser.open('http://nohost/plone/portal_view_customizations/registrations.html')
+  >>> browser.contents
+  '...Plone View Customizations...
+   ...The following list shows all registered...
+   ...five.customerize.interfaces.IViewTemplateContainer...
+   ...<a href="@@customizezpt.html?...view_name=customizezpt.html"...
+   ...customizezpt.html</a>...
+   ...<a href="@@customizezpt.html?...view_name=registrations.html"...
+   ...registrations.html</a>...'
+
+Next we try to customize a view template by following the provided link. This
+presents us with some information about and the contents of the template:
+
+  >>> browser.getLink('customizezpt.html').click()
+  >>> browser.url
+  'http://nohost/plone/portal_view_customizations/@@customizezpt.html?...view_name=customizezpt.html...'
+  >>> browser.contents
+  '...The following is the source of...customizezpt.html...
+   ...<dl>...
+   ...view name...customizezpt.html...
+   ...registered for interface...five.customerize.interfaces.IViewTemplateContainer...
+   ...registered for request type...zope.publisher.interfaces.browser.IDefaultBrowserLayer...
+   ...template file...plone.app.customerize/customize.pt...
+   ...zcml file...plone.app.customerize/configure.zcml...
+   ...</dl>...<pre>...
+   ...The following is the source of...
+   ...</pre>...'
+
+We click the "customize" button and enter some new content:
+
+  >>> browser.getControl('Customize').click()
+  >>> browser.url
+  'http://nohost/plone/portal_view_customizations/five.customerize.interfaces.iviewtemplatecontainer-customizezpt.html/pt_editForm'
+  >>> browser.getControl(name='text:text').value = 'you loose!'
+  >>> browser.getControl('Save Changes').click()
+  >>> browser.url
+  'http://nohost/plone/portal_view_customizations/five.customerize.interfaces.iviewtemplatecontainer-customizezpt.html'
+  >>> browser.contents
+  '...Saved changes...'
+
+The view name is stored on the template (which can be queried from the template renderer)
+This is mainly useful for code which wants the view_name anyhow.
+
+  >>> portal.restrictedTraverse('portal_view_customizations/five.customerize.interfaces.iviewtemplatecontainer-customizezpt.html').view_name
+  'customizezpt.html'
+
+Now we look at the view we just customized.  To do so we browse the view
+registrations overview again and select another template for customization:
+
+  >>> browser.getLink('portal_view_customizations').click()
+  >>> browser.getLink('registrations.html').click()
+  >>> browser.contents
+  '...you loose!...'
+
+This is not so helpful, so we customize the template again and thereby check
+if the view registrations overview correctly links to the customized version
+of the template:
+
+  >>> browser.goBack()
+  >>> browser.getLink('customizezpt.html').click()
+  >>> browser.url
+  'http://nohost/plone/portal_view_customizations/five.customerize.interfaces.iviewtemplatecontainer-customizezpt.html/manage_main'
+  >>> browser.getControl(name='text:text').value = 'you loose, but now you know it!'
+  >>> browser.getControl('Save Changes').click()
+  >>> browser.contents
+  '...Saved changes...'
+
+By now we have realized we shouldn't customize just this particular template.
+So, we try to get back to it's original implementation by simply deleting the
+view template object again:
+
+  >>> browser.open('http://nohost/plone/portal_view_customizations/registrations.html')
+  >>> browser.getLink('Contents').click()
+  >>> browser.getControl(name='ids:list').getControl(value='five.customerize.interfaces.iviewtemplatecontainer-customizezpt.html').selected = True
+  >>> browser.getControl('Delete').click()
+  >>> browser.url
+  'http://nohost/plone/portal_view_customizations/'
+  >>> browser.contents
+  '...There are currently no items in...'
+
+The template was deleted, which should have also unregistered the local
+adapter.  We test that by once more trying to customize another template,
+which should give us the regular pre-customization screen again:
+
+  >>> browser.getLink('Registrations').click()
+  >>> browser.getLink('registrations.html').click()
+  >>> browser.contents
+  '...The following is the source of...registrations.html...'
+  >>> browser.getControl('Customize')
+  <SubmitControl name='' type='submit'>

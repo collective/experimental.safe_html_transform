@@ -1,0 +1,426 @@
+Metadata-Version: 1.1
+Name: plone.outputfilters
+Version: 1.14
+Summary: Transformations applied to HTML in Plone text fields as they are rendered
+Home-page: http://github.com/plone/plone.outputfilters
+Author: David Glick, Plone Foundation
+Author-email: davidglick@groundwire.org
+License: GPL
+Description: Introduction
+        ============
+        
+        ``plone.outputfilters`` provides a framework for registering filters that
+        get applied to text as it is rendered.
+        
+        By default, these filters are wired up to occur when text is transformed from
+        the text/html mimetype to the text/x-html-safe mimetype via the
+        PortalTransforms machinery.
+        
+        With both Archetypes TextFields and the RichText field of
+        ``plone.app.textfield``, this transform is typically applied when the field
+        value is first accessed. The result of the transform is then cached in a
+        volatile attribute for an hour or until the value is replaced.
+        
+        
+        Included Filters
+        ================
+        
+        A default filter is included which provides the following features:
+        
+        * Resolving UID-based links
+        * Adding captions to images
+        
+        (These are implemented as one filter to avoid the overhead of parsing the HTML
+        twice.)
+        
+        These features used to be provided by similar transforms in both Products.kupu
+        and Products.TinyMCE.  New releases of these editors are being prepared which
+        depend on the transform in plone.outputfilters, so that bugs don't need to be
+        fixed in multiple places.
+        
+        
+        Resolving UID-based links
+        -------------------------
+        
+        Internal links may be inserted with a UID reference rather than the real path
+        of the item being linked.  For example, a link might look like this::
+        
+         <a href="resolveuid/6992f1f6-ae36-11df-9adf-001ec2a8cdf1">
+        
+        Such URLs can be resolved by the ``resolveuid`` view, which resolves the UID to
+        an object and then redirects to its URL. However, resolving links in this way
+        requires an extra request after the redirect. The resolveuid filter avoids that
+        by replacing such URLs with the object's actual full absolute URL as the link
+        is rendered.
+        
+        UIDs are resolved using ``plone.app.uuid.utils.uuidToURL``, with a fallback to
+        the Archetypes UID catalog for backwards compatibility. LinguaPlone translations
+        are supported when LinguaPlone is present.
+        
+        The resolveuid filter is enabled if there is at least one
+        ``plone.outputfilters.filters.resolveuid_and_caption.IResolveUidsEnabler``
+        utility whose ``available`` property returns ``True``.  This mechanism exists
+        for compatibility with TinyMCE and kupu, which both provide their own control
+        panel setting to enable the link-by-uid feature.
+        
+        
+        Image captioning
+        ----------------
+        
+        Image tags with the "captioned" class and a ``src`` attribute that resolves to
+        an image object within the site will be wrapped in a definition list (DL) tag
+        which includes a caption based on the value of the image's ``description``
+        field, if any.
+        
+        For example, this image tag::
+        
+         <img src="path/to/image" class="captioned"/>
+        
+        might be transformed into::
+        
+          <dl class="captioned">
+           <dt><img src="path/to/image"/></dt>
+           <dd class="image-caption">Caption text</dd>
+          </dl>
+        
+        assuming the image found at "path/to/image" has the description "Caption text".
+        
+        The captioning filter is enabled if there is at least one
+        ``plone.outputfilters.filters.resolveuid_and_caption.IImageCaptioningEnabler``
+        utility whose ``available`` property returns ``True``.  This mechanism exists
+        for compatibility with TinyMCE and kupu, which both provide their own control
+        panel setting to enable the captioning feature.
+        
+        The captioned version of an image is rendered using the
+        ``@@plone.outputfilters_captioned_image`` view, which may be overridden to
+        customize the caption.  This view is passed the following kwargs:
+        
+        class
+          The CSS class on the image.
+        originalwidth
+          The ``width`` attribute of the image tag.
+        originalalt
+          The ``alt`` attribute of the image tag.
+        url_path
+          The path of the image, relative to the site root.
+        caption
+          The image's description.
+        image
+          The (possibly scaled) image object.
+        fullimage
+          The original unscaled image object.
+        tag
+          A full HTML tag which displays the image.
+        isfullsize
+          True if ``image`` is ``fullimage``.
+        width
+          The width of ``image``.
+        
+        Adding a custom filter
+        ======================
+        
+        As an example, the following filter replaces all doubled hyphens ("--") with em
+        dashes ("-"). (Don't use the example verbatim, because it doesn't parse HTML to
+        apply itself only to text nodes, so will mangle HTML comments.)
+        
+        A filter is a callable which accepts a UTF-8-encoded HTML string as input, and
+        returns a modified UTF-8-encoded HTML string. A return value of ``None`` may be
+        used to indicate that the input should not be modified.
+        
+        Example::
+        
+            import re
+            from zope.interface import implements
+            from plone.outputfilters.interfaces import IFilter
+        
+            class EmDashAdder(object):
+                implements(IFilter)
+                order = 1000
+        
+                def __init__(self, context, request):
+                    pass
+        
+                def is_enabled(self):
+                    return True
+        
+                pattern = re.compile(r'--')
+        
+                def __call__(self, data):
+                    return self.pattern.sub('\xe2\x80\x94', data)
+        
+        The ``order`` attribute may be used to affect the order in which filters are
+        applied (higher values run later). The is_enabled method should return a boolean
+        indicating whether the filter should be applied.
+        
+        Filters are registered in ZCML as a named multi-adapter of the context and
+        request to IFilter.
+        
+         >>> from Products.Five.zcml import load_string
+         >>> load_string("""
+         ... <configure
+         ...     xmlns="http://namespaces.zope.org/zope">
+         ... 
+         ...   <adapter
+         ...     name="em_dash_adder"
+         ...     provides="plone.outputfilters.interfaces.IFilter"
+         ...     for="* *"
+         ...     factory="plone.outputfilters.filters.example.EmDashAdder"
+         ...     />
+         ... 
+         ... </configure>
+         ... """)
+        
+        Now when text is transformed from text/html to text/x-html-safe, the filter will
+        be applied.
+        
+         >>> str(self.portal.portal_transforms.convertTo('text/x-html-safe',
+         ...     'test--test', mimetype='text/html', context=self.portal))
+         'test\xe2\x80\x94test'
+        
+        
+        How it works
+        ============
+        
+        ``plone.outputfilters`` hooks into the PortalTransforms machinery by installing:
+         
+        1. a new mimetype ("text/x-plone-outputfilters-html")
+        2. a transform from text/html to text/x-plone-outputfilters-html
+        3. a null transform from text/x-plone-outputfilters-html back to text/html
+        4. a "transform policy" for the text/x-html-safe mimetype, which says that text
+           being transformed to text/x-html-safe must first be transformed to
+           text/x-plone-outputfilters-html
+        
+        The filter adapters are looked up and applied during the execution of the
+        transform from step #2.
+        
+        This should be considered an implementation detail and may change at some point
+        in the future.
+        
+        
+        Changelog
+        =========
+        
+        1.14 (2014-04-22)
+        -----------------
+        
+        - for plone 5, always resolveuids
+          [vangheem]
+        
+        
+        1.13 (2014-04-13)
+        -----------------
+        
+        - #12783 img tag referencing non existent scales leads to transform error
+          [anthonygerrard]
+        
+        
+        1.12 (2014-01-27)
+        -----------------
+        
+        - Nothing changed yet.
+        
+        
+        1.11.1 (2013-07-19)
+        -------------------
+        
+        - Fix README rst.
+          [gotcha]
+        
+        
+        1.11 (2013-07-19)
+        -----------------
+        
+        - img unicode issue : fix resolve_image to avoid that it returns unicode
+          [gotcha]
+          
+        - handle possibility of img tag being unicode to prevent unicode errors
+          [vangheem]
+        
+        
+        1.10 (2013-05-23)
+        -----------------
+        
+        - Work around bug in SGMLParser to handle singleton tags correctly.
+          [tom_gross]
+        
+        
+        1.9 (2013-04-06)
+        ----------------
+        
+        - If we have an image description it should go into the alt text of the img
+          tag
+          [ale-rt]
+        
+        
+        1.8 (2012-12-10)
+        ----------------
+        
+        - Fix packaging issue. 
+          [esteele]
+        
+        
+        1.7 (2012-12-09)
+        ----------------
+        
+        - When resolving images, only look upward for the full image if the
+          image that was traversed is not a content item (i.e. is a scale).
+          [davisagli, datakurre]
+        
+        - Also convert "resolveUid/" links (big 'U') that FCKeditor used to create. 
+          [hacklschorsch]
+        
+        - Also escape double quotes, fixes #13219
+          [maartenkling]
+        
+        1.6 (2012-08-16)
+        ----------------
+        
+        - Don't break if an @@images scale can't be resolved for some reason.
+          [davisagli]
+        
+        
+        1.5 (2012-08-15)
+        ----------------
+        
+        - Restore compatibility with Plone 4.0 when plone.outputfilters is present.
+          [davisagli]
+        
+        
+        1.4 (2012-08-04)
+        ----------------
+        
+        - Fix incompatibilities with plone.namedfile
+          [do3cc]
+        
+        
+        1.3 (2012-05-25)
+        ----------------
+        
+        - Fixed testing error by moving the part of README.rst to
+          plone/outputfilters/README.txt.
+          [maurits]
+        
+        - Small pep8 update
+          [pbdiode]
+        
+        
+        1.2 - 2012-04-09
+        ----------------
+        
+        - Prevent transformation of links to anchors on the same page.
+          [davisagli]
+        
+        - Fixed undefined uuid variable in kupu_resolveuid_hook branch
+          in resolveuid view.
+          [vincentfretin]
+        
+        - Make sure links to expired objects can still be resolved by the resolveuid view.
+          [davisagli]
+        
+        - alt/title attributes on img tags were not present if tinymce uid linking was not used
+          [iElectric]
+        
+        - When making relative URIs absolute, use the parent as the relative
+          root when the context is not folderish.  Fixes an issue where
+          relative URLs from Plone 3, for example, had the wrong URLs under
+          Plone 4 when a default page was used for a folder.
+          [rossp]
+        
+        - Fixed testing error when packaged with a missing README.rst.
+          [maurits]
+        
+        
+        1.1 - 2011-11-21
+        ----------------
+        
+        - Fixed resolving of protected objects for AT content
+          [tom_gross]
+        
+        - Fixed resolving of relative ../resolveuid/... links
+          [tom_gross]
+        
+        - Respect implementation differences in Python 2.4 and
+          Python 2.6 sgmlparser
+          [tom_gross]
+        
+        - Fixed resolving of images in protected folders for captioning
+          [mj]
+        
+        
+        1.0 - 2011-05-13
+        ----------------
+        
+        - Release 1.0 Final.
+          [esteele]
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        
+        1.0b5 - 2011-03-24
+        ------------------
+        
+        - Make captioning and linking work with new style image scales.
+          [elro]
+        
+        - General refactoring of link resolution.
+          [elro]
+        
+        
+        1.0b4 - 2011-03-22
+        ------------------
+        
+        - Add alt and title tags to images.
+          [elro]
+        
+        - Get various image properties from the imaging view to work better with
+          Dexterity.
+          [elro]
+        
+        - small fix so it is possible to create object without need of REQUEST or
+          without need of mocking it.
+          [garbas]
+        
+        
+        1.0b3 - 2011-02-24
+        ------------------
+        
+        - Resolve image paths beginning with a slash relative to the Plone site root.
+          [davisagli]
+        
+        - Support image captioning for new-style image scales using the @@images view.
+          [davisagli]
+        
+        
+        1.0b2 - 2011-01-11
+        ------------------
+        
+        - Fix resolveuid so that uid resolution occurs after authentication.
+          [elro]
+        
+        - Please remember to run tests before checking in!
+          [elro]
+        
+        - Fix issue where resolving links with subpaths resulted in a reversed
+          subpath.
+          [elro]
+        
+        
+        1.0b1 - 2011-01-25
+        ------------------
+        
+        - Fix issue with resolving resolveuid links with subpaths. This fixes
+          http://dev.plone.org/plone/ticket/11426
+          [davisagli]
+        
+        
+        1.0a1 - 2011-01-03
+        ------------------
+        
+        - Initial implementation.
+          [davisagli]
+        
+Keywords: plone transform filter uid caption
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python

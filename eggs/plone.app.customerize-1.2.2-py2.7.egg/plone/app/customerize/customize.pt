@@ -1,0 +1,59 @@
+<h1 tal:replace="structure context/manage_page_header" />
+<h1 tal:replace="structure context/manage_tabs" />
+
+<div>
+
+<form action="@@customizezpt" method="post"
+      enctype="multipart/form-data">
+
+  <style type="text/css">
+    dl {
+      font-family: Verdana, Helvetica, sans-serif;
+      font-size: 10pt;
+    }
+    dt {
+      font-weight: bold;
+    }
+    pre {
+      background-color: #cccccc;
+      border: 1px solid black;
+      padding: 0.5em;
+      margin: 0.5em;
+      font-size: 85%;
+    }
+    dl, pre, form {
+      margin-left: 1em;
+    }
+  </style>
+
+  <p i18n:translate="">The following is the source of
+  "<code tal:content="request/form/view_name">viewname</code>",
+  registered as:</p>
+
+  <dl tal:define="info view/getTemplateViewRegistrationInfo">
+    <dt> view name </dt>
+      <dd tal:content="info/viewname" />
+    <dt> registered for interface </dt>
+      <dd tal:content="info/for" />
+    <dt> registered for request type </dt>
+      <dd tal:content="info/type" />
+    <dt> template file </dt>
+      <dd tal:content="info/zptfile" />
+    <dt> zcml file </dt>
+      <dd tal:content="info/zcmlfile" />
+  </dl>
+
+  <pre tal:content="view/getTemplateCodeFromRegistration">
+    template source
+  </pre>
+
+    <input type="hidden" name="required" value=""
+           tal:attributes="value request/form/required" />
+    <input type="hidden" name="view_name" value="theviewname"
+           tal:attributes="value request/form/view_name" />
+    <input type="submit" name="" value="Customize" />
+  </form>
+
+</div>
+
+<h1 tal:replace="structure context/manage_page_footer" />

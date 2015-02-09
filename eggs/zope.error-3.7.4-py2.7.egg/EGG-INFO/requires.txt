@@ -1,0 +1,8 @@
+setuptools
+zope.exceptions
+zope.interface
+zope.location
+ZODB3
+
+[test]
+zope.testing >= 3.8

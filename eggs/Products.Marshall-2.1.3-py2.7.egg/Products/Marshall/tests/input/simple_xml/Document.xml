@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<document>
+	<id>
+		document
+	</id>
+	<title>
+		Some Title
+	</title>
+	<description>
+		Neque porro quisquam est qui dolorem ipsum quia dolor sit amet,
+    consectetur, adipisci velit...
+    There is no one who loves pain
+    itself, who seeks after it and wants to have it, simply because it
+    is pain...
+	</description>
+	<subject>
+		Test
+		Data
+	</subject>
+	<relatedItems/>
+	<location>
+		
+	</location>
+	<language>
+		en
+	</language>
+	<effectiveDate>
+		2004/01/01 01:02:03 GMT+1
+	</effectiveDate>
+	<expirationDate>
+		2004/09/09 10:09:08 GMT+1
+	</expirationDate>
+	<creation_date>
+		2004/01/01 01:02:03 GMT+1
+	</creation_date>
+	<modification_date>
+		2004/09/09 10:09:08 GMT+1
+	</modification_date>
+	<creators>
+		sidnei
+		cameron
+	</creators>
+	<contributors>
+		sidnei
+		alan
+	</contributors>
+	<rights>
+		Copyleft 2004, No Rights Reserved
+	</rights>
+	<allowDiscussion>
+		0
+	</allowDiscussion>
+	<excludeFromNav>
+		False
+	</excludeFromNav>
+	<presentation>
+		False
+	</presentation>
+	<tableContents>
+		False
+	</tableContents>
+</document>

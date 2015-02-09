@@ -1,0 +1,74 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:five="http://namespaces.zope.org/five">
+
+    <!-- Adding view -->
+    <browser:view
+        for="Products.CMFCore.interfaces.IFolderish"
+        name="+"
+        class=".adding.CMFAdding"
+        permission="cmf.AddPortalContent"
+        />
+
+    <!-- Folder contents -->
+    <browser:page
+        for="*"
+        class=".foldercontents.FolderContentsView"
+        name="folder_contents"
+        template="folder_contents.pt"
+        permission="cmf.ListFolderContents" />
+
+    <browser:page
+         for="*"
+         class=".foldercontents.FolderContentsBrowserView"
+         attribute="update_table"
+         name="foldercontents_get_table"
+         permission="cmf.ListFolderContents" />
+
+    <browser:resource
+        file="folder_contents.js"
+        name="folder_contents.js" />
+
+    <!-- Review list -->
+    <browser:page
+        for="*"
+        class=".reviewlist.FullReviewListView"
+        name="full_review_list"
+        template="full_review_list.pt"
+        permission="cmf.ReviewPortalContent" />
+
+    <browser:page
+         for="*"
+         class=".reviewlist.ReviewListBrowserView"
+         attribute="update_table"
+         name="reviewlist_get_table"
+         permission="cmf.ReviewPortalContent" />
+
+    <!-- Folder factories -->
+    <browser:page
+        for="*"
+        name="folder_factories"
+        class=".folderfactories.FolderFactoriesView"
+        template="folderfactories.pt"
+        permission="cmf.AddPortalContent"
+        />
+
+    <!-- Constrain container allowed content types -->
+    <permission
+        id="plone.ModifyConstrainTypes"
+        title="Modify constrain types"
+        />
+    <browser:page
+        name="folder_constraintypes_form"
+        for="Products.CMFCore.interfaces.IFolderish"
+        permission="plone.ModifyConstrainTypes"
+        class=".constraintypes.ConstrainsFormView"
+        />
+    <utility
+        component=".constraintypes.ValidTypesFactory"
+        name="plone.app.content.ValidAddableTypes"
+        />
+
+
+</configure>

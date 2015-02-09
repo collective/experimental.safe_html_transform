@@ -1,0 +1,11 @@
+setuptools
+transaction
+zope.i18nmessageid
+zope.interface
+zope.schema
+zope.component>=3.8.0
+zope.configuration
+
+[test]
+zope.security
+zope.component [test]

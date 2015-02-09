@@ -1,0 +1,30 @@
+<configure
+  xmlns="http://namespaces.zope.org/zope"
+  xmlns:five="http://namespaces.zope.org/five"
+  xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+  xmlns:zcml="http://namespaces.zope.org/zcml"
+  xmlns:browser="http://namespaces.zope.org/browser"
+  i18n_domain="cmfquickinstallertool">
+
+  <genericsetup:registerProfile
+      name="CMFQuickInstallerTool"
+      title="CMFQuickInstallerTool"
+      directory="profiles/default"
+      description="Extension profile for CMFQuickInstallerTool."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      />
+
+  <subscriber
+      zcml:condition="installed Products.GenericSetup.events"
+      handler=".events.handleBeforeProfileImportEvent" />
+
+  <subscriber
+      zcml:condition="installed Products.GenericSetup.events"
+      handler=".events.handleProfileImportedEvent" />
+
+  <utility
+      factory=".QuickInstallerTool.HiddenProducts"
+      name="Products.CMFQuickInstallerTool"
+      />
+
+</configure>

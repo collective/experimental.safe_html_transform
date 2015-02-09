@@ -1,0 +1,10 @@
+setuptools
+zope.interface
+zope.component
+zope.publisher
+zope.schema
+plone.resource
+Zope2
+
+[test]
+plone.app.testing

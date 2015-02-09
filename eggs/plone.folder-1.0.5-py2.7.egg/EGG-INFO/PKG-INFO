@@ -1,0 +1,234 @@
+Metadata-Version: 1.1
+Name: plone.folder
+Version: 1.0.5
+Summary: BTree-based folder implementation with order support
+Home-page: http://pypi.python.org/pypi/plone.folder
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: plone.folder
+        ============
+        
+        Overview
+        --------
+        
+        This package provides a base class for folderish content types based
+        on `B-trees`_, a.k.a. "large folders" in Plone_.  Storing content in
+        such folders provides significant `performance benefits`_ over regular
+        folders.  However, "large folders" do not support explicit ordering of
+        their contents out-of-the box.  That is, you cannot manually specify the
+        order of items within the folder, you can only sort things according to
+        a given criteria after fetching items from the folder.
+        
+          .. _`B-tree`: http://en.wikipedia.org/wiki/B-tree
+          .. _`B-trees`: http://en.wikipedia.org/wiki/B-tree
+          .. _`Plone`: http://plone.org/
+          .. _`performance benefits`: http://plone.org/products/plone/roadmap/191
+          .. |---| unicode:: U+2014  .. em dash
+        
+        Many times, though, it is desirable to be able to explicitly order
+        a folder's content, for example for items that are related to site
+        navigation.  Sorting alphabetically often doesn't make sense here.
+        
+        To compensate ``plone.folder`` provides ordering support for `B-tree`_
+        folders via the above mentioned base class, which can make use of an
+        adapter to store the actual order information.  It also comes with two
+        sample adapter implementations:
+        
+          * A default adapter handling order information for all objects
+            contained in a folder.  This adapter can be used to build fully
+            backwards-compatible drop-in replacements for folderish content.
+            In other words, when using this adapter `B-tree`_-based folders should
+            behave just like the "regular" folder implementation, but provide some
+            of the performance benefits at the same time.
+        
+          * An alternative adapter implementation that is targeted towards
+            sites with only a relatively small percentage of content for which
+            (explicit) order matters.  It'll only manage order information for
+            certain content types (via a marker interface).
+        
+        The latter allows to not having to separate such content from
+        "non-orderable" content.  Up to now many large sites ended up storing
+        "orderable" items |---| for example everything related to navigation
+        and typically only a few |---| in regular folders and the bulk of the
+        content in "large" folders, most of the time solely for performance
+        reasons.  This adapter will hopefully help avoid having to make this
+        distinction in the future and still provide the better performance
+        characteristics of `B-tree`_ folders.
+        
+        Changelog
+        =========
+        
+        
+        1.0.5 (2013-12-07)
+        ------------------
+        
+        - Allow reversing the current order, without specifying a key for
+          sorting.
+          [maurits]
+        
+        - Allow ordering by a method instead of an attribute.
+          [maurits]
+        
+        
+        1.0.4 (2012-08-30)
+        ------------------
+        
+        - Update manifest.in to fix packaging error.
+          [esteele]
+        
+        
+        1.0.3 (2012-08-29)
+        ------------------
+        
+        - In setup.py, name more dependencies explicitly.
+          [thet]
+        
+        
+        1.0.2 (2012-07-02)
+        ------------------
+        
+        - Update notifyContainerModified import location.
+          [hannosch]
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        
+        1.0.1 - 2010-08-08
+        ------------------
+        
+        - Added objectValues and objectItems method to the ordered folder
+          implementation, which use objectIds and thus the ordering information. In
+          Zope 2.13 BTreeFolder2 was optimized to loop over the internal _tree data
+          structure avoiding the objectIds indirection.
+          [hannosch]
+        
+        
+        1.0 - 2010-07-18
+        ----------------
+        
+        - Avoid dangerous memoization in the DefaultOrdering adapter.
+          [hannosch]
+        
+        - Update license to GPL version 2 only.
+          [hannosch]
+        
+        
+        1.0b5 - 2010-03-06
+        ------------------
+        
+        - Remove support for setting ``__parent__`` and ``__name__`` for content
+          providing ``IContained`` as it can cause severe performance issues when
+          used on Zope 2.x.
+          [witsch]
+        
+        
+        1.0b4 - 2010-02-17
+        ------------------
+        
+        - Register all ordering adapter by default now that they can co-exist.
+          [witsch]
+        
+        - Add `__getitem__` support to the default ordering adapter to help
+          previous/next support in `plone.app.folder`.
+          [witsch]
+        
+        
+        1.0b3 - 2010-02-09
+        ------------------
+        
+        - Make sure order changes are persisted when using the partial ordering
+          adapter.
+          [hannosch, witsch]
+        
+        
+        1.0b2 - 2010-01-28
+        ------------------
+        
+        - Make the dependency on `Products.CMFCore` a soft one.
+          [witsch]
+        
+        - Added an 'unordered' adapter which can be used when no explicit ordering
+          is needed.
+          [davisagli]
+        
+        - Allow the use of different named adapters to ``IOrdering``, with the name
+          determined by the folder's ``_ordering`` attribute.
+          [davisagli]
+        
+        
+        1.0b1 - 2009-10-10
+        ------------------
+        
+        - Fix the WebDAV content creation process by properly returning a
+          ``NullResource`` when required.
+          [optilude]
+        
+        
+        1.0a3 - 2009-05-11
+        ------------------
+        
+        - Let ``objectIds`` always return all object ids, even with partial ordering.
+          [witsch]
+        
+        
+        1.0a2 - 2009-05-07
+        ------------------
+        
+        - Fix a bug in the default ordering that would cause the ``pos`` dict to get
+          out of sync when an item is deleted.
+          [optilude]
+        
+        - Declare ``IContainer`` support.
+          [optilude]
+        
+        - Properly set ``__parent__`` and ``__name__`` for ``IContained`` in
+          ``_setOb()``.
+          [optilude]
+        
+        - Add ``__getitem__``, needed when not using the CMF mix-in.
+          [optilude]
+        
+        - Added ``__setitem__``, ``__contains__`` and ``__delitem__`` to support a
+          dict-like API.
+          [optilude]
+        
+        - Fix issue with removing non-orderable content for partial ordering suppport.
+          [witsch]
+        
+        - Fix ``getObjectPosition`` to return a value representing "no position" for
+          non-orderable content instead of raising an error.
+          [witsch]
+        
+        - Fix boolean value of the btree-based folder base class.
+          [witsch]
+        
+        - Factor CMF out of the base classes for the new btree-based folder class
+          and simplify things a bit afterwards.
+          [witsch]
+        
+        - Add adapter providing explicit ordering only for "orderable" content.
+          [witsch]
+        
+        - Clean up tests and their setup.
+          [witsch]
+        
+        
+        1.0a1 - 2008-05-27
+        ------------------
+        
+        - Initial release
+          [optilude, tesdal, witsch]
+        
+Keywords: folder btree order
+Platform: Any
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: Intended Audience :: Other Audience
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

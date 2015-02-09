@@ -1,0 +1,7 @@
+setuptools
+zope.interface
+
+[test]
+zope.component
+zope.location
+zope.testing

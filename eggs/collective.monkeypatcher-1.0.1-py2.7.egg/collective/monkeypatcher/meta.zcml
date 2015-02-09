@@ -1,0 +1,16 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta"
+    i18n_domain="collective.monkeypatcher">
+
+    <meta:directives namespace="http://namespaces.plone.org/monkey">
+        
+        <meta:directive
+            name="patch"
+            schema=".meta.IMonkeyPatchDirective"
+            handler=".meta.replace"
+            />
+            
+    </meta:directives>
+
+</configure>

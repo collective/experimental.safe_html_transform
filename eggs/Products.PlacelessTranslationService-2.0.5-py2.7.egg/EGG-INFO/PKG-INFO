@@ -1,0 +1,1092 @@
+Metadata-Version: 1.1
+Name: Products.PlacelessTranslationService
+Version: 2.0.5
+Summary: PTS provides a way of internationalizing (i18n'ing) and localizing (l10n'ing) software for Zope 2.
+Home-page: http://pypi.python.org/pypi/Products.PlacelessTranslationService
+Author: Lalo Martins
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL
+Description: PlacelessTranslationService
+        
+           Copyright (C) 2001-2007 Lalo Martins <lalo@laranja.org>,
+                         Zope Corporation and Contributors
+        
+           This program is free software; you can redistribute it and/or modify
+           it under the terms of the GNU General Public License as published by
+           the Free Software Foundation; either version 2 of the License, or
+           (at your option) any later version.
+        
+           See license.txt for more details.
+        
+           This program is distributed in the hope that it will be useful,
+           but WITHOUT ANY WARRANTY; without even the implied warranty of
+           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+           GNU General Public License for more details.
+        
+           You should have received a copy of the GNU General Public License
+           along with this program; if not, write to the Free Software
+           Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
+        
+        What is PlacelessTranslationService?
+        
+          PTS is a way of internationalizing (i18n'ing) and localizing (l10n'ing)
+          software for Zope 2.
+          It's based on the files supported by the GNU gettext set of
+          utilities. A good source of information and background reading is
+          the gettext documentation:
+          
+          http://www.gnu.org/software/gettext/manual/
+        
+        Installation
+        
+          PTS is installed as a normal Zope product. This is usually done by unpacking
+          the distribution into the Products directory of your INSTANCE_HOME
+          and restarting Zope. More information can be found in the Zope Book:
+        
+          http://zope.org/Documentation/Books/ZopeBook/2_6Edition/MaintainingZope.stx
+        
+        Using PlacelessTranslationService
+        
+          PTS is used in the following steps:
+        
+          1. i18n your software
+        
+          2. Prepare a translation template
+        
+          3. Prepare translations of the template
+        
+          4. Install translations
+        
+          Each of these is explained below.
+        
+        1. Internationalizing Your Software
+        
+          A good overview of this can be found at:
+          http://www.upfrontsystems.co.za/Members/jean/mysite-i18n
+        
+        2. Preparing a Translation Template
+        
+          A translation template is an empty Portable Object file as defined
+          by the gettext standard with a special header block. 
+        
+          The PO format is described in detail here:
+        
+          http://www.gnu.org/software/gettext/manual/html_node/gettext_9.html#SEC9
+        
+          The header block is fairly self explanatory and can be seen in the
+          sample.pot file included in this directory. All phrases in capitals,
+          the language code, language name and (optionally) the content type
+          and preferred encodings should be replaced with their correct
+          values.
+        
+          There are several ways to prepare a PO template:
+        
+          -- By hand:
+          
+             This can be done by copying the blank.pot included in this
+             directory, replacing the sample values as described above and and
+             then manually adding msgid and empty msgstr pairs for each of the
+             msgid's used in your software.
+        
+          -- Using i18ndude:
+        
+             i18ndude is a tool that is useful when all your software is in
+             the form of ZPT's that are stored in files on the filesystem.
+        
+             It can be downloaded from:
+        
+             http://plone.org/products/i18ndude
+        
+        3. Prepare Translations of the Template
+        
+           Preferably, find a translation company that can handle the gettext
+           standards and send them your .pot file. They should send back .po
+           files for the languages you require.
+        
+           If you're doing it yourself, copy the .pot file to a file on the
+           name of the language you're translating to and with a .po
+           extension. Then go through that file and fill in the msgstr
+           sections. Finally, update all the metadata fields at the top of the
+           file so they are correct for the translation you have just
+           completed.
+        
+           At this point, you should have a .pot file and a collection of .po
+           files.
+        
+        4. Install Translations
+        
+           PTS will look in folders called 'i18n' for .po files to use as
+           translations. These 'i18n' folders will be searched if they are in
+           the INSTANCE_HOME or in the directories of any of the Products you
+           have installed.
+        
+           Copy your .po files to a 'i18n' folder of your choice in one of
+           these locations.
+        
+           Once that's done, restart Zope.
+        
+        Changelog
+        =========
+        
+        2.0.5 (2014-04-16)
+        ------------------
+        
+        - .gitignore added.
+          [tisto]
+        
+        
+        2.0.4 (2013-08-13)
+        ------------------
+        
+        - Add module security declarations. Prevent publishing of
+          the translate method. (Fixes from PloneHotfix20130618.)
+          [davisagli]
+        
+        
+        2.0.3 (2011-11-24)
+        ------------------
+        
+        - Prevent exception after failing to reload a lazy catalog.
+          This closes http://dev.plone.org/ticket/9726
+          [davisagli]
+        
+        - Make sure packages that are registered with five:registerPackage are
+          searched for an i18n directory, also in Zope 2.13 (Plone 4.1).
+          [maurits]
+        
+        - Make product init compatible with Zope trunk.
+          [elro]
+        
+        2.0.2 - 2010-10-27
+        ------------------
+        
+        - Fixed chameleon incompatibility in ``catalog_broken.pt``.
+          [swampmonkey]
+        
+        2.0.1 - 2010-08-04
+        ------------------
+        
+        - Made initialize2 function compatible with Zope 2.13.
+          [hannosch]
+        
+        2.0 - 2010-07-18
+        ----------------
+        
+        - No changes.
+        
+        2.0b6 - 2010-06-13
+        ------------------
+        
+        - Removed the ``.registration.cache`` file from i18n directories. Since the
+          majority of po files in plone.app.locales moved to locales folders, this
+          optimization isn't worth it anymore.
+          [hannosch]
+        
+        - Avoid using the deprecated five:implements directive.
+          [hannosch]
+        
+        2.0b5 - 2010-03-26
+        ------------------
+        
+        - Fixed incompatibility in ``TEMPLATE_LANGUAGE`` support if you have specified
+          an explicit language list via ``zope_i18n_allowed_languages``.
+          [hannosch]
+        
+        2.0b4 - 2010-03-01
+        ------------------
+        
+        - Made sure that the request language memoization patch doesn't throw errors
+          if the request cannot be adapted to IAnnotations. This closes
+          http://dev.plone.org/plone/ticket/10272.
+          [hannosch, davisagli]
+        
+        2.0b3 - 2010-02-04
+        ------------------
+        
+        - Refactored the i18n folder discovery mechanism to be independent of the
+          persistent product registry.
+          [hannosch]
+        
+        2.0b1 - 2010-01-24
+        ------------------
+        
+        - Extend our hack of the negotiator a bit more and introduce the concept of a
+          template language. This one will always be allowed no matter if there's a
+          po file for it for every domain or not. This closes
+          http://dev.plone.org/plone/ticket/9762.
+          [hannosch]
+        
+        - Added missing zope.annotation dependency.
+          [hannosch]
+        
+        2.0a2 - 2009-11-13
+        ------------------
+        
+        - Merged in the PTSLanguages class from Products.Five.i18n and enabled it in
+          our overrides.zcml.
+          [hannosch]
+        
+        - Fixed deprecation warnings for use of Globals.
+          [hannosch]
+        
+        - Cleaned up package metadata and declare package dependencies.
+          [hannosch]
+        
+        2.0a1 - 2008-10-16
+        ------------------
+        
+        - Finished support for handling of po files inside i18n folders in normal
+          Python packages. They need to registered as a Zope2 product but don't
+          need to be in the Products.* namespace anymore.
+          [hannosch]
+        
+        - Removed the _compile_locales_dir method and patch. Compiling mo files is
+          now handled by zope.i18n itself.
+          [hannosch]
+        
+        - Added first version of a registration cache for i18n folders. We track the
+          modification time, number of files and header information of the files and
+          write those out to a cache file. On startup we read the cache file and use
+          the information as long as it is still current, instead of reparsing the po
+          files headers. The cache file is called '.registration.cache'.
+          [hannosch]
+        
+        - Minor optimization in initialize code.
+          [hannosch]
+        
+        - Optimized loading of po files from i18n files. We only parse the header of
+          the files, when all we need is the language header. This requires a new
+          version of python-gettext.
+          [hannosch]
+        
+        - Optimized startup logging. Now we don't spam the debug level anymore.
+          [hannosch]
+        
+        - Deprecated all translation domain and service related methods and classes.
+          [hannosch]
+        
+        - Removed the var/pts mo file cache in favor of compiling all mo files
+          inplace. Also removed registration of catalogs with PTS and register them
+          as Zope3 ITranslationDomain utilities instead.
+          [hannosch]
+        
+        - Removed our own copy of the msgfmt module and use the one from the
+          python-gettext package instead.
+          [hannosch]
+        
+        - Stopped adding BrokenMessageCatalog objects to PTS.
+          [hannosch]
+        
+        - Removed self recreation code when updating to newer versions of PTS.
+          [hannosch]
+        
+        - Removed deprecated methods.
+          [hannosch]
+        
+        1.5.4 - 2010-03-01
+        ------------------
+        
+        - Fix the PTS_LANGUAGES and LazyGettextMessageCatalog optimization. A boolean
+          check was inverted. This closes http://dev.plone.org/plone/ticket/9575.
+          [hannosch]
+        
+        1.5.3 - 2009-06-11
+        ------------------
+        
+        - Fix support for merging multiple message catalogs for the same domain.
+          Previously this only worked in test-land.
+          [witsch]
+        
+        - Add test layer properly initializing the package so that the tests can
+          also pass with the eggified version.
+          [witsch]
+        
+        1.5.2 - 2009-05-13
+        ------------------
+        
+        - Create unique catalog names for translation files found in packages. This
+          closes http://dev.plone.org/plone/ticket/8443.
+          [hannosch]
+        
+        - Deferred our own initialization to the package load time, so the persistent
+          product registry is populated with the product entries for all packages.
+          This allows all translations to be registered at the first startup of a new
+          instance and closes http://dev.plone.org/plone/ticket/8376.
+          [hannosch]
+        
+        1.5.1 - 2009-02-22
+        ------------------
+        
+        - Uppercased the readme.txt file to README.txt. Some platforms don't seem to
+          like an all lowercase name here.
+          [hannosch]
+        
+        1.5 - 2009-02-20
+        ----------------
+        
+        - Reformatted changelog and updated package metadata.
+          [hannosch]
+        
+        - Patched zope.i18n.zcml.registerTranslations in order to backport
+          Hanno's work on merging po files from the same domain.
+          [tarek]
+        
+        - Added some tests for the registerTranslations patch.
+          [tarek]
+        
+        1.4.14
+        ------
+        
+        - Fixed setup.py that was referring to a non-existing file.
+          [maurits]
+        
+        
+        1.4.13 - August 18, 2008
+        ------------------------
+        
+        - Reworked the PTS loading code to not rely on the persistent product
+          registry for file path anymore, since that can get out of sync too easily
+          and cause problems with multiple ZEO clients on different file paths
+          connected to the same database. This closes
+          http://dev.plone.org/plone/ticket/8265 and
+          http://dev.plone.org/plone/ticket/8317.
+          [hannosch]
+        
+        
+        1.4.12 - June 17, 2008
+        ----------------------
+        
+        - Finished support for handling of po files inside i18n folders in normal
+          Python packages. They need to registered as a Zope2 product but don't
+          need to be in the Products.* namespace anymore.
+          [hannosch]
+        
+        - Added some missing ZCML statements, which allow to use PTS in a Zope-only
+          environment. Thanks to Martijn Jacobs for the patch.
+          [hannosch]
+        
+        1.4.11 - April 28, 2008
+        -----------------------
+        
+        - Work around a bug in addCatalog that would fail on broken message catalogs.
+          This closes http://dev.plone.org/plone/ticket/8084.
+          [hannosch]
+        
+        
+        1.4.10 - April 20, 2008
+        -----------------------
+        
+        - Switched mo file cache to store files under the client home instead of
+          relying on the var folder to be present inside the instance home. This
+          should fix permission errors for effective-user installs. This refs
+          http://dev.plone.org/plone/ticket/7786.
+          [hannosch]
+        
+        - Do not use the lazy message catalog at all when the list of languages is
+          restricted via PTS_LANGUAGES, as the advantage in memory footprint will
+          no longer exist, but the tiny lookup penalty would still be there.
+          [hannosch]
+        
+        - Added support for a new environment variable called PTS_LANGUAGES. If this
+          variable is specified and contains a space separated list of language codes
+          only those languages will be registered in the Zope instance. This can help
+          in reducing the memory footprint and number of ZODB objects generated by
+          PTS. For locales folders this also avoids compiling po files to mo files.
+          [hannosch]
+        
+        
+        1.4.9 - March 26, 2008
+        ----------------------
+        
+        - Restructured patches. Added patch to always compile po files in all locales
+          folders to mo files, even when those are found in packages. This closes
+          http://dev.plone.org/plone/ticket/7157. At the same time we do not longer
+          load locales folders in Products if they are not registered via ZCML.
+          [hannosch]
+        
+        - Fixed incorrect logging in MoFileCache. This closes
+          http://dev.plone.org/plone/ticket/7775.
+          [kaell311, hannosch]
+        
+        
+        1.4.8 - January 5, 2008
+        -----------------------
+        
+        - Fixed a bug in the persistent translation service creation code. It
+          registered the wrapper with a _path of ('TranslationService', ) at first.
+          After a restart that would be corrected to the correct one:
+          ('', 'Control_Panel', 'TranslationService'). This should fix a couple of
+          bugs in the Plone bug tracker.
+          [hannosch]
+        
+        
+        1.4.7 - December 24, 2007
+        -------------------------
+        
+        - Raise a ValueError when the Zope3 translation utilities get passed in an
+          invalid context argument. Translations in Zope3 work against the request
+          alone and while the keyword is called context it was too easily confused
+          with a contentish context.
+          [hannosch]
+        
+        
+        1.4.6 - December 2, 2007
+        ------------------------
+        
+        - Catch PoSyntaxError when loading translation files from locales folders
+          and output a warning instead of preventing Zope from starting up.
+          [hannosch]
+        
+        - Backed out handling of PTS as a global utility again. It turns out that
+          registering a persistent object both as a global utility is as bad as
+          registering it as a module level global. So we use the PTSWrapper again
+          which stores only the physical path to the PTS and loads it on every
+          access. This fixes the ConnectionStateErrors witnessed in Plone 3.0 and
+          closes http://dev.plone.org/plone/ticket/7233.
+          [hannosch]
+        
+        - Backported LazyGettextMessageCatalog from the trunk and use it instead of
+          the standard zope.i18n GettextMessageCatalog. This improves startup time
+          and memory footprint, as only those catalog files will be parsed and loaded
+          into memory which are actually used.
+          [hannosch]
+        
+        
+        1.4.5 - October 7, 2007
+        -----------------------
+        
+        - Guard against sporadic ConnectionStateErrors in the PTS utility
+          implementation.
+          [hannosch]
+        
+        
+        1.4.4 - July 9, 2007
+        --------------------
+        
+        - Added new memoize function, which is used to patch the Zope3 negotiator to
+          store the results of the language negotiation on the request.
+          [hannosch]
+        
+        - Various minor updates to msgfmt.py.
+          [hannosch]
+        
+        
+        1.4.3 - May 1, 2007
+        -------------------
+        
+        - Added new mo file generation logic, which will automatically generate and
+          update the mo files in all locales folders instead of in the var/pts cache,
+          so these can be picked up by the Zope3 translation machinery directly. You
+          need to make sure that the user running the Zope process has write
+          permissions in all locales folders for this feature to work. Folders
+          following the i18n folder layout will be treated the same way as before.
+          [hannosch]
+        
+        - Removed mo files for the PTS domain.
+          [hannosch]
+        
+        
+        1.4.2b2 - March 23, 2007
+        ------------------------
+        
+        - Commented out the five:registerPackage for now, as it lead to ugly
+          ConnectionStateErrors during tests, as PTS would have been set up as part
+          of the ZCML layer.
+          [hannosch]
+        
+        
+        1.4.2b1 - March 5, 2007
+        -----------------------
+        
+        - Small optimization. Check if the context passed to the translate function
+          is already a request, so we don't need to acquire it from the context.
+          [hannosch]
+        
+        - Added IPTSTranslationDomain interface and utility. These can be used to
+          proxy a translation domain that is still handled by PTS to make it available
+          as a Zope3 translation domain as well, so it can be used in pure Zope3 page
+          templates for example.
+          [hannosch, philiKON]
+        
+        
+        1.4.1 - February 10, 2007
+        -------------------------
+        
+        - Removed TranslateTags and dtml translation features. They weren't working
+          anymore for ages and noone was able to fix or maintain those.
+          See http://dev.plone.org/plone/ticket/4895 for the whole story.
+          [hannosch]
+        
+        - Register the PlacelessTranslationService object as a global utility during
+          initialization. This allows us to get rid of all the magic acquistion code
+          in PTSWrapper, which traversed to the real PTS object for every translate
+          method call. We can now do a simple getUtility call instead.
+          [hannosch]
+        
+        - Removed custom cache handling and replaced it by the standard approach
+          based on ideas from plone.memoize. The code can be found in memoize module.
+          This results in a major speed increase again.
+          [hannosch]
+        
+        - Removed obsolete as_unicode argument from the translate method.
+          [hannosch]
+        
+        - Deprecated a bunch of methods, which don't serve any particular purpose
+          anymore.
+          [hannosch]
+        
+        - Removed the .missing tracking facilities. These were unmaintained and not
+          tested in any way.
+          [hannosch]
+        
+        
+        1.4.0 - October 25, 2006
+        ------------------------
+        
+        - Removed the tracker functionality of automatically recording missing
+          translations. This turned out to be quite resource intense.
+          [hannosch]
+        
+        - Fixed translate method to work in an environment where the context is not
+          acquisition wrapped.
+          [hannosch]
+        
+        - Fixed one more deprecation warning in GettextMessageCatalog.
+          [hannosch]
+        
+        - Removed PatchStringIO completely, it apparently wasn't needed anymore.
+          [hannosch]
+        
+        - Removed the FasterStringIO module and the accompanying monkey patch. These
+          are part of CMFPlone/patches now.
+          [hannosch]
+        
+        - Clarified some doc strings on the utranslate methods, these are identical
+          to the translate methods now, don't use them anymore.
+          [hannosch]
+        
+        - Cleaned up the PatchStringIO a bit, as we require Zope 2.10 now, we always
+          have the Zope3 TAL machinery around and we should suppress the annoying
+          deprecation warnings.
+          [hannosch]
+        
+        - Deprecated the RequestGetAccept language negotiation handler, as it
+          interferes with forms that include a field called language. We do not
+          register the handler in 1.4 anymore. This closes
+          http://dev.plone.org/plone/ticket/4986.
+          [hannosch]
+        
+        - Cleaned up tests and removed custom testrunner (framework/runalltests).
+          [hannosch]
+        
+        - All translation domains which are registered with the Zope3 translation
+          service are now ignored by PTS, as PTS wouldn't been queried for these
+          anyways.
+          [hannosch]
+        
+        - PTS's translations (for the management screens) are now set up to use the
+          Zope3 translation service. Quite ironic you may think, but this emphasizes
+          even more the path PTS will take.
+          [hannosch]
+        
+        - Converted PTS's own translation to new-style locales folder layout.
+          [hannosch]
+        
+        - Changed translate method of PTS to return Unicode by default to work better
+          with Zope 2.10+, which uses the Zope3 tal and pagetemplate machinery which
+          expects Unicode in all places.
+          [hannosch]
+        
+        
+        1.3.6 - April 22, 2007
+        ----------------------
+        
+        - Yet another Unicode error was fixed which was caused by non unicode
+          characters in page template source (utf encoded string in page template
+          source). This closes http://dev.plone.org/plone/ticket/6238.
+          [naro, hannosch]
+        
+        
+        1.3.5 - January 27, 2006
+        ------------------------
+        
+        - The recent change to return Unicode exposed another place in the TAL
+          interpreter that combines text, which wasn't yet patched to allow a mixture
+          of Unicode and utf-8 encoded text. A new monkey-patch has been introduced
+          to fix this problem. This closes http://dev.plone.org/plone/ticket/6068.
+          [hannosch]
+        
+        
+        1.3.4 - December 13, 2006
+        -------------------------
+        
+        - Changed translate method of PTS to return Unicode by default. This was
+          needed for Plone 2.5 in order to get a sensible behaviour with the
+          FiveTranslationService. This release is probably not compatible with
+          Plone 2.1.
+          [hannosch]
+        
+        
+        1.3.3 - September 29, 2006
+        --------------------------
+        
+        - Provided some more nice fallback in the interpolate function for situations
+          where you mixed encoded strings or unicode in the mapping dict compared to
+          the text itself. We handle utf-8 encoded strings gracefully in all cases now.
+          [hannosch]
+        
+        
+        1.3.2 - September 8, 2006
+        -------------------------
+        
+        - Made the logging of broken message catalogs more verbose. Now both the
+          filename and path are logged, so you actually have a chance of finding those
+          files. Thx limi for the suggestion.
+          [hannosch]
+        
+        - Fixed bugs in interpolate function, where mixing of Unicode and encoded
+          strings failed, when the Unicode string contained only ASCII characters.
+          This will work now. Nonetheless you should update your code to use Unicode
+          internally, as support for translating non-Unicode strings will go away once
+          we switch to a Zope3-based TranslationService.
+          [hannosch]
+        
+        
+        1.3.1 - June 1, 2006
+        --------------------
+        
+        - Also apply our evil hack that allows mixing utf-8 encoded strings and
+          Unicode to the Zope3 versions of pagetemplate and talinterpreter, so current
+          Plone works under Zope 2.10. Note that PTS is slated for destruction and you
+          should really start to update all your code to use Unicode internally and
+          especially for output through TAL.
+          [hannosch]
+        
+        
+        1.3.0 - May 15, 2006
+        --------------------
+        
+        - Fixed another problem in the interpolate function, where variables where not
+          replaced if the string was an old-style normal string and not unicode.
+          This closes http://dev.plone.org/plone/ticket/5509.
+          [hannosch]
+        
+        - Fixed a UnicodeDecodeError bug in the interpolate function, when a mapping
+          or the text was Unicode but the other one was not. The function excepts only
+          Unicode as both the text and for all entries of the mapping, as it has no
+          way to guess the encoding of any of them.
+          [hannosch]
+        
+        - Sanitized the interpolate function. It had various major bugs and was just
+          unbelievable slow. This closes http://dev.plone.org/plone/ticket/5421.
+          [hannosch]
+        
+        - Removed OpenTal support in anticipation of having to support Zope3 zope.tal
+          for Zope 2.10. We don't want to support three tal implementations ;)
+          [hannosch]
+        
+        - Big general spring cleaning. Moved to logging module instead of zLOG. The
+          logging module is included in Python starting with 2.3. Running an older
+          version of Python is therefore not supported anymore. This goes likewise for
+          Zope < 2.7.
+          [hannosch]
+        
+        - Include the filename of the po in the missing-domain error message
+          [wichert]
+        
+        
+        1.2.7 - March 19, 2006
+        ----------------------
+        
+        - Fixed a bug in msgfmt.py noted by Andrey Lebedev. All comments starting with
+          '#,' where treated as fuzzy.
+          [hannosch]
+        
+        - Fixed a bug where the translation service would return None for a
+          translation, when it could not find one and the default was None. Changed to
+          use the msgid instead. This has happened for all Zope3 Messages which have
+          no default text.
+          [hannosch] [alecm]
+        
+        - Added test to show that dtml translation is broken, see
+          http://dev.plone.org/plone/ticket/4895.
+          [hannosch]
+        
+        - Do not reset the PTS_IS_RTL flag in a request if it is already set.
+          http://dev.plone.org/plone/ticket/4631
+          [wichert]
+        
+        
+        1.2.6 - February 25, 2006
+        -------------------------
+        
+        - Removed some Python 2.1 BBB and unused code.
+          [hannosch]
+        
+        - Removed home-grown MessageID implementation. Using Zope 3 MessageID's is now
+          possible with Zope 2.8 / Five 1.1 or Zope > 2.9.
+          [hannosch]
+        
+        - Moved changes.txt from doc subfolder to main folder and renamed it to
+          HISTORY.txt to comply to the standard layout.
+          [hannosch]
+        
+        - Changed standard logging level to BLATHER instead of INFO so the startup
+          process isn't bombarded with useless messages.
+          [hannosch]
+        
+        - Added a environment variable "DISABLE_PTS" to entirely disable
+          loading of translation files and registration of PTS as a
+          translation service without removing the product from the
+          'Products' directory. HINT: One easy way to set environment
+          variables is to use the <environment> 'zope.conf' directive.
+          [dreamcatcher]
+        
+        
+        1.2.5 - 2005-12-06
+        ------------------
+        
+        - Fix problems with folder layout where INSTANCE_HOME.startswith(ZOPE_HOME)
+          is True, as reported in http://plone.org/collector/4983. Thanks to ymahe for
+          the patch, which I have slightly modified.
+          [hannosch]
+        
+        
+        1.2.4 - 2005-11-16
+        ------------------
+        
+        - Removed some Python 2.1 compatibility code and added first very basic test
+          for loading po files
+          [hannosch]
+        
+        - Made some filesystem access code a bit more robust by additionally catching
+          OSErrors. This fixes http://plone.org/collector/4824.
+          [hannosch]
+        
+        - Increased class version again and wrote test to ensure matching class
+          version and version in version.txt
+          [hannosch]
+        
+        
+        1.2.3 - 2005-10-17
+        ------------------
+        
+        - Fixed http://plone.org/collector/4799 - upgrade from 2.1 to 2.1.1 breaks all
+          message catalogs. We now increment the internal class version of PTS, which
+          will result in a recreation of the translation_service object in the ZODB,
+          so all contained internal poFile objects get removed and freshly recreated
+          [hannosch]
+        
+        
+        1.2.2 - 2005-10-08
+        ------------------
+        
+        - Replaced storing the persistent PTS at the module level in __init__.py
+          with a PTSWrapper object.  Added isRTL method to PTSWrapper.  Should
+          fix the connection issues.
+          [alecm]
+        
+        - Merged missing fix from the 1.0 branch. It's changelog entry was:
+          "Fixed issue with multiple ZEO clients at differen filesystem locations."
+          This was done by longsleep on Feb 9, 2005
+          [hannosch]
+        
+        
+        1.2.1 - 2005-08-07
+        ------------------
+        
+        - Fresh tarball for Plone 2.1rc2 (without .svn directories)
+          [batlogg]
+        
+        - Added greek translation [thx to Nikos Papagrigoriou]
+          [hannosch]
+        
+        
+        1.2.0 - 2005-07-28
+        ------------------
+        
+        - Purge mo file cache when PTS is recreated
+          [tiran]
+        
+        
+        1.2-rc3
+        -------
+        
+        - Fixed id generation for po files located in the "locales" directory
+          [tiran]
+        
+        - Added a mo file cache which is storing the compiled files in
+          INSTANCE_HOME/var/pts/${catalog_id}.mo
+          [tiran]
+        
+        
+        1.2-rc2
+        -------
+        
+            ...
+        
+        
+        1.2-rc1 - 2004-09-08
+        --------------------
+        
+        - New feature RTL support and RTL api for right to left languages. Po files
+          may contain a header called X-Is-RTL with either yes, y, true or 1 for a
+          rtl language or no, n, false, 0 for a ltr language (default value). The
+          product module also contains a new method isRTL which is available TTW.
+        
+        
+        1.1-rc1 - 2004-07-15
+        --------------------
+        
+        - New feature msgid tracker (thanks to ingeniweb):
+        
+          It's tracking untranslated msgids inside the PTS. You can easily download
+          them as po file. See ZMI for more informations
+        
+        - Set MessageCatalog isPrincipiaFolderish to false to avoid infinite recursion
+          of dtml-tree inside the ZMI.
+        
+        
+        1.0-rc8
+        -------
+        
+        - This version is no longer a fork, but is the official version now.
+          Thanks to Lalo Martins for his tireless efforts in writing the
+          original product.
+        
+        - Disabled usage of SESSION
+        
+        - Re-enabled .missing logging
+        
+        - Added documentation section, including details of how to use
+          .missing logging to generate .pot files
+        
+        
+        1.0fork-rc7 - 2004-05-11
+        ------------------------
+        
+        - Reenabled getRequest patch to avoid some ugly problems
+        
+        
+        1.0fork-rc6 - 2004-05-05
+        ------------------------
+        
+        - Cleaned up all python files, realigned the code and removed spaces
+        
+        
+        1.0fork-rc5 - 2004-04-22
+        ------------------------
+        
+        - Changed logging to get use the methods and vars from utils.py
+        
+        - Cleaned up the imports an seperate them into python, zope and PTS imports
+        
+        - Removed the dependency and auto loading of the get_request patch. Now it's
+          loaded only when using the MessageID module, when applying unicode to
+          FasterStringIO (shouldn't happen!) or as fallback when PTS can't get a valid
+          context (REQUEST).
+          The last two cases will break the first time after a (re)start of zope. If
+          your software depends on get_request() apply the patch manually::
+        
+              from Products.PlacelessTranslationService.PatchStringIO import applyRequestPatch
+              applyRequestPatch()
+        
+          NOTE: FOR THIS RELEAE THE get_request PATCH IS ENABLED BY DEFAULT!
+        
+        - Better debugging message for PoSyntaxErrors
+        
+        
+        1.0fork-rc4 - 2004-04-05
+        ------------------------
+        
+        - Changed po file id creation:
+        
+            - id is MyProducts.i18n-pofile or MyProducts.locales-pofile
+              for po files loaded from a product directory
+            - id is GlobalCatalogs-pofile for po files loaded from
+              INSTANCE_HOME/i18n/
+        
+        - Always append fallback catalogs to the catalogs
+          used for translation
+        
+        - Support INSTANCE_HOME/locales/
+        
+        - Move GlobalCatalogs from INSTANCE_HOME/i18n/ and
+          INSTANCE_HOME/locales/ to the beginning of the
+          catalogs used for translation
+        
+        - Cache catalog names in the REQUEST using the domain and language as key
+        
+        
+        1.0fork-rc3 - 2004-03-09
+        ------------------------
+        
+        - Added a product identifier to the control panel catalog id
+          to allow same po filenames in different locations:
+        
+        - Catalog its are now like Products.CMFPlone.i18n.plone-de.po
+          Catalogs not coming from a Product (eg from INSTANCE_HOME)
+          are named like before (plone-de.po)
+        
+        - Fixed collector issue #910529
+          Thanks to Nicolas Ledez for the report and the patch
+        
+        
+        1.0fork-rc2 - 2004-03-01
+        ------------------------
+        
+        - Fixed bug in FasterStringIO that added new lines to the output
+        
+        - Added zope 3 like locales directory support:
+          Products/MyProduct/locales/${lang}/LC_MESSAGES/${domain}.po
+        
+        
+        1.0fork-rc1 - 2004-02-11
+        ------------------------
+        
+        - Fixed minors problems with python 2.1 compatibility
+        
+        
+        1.0fork-beta5 - 2004-02-03
+        --------------------------
+        
+        - Added utranslate method
+        
+        - Added negotiator chains and two new easy negotiators
+        
+        - Added zope 3 like MessageID and MessageIDFactory
+        
+        - Updated API and cleaned up code:
+            - added security to classes
+            - moved some classes to utils.py to avoid method level imports
+            - added getTranslationService() method to get the PTS instance
+              in other products
+        
+        
+        1.0fork-beta4 - 2004-01-28
+        --------------------------
+        
+        - Read all files with "rb" in msgfmt.py
+        
+        - Display broken Message Catalogs in ControlPanel as "broken"
+        
+        - Synced with these latest PTS changes from savannah:
+            - added as_unicode argument to translate
+            - cleaned up msgfmt.py
+        
+        
+        1.0fork-beta3 - 2004-01-07
+        --------------------------
+        
+        - Added a builtin mo compiler based on the msgfmt tool from the python source
+          package. No need to compile the po files to mo files. Thanks to
+          Christian 'Tiran' Heimes <tiran@cheimes.de>
+        
+        - No longer load mo files on startup. Catalogs are automatically compiled.
+        
+        
+        1.0fork-beta2 - 2003-11-24
+        --------------------------
+        
+        - No longer register a persistent service to zope translation
+          service registry. Instead wrap PTS with a non persistent class
+        
+        - Added a de (German) translation for PTS ZMI
+        
+        - Reimplemented hook to register own negotiaton method into
+          Negotiator which was stripped out in 1.0beta1 (now works
+          with PloneLanguageTool again)
+        
+        - Python 2.1 compatibility
+        
+        
+        1.0beta1 - 2003-10-??
+        ---------------------
+        
+        - Internationalized our own page templates (for ZMI) and added a
+          pt_BR translation
+        
+        - Generalized the Negotiator so that it may negotiate any header in
+          the "accept" format
+        
+        
+        1.0alpha2 - 2003-09-26
+        ----------------------
+        
+        - Some primitive DTML support
+        
+        - Fixed persistence issues that were arising from having the same
+          object stored in the ZODB and in a module-level global var (thanks
+          to Sidnei)
+        
+        
+        1.0alpha1 - 2003-08-27
+        ----------------------
+        
+        - Removed dependency from PAX
+        
+        - Now PTS looks for an "i18n" subdirectory under each Product
+          package, which makes it easier to package/install i18n-aware
+          products. The i18n dir on INSTANCE_HOME is still kept, you can
+          use it for local overrides
+        
+        - Improvements on the ZMI usability
+        
+        
+        0.5 - 2003-03-31
+        ----------------
+        
+        - Now we have a ZMI (Zope Management Interface) in Zope's Control
+          Panel. You can use it to refresh catalogs without restarting, and
+          to test installed catalogs
+        
+        - Some functions at module-level are exported for use in Python
+          Scripts and Page Templates (Open or Z): negotiate(), translate(),
+          getLanguages(), getLanguageName()
+        
+        - Added a "hotfix" to StringIO that should make PTS work with ZPT
+          without UnicodeError being raised constantly
+        
+        
+        0.4 - 2003-02-03
+        ----------------
+        
+        - Relicensed to GPL
+        
+        - Now it really works with ZPT (thoroughly tested)
+        
+        - If used with OpenPT, it will use the output encoding negotiation hooks
+        
+        - Negotiator now uses a cache (stored in the request) to speed things up
+        
+        - Can now use multiple catalogs for the same domain (but the order
+          in which they are checked is a bit randomic)
+        
+        - Special thanks to Magnus Heino for the ZPT support hints and patches
+        
+        
+        0.3 - 2003-01-02
+        ----------------
+        
+        - This release marked the split of PlacelessTranslationService into
+          its own package, and the initial attempts at making it compatible
+          with ZPT.
+        
+        
+        0.2 - 2002-09-22
+        ----------------
+        
+        - Updated release
+        
+        
+        0.1 - 2002-08-24
+        ----------------
+        
+        - Initial release
+        
+Keywords: Zope CMF Plone i18n l10n translation gettext
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Programming Language :: Python

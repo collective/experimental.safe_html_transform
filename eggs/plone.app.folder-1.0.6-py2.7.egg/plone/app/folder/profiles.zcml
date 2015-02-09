@@ -1,0 +1,14 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone.app.folder">
+
+  <genericsetup:registerProfile
+    name="default"
+    title="plone.app.folder"
+    directory="profiles/default"
+    description="Orderable btree-based folders as proposed in PLIP 191."
+    for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+    provides="Products.GenericSetup.interfaces.EXTENSION" />
+
+</configure>

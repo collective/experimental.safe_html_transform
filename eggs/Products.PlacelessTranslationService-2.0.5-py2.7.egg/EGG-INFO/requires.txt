@@ -1,0 +1,14 @@
+setuptools
+python-gettext >= 0.6
+zope.annotation
+zope.component
+zope.deferredimport
+zope.deprecation
+zope.i18n
+zope.interface
+zope.publisher
+Acquisition
+DateTime
+ExtensionClass
+ZODB3
+Zope2

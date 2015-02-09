@@ -1,0 +1,137 @@
+Metadata-Version: 1.1
+Name: plone.locking
+Version: 2.0.5
+Summary: webdav locking support
+Home-page: http://pypi.python.org/pypi/plone.locking
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: Overview
+        ========
+        
+        Provides basic automatic locking support for Plone. Locks are stealable by
+        default, meaning that a user with edit privileges will be able to steal
+        another user's lock, but will be warned that someone else may be editing
+        the same object. Used by Plone, Archetypes and plone.app.iterate
+        
+        Changelog
+        =========
+        
+        2.0.5 (2014-10-20)
+        ------------------
+        
+        - Adding "create_lock" to "plone_lock_operations"
+          [hman]
+        
+        - The locking timeout is now modifiable through LockType definition
+          [parruc]
+        
+        - Ported to plone.app.testing
+          [tomgross]
+        
+        
+        2.0.4 (2012-10-20)
+        ------------------
+        
+        - Do not download the file when we click on "unlock" in the context of a file.
+          Refs https://dev.plone.org/ticket/13191
+          [thomasdesvenain]
+        
+        
+        2.0.3 (2012-01-04)
+        ------------------
+        
+        - Check if context is not joined to zodb connection for transaction where lock
+          is added.
+          [fafhrd91]
+        
+        2.0.2 (2011-11-29)
+        ------------------
+        
+        - Do not cleanup stale lock if database is in read-only mode.
+          http://dev.plone.org/ticket/12239
+          [fafhrd91]
+        
+        
+        2.0.1 - 2011-05-12
+        ------------------
+        
+        - Make plone.locking check for the global lock settings if a context-specific
+          adapter is not found. Fixes http://dev.plone.org/plone/ticket/11779
+          [ggozad]
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        
+        2.0 - 2010-07-18
+        ----------------
+        
+        - Define all package dependencies.
+          [hannosch]
+        
+        - Update license to GPL version 2 only.
+          [hannosch]
+        
+        
+        1.2.1 - 2010-07-01
+        ------------------
+        
+        - Load the ``cmf.*`` permissions from Products.CMFCore.
+          [hannosch]
+        
+        
+        1.2.0 - 2009-03-04
+        ------------------
+        
+        - Added IRefreshableLockable interface and TTWLockable implementation.
+          [davisagli]
+        
+        - Changed default lock timeout to 10 minutes.
+          [davisagli]
+        
+        
+        1.1.0
+        -----
+        
+        - Clarified license and copyright statements.
+          [hannosch]
+        
+        - Declare test dependencies in an extra. Avoid dependency on Plone.
+          [hannosch]
+        
+        - Specify package dependencies.
+          [hannosch]
+        
+        - Fix missing internationalization (#8609 thanks to Vincent Fretin)
+          [encolpe]
+        
+        
+        1.0.5 - 2008-01-03
+        ------------------
+        
+        - Fix lock timeout which was set by default to 12 minutes, it is
+          now set to maxtimeout (71582788 minutes).
+          Fixes http://dev.plone.org/plone/ticket/7358
+          [jfroche]
+        
+        - Fix TypeError when an anonymous user locks content.  Fixes
+          http://dev.plone.org/plone/ticket/7246
+          [maurits]
+        
+        
+        1.0 - 2007-08-17
+        ----------------
+        
+        - Initial release.
+        
+Keywords: locking webdav plone archetypes
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Plone :: 5.0
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.7

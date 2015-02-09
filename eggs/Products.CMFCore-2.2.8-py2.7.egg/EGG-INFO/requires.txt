@@ -1,0 +1,9 @@
+setuptools
+Zope2 > 2.12.8
+five.localsitemanager
+Products.GenericSetup
+Products.ZSQLMethods
+zope.app.publication
+
+[test]
+zope.testing

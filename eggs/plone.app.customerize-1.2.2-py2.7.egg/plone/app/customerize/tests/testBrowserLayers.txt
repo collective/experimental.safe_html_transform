@@ -1,0 +1,254 @@
+This tests customerizeability (phew :)) of views and viewlets registered for
+a specific layer using `plone.browserlayer`.  Most of the test's setup and
+actual code or text was borrowed from that package as well, but let's get
+started...
+
+In `testing.zcml` we have registered a view, "layer-test-view", available only
+for the layer `plone.app.customerize.tests.interfaces.IMyLayer`. Before the
+product is installed, we cannot view the view, though:
+
+  >>> from plone.app.customerize.tests.interfaces import IMyLayer
+  >>> from plone.browserlayer.utils import register_layer, registered_layers
+  >>> IMyLayer in registered_layers()
+  False
+
+  >>> self.setRoles(('Manager',))
+  >>> browser = self.getBrowser(loggedIn=True)
+  >>> browser.open('http://nohost/plone/@@layer-test-view')
+  Traceback (most recent call last):
+  ...
+  HTTPError: HTTP Error 404: Not Found
+
+We can view a view registered for the default layer, though:
+
+  >>> browser.open('http://nohost/plone/@@standard-test-view')
+  >>> print browser.contents
+  a standard view
+
+At this time only the latter should be customerizable:
+
+  >>> browser.open('http://nohost/plone/portal_view_customizations/registrations.html')
+  >>> browser.contents
+  '...Plone View Customizations...
+   ...The following list shows all registered...
+   ...<a href="@@customizezpt.html?...view_name=standard-test-view"...
+   ...>standard-test-view</a>...'
+  >>> 'layer-test-view' in browser.contents
+  False
+
+However, if we install the product both views should be traversable and both
+should also show up as being customizable:
+
+  >>> register_layer(IMyLayer, name='my.product')
+  >>> IMyLayer in registered_layers()
+  True
+
+  >>> browser.open('http://nohost/plone/@@layer-test-view')
+  >>> print browser.contents
+  a local view
+
+  >>> browser.open('http://nohost/plone/@@standard-test-view')
+  >>> print browser.contents
+  a standard view
+
+  >>> browser.open('http://nohost/plone/portal_view_customizations/registrations.html')
+  >>> browser.contents
+  '...Plone View Customizations...
+   ...The following list shows all registered...
+   ...<a href="@@customizezpt.html?...view_name=layer-test-view"...
+   ...>layer-test-view</a>...
+   ...<a href="@@customizezpt.html?...view_name=standard-test-view"...
+   ...>standard-test-view</a>...'
+
+The layer is unregistered again to clean up for the remainder of the test:
+
+  >>> from plone.browserlayer.utils import unregister_layer
+  >>> unregister_layer(name='my.product')
+  >>> IMyLayer in registered_layers()
+  False
+
+The same should be true for viewlets.  First we need to set them up via the
+GenericSetup profile provided for testing, after which the standard viewlet
+should show up on the home page:
+
+  >>> from Products.CMFCore.utils import getToolByName
+  >>> portal_setup = getToolByName(self.portal, 'portal_setup')
+  >>> _ = portal_setup.runAllImportStepsFromProfile('profile-plone.app.customerize.tests:testing')
+
+  >>> browser.open('http://nohost/plone/')
+  >>> browser.contents
+  '...id="portal-logo"...
+   ...a standard view...
+  >>> 'a local view' in browser.contents
+  False
+
+The standard viewlet should be customizable, but not the local one:
+
+  >>> browser.open('http://nohost/plone/portal_view_customizations/registrations.html')
+  >>> browser.contents
+  '...Plone View Customizations...
+   ...The following list shows all registered...
+   ...<a href="@@customizezpt.html?...view_name=standard-test-viewlet"...
+   ...>standard-test-viewlet</a>...'
+  >>> 'layer-test-viewlet' in browser.contents
+  False
+
+Again, the layer is registered and now both viewlets should show up on the
+home page and as being customizable:
+
+  >>> register_layer(IMyLayer, name='my.product')
+  >>> IMyLayer in registered_layers()
+  True
+
+  >>> browser.open('http://nohost/plone/')
+  >>> browser.contents
+  '...id="portal-logo"...
+   ...a local view...a standard view...
+
+  >>> browser.open('http://nohost/plone/portal_view_customizations/registrations.html')
+  >>> browser.contents
+  '...Plone View Customizations...
+   ...The following list shows all registered...
+   ...<a href="@@customizezpt.html?...view_name=layer-test-viewlet"...
+   ...>layer-test-viewlet</a>...
+   ...<a href="@@customizezpt.html?...view_name=standard-test-viewlet"...
+   ...>standard-test-viewlet</a>...'
+
+We still need to make sure the local view and viewlet can actually be
+customerized.  First we look at the info page for the view:
+
+  >>> browser.getLink('layer-test-view').click()
+  >>> browser.contents
+  '...The following is the source of...layer-test-view...
+   ...<dl>...
+   ...view name...layer-test-view...
+   ...registered for interface...zope.interface.Interface...
+   ...registered for request type...plone.app.customerize.tests.interfaces.IMyLayer...
+   ...template file...plone.app.customerize.tests/local.pt...
+   ...zcml file...plone.app.customerize.tests/testing.zcml...
+   ...</dl>...
+   ...<pre>a local view</pre>...'
+
+We click the "customize" button, enter some new content, and save the changes:
+
+  >>> browser.getControl('Customize').click()
+  >>> browser.url
+  'http://nohost/plone/portal_view_customizations/zope.interface.interface-layer-test-view/pt_editForm'
+  >>> browser.getControl(name='text:text').value = 'customized view'
+  >>> browser.getControl('Save Changes').click()
+  >>> browser.url
+  'http://nohost/plone/portal_view_customizations/zope.interface.interface-layer-test-view'
+  >>> browser.contents
+  '...Saved changes...'
+
+  Now we look at the view we just customized:
+
+  >>> browser.open('http://nohost/plone/@@layer-test-view')
+  >>> print browser.contents
+  customized view
+
+And now let's do the same with a viewlet:
+
+  >>> browser.open('http://nohost/plone/portal_view_customizations/registrations.html')
+  >>> browser.getLink('layer-test-viewlet').click()
+  >>> browser.contents
+  '...The following is the source of...layer-test-viewlet...
+   ...<dl>...
+   ...view name...layer-test-viewlet...
+   ...registered for interface...zope.interface.Interface...
+   ...registered for request type...plone.app.customerize.tests.interfaces.IMyLayer...
+   ...template file...plone.app.customerize.tests/local.pt...
+   ...zcml file...plone.app.customerize.tests/testing.zcml...
+   ...</dl>...
+   ...<pre>a local view</pre>...'
+   >>> browser.getControl('Customize').click()
+   >>> browser.url
+   'http://nohost/plone/portal_view_customizations/zope.interface.interface-layer-test-viewlet/pt_editForm'
+   >>> browser.getControl(name='text:text').value = 'customized viewlet'
+   >>> browser.getControl('Save Changes').click()
+   >>> browser.url
+   'http://nohost/plone/portal_view_customizations/zope.interface.interface-layer-test-viewlet'
+   >>> browser.contents
+   '...Saved changes...'
+   >>> browser.open('http://nohost/plone/@@layer-test-view')
+   >>> browser.open('http://nohost/plone/')
+   >>> browser.contents
+   '...id="portal-logo"...
+    ...customized viewlet...
+
+Let's double-check the information for a viewlet on the default layer
+(this is to demonstrate issue #8275 which arises to do improper handling
+of portlet templates).
+
+  >>> browser.open('http://nohost/plone/portal_view_customizations/registrations.html')
+  >>> browser.getLink('standard-test-viewlet').click()
+  >>> browser.contents
+  '...The following is the source of...standard-test-viewlet...
+   ...<dl>...
+   ...view name...standard-test-viewlet...
+   ...registered for interface...zope.interface.Interface...
+   ...registered for request type...zope.publisher.interfaces.browser.IDefaultBrowserLayer...
+   ...template file...plone.app.customerize.tests/standard.pt...
+   ...zcml file...plone.app.customerize.tests/testing.zcml...
+   ...</dl>...
+   ...<pre>a standard view</pre>...'
+
+And clean up after ourselves for the sake of later tests:
+
+  >>> browser.open('http://nohost/plone/portal_view_customizations/registrations.html')
+  >>> browser.getLink('Contents').click()
+  >>> browser.getControl(name='ids:list').getControl(value='zope.interface.interface-layer-test-view').selected = True
+  >>> browser.getControl(name='ids:list').getControl(value='zope.interface.interface-layer-test-viewlet').selected = True
+  >>> browser.getControl('Delete').click()
+  >>> browser.url
+  'http://nohost/plone/portal_view_customizations/'
+  >>> browser.contents
+  '...There are currently no items in...'
+
+As a last test to make sure the extension_ for browserlayer awareness
+doesn't have any unwanted side effects, we compare the list of registrations
+with the layer registered and not.  The set difference should come down to
+only the locally registered view and viewlet:
+
+  >>> from plone.app.customerize.registration import templateViewRegistrations
+  >>> IMyLayer in registered_layers()
+  True
+  >>> with_layer = set([ reg.name for reg in templateViewRegistrations() ])
+  >>> unregister_layer(name='my.product')
+  >>> IMyLayer in registered_layers()
+  False
+  >>> without_layer = set([ reg.name for reg in templateViewRegistrations() ])
+  >>> without_layer.issubset(with_layer)
+  True
+  >>> sorted(list(with_layer.difference(without_layer)))
+  [u'layer-test-view', u'layer-test-viewlet']
+
+  .. _extension: http://dev.plone.org/plone/changeset/20088
+
+Let's do a test to show that if two browser layers register a viewlet with the
+same name, we can customize both of them. We have registered a second viewlet.
+Let's register it for both layers:
+
+  >>> from plone.app.customerize.tests.interfaces import IOtherLayer
+  >>> register_layer(IMyLayer, name='my.product')
+  >>> register_layer(IOtherLayer, name='my.otherproduct')
+
+Now we should see two registrations with this view name:
+
+  >>> browser.open('http://nohost/plone/portal_view_customizations/registrations.html')
+  >>> browser.contents
+  '...Plone View Customizations...
+   ...The following list shows all registered...
+   ...<a href="@@customizezpt.html?...view_name=layer-test-viewlet"...
+   ...>layer-test-viewlet</a>...
+   ...<a href="@@customizezpt.html?...view_name=layer-test-viewlet"...
+   ...>layer-test-viewlet</a>...'
+
+But they should link to different places:
+
+  >>> my = browser.getLink('layer-test-viewlet', index=0)
+  >>> other = browser.getLink('layer-test-viewlet', index=1)
+  >>> my.text == other.text
+  True
+  >>> my.url == other.url
+  False

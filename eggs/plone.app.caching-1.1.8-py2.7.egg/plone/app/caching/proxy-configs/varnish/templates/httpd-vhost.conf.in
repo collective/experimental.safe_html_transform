@@ -1,0 +1,45 @@
+# Apache configuration example for Varnish-behind-Apache setup 
+
+# Include the following in the Apache config like so:
+#
+#   Include ${buildout:directory}/etc/httpd-vhost.conf
+#
+# Or copy/paste into the relevant VirtualHost block
+# or into the default host if not using VirtualHosts.
+
+
+# The main domain
+<VirtualHost *:80>
+  ServerName ${apache-vhost:hostname}
+  RewriteEngine On
+  
+  # Remove trailing slash to avoid duplicates in caching proxy,
+  # 1) for search engines, redirect to normalized version
+  # 2) for everyone else, just strip the trailing slash
+  RewriteCond %{HTTP_USER_AGENT} ^Yahoo.* [NC,OR]
+  RewriteCond %{HTTP_USER_AGENT} ^Googlebot.* [NC,OR]
+  RewriteCond %{HTTP_USER_AGENT} ^msnbot.* [NC]
+  RewriteRule ^/(.*)/$ /$1 [R=301]
+  RewriteRule ^/(.*)/$ /$1
+  
+  RewriteRule ^/(.*) http://${apache-vhost:backend}/VirtualHostBase/http/${apache-vhost:hostname}:80/${apache-vhost:zope-path}/VirtualHostRoot/$1 [P]
+  
+</VirtualHost>
+
+
+# Additional domains:
+# Avoid the use of the ServerAlias directive in the main domain VirtualHost
+# container as this tends to undermine the ability of external search engines
+# to accurately assess page uniqueness. Instead perform a 301 redirect like so.
+<VirtualHost *:80>
+  ServerName www.${apache-vhost:hostname}
+  ServerAlias *.${apache-vhost:hostname}
+  RedirectPermanent / http://${apache-vhost:hostname}/
+</VirtualHost>
+
+
+# References
+# http://plone.org/documentation/kb/plone-apache/vhm
+# http://httpd.apache.org/docs/2.2/rewrite
+
+

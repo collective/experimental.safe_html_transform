@@ -1,0 +1,52 @@
+# Configuration file optimized for squid 2.7+.  It is untested with squid 3.x.
+# See http://www.squid-cache.org/Doc/config/ for details
+
+# Assumes a single backend behind Squid (which could be a single
+# zope instance or a load balancer serving multiple zeo clients).
+# To change this to support multiple backends, see the docs linked above
+
+
+visible_hostname ${squid-config:hostname}
+http_port ${squid-config:bind} vhost defaultsite=${squid-config:hostname}
+pid_filename ${squid-config:pid}
+
+# You may need to set the following if you need to start Squid as root.
+# This might be the case if you need to bind to port 80.
+#cache_effective_user zope
+#cache_effective_group zope
+
+## Log files (http://wiki.squid-cache.org/SquidFaq/SquidLogs)
+cache_log ${squid-config:log}
+cache_store_log none
+access_log none
+
+# Cache storage
+# (for a faster cache storage option see,
+#  http://wiki.squid-cache.org/Features/CyclicObjectStorageSystem)
+cache_dir ufs ${squid-config:cache-dir} ${squid-config:cache-size} 16 256
+cache_mem 256 MB                     
+maximum_object_size 5 MB
+maximum_object_size_in_memory 1 MB
+
+# Purge access - zope servers can purge but nobody else
+# (works best if Zope and Apache are on different IPs
+# or if Apache is configured to reject PURGE requests)
+acl zope_servers src ${squid-config:backend-host}
+acl purge method PURGE
+http_access allow zope_servers purge
+http_access deny purge
+
+# Deny caching of POST requests
+acl post_requests method POST
+cache deny post_requests
+
+# Cache Peers 
+cache_peer ${squid-config:backend-host} parent ${squid-config:backend-port} 0 no-query originserver login=PASS name=peer_0
+
+# Cache Peer Access
+acl all src all
+acl path_0 urlpath_regex /VirtualHostBase
+http_access allow path_0
+cache_peer_access peer_0 allow path_0
+cache_peer_access peer_0 deny all
+

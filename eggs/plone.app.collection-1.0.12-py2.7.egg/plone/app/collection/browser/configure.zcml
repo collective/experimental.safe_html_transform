@@ -1,0 +1,84 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="plone">
+
+  <include package="plone.app.contentmenu" />
+
+  <!-- Views for in Display menu -->
+  <browser:page
+      name="standard_view"
+      permission="zope2.View"
+      for="plone.app.collection.interfaces.ICollection"
+      template="templates/standard_view.pt"
+      />
+
+  <browser:page
+      name="summary_view"
+      permission="zope2.View"
+      for="plone.app.collection.interfaces.ICollection"
+      template="templates/summary_view.pt"
+      />
+
+  <browser:page
+      name="all_content"
+      permission="zope2.View"
+      for="plone.app.collection.interfaces.ICollection"
+      template="templates/all_content.pt"
+      />
+
+  <browser:page
+      name="tabular_view"
+      permission="zope2.View"
+      for="plone.app.collection.interfaces.ICollection"
+      template="templates/tabular_view.pt"
+      />
+
+  <browser:page
+      name="thumbnail_view"
+      permission="zope2.View"
+      for="plone.app.collection.interfaces.ICollection"
+      template="templates/thumbnail_view.pt"
+      />
+
+  <browser:page
+      name="folder_summary_view"
+      permission="zope2.View"
+      for="plone.app.collection.interfaces.ICollection"
+      template="templates/summary_view.pt"
+      />
+
+  <browser:menuItems
+      for="plone.app.collection.interfaces.ICollection"
+      menu="plone_displayviews">
+    <browser:menuItem
+        title="Standard view"
+        action="standard_view"
+        />
+    <browser:menuItem
+        title="Summary view"
+        action="summary_view"
+        />
+    <browser:menuItem
+        title="All content"
+        action="all_content"
+        />
+    <browser:menuItem
+        title="Tabular view"
+        action="tabular_view"
+        />
+    <browser:menuItem
+        title="Thumbnail view"
+        action="thumbnail_view"
+        />
+  </browser:menuItems>
+
+  <browser:page zcml:condition="not-have Plone-43"
+      name="RSS"
+      permission="zope2.View"
+      for="plone.app.collection.interfaces.ICollection"
+      template="templates/rss.pt"
+      />
+
+</configure>

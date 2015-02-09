@@ -1,0 +1,51 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:browser="http://namespaces.zope.org/browser">
+
+  <adapter
+      factory=".contentlisting.ContentListing"
+      for="Products.ZCatalog.Lazy.LazyMap"
+      />
+
+  <adapter
+      factory=".contentlisting.ContentListing"
+      for="Products.ZCatalog.Lazy.LazyCat"
+      />
+
+  <adapter
+      factory=".contentlisting.ContentListing"
+      for="zope.interface.common.sequence.IFiniteSequence"
+      />
+
+  <adapter
+      factory=".contentlisting.ContentListing"
+      for="list"
+  />
+
+  <adapter
+      factory=".contentlisting.ContentListing"
+      for="Products.CMFPlone.PloneBatch.Batch"
+      />
+
+  <adapter
+      factory=".contentlisting.ContentListing"
+      for="ZTUtils.Batch.Batch"
+      />
+
+  <adapter
+      factory=".catalog.CatalogContentListingObject"
+      for="Products.ZCatalog.interfaces.ICatalogBrain"
+      />
+
+  <adapter
+      factory=".realobject.RealContentListingObject"
+      for="Products.CMFCore.interfaces.IContentish "
+      />
+
+  <browser:page
+      name="folderListing"
+      class=".browser.FolderListing"
+      permission="zope2.View"
+      for="Products.CMFCore.interfaces.IFolderish"
+      />
+
+</configure>

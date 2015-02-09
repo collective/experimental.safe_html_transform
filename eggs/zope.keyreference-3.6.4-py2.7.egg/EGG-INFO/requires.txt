@@ -1,0 +1,8 @@
+setuptools
+ZODB3
+zope.component
+zope.i18nmessageid
+zope.interface
+zope.schema
+
+[test]

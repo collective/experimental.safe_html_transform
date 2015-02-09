@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<componentregistry>
+ <adapters/>
+ <utilities>
+  <utility
+     interface="Products.CMFUid.interfaces.IUniqueIdGenerator"
+     object="portal_uidgenerator"/>
+  <utility
+     interface="Products.CMFUid.interfaces.IUniqueIdAnnotationManagement"
+     object="portal_uidannotation"/>
+  <utility
+     interface="Products.CMFUid.interfaces.IUniqueIdHandler"
+     object="portal_uidhandler"/>
+ </utilities>
+</componentregistry>

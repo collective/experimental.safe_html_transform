@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<object name="Event" meta_type="Factory-based Type Information"
+   i18n:domain="cmf_calendar"
+   xmlns:i18n="http://xml.zope.org/namespaces/i18n">
+ <property name="title" i18n:translate="">Event</property>
+ <property name="description"
+    i18n:translate="">Events are objects for use in Calendar topical queries on the catalog.</property>
+ <property
+    name="icon_expr">string:${portal_url}/++resource++event_icon.gif</property>
+ <property name="content_meta_type">CMF Event</property>
+ <property name="product"></property>
+ <property name="factory">cmf.calendar.event</property>
+ <property name="add_view_expr">string:${folder_url}/++add++Event</property>
+ <property name="link_target"></property>
+ <property name="immediate_view">edit.html</property>
+ <property name="global_allow">True</property>
+ <property name="filter_content_types">True</property>
+ <property name="allowed_content_types"/>
+ <property name="allow_discussion">False</property>
+ <alias from="(Default)" to="@@view.html"/>
+ <alias from="view" to="@@view.html"/>
+ <action title="View" action_id="view" category="object" condition_expr=""
+    icon_expr="string:${portal_url}/preview_icon.png" link_target=""
+    url_expr="string:${object_url}" visible="True">
+  <permission value="View"/>
+ </action>
+ <action title="Edit" action_id="edit" category="object" condition_expr=""
+    icon_expr="string:${portal_url}/edit_icon.png" link_target=""
+    url_expr="string:${object_url}/edit.html" visible="True">
+  <permission value="Change portal events"/>
+ </action>
+</object>

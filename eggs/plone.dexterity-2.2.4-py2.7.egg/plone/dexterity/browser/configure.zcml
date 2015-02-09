@@ -1,0 +1,85 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone.dexterity">
+
+    <!-- Standard view -->
+    <browser:page
+        for="..interfaces.IDexterityContent"
+        name="view"
+        class=".view.DefaultView"
+        template="item.pt"
+        permission="zope2.View"
+        />
+
+    <!-- Content core views -->
+
+    <browser:page
+        for="..interfaces.IDexterityItem"
+        name="content-core"
+        class=".view.DefaultView"
+        template="itemcontentcore.pt"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="..interfaces.IDexterityContainer"
+        name="content-core"
+        class=".view.DefaultView"
+        template="containercontentcore.pt"
+        permission="zope2.View"
+        />
+
+    <!-- Standard IPublishTraverse adapter -->
+    <adapter factory=".traversal.DexterityPublishTraverse" />
+
+    <!-- Standard add view and form - invoked from ++add++ traverser -->
+    <adapter
+        for="Products.CMFCore.interfaces.IFolderish
+             zope.publisher.interfaces.browser.IDefaultBrowserLayer
+             ..interfaces.IDexterityFTI"
+        provides="zope.publisher.interfaces.browser.IBrowserPage"
+        factory=".add.DefaultAddView"
+        />
+    <class class=".add.DefaultAddView">
+        <require
+            permission="cmf.AddPortalContent"
+            interface="zope.publisher.interfaces.browser.IBrowserPage"
+            />
+    </class>
+
+    <!-- Standard edit view -->
+    <browser:page
+        for="..interfaces.IDexterityContent"
+        name="edit"
+        class=".edit.DefaultEditView"
+        permission="cmf.ModifyPortalContent"
+        />
+
+    <!-- FTI add form -->
+    <browser:page
+        for="zope.browser.interfaces.IAdding"
+        name="plone.dexterity.fti"
+        template="fti.pt"
+        class=".fti.FTIAddView"
+        permission="cmf.ManagePortal"
+        />
+
+    <!-- Resources for icons -->
+
+    <browser:resource
+        name="plone.dexterity.item.gif"
+        file="icons/item_icon.gif"
+        />
+
+    <browser:resource
+        name="plone.dexterity.container.gif"
+        file="icons/container_icon.gif"
+        />
+
+    <browser:resource
+        name="plone.dexterity.fti.gif"
+        file="icons/typeinfo.gif"
+        />
+
+</configure>

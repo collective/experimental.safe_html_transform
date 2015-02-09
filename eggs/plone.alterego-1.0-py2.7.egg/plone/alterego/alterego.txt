@@ -1,0 +1,124 @@
+==============
+plone.alterego
+==============
+
+Now you see it, it now you don't!
+
+This package defines a dynamic module type that lets you create objects in the
+dynamic module on demand.
+
+Usage
+-----
+
+To use this package, you should:
+
+ - Identify an appropriate parent module where the dynamic module will live.
+  
+ - Ensure that plone.alterego.dynamic.create() is called with this module and
+   a dynamic module name. Typically, you'd do this in the parent module 
+   itself, so that the dynamic module is instantiated as soon as the parent
+   module is imported.
+   
+ - Register a named utility providing IDynamicObjectFactory. The name should
+   be the same as the full dotted path to the dynamic module. This utility
+   will be responsible for creating the objects that inhabit the dynamic
+   module.
+
+Dynamic interfaces
+------------------
+
+As an example of using plone.alterego, let's say we have a generic content 
+class that should get a unique interface for each instance.
+
+    >>> from zope import interface
+    >>> class IContent(interface.Interface):
+    ...     pass
+    >>> class Content(object):
+    ...     interface.implements(IContent)
+
+    >>> c1 = Content()
+
+To create the unique interface, we will use a dynamic module. There is a
+helper method to make this easier. It takes a parent module and a name as
+arguments:
+
+    >>> from plone.alterego.dynamic import create
+    >>> dynamic = create('plone.alterego.tests.dynamic')
+
+Since we are not calling create() from the module where we are pretending
+the dynamic module exists ('plone.alterego.tests' in this case), we need to
+explicitly set it. Normally, the two lines above will suffice, so long as the
+name of the parent module and the dynamic module match in the string and in
+real code.
+
+    >>> import plone.alterego.tests
+    >>> setattr(plone.alterego.tests, 'dynamic', dynamic)
+
+Keep track of the return value for a moment so we can test it.
+
+    >>> dynamic_module = dynamic
+    >>> del dynamic
+
+We can now import this module:
+
+    >>> from plone.alterego.tests import dynamic
+    >>> dynamic is dynamic_module
+    True
+
+However, until we have defined the utility that knows how to construct 
+objects, we will get an error.
+
+    >>> dynamic.IOne # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    AttributeError: Cannot find dynamic object factory for module plone.alterego.tests.dynamic
+
+To make objects on demand, we'll need to register a utility that can act
+as a factory. This utility should have a name that corresponds to the full,
+dotted name to the dynamic module. This way, we can have different factories
+for different dynamic modules.
+
+    >>> from plone.alterego.interfaces import IDynamicObjectFactory
+    >>> from zope.interface.interface import InterfaceClass
+    >>> class InterfaceOnDemand(object):
+    ...     interface.implements(IDynamicObjectFactory)
+    ...     
+    ...     def __call__(self, name, module):
+    ...         print "Creating", name, "in", module.__name__
+    ...         schema = InterfaceClass(name, (interface.Interface,), __module__=module.__name__)
+    ...         setattr(module, name, schema)
+    ...         return schema
+
+    >>> from zope.component import provideUtility
+    >>> provideUtility(InterfaceOnDemand(), name='plone.alterego.tests.dynamic')
+
+    >>> dynamic.IOne
+    Creating IOne in plone.alterego.tests.dynamic
+    <InterfaceClass plone.alterego.tests.dynamic.IOne>
+
+Note that the factory is created once for each name only, because it sets
+the schema back on the module as an attribute.
+
+    >>> dynamic.IOne
+    <InterfaceClass plone.alterego.tests.dynamic.IOne>
+
+We could then create an on-demand interface easily:
+
+    >>> interface.alsoProvides(c1, dynamic.ITwo)
+    Creating ITwo in plone.alterego.tests.dynamic
+
+    >>> list(interface.providedBy(c1).flattened()) # doctest: +NORMALIZE_WHITESPACE
+    [<InterfaceClass plone.alterego.tests.dynamic.ITwo>, 
+     <InterfaceClass __builtin__.IContent>,
+     <InterfaceClass zope.interface.Interface>]
+
+Crucially, so long as the factory always returns the same thing, the same
+objects will be returned each time the module is accessed.
+
+    >>> del dynamic
+    >>> del dynamic_module
+
+    >>> list(interface.providedBy(c1).flattened()) # doctest: +NORMALIZE_WHITESPACE
+    [<InterfaceClass plone.alterego.tests.dynamic.ITwo>, 
+     <InterfaceClass __builtin__.IContent>,
+     <InterfaceClass zope.interface.Interface>]

@@ -1,0 +1,5 @@
+setuptools
+collective.monkeypatcher
+
+[ipdb]
+ipdb>=0.3

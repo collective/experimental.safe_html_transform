@@ -1,0 +1,189 @@
+Metadata-Version: 1.1
+Name: plone.theme
+Version: 2.1.1
+Summary: Tools for managing themes in CMF and Plone sites
+Home-page: http://pypi.python.org/pypi/plone.theme
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: Overview
+        ========
+        
+        Tools for managing themes in CMF and Plone sites.
+        
+        plone.theme
+        ===========
+        
+        This package lets you mark the request with a "layer" interface conditional
+        on the currently selected skin (theme) in the portal_skins tool.
+        
+        Most Zope 3 "visual" directives, like <browser:page /> or <browser:viewlet />
+        accept a 'layer' attribute, which should point to an interface. Recall that a 
+        view is a multi-adapter on (context, request). Most views are registered 
+        so that the 'request' being adapted only needs to provide Interface. This
+        is equivalent to saying layer="*".
+        
+        By applying a marker interface to the request, and registering a view or
+        viewlet with this interface as the adapted 'layer', we can override a more
+        general view, or make a viewlet that is only shown for a particular layer.
+        
+        In the context of CMF and Plone, we'd like to tie the layer to the current
+        skin selection. We do that by name.
+        
+        What you have to do
+        -------------------
+        
+        First, you should create a marker interface:
+        
+            >>> from zope.interface import Interface
+            >>> class IMyTheme(Interface):
+            ...     """Marker interface for skins part of 'My Theme'
+            ...     """
+        
+        Then, register this as a theme layer in ZCML:
+        
+            <interface 
+              interface=".interfaces.IMyTheme" 
+              type="zope.publisher.interfaces.browser.IBrowserSkinType"
+              name="My Theme"
+              />
+        
+        The title here must match the name of the theme/skin selection in 
+        portal_skins.
+        
+        How it works
+        ------------
+        
+        Behind the scenes, the <interface /> registration marks IMyTheme with the
+        "IInterface" IThemelayer, and registers IMyTheme as a utility named "My Theme"
+        and providing IBrowserSkinType.
+        
+        We do something to this effect in tests/tests.zcml.
+        
+        Let us define the "My Theme" skin selection:
+        
+            >>> from Products.CMFCore.utils import getToolByName
+            >>> portal_skins = getToolByName(self.portal, 'portal_skins')
+            >>> default_skin = portal_skins.getDefaultSkin()
+            >>> skin_path = portal_skins._getSelections()[default_skin]
+            >>> portal_skins.addSkinSelection('My Theme', skin_path)
+        
+        In tests/tests.zcml we have registered two version of a view called 
+        @@layer-test-view. One, for the default skin layer, simply outputs "Default".
+        The other outputs "My Theme".
+        
+        Before we turn on the skin, we will get the default view.
+        
+            >>> from Products.Five.testbrowser import Browser
+            >>> browser = Browser()
+        
+            >>> browser.open(self.portal.absolute_url() + '/@@layer-test-view')
+            >>> print browser.contents
+            Default
+        
+        However, if we turn the skin on, we should see the effects of the marker
+        interface being applied.
+        
+            >>> portal_skins.default_skin = 'My Theme'
+        
+            >>> browser.open(self.portal.absolute_url() + '/@@layer-test-view')
+            >>> print browser.contents
+            My Theme
+        
+        And if we switch back:
+        
+            >>> portal_skins.default_skin = 'Plone Default'
+        
+            >>> browser.open(self.portal.absolute_url() + '/@@layer-test-view')
+            >>> print browser.contents
+            Default
+        
+        Changelog
+        =========
+        
+        2.1.1 (2014-03-02)
+        ------------------
+        
+        - Remove hard dependency on CMFDefault.
+          [davisagli]
+        
+        2.1 - 2011-05-12
+        ----------------
+        
+        - Update to import BeforeTraverseEvent from zope.traversing instead of
+          zope.app.publication.
+          [davisagli]
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        
+        2.0 - 2010-07-18
+        ----------------
+        
+        - Update license to GPL version 2 only.
+          [hannosch]
+        
+        
+        2.0b2 - 2010-03-05
+        ------------------
+        
+        - Protect against running multiple times. This can happen when using ++skin++
+          traversers or VirtualHostMonster.
+          [wichert]
+        
+        
+        2.0b1 - 2010-01-02
+        ------------------
+        
+        - Fix an error introduced by my previous adjustment. If a skin layer
+          extending the default layer was used (which is typical), then the
+          default layer would end up with higher precedence than browser
+          layers not extending the default layer.
+          [davisagli]
+        
+        
+        2.0a2 - 2009-11-13
+        ------------------
+        
+        - Inherit from the CMFDefault layer again, for compatibility with products
+          that depend only on CMF but are also usable within Plone, and register
+          views to the CMFDefault layer.
+          [davisagli]
+        
+        
+        2.0a1 - 2009-04-05
+        ------------------
+        
+        - Avoid inheriting from the CMFDefault browser layer and rather define our
+          own. We don't have anything in common with the CMFDefault layer.
+          [hannosch]
+        
+        - Declare test dependencies in an extra.
+          [hannosch]
+        
+        - Specify package dependencies.
+          [hannosch]
+        
+        
+        1.1 - 2009-04-04
+        ----------------
+        
+        - Make sure the theme layer takes precedence over other browser layers.
+          [davisagli]
+        
+        
+        1.0 - 2007-08-15
+        ----------------
+        
+        - First stable release
+          [wichert]
+        
+        
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

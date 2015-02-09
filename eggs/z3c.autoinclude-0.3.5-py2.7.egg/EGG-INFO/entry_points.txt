@@ -1,0 +1,4 @@
+
+    [console_scripts]
+    autoinclude-test = z3c.autoinclude.tests.tests:interactive_testing_env
+    

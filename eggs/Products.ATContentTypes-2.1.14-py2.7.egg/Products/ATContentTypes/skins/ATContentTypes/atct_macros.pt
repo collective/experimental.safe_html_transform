@@ -1,0 +1,71 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xml:lang="en-US"
+      lang="en-US"
+      i18n:domain="plone">
+
+<body>
+<table summary="criteria">
+<tr>
+<metal:criterion metal:define-macro="criterion_edit">
+   <tal:define-block tal:define="
+                schematas criterion/Schemata;
+                fieldsets python:[key for key in schematas.keys() if key != 'metadata'];
+                default_fieldset python:(not schematas or schematas.has_key('default'))
+                                         and 'default' or fieldsets[0];
+                fieldset request/fieldset|options/fieldset|default_fieldset;
+                index python:here.portal_atct.getIndex(criterion.Field());
+                edit_macros here/edit_macros/macros;
+                criterionid criterion/getId;
+               ">
+
+      <td style="padding: 0.5em; align: center;">
+        <input class="noborder"
+               type="checkbox" 
+               value="" 
+               name="criterion_ids:list" 
+               id=""
+               tal:attributes="value criterionid; 
+                               id string:cb_${criterionid}"
+               />
+      </td>
+      
+      <td style="padding: 0.5em;">
+         <span tal:content="python:index.friendlyName or index.index" i18n:translate="" />
+         <div class="formHelp" tal:content="index/description" i18n:translate="" />
+      </td>
+      <td style="padding: 0.5em;">
+
+        <div i18n:translate="" tal:content="criterion/Description" />
+
+        <div id="" 
+             i18n:translate=""
+             class="formHelp" 
+             style="visibility:hidden"
+             tal:content="criterion/Description"
+             tal:attributes="id string:${criterionid}_help;"
+             >
+        String
+        </div>
+
+        <input type="hidden" 
+               name="criteria.id:records" 
+               value=""
+               tal:attributes="value criterionid"
+               />
+
+        <tal:fields repeat="field python: schematas[fieldset].fields()">
+          <tal:editable tal:condition="python:field.mode != 'r'">
+              <metal:fieldMacro use-macro="python: criterion.widget('%s_%s' % (criterionid, field.getName()),
+                                           field = field,
+                                           mode='edit')"/>
+          </tal:editable>
+        </tal:fields>
+      </td>
+
+  </tal:define-block>
+</metal:criterion>
+</tr>
+</table>
+
+</body>
+</html>

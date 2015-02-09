@@ -1,0 +1,17 @@
+setuptools
+zope.component
+zope.contentprovider
+zope.interface
+zope.site
+zope.viewlet
+Products.GenericSetup
+ZODB3
+Acquisition
+Zope2
+plone.app.vocabularies
+
+[test]
+zope.publisher
+zope.testing
+Products.CMFPlone
+Products.PloneTestCase

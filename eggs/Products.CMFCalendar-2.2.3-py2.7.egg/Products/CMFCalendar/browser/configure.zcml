@@ -1,0 +1,82 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+  <adapter factory=".event.EventSchemaAdapter"/>
+
+  <include package="Products.CMFCore" file="permissions.zcml"/>
+
+  <utility
+      component=".event.EventTypeVocabularyFactory"
+      name="cmf.calendar.AvailableEventTypes"
+      />
+
+  <browser:page
+      for="Products.CMFCalendar.interfaces.IEvent"
+      layer="Products.CMFDefault.interfaces.ICMFDefaultSkin"
+      name="view.html"
+      class=".event.EventView"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="Products.CMFCalendar.interfaces.IMutableEvent"
+      layer="Products.CMFDefault.interfaces.ICMFDefaultSkin"
+      name="edit.html"
+      class=".event.EventEditView"
+      permission="cmf.ModifyPortalContent"
+      />
+
+  <browser:page
+      for="*"
+      layer="Products.CMFDefault.interfaces.ICMFDefaultSkin"
+      name="calendar_day.html"
+      class=".calendartool.CalendarView"
+      template="templates/calendar_day.pt"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="*"
+      layer="Products.CMFDefault.interfaces.ICMFDefaultSkin"
+      name="calendar_widget"
+      class="Products.CMFDefault.browser.utils.MacroView"
+      template="templates/calendar_widgets.pt"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="*"
+      layer="Products.CMFDefault.interfaces.ICMFDefaultSkin"
+      name="calendar_box_view"
+      class=".calendartool.CalendarBoxView"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="Products.CMFCalendar.interfaces.IEvent"
+      layer="Products.CMFDefault.interfaces.ICMFDefaultSkin"
+      name="view.ics"
+      class=".event.EventiCalView"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="Products.CMFCalendar.interfaces.IEvent"
+      layer="Products.CMFDefault.interfaces.ICMFDefaultSkin"
+      name="view.vcs"
+      class=".event.EventvCalView"
+      permission="zope2.View"
+      />
+
+  <browser:resource
+      name="event_icon.gif"
+      image="../skins/zpt_calendar/event_icon.gif"
+      />
+
+  <browser:resource
+      name="calendar.css"
+      file="../skins/zpt_calendar/CalendarStyle.css"
+      />
+
+</configure>

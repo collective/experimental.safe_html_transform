@@ -1,0 +1,29 @@
+<body bgcolor="#ffffff">
+<dtml-var manage_tabs>
+<h2>Sitewide Syndication Reporting Facility</h2>
+<form action="generateSyReport" method="POST">
+<table width="100%" border="0">
+  <tr>
+     <th valign="top" align="left">Syndication Reports</th>
+  </tr>
+
+
+  <tr>
+     <td colspan="2">
+       <table width="90%" border="1"><tr><td>
+       <table>
+         <tr>
+           <th>Reports are not yet implemented</th>
+           <th>&nbsp;</th>
+         </tr>
+       </table>
+       </td></tr></table>
+     </td>
+  </tr>
+  <tr>
+   <td> <br /> </td>
+  </tr>
+</table>
+</form>
+</body>
+</html>

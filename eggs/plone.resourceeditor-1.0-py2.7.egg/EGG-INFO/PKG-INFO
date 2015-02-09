@@ -1,0 +1,76 @@
+Metadata-Version: 1.1
+Name: plone.resourceeditor
+Version: 1.0
+Summary: UNKNOWN
+Home-page: https://github.com/plone/plone.resourceeditor
+Author: UNKNOWN
+Author-email: UNKNOWN
+License: GPL
+Description: Introduction
+        ============
+        
+        This package contains resources for integrating ACE (http://ace.ajax.org/) into
+        Plone, with a file manager that can edit ``plone.resource`` resource directories
+        in the ZODB.
+        
+        ACE can be found under ``++resource++plone.resourceeditor/ace/*``.
+        
+        The file manager can be included in a view with the following in the header::
+        
+            <metal:block use-macro="resourceDirectory/@@plone.resourceeditor.filemanager/macros/resources" />
+        
+        and the following in the body::
+        
+            <metal:block use-macro="resourceDirectory/@@plone.resourceeditor.filemanager/macros/filemanager">
+        
+        In both of these cases, ``resourceDirectory`` should be an in-ZODB
+        ``plone.resource`` resource directory instance.
+        
+        The macros assume that jQuery is already loaded.
+        
+        Changelog
+        =========
+        
+        1.0 (2013-05-23)
+        ----------------
+        
+        - make sure theme is disable
+          [vangheem]
+        
+        - do not set value inside of pre tag since it can go crazy on some markup
+          [vangheem]
+        
+        
+        1.0b4 (2013-01-01)
+        ------------------
+        
+        - Fixed a bug with saving files containing non-ASCII characters.
+          [optilude]
+        
+        
+        1.0b3 (2012-10-16)
+        ------------------
+        
+        - Fix right click menu bug
+          [optilude]
+        
+        - Upgrade to latest version of ACE
+          [optilude]
+        
+        
+        1.0b2 (2012-08-08)
+        ------------------
+        
+        - Upgrade to version 1.0 of the ACE editor
+          [optilude]
+        
+        
+        1.0b1 (2012-08-08)
+        ------------------
+        
+        - Initial release
+          [optilude]
+        
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python

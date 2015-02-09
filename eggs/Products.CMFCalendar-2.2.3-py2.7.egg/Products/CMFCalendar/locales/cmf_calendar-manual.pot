@@ -1,0 +1,56 @@
+msgid "Su"
+msgstr ""
+
+msgid "Mo"
+msgstr ""
+
+msgid "Tu"
+msgstr ""
+
+msgid "We"
+msgstr ""
+
+msgid "Th"
+msgstr ""
+
+msgid "Fr"
+msgstr ""
+
+msgid "Sa"
+msgstr ""
+
+msgid "January"
+msgstr ""
+
+msgid "February"
+msgstr ""
+
+msgid "March"
+msgstr ""
+
+msgid "April"
+msgstr ""
+
+msgid "May"
+msgstr ""
+
+msgid "June"
+msgstr ""
+
+msgid "July"
+msgstr ""
+
+msgid "August"
+msgstr ""
+
+msgid "September"
+msgstr ""
+
+msgid "October"
+msgstr ""
+
+msgid "November"
+msgstr ""
+
+msgid "December"
+msgstr ""

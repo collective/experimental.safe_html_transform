@@ -1,0 +1,236 @@
+<tal:block replace="nothing">
+-*- coding: utf-8 -*-
+## CMFPlacefulWorkflow
+## Copyright (C)2005-2008 Ingeniweb
+
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+
+## You should have received a copy of the GNU General Public License
+## along with this program; see the file COPYING. If not, write to the
+## Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Workflow policy configuration template
+
+</tal:block>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      lang="en"
+      metal:use-macro="here/main_template/macros/master"
+      i18n:domain="cmfplacefulworkflow">
+
+    <div metal:fill-slot="main"
+         tal:define="wf_list here/portal_workflow/objectIds;
+                     pwtool here/portal_placeful_workflow;
+                     config python: pwtool.getWorkflowPolicyConfig(here);
+                     siteroot python: pwtool.isSiteRoot(here);">
+
+        <h1 i18n:translate="heading_workflow_policies">
+            Workflow policies' local configuration management
+        </h1>
+
+        <p i18n:translate="description_workflow_policies">
+            Set your workflow policies' local configuration for this folder and below.
+        </p>
+
+        <tal:site tal:condition="siteroot">
+
+          <p i18n:translate="">
+              You are viewing the root of your site. Local workflow
+              configuration is only available in subfolders of your site.
+          </p>
+
+        </tal:site>
+
+        <tal:nosite tal:condition="not:siteroot">
+
+          <p tal:condition="python:not config and here.isPrincipiaFolderish">
+              <br />
+              <a href="placeful_workflow_configuration_add"
+                 i18n:translate="description_add_workflow_policy_for_type">
+                  Add a workflow policy's local configuration in the
+                  <span tal:replace="python:here.translate(here.portal_type)"
+                        i18n:name="portal_type">
+                      portal type
+                  </span>
+              </a>
+              <br />
+              <br />
+          </p>
+
+          <p tal:condition="python:not here.isPrincipiaFolderish and here is not container">
+              <a href=""
+                 tal:attributes="href python:container.absolute_url()+'/placeful_workflow_configuration_add'"
+                 i18n:translate="description_add_workflow_policy">
+                  Add Workflow policy's local configuration
+              </a>
+          </p>
+
+          <form id="edit_form"
+                name="edit_form"
+                method="post"
+                action="placeful_workflow_configuration_set"
+                tal:condition="config">
+
+              <fieldset tal:define="policies pwtool/getWorkflowPolicyInfos;
+                                    policy_in_id config/getPolicyInId;
+                                    policy_below_id config/getPolicyBelowId;">
+
+                  <legend i18n:translate="legend_publishing_details">
+                      Workflow policies
+                  </legend>
+
+                  <strong i18n:translate="label_in_this_folder">For this Folder</strong>
+                  <div class="formHelp"
+                       i18n:translate="description_in_this_folder">
+                      Modify the workflows of this folder and below. If you don't want
+                      to modify the workflow of this Folder use 'Below this Folder' section.
+                  </div>
+
+                  <div class="field">
+
+                      <tal:policy tal:repeat="policy policies">
+
+                          <input type="radio" class="noborder" name="policy_in"
+                                 value="policy" id="cb_policy"
+                                 tal:attributes="id python: 'cb_policy_' + policy['id'];
+                                                 value policy/id;
+                                                 checked python: policy['id'] == policy_in_id" />
+
+                          <label for="cb_policy"
+                                 tal:attributes="for python: 'cb_' + policy['id']"
+                                 tal:content="policy/title"
+                                 i18n:domain="cmfplacefulworkflow"
+                                 i18n:translate="">
+                              Policy Label
+                          </label>
+                          <br />
+                          <span class="formHelp"
+                                tal:content="policy/description">
+                              Workflow policy description
+                          </span>
+                          <br />
+                      </tal:policy>
+
+                      <input type="radio" class="noborder" name="policy_in"
+                             id="cb_default_policy" title="" checked="checked"
+                             tal:attributes="value python:'';
+                                             checked not:config/getPolicyIn" />
+
+                      <label for="cb_default_policy"
+                             i18n:translate="label_default_policy">
+                          Default Policy
+                      </label>
+                      <br />
+                      <span class="formHelp"
+                            i18n:translate="help_default_workflow_policy">
+                          The default workflow policy.
+                      </span>
+                      <br />
+                  </div>
+
+                  <hr/>
+
+                  <strong i18n:translate="label_below_this_folder">Below this Folder</strong>
+                  <div class="formHelp"
+                       i18n:translate="description_below_this_folder">
+                      Modify the workflows only below this Folder. If you want to
+                      modify the workflow of this Folder use 'For this Folder' section.
+                  </div>
+
+                  <div class="field">
+
+                      <tal:policy tal:repeat="policy policies">
+
+                          <input type="radio" class="noborder" name="policy_below"
+                                 value="policy" id="cb_policy"
+                                 tal:attributes="id python: 'cb_policy_' + policy['id'];
+                                                 value policy/id;
+                                                 checked python: policy['id'] == policy_below_id" />
+
+                          <label for="cb_policy"
+                                 tal:attributes="for python: 'cb_' + policy['id']"
+                                 tal:content="policy/title"
+                                 i18n:domain="cmfplacefulworkflow"
+                                 i18n:translate="">
+                              Policy Label
+                          </label>
+                          <br />
+                          <span class="formHelp"
+                                tal:content="policy/description">
+                              Workflow policy description
+                          </span>
+                          <br />
+
+                      </tal:policy>
+
+                      <input type="radio"
+                             class="noborder"
+                             name="policy_below"
+                             id="cb_default_policy"
+                             title=""
+                             checked="1"
+                             tal:attributes="value python:'';
+                                             checked not: config/getPolicyBelow" />
+
+                      <label for="cb_default_policy"
+                             i18n:translate="label_default_policy">
+                          Default Policy
+                      </label>
+                      <br />
+                      <span class="formHelp"
+                            i18n:translate="help_default_workflow_policy">
+                          The default workflow policy.
+                      </span>
+                      <br />
+
+                  </div>
+
+                  <strong i18n:translate="label_update_security">Update security</strong>
+                  <div class="formHelp"
+                       i18n:translate="description_update_security">
+                      Update catalog security (update role mappings). Note that updating catalog
+                      security might be a very long operation if there are a lot of brains to be
+                      re-indexed. This operation can be done afterwards as a separate upgrade step.
+                  </div>
+
+                  <div class="field">
+
+                    <input type="checkbox" checked="checked" class="noborder"
+                           name="update_security" value="" id="cb_update_security" />
+
+                    <label for="cb_update_security"
+                           i18n:domain="cmfplacefulworkflow"
+                           i18n:translate="">
+                        Update catalog role mappings
+                    </label>
+
+                  </div>
+                  <br />
+
+                  <div class="formControls" i18n:domain="plone">
+
+                      <input class="context"
+                             type="submit"
+                             name="submit"
+                             value="Save"
+                             i18n:attributes="value label_save;" />
+                      <input class="standalone"
+                             type="submit"
+                             name="submit"
+                             value="Cancel"
+                             i18n:attributes="value label_cancel;" />
+                  </div>
+              </fieldset>
+          </form>
+
+        </tal:nosite>
+
+    </div>
+</html>

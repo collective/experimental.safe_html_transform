@@ -1,0 +1,4 @@
+
+      [zope2.initialize]
+      Products.PluginRegistry = Products.PluginRegistry:initialize
+      

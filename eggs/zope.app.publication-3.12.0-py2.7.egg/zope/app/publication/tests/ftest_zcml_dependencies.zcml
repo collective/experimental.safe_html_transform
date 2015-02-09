@@ -1,0 +1,10 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+    <include package="zope.component" file="meta.zcml"/>
+    <include package="zope.app.publication" file="meta.zcml" />
+    <include package="zope.browserpage" file="meta.zcml" />
+
+    <include package="zope.app.publication" />
+
+</configure>

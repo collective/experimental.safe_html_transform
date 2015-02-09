@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<object name="Link">
+ <alias from="(Default)" to="@@view.html"/>
+ <alias from="link_edit_form" to="@@edit.html"/>
+ <alias from="link_view" to="@@view.html"/>
+ <alias from="metadata_edit_form" to="@@properties.html"/>
+ <alias from="view" to="@@view.html"/>
+</object>

@@ -1,0 +1,24 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plonetest">
+
+<browser:menuItems
+    for="*"
+    menu="plone_displayviews">
+
+  <browser:menuItem
+      title="Test Menu Item"
+      action="foo.html"
+      description="This is a test menu item"
+      />
+
+  <browser:menuItem
+      title="Another Test Menu Item"
+      action="@@bar.html"
+      description="This is a test menu item for a view"
+      />
+
+</browser:menuItems>
+
+</configure>

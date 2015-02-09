@@ -1,0 +1,17 @@
+setuptools
+ZODB3
+plone.memoize
+zope.annotation
+zope.component
+zope.container
+zope.contentprovider
+zope.interface
+zope.publisher
+zope.schema
+zope.site
+
+[test]
+zope.browserpage
+zope.configuration
+zope.location
+zope.security

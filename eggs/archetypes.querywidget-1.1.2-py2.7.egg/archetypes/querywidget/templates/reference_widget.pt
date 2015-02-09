@@ -1,0 +1,26 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      i18n:domain="plone">
+
+    <body>
+         <metal:widget define-macro="widget"
+         	tal:define="fieldName fieldName|string:query;
+         				      value value|nothing">
+
+            <dl class="querywidget referenceWidget">
+                <dt class="hiddenStructure" i18n:translate="">Select&hellip;</dt>
+                <dd>
+                    <input class="queryvalue"
+                    	   autocomplete="off"
+                    	   type="text"
+                    	   name="query.v:records"
+                    	   tal:attributes="name python:str(fieldName)+'.v:records';
+                    	   				   value value" />
+                </dd>
+            </dl>
+          </metal:widget>
+
+    </body>
+</html>

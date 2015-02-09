@@ -1,0 +1,75 @@
+# Translation of atreferencebrowserwidget.pot to Lithuanian
+# Martynas Storasta <martynas.storasta@ef.vu.lt>, 2004
+msgid ""
+msgstr ""
+"Project-Id-Version: ATReferenceBrowserWidget\n"
+"POT-Creation-Date: 2013-05-22 08:09+0000\n"
+"PO-Revision-Date: 2008-01-04 11:15+0200\n"
+"Last-Translator: Jaroslav Šatkevič <jaro@akl.lt>\n"
+"Language-Team: Plone i18n <plone-i18n@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language-Code: lt\n"
+"Language-Name: Lithuanian\n"
+"Preferred-Encodings: utf-8\n"
+"Domain: atreferencebrowserwidget\n"
+
+#. Default: "Add..."
+#: archetypes/referencebrowserwidget/skins/referencebrowser/referencebrowser.pt:190
+msgid "label_add"
+msgstr "Pridėti..."
+
+#. Default: "(Directory: ${directory})"
+#: archetypes/referencebrowserwidget/skins/referencebrowser/referencebrowser.pt:50
+msgid "label_directory"
+msgstr "( Katalogai: ${directory} )"
+
+#. Default: "Go"
+#: archetypes/referencebrowserwidget/browser/popup.pt:127
+msgid "label_go"
+msgstr "Pirmyn"
+
+#. Default: "No reference set. Click the add button to select."
+#: archetypes/referencebrowserwidget/skins/referencebrowser/referencebrowser.pt:137
+#, fuzzy
+msgid "label_no_reference_set"
+msgstr "Nėra jokios nuorodos. Spauskite ant mygtuko Ieškoti."
+
+#. Default: "Clear reference"
+#: archetypes/referencebrowserwidget/skins/referencebrowser/referencebrowser.pt:196
+msgid "label_remove_reference"
+msgstr ""
+
+#. Default: "History"
+#: archetypes/referencebrowserwidget/browser/popup.pt:122
+msgid "referencebrowser_history"
+msgstr "Istorija"
+
+#. Default: "No items found."
+#: archetypes/referencebrowserwidget/browser/popup.pt:161
+msgid "referencebrowser_no_items_found"
+msgstr "Nieko nerasta."
+
+#. Default: "Search index"
+#: archetypes/referencebrowserwidget/browser/popup.pt:58
+msgid "referencebrowser_search_index_label"
+msgstr "Paieškos indeksas"
+
+#. Default: "Search Site"
+#: archetypes/referencebrowserwidget/browser/popup.pt:82
+msgid "referencebrowser_search_site"
+msgstr ""
+
+#. Default: "Added"
+#: archetypes/referencebrowserwidget/browser/popup.pt:35
+#, fuzzy
+msgid "referencebrowser_text_added_reference"
+msgstr "Pridėta nuoroda:"
+
+#. Default: "Removed"
+#: archetypes/referencebrowserwidget/browser/popup.pt:43
+msgid "referencebrowser_text_removed_reference"
+msgstr ""
+

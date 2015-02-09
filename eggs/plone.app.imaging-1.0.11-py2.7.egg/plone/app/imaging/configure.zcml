@@ -1,0 +1,71 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:cache="http://namespaces.zope.org/cache"
+    i18n_domain="plone.app.imaging">
+
+  <five:registerPackage package="." initialize=".initialize"/>
+
+
+  <include file="profiles.zcml" />
+
+  <class class="Products.Archetypes.Field.ImageField">
+    <implements interface="Products.Archetypes.interfaces.IImageField" />
+  </class>
+
+  <class class="Products.Archetypes.atapi.BaseObject">
+    <implements interface="plone.app.imaging.interfaces.IBaseObject" />
+  </class>
+
+  <adapter
+      factory=".traverse.ImageTraverser" />
+
+  <adapter
+      factory=".traverse.DefaultImageScaleHandler" />
+
+  <adapter
+      for="Products.Archetypes.interfaces.IImageField"
+      factory=".scaling.ImageScaleFactory" />
+
+  <adapter
+      factory=".configlet.ImagingControlPanelAdapter" />
+
+  <permission
+      id="plone.app.controlpanel.Imaging"
+      title="Plone Site Setup: Imaging" />
+
+  <browser:page
+      name="imaging-controlpanel"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      class=".configlet.ImagingControlPanel"
+      permission="plone.app.controlpanel.Imaging" />
+
+  <browser:page
+      for="Products.Archetypes.interfaces.IBaseObject"
+      name="images"
+      class=".scaling.ImageScaling"
+      allowed_interface=".interfaces.IImageScaling"
+      permission="zope2.View" />
+
+  <!-- configure sizes lookup for `plone.namedfile` if it's present -->
+  <utility
+      component=".utils.getAllowedSizes"
+      provides="plone.namedfile.interfaces.IAvailableSizes"
+      zcml:condition="installed plone.namedfile.scaling" />
+
+  <!-- soft dependency: quality lookup for IScaledImageQuality -->
+  <utility
+      component=".utils.getQuality"
+      provides="plone.scale.interfaces.IScaledImageQuality"
+      zcml:condition="installed plone.scale.interfaces" />
+
+  <include package="z3c.caching" />
+  <include package="z3c.caching" file="meta.zcml" />
+  <cache:ruleset
+      for=".interfaces.IStableImageScale"
+      ruleset="plone.stableResource"
+      />
+
+</configure>

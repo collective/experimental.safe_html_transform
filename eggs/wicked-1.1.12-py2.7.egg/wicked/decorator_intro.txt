@@ -1,0 +1,171 @@
+=======================
+  Intro to decorators
+=======================
+
+A decorator is a closure that extends another function by wrapping it
+and returning a new function.
+
+For example let's make some simple decorators that print some
+debugging info to a buffer for us to inspect.
+
+First, we'll extend StringIO so we don't have to keep calling strip()
+in this doctest whenever we inspect our buffer.  We'll use a decorator
+to extend StringIO to call strip for us.  Like a monkeypatch, the
+decorator replaces the method for all instances of the class. Unlike a
+monkey patch, the decorator only extends the original function; note
+our closure does not duplicate or reimplement any of the 'getvalue'
+method's logic ::
+
+    >>> def addstrip(getvalue):
+    ...     def newgetvalue(*args, **kw):
+    ...         value = getvalue(*args, **kw)
+    ...         return value.strip()
+    ...     return newgetvalue
+
+Let's import StringIO and decorate!  First we'll try the normal
+behavior ::
+    
+    >>> from StringIO import StringIO
+    >>> output = StringIO()
+    >>> print >> output, 'bhaaaaa'
+    >>> print output.getvalue()
+    bhaaaaa
+    <BLANKLINE>
+
+Now let's decorate and compare the same example ::
+
+    >>> StringIO.old_getvalue = StringIO.getvalue
+    >>> StringIO.getvalue = addstrip(StringIO.old_getvalue)
+    >>> output = StringIO()
+    >>> print >> output, 'bhaaaaa'
+    >>> print output.getvalue()
+    bhaaaaa
+
+Ahh...no annoying blankline!
+
+Now, let's use decorators to extend code within our control.  We'll
+define a buffer accesible to the namespace of the closures; the new
+'decorate' functions can print to this, and we can look at it and see
+what is going on ::
+    
+    >>> output = StringIO()
+
+Now, we will define a closure.  It will print the name of the function
+passed to it, and wrap that function with behavior to print the
+function's name, arguments, and return value to our buffer ::
+
+    >>> def print_info(f):
+    ...     print >> output, 'sprucing up %s' %f.__name__
+    ...     def newfunc(*args, **kwargs):
+    ...         value = f(*args, **kwargs);
+    ...         info = (f.__name__, args, value)
+    ...         print >> output, 'calling %s args:%s value:%s' %info
+    ...         return value
+    ...     return newfunc
+
+We'll define a simple adding function to decorate ::
+
+    >>> def adder(x, y): return x + y
+
+Before python 2.4, decorators could be simply by calling the closure
+on the target function like so ::
+
+    >>> adder = print_info(adder)
+    >>> print output.getvalue()
+    sprucing up adder
+    
+    >>> adder(1, 2)
+    3
+
+    >>> print output.getvalue()
+    sprucing up adder
+    calling adder args:(1, 2) value:3
+
+In python 2.4, we get some syntactic sugar to the most common
+usecases for decoration more convenient and readable.  Lets
+decorate 'adder' again ::
+
+    >>> output = StringIO()
+    >>> @print_info
+    ... def adder(x, y): return x + y
+    >>> adder(1, 2)
+    3
+
+    >>> print output.getvalue()
+    sprucing up adder
+    calling adder args:(1, 2) value:3
+
+Using python2.4, we can 'stack' decorators. Stacking alludes to the
+appearance in the code.  As you read down a page of python the last
+decorator to wrap a function is on the first line of a function
+declaration.  For example, let's create a rather generic function that
+we can use to observe what happens.  We'll define a counting variable
+to let us follow the application of the decorators to our function ::
+
+    >>> output = StringIO()
+    >>> global count
+    >>> count = 0
+    >>> def decorate(f):
+    ...     fname = f.__name__
+    ...     global count
+    ...     count +=1
+    ...     print >> output, 'step %s decorate: %s' %(count, fname)
+    ...     def new(*args, **kwargs):
+    ...         value = f(*args, **kwargs)
+    ...         print >> output, 'new(%s), value = %s' %(fname, value)
+    ...         return value
+    ...     new.__name__ = 'new%s(%s)' %(count, fname)
+    ...     return new
+
+We'll copy these functions to some new names ::
+
+    >>> first = decorate
+    >>> second = decorate
+    >>> third = decorate
+
+Now, we'll stack them ::
+
+    >>> @third
+    ... @second
+    ... @first
+    ... def adder(x, y): return x + y
+    >>> adder24 = adder
+    >>> val24 = output.getvalue()
+    >>> print val24
+    step 1 decorate: adder
+    step 2 decorate: new1(adder)
+    step 3 decorate: new2(new1(adder))
+
+Let's do the equivalent for 2.3 ::
+
+    >>> count = 0
+    >>> output = StringIO()
+    >>> def adder(x, y): return x + y
+    >>> adder23 = third(second(first(adder)))
+    >>> val23 = output.getvalue()
+    >>> print val23
+    step 1 decorate: adder
+    step 2 decorate: new1(adder)
+    step 3 decorate: new2(new1(adder))
+    
+    >>> val23 == val24
+    True
+
+And finally, what happens when we call our new function ::
+
+    >>> output = StringIO()
+    >>> adder24(1, 2)
+    3
+    >>> adder23(3, 4)
+    7
+    >>> print output.getvalue()
+    new(adder), value = 3
+    new(new1(adder)), value = 3
+    new(new2(new1(adder))), value = 3
+    new(adder), value = 7
+    new(new1(adder)), value = 7
+    new(new2(new1(adder))), value = 7
+
+Let's cleanup in case someone runs this test with others ;)
+
+    >>> StringIO.getvalue = StringIO.old_getvalue

@@ -1,0 +1,41 @@
+Country tests.
+
+  >>> from plone.app.i18n.locales.interfaces import ICountries
+  >>> from zope.component import queryUtility
+
+  >>> util = queryUtility(ICountries)
+  >>> util
+  <Countries at ...>
+
+  >>> countrycodes = util.getAvailableCountries()
+  >>> len(countrycodes)
+  1
+
+  >>> u'en' in countrycodes
+  True
+
+  >>> id(countrycodes) == id(util.countries)
+  False
+
+  >>> countries = util.getCountries()
+  >>> len(countries) > 200
+  True
+
+  >>> de = countries[u'de']
+  >>> de[u'name']
+  u'Germany'
+
+  >>> de[u'flag']
+  u'/++resource++country-flags/de.gif'
+
+  >>> old = util.getAvailableCountries()
+  >>> countries = ['de']
+  >>> util.setAvailableCountries(countries)
+
+  >>> util.getAvailableCountries()
+  ['de']
+
+  >>> id(countries) == util.countries
+  False
+
+  >>> util.setAvailableCountries(old)

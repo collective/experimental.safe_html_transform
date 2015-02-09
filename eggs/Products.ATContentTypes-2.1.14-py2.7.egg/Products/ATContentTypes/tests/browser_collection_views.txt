@@ -1,0 +1,77 @@
+Collection (Topic) views
+------------------------
+
+Ensure Title, description and text are actually shown at the various views for 
+a Collection - http://dev.plone.org/plone/ticket/10226: 
+
+atct_album_view (Thumbnail view)
+atct_topic_view (Collection, the default view)
+
+
+First create a folder and a demo collection:
+
+    >>> self.setRoles(['Manager'])
+    >>> _ = self.portal.invokeFactory('Folder', 'folder')
+    >>> folder = self.portal.folder
+    >>> folder.setTitle('Folder title')
+    >>> folder.setDescription('Folder description')    
+    >>> _ = folder.invokeFactory('Topic', 'collection')
+    >>> collection = folder.collection
+    >>> collection_title = 'Title. Lorem ipsum dolor sit amet'
+    >>> collection.setTitle(collection_title)
+    >>> collection_description = 'Description. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod.'
+    >>> collection.setDescription(collection_description)
+    >>> collection_text = '<p>Text. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>'
+    >>> collection.setText(collection_text, mimetype='text/html')
+
+
+Now let's login and visit the collection in the test browser:
+
+    # BBB Zope 2.12
+    >>> try:
+    ...     from Testing.testbrowser import Browser
+    ... except ImportError:
+    ...     from Products.Five.testbrowser import Browser
+
+    >>> browser = Browser()
+    >>> browser.open('http://nohost/plone/login_form')
+    >>> browser.getControl('Login Name').value = 'test_user_1_'
+    >>> browser.getControl('Password').value = 'secret'
+    >>> browser.getControl('Log in').click()
+    >>> browser.open('http://nohost/plone/folder/collection')
+
+
+Lets check the atct_album_view (Thumbnail view):
+
+    >>> browser.getLink('Thumbnail view').click()
+    >>> collection_title in browser.contents
+    True
+    >>> collection_description in browser.contents
+    True
+    >>> collection_text in browser.contents
+    True
+
+
+Lets check the atct_topic_view (Collection, the default view):
+
+    >>> browser.getLink('Standard view').click()
+    >>> collection_title in browser.contents
+    True
+    >>> collection_description in browser.contents
+    True
+    >>> collection_text in browser.contents
+    True
+
+
+Lets ensure text is shown when Collection is default view of a folder
+
+    >>> browser.open('http://nohost/plone/folder')
+    >>> browser.getLink('Select a content item as default view...').click()
+    >>> browser.getControl(name='objectId').value = ['collection']
+    >>> browser.getControl('Save').click()
+    >>> collection_title in browser.contents
+    True
+    >>> collection_description in browser.contents
+    True
+    >>> collection_text in browser.contents
+    True

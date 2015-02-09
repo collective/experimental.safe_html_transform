@@ -1,0 +1,10 @@
+setuptools
+zope.contenttype
+zope.interface
+Products.CMFCore
+Acquisition
+ZODB3
+Zope2
+
+[test]
+Products.Archetypes

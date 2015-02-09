@@ -1,0 +1,31 @@
+Metadata-Version: 1.1
+Name: zope.sequencesort
+Version: 3.4.0
+Summary: Sequence Sorting
+Home-page: http://cheeseshop.python.org/pypi/zope.sequencesort
+Author: Zope Corporation and Contributors
+Author-email: zope3-dev@zope.org
+License: ZPL 2.1
+Description: This package provides a very advanced sequence sorting feature.
+        
+        
+        =======
+        CHANGES
+        =======
+        
+        3.4.0 (2007-10-03)
+        ------------------
+        
+        - Initial release independent of the main Zope tree.
+        
+Keywords: zope3 sequence sort
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3

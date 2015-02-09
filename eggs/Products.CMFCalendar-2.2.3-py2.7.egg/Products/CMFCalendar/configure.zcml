@@ -1,0 +1,58 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="cmf_calendar">
+
+  <!-- Load CMFDefault.skin first, we use the layer named "cmf" it defines -->
+  <include package="Products.CMFDefault.skin"/>
+
+  <include package=".browser"/>
+
+  <!-- Event -->
+
+  <five:registerClass
+      class=".Event.Event"
+      meta_type="CMF Event"
+      permission="cmf.AddPortalContent"
+      />
+
+  <utility
+      component=".Event.EventFactory"
+      name="cmf.calendar.event"
+      />
+
+  <!-- directories -->
+
+  <cmf:registerDirectory name="zpt_calendar"/>
+
+  <!-- exportimport -->
+
+  <genericsetup:importStep
+      name="various-calendar"
+      title="Various Calendar Settings"
+      description="Import various settings for CMF Calendar."
+      handler="Products.CMFCalendar.setuphandlers.importVarious">
+    <depends name="toolset"/>
+  </genericsetup:importStep>
+
+  <!-- profiles -->
+
+  <genericsetup:registerProfile
+      name="default"
+      title="CMFCalendar"
+      description="Adds calendar support."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      />
+
+  <genericsetup:registerProfile
+      name="skins_support"
+      title="CMFCalendar Oldstyle Skins"
+      description="Hooks up the oldstyle skins."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      />
+
+</configure>

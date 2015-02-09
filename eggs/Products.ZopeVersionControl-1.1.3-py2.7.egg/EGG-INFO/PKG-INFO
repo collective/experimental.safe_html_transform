@@ -1,0 +1,113 @@
+Metadata-Version: 1.1
+Name: Products.ZopeVersionControl
+Version: 1.1.3
+Summary: Zope Version Control
+Home-page: http://pypi.python.org/pypi/Products.ZopeVersionControl
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL
+Description: Changelog
+        =========
+        
+        1.1.3 - 2010-10-02
+        ------------------
+        
+        - Made sure the VersionHistory.BranchInfo class fulfill the API,
+          providing a getId method. Added missing security declarations.
+        
+        1.1.2 - 2010-08-05
+        ------------------
+        
+        - Made sure we cast MAX32 to an int, as ``2**31`` would be automatically
+          overflow to a long on 32bit Python's.
+        
+        1.1.1 - 2010-08-04
+        ------------------
+        
+        - Made compatible with Zope 2.13 and ZODB 3.10.
+        
+        1.1 - 2010-07-18
+        ----------------
+        
+        - No changes.
+        
+        1.1a1 - 2009-11-13
+        ------------------
+        
+        - Fixed an undefined exception.
+        
+        - Don't break when checking the connection version in ZODB>=3.9.
+        
+        - Fixed tests to not use the DemoStorage quota parameter which was removed.
+        
+        - Changed the Globals.InitializeClass import change in a backward compatible
+          way.
+        
+        - Fixed deprecation warnings for use of Globals. Specified package
+          dependencies.
+        
+        - Purge old zope2 Interface interfaces for Zope 2.12 compatibility. Note that
+          they are internal to the implementation of this module.
+        
+        1.0a1 (2008/05/03)
+        ------------------
+        
+        - Updated package metadata.
+        
+        0.3.4 (2007/02/05)
+        ------------------
+        
+        - Add omitted 'tests/common.py' module.
+        
+        0.3.3 (2006/09/20)
+        ------------------
+        
+        - __init__.py, nonversioned.py:  Fixed compatibility with Zope 2.8
+          and new-style objects (http://www.zope.org/Collectors/Zope/2137)
+        
+        
+        0.3.2 (2006/06/02)
+        ------------------
+        
+        - ZopeRepository.py:  make ZR addable via GenericSetup toolset
+          (http://www.zope.org/Collectors/CMF/438).
+        
+        - Utility.py:  Import cleanup, including compatibility with ZODB 3.3+
+          location of 'refrencesf'.
+        
+        
+        0.3.1 (2004/05/03)
+        ------------------
+        
+        - IVersionControl.py:  Added a module-scope alias for the benefit
+          of older software which depended on the old name.
+        
+        - Hardened unit tests against the absence of the References product.
+        
+        
+        0.3 (2004/04/20)
+        ----------------
+        
+        - Refined the pattern for maintaining parts of objects independently
+          of version control.  This is a generalization of the mechanism for
+          versioning container items.  IVersionedContainer is now named
+          INonVersionedData and has more descriptive method names.
+        
+        - 'updateResource' and 'uncheckoutResource' now retain the identity
+          of the object being versioned.  That is, they never replace an
+          object with a new object, but instead change the state of an
+          existing object.
+        
+          'updateResource' and 'uncheckoutResource' used to replace the
+          object in its container, but this strategy had two flaws:
+        
+            1. It required ZopeVersionControl to use the ObjectManager API.
+               Version control should not require versionable objects to be
+               contained in ObjectManagers.
+        
+            2. It assumes that versionable objects are simply wrapped using
+               acquisition.  References (symlink-like objects) break this
+               assumption.
+        
+Platform: UNKNOWN
+Classifier: Framework :: Zope2

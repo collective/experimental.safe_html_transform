@@ -1,0 +1,8 @@
+<configure xmlns="http://namespaces.zope.org/browser">
+
+    <resource
+        name="plone.session.refreshsupport.js"
+        file="resources/refreshsupport.js"
+        />
+
+</configure>

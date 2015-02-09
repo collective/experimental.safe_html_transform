@@ -1,0 +1,95 @@
+===========
+ Bug fixes
+===========
+
+Wrong setting of working-dir
+============================
+
+Since version 3.6.0 zope.testing can run layers in parallel
+processes. zc.recipe.testrunner sets the working directory for each
+using a relative path. The subprocesses have the given working
+directory already set, but zc.recipe.testrunner tried to set it again
+and failed ("IOError: No such file or directory").
+
+To illustrate this, we'll create a project with two layers:
+
+>>> mkdir(sample_buildout, 'sample_working_dir')
+>>> mkdir(sample_buildout, 'bugfix1')
+>>> mkdir(sample_buildout, 'bugfix1', 'bugfix1')
+>>> write(sample_buildout, 'bugfix1', 'bugfix1', '__init__.py', '')
+>>> write(sample_buildout, 'bugfix1', 'bugfix1', 'tests.py',
+... '''
+... import unittest
+...
+... class Layer1:
+...     pass
+... class Layer2:
+...     pass
+...
+... class TestDemo1(unittest.TestCase):
+...    def test(self):
+...        pass
+... class TestDemo2(unittest.TestCase):
+...    def test(self):
+...        pass
+...
+... def test_suite():
+...     suite = unittest.TestSuite()
+...     suite1 = unittest.makeSuite(TestDemo1)
+...     suite1.layer = Layer1
+...     suite.addTest(suite1)
+...     suite2 = unittest.makeSuite(TestDemo2)
+...     suite2.layer = Layer2
+...     suite.addTest(suite2)
+...     return suite
+... ''')
+
+>>> write(sample_buildout, 'bugfix1', 'setup.py',
+... """
+... from setuptools import setup
+...
+... setup(name = "bugfix1")
+... """)
+>>> write(sample_buildout, 'bugfix1', 'README.txt', '')
+
+We create a buildout to install the bugfix1 project as a develop egg
+and to create the test script using the working-directory parameter:
+
+>>> write(sample_buildout, 'buildout.cfg',
+... """
+... [buildout]
+... develop = bugfix1
+... parts = testbugfix1
+... offline = true
+...
+... [testbugfix1]
+... recipe = zc.recipe.testrunner
+... eggs =
+...    bugfix1
+... script = test
+... working-directory = sample_working_dir
+... """)
+
+Now when we run the buildout:
+
+>>> import os
+>>> os.chdir(sample_buildout)
+>>> print system(os.path.join(sample_buildout, 'bin', 'buildout') + ' -q'),
+
+We can run the test script now:
+(somehow zc.buildout.testing.normalize_endings does not work here...)
+
+>>> print system(os.path.join(sample_buildout, 'bin', 'test') + ' -vv -j2').replace('\r\n','\n'),
+Running tests at level 1
+Running bugfix1.tests.Layer1 tests:
+  Set up bugfix1.tests.Layer1 in 0.000 seconds.
+  Running:
+ test (bugfix1.tests.TestDemo1)
+  Ran 1 tests with 0 failures and 0 errors in 0.000 seconds.
+[Parallel tests running in bugfix1.tests.Layer2:
+  . LAYER FINISHED]
+Running bugfix1.tests.Layer2 tests:
+  Running in a subprocess.
+  Set up bugfix1.tests.Layer2 in 0.000 seconds.
+  Ran 1 tests with 0 failures and 0 errors in 0.000 seconds.
+Total: 2 tests, 0 failures, 0 errors in 0.261 seconds.

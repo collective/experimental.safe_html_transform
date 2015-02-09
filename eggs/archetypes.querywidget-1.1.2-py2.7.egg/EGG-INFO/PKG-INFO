@@ -1,0 +1,164 @@
+Metadata-Version: 1.1
+Name: archetypes.querywidget
+Version: 1.1.2
+Summary: Archetypes.querywidget implements a widget for creating catalog queries using an email-filtering-like interface, as found in GMail or Apple Mail.
+Home-page: http://pypi.python.org/pypi/archetypes.querywidget
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: Introduction
+        ============
+        
+        Archetypes.querywidget implements a widget for creating catalog queries using an
+        email-filtering-like interface, as found in GMail or Apple Mail.
+        
+        Changelog
+        =========
+        
+        1.1.2 (2014-11-05)
+        ------------------
+        
+        - Added 'SelectionWidget', a single selection widget.
+          [gbastien]
+        
+        
+        1.1.1 (2014-09-07)
+        ------------------
+        
+        - Declare the correcty ``application/javascript`` contenttype for the
+          ``@@datepickerconfig`` view.
+          [thet]
+        
+        - Add a ``custom_query`` parameter to ``QueryField.get`` method, which allows
+          for run time customization of the stored query, e.g. by request parameters.
+          [thet]
+        
+        
+        1.1 (2014-07-10)
+        ----------------
+        
+        - Support for jQuery 1.7+, including 1.9. Drop support for jQuery 1.4.
+          [thet]
+        
+        
+        1.0.10 (2014-01-27)
+        -------------------
+        
+        - ``QueryBuilder`` instance is now obtained using ZCA, so other add-ons
+          will be able to customize it
+          [keul, cekk]
+        
+        1.0.9 (2013-08-13)
+        ------------------
+        
+        - Fix CSS to ensure that multiple selection widgets are accessible and visible
+          to the user.
+          [davidjb]
+        
+        
+        1.0.8 (2013-03-06)
+        ------------------
+        
+        - Hide the test_fixture profile from @@plone-addsite view.
+          [esteele]
+        
+        
+        1.0.7 (2013-01-24)
+        ------------------
+        
+        - Bugfix: Handle vocabularies with integers as values,
+          see http://dev.plone.org/ticket/13421 [frapell]
+        
+        
+        1.0.6 (2012-10-11)
+        ------------------
+        
+        - Fixed link path reference of querywidget.js for the qunit tests
+          [ichimdav]
+        
+        - Improved multiselection widget readability by sorting its returned values
+          [ichimdav]
+        
+        - Fixed overly long selection lists by displaying scrollbars for multiselection
+          widgets
+          [ichimdav]
+        
+        - Fixed conditional initialization of querywidget,
+          see http://dev.plone.org/ticket/12529 [kroman0]
+        
+        
+        1.0.5 (2012-09-08)
+        ------------------
+        
+        - fixed http://dev.plone.org/ticket/13144 raw get returns persistent
+          querystring on .get(context, raw=True)
+          [jensens]
+        
+        
+        1.0.4 (2012-08-14)
+        ------------------
+        
+        - Added initially missing RelativePathWidget widget macro
+          [petschki]
+        
+        - call the "@@querybuilder_html_results" view on collection context
+          [petschki]
+        
+        1.0.3 (2012-06-29)
+        ------------------
+        
+        - Get date field values from the widget instead of the field, as the field isn't
+          yet updated at this point in the event call.
+          [esteele]
+        
+        - Properly handle finding/removing multiselection widgets, which are nested in
+          dls.
+          See http://dev.plone.org/ticket/12964
+          [esteele]
+        
+        
+        1.0.2 (2012-04-15)
+        ------------------
+        
+        - Accept an optional 'brains' parameter for the field's get method which
+          says to return normal catalog results instead of an IContentListing.
+          [davisagli]
+        
+        - Show currently-selected sort index.
+          [esteele]
+        
+        - Move querywidget widgets into browser views so we're not redefining the
+          same template code in 3 places.
+          [esteele]
+        
+        - Add a relative date widget.
+          [esteele]
+        
+        - Fix errors in widget's dict access in edit template.
+          [esteele]
+        
+        - Render the "Remove line" via a view instead of creating it in javascript,
+          so that we can localize it.
+          Refs http://dev.plone.org/ticket/12377
+          [esteele]
+        
+        
+        1.0.1 (2011-08-25)
+        ------------------
+        
+        - I18n fixes.
+          [vincentfretin]
+        
+        
+        1.0 - 2011-07-19
+        ----------------
+        
+        - Initial release.
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Programming Language :: Python

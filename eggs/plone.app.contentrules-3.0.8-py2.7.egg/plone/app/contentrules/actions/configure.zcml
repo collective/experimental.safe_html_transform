@@ -1,0 +1,208 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone">
+
+    <!-- Logger action -->
+
+    <adapter factory=".logger.LoggerActionExecutor" />
+
+    <browser:page
+      for="plone.app.contentrules.browser.interfaces.IRuleActionAdding"
+      name="plone.actions.Logger"
+      class=".logger.LoggerAddForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <browser:page
+      for="plone.app.contentrules.actions.logger.ILoggerAction"
+      name="edit"
+      class=".logger.LoggerEditForm"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <plone:ruleAction
+        name="plone.actions.Logger"
+        title="Logger"
+        description="Log a particular event"
+        for="*"
+        event="*"
+        addview="plone.actions.Logger"
+        editview="edit"
+        schema=".logger.ILoggerAction"
+        factory=".logger.LoggerAction"
+        />
+
+    <!-- Notify action -->
+
+    <adapter factory=".notify.NotifyActionExecutor" />
+
+    <browser:page
+        for="plone.app.contentrules.browser.interfaces.IRuleActionAdding"
+        name="plone.actions.Notify"
+        class=".notify.NotifyAddForm"
+        permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <browser:page
+        for="plone.app.contentrules.actions.notify.INotifyAction"
+        name="edit"
+        class=".notify.NotifyEditForm"
+        permission="plone.app.contentrules.ManageContentRules"
+      />
+
+    <plone:ruleAction
+        name="plone.actions.Notify"
+        title="Notify user"
+        description="Return a portal message to the user"
+        for="*"
+        event="*"
+        addview="plone.actions.Notify"
+        editview="edit"
+        schema=".notify.INotifyAction"
+        factory=".notify.NotifyAction"
+        />
+
+    <!-- Copy to folder action -->
+
+     <adapter factory=".copy.CopyActionExecutor" />
+
+     <browser:page
+       for="plone.app.contentrules.browser.interfaces.IRuleActionAdding"
+       name="plone.actions.Copy"
+       class=".copy.CopyAddForm"
+       permission="plone.app.contentrules.ManageContentRules"
+       />
+
+     <browser:page
+       for="plone.app.contentrules.actions.copy.ICopyAction"
+       name="edit"
+       class=".copy.CopyEditForm"
+       permission="plone.app.contentrules.ManageContentRules"
+       />
+
+     <plone:ruleAction
+         name="plone.actions.Copy"
+         title="Copy to folder"
+         description="Copy the triggering item to a specific folder"
+         for="*"
+         event="zope.component.interfaces.IObjectEvent"
+         addview="plone.actions.Copy"
+         editview="edit"
+         schema=".copy.ICopyAction"
+         factory=".copy.CopyAction"
+         />
+
+    <!-- Move to folder action -->
+
+     <adapter factory=".move.MoveActionExecutor" />
+
+     <browser:page
+       for="plone.app.contentrules.browser.interfaces.IRuleActionAdding"
+       name="plone.actions.Move"
+       class=".move.MoveAddForm"
+       permission="plone.app.contentrules.ManageContentRules"
+       />
+
+     <browser:page
+       for="plone.app.contentrules.actions.move.IMoveAction"
+       name="edit"
+       class=".move.MoveEditForm"
+       permission="plone.app.contentrules.ManageContentRules"
+       />
+
+     <plone:ruleAction
+         name="plone.actions.Move"
+         title="Move to folder"
+         description="Move the triggering item to a specific folder"
+         for="*"
+         event="zope.component.interfaces.IObjectEvent"
+         addview="plone.actions.Move"
+         editview="edit"
+         schema=".move.IMoveAction"
+         factory=".move.MoveAction"
+         />
+
+    <!-- Delete action (no configurable options) -->
+
+     <adapter factory=".delete.DeleteActionExecutor" />
+
+     <browser:page
+       for="plone.app.contentrules.browser.interfaces.IRuleActionAdding"
+       name="plone.actions.Delete"
+       class=".delete.DeleteAddForm"
+       permission="plone.app.contentrules.ManageContentRules"
+       />
+
+     <plone:ruleAction
+         name="plone.actions.Delete"
+         title="Delete object"
+         description="Delete the triggering item"
+         for="*"
+         event="zope.component.interfaces.IObjectEvent"
+         addview="plone.actions.Delete"
+         schema=".delete.IDeleteAction"
+         factory=".delete.DeleteAction"
+         />
+
+    <!-- Transition workflow action -->
+
+     <adapter factory=".workflow.WorkflowActionExecutor" />
+
+     <browser:page
+       for="plone.app.contentrules.browser.interfaces.IRuleActionAdding"
+       name="plone.actions.Workflow"
+       class=".workflow.WorkflowAddForm"
+       permission="plone.app.contentrules.ManageContentRules"
+       />
+
+     <browser:page
+       for="plone.app.contentrules.actions.workflow.IWorkflowAction"
+       name="edit"
+       class=".workflow.WorkflowEditForm"
+       permission="plone.app.contentrules.ManageContentRules"
+       />
+
+     <plone:ruleAction
+         name="plone.actions.Workflow"
+         title="Transition workflow state"
+         description="Perform a workflow transition on the triggering object"
+         for="*"
+         event="zope.component.interfaces.IObjectEvent"
+         addview="plone.actions.Workflow"
+         editview="edit"
+         schema=".workflow.IWorkflowAction"
+         factory=".workflow.WorkflowAction"
+         />
+
+    <!-- Email action definition -->
+
+     <adapter factory=".mail.MailActionExecutor" />
+
+     <browser:page
+       for="plone.app.contentrules.browser.interfaces.IRuleActionAdding"
+       name="plone.actions.Mail"
+       class=".mail.MailAddForm"
+       permission="plone.app.contentrules.ManageContentRules"
+       />
+
+     <browser:page
+       for="plone.app.contentrules.actions.mail.IMailAction"
+       name="edit"
+       class=".mail.MailEditForm"
+       permission="plone.app.contentrules.ManageContentRules"
+       />
+
+     <plone:ruleAction
+         name="plone.actions.Mail"
+         title="Send email"
+         description="Send an email on the triggering object"
+         for="*"
+         event="*"
+         addview="plone.actions.Mail"
+         editview="edit"
+         schema=".mail.IMailAction"
+         factory=".mail.MailAction"
+         />
+
+</configure>

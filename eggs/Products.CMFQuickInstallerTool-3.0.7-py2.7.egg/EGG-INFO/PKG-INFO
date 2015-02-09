@@ -1,0 +1,637 @@
+Metadata-Version: 1.1
+Name: Products.CMFQuickInstallerTool
+Version: 3.0.7
+Summary: CMFQuickInstallerTool is a facility for comfortable activation/deactivation of CMF compliant products.
+Home-page: http://pypi.python.org/pypi/Products.CMFQuickInstallerTool
+Author: Hanno Schlichting
+Author-email: hannosch@plone.org
+License: GPL
+Description: Products.CMFQuickInstallerTool
+        ==============================
+        
+        Features
+        --------
+        
+        CMFQuickInstallerTool is a facility for comfortable activation/deactivation of
+        CMF compliant products inside a CMF site.
+        
+        Therefore it has to be installed as a tool inside a CMF portal, where it stores
+        the information about the installed products.
+        
+        The requirements for a product to be installable with QuickInstallerTool are
+        quite simple (almost all existing CMF  products fulfill them)::
+        
+          External Product:  The product has to implement an external 
+                             method 'install' in a python module 'Install.py' 
+                             in its Extensions directory.
+                             
+                             OR
+                             
+                             The product ships with a GenericSetup extension profile
+                             and has no install method. It can still use an uninstall
+                             method for custom uninstallation tasks though.
+        
+        Products can be uninstalled and QuickInstallerTool removes the following items
+        a product creates during install:
+        
+        - portal actions,
+        - portal skins,
+        - portal types,
+        - portal objects (objects created in the root of the portal),
+        - workflows,
+        - left and right slots (also checks them only for the portal),
+        - resource registry entries
+        
+        Attention:
+        
+        QuickInstallerTool just tracks which objects are ADDED, but not what is changed
+        or deleted.
+        
+        Usage
+        -----
+        
+        In the ZMI click on portal_quickinstaller. The management screen allows you to
+        select products for installation and uninstallation. You can browse into the
+        installed products and see what was created and the logs of the install process.
+        
+        Customized uninstall
+        --------------------
+        
+        In order to use a customize uninstall, the following
+        requirements must be met::
+        
+          External Product:  The product has to implement an external 
+                             method 'uninstall in a python module 'Install.py' 
+                             in its Extensions directory.
+        
+        Please note that the customized uninstall method is invoked before (and in
+        addition to) the standard removal of objects.
+        
+        Install:
+        --------
+        
+          `install(portal) or install(portal, reinstall)`
+        
+        Uninstall:
+        ----------
+        
+          `uninstall(portal) or uninstall(portal, reinstall)`
+        
+        Reinstall
+        ---------
+        
+        Reinstalling a product invokes uninstall() and install(). If you have special
+        code which should work differently on reinstall than uninstall/install you can
+        add a second argument to the install or uninstall method named 'reinstall' which
+        is true only for a reinstallation. In most cases you shouldn't react differently
+        when reinstalling!
+        
+        
+        Changelog
+        =========
+        
+        3.0.7 (2014-10-24)
+        ------------------
+        
+        - Allow to pass the option to skip certain steps to GenericSetup's
+          runAllImportStepsFromProfile.
+          [pbauer]
+        
+        - switch to using volatile attributes for detected errors so we don't
+          write to the ZODB on read
+          [vangheem]
+        
+        - Fixed a bug where listing the installable products would always
+          result in a transaction payload.
+          [malthe]
+        
+        - Remove InstalledProduct instance when a product is uninstalled.
+          Leaving the instance around can prevent settings from being stored
+          properly on subsequent installation of the product.
+          [rochecompaan]
+        
+        - interfaces/portal_quickinstaller.py:
+          Don't use list as default parameter value.
+          [kleist]
+        
+        - Ported tests to plone.app.testing and removed CMFTestCase dependency
+          [tomgross]
+        
+        - PEP8 cleanup
+          [tomgross]
+        
+        3.0.6 (2012-03-15)
+        ------------------
+        
+        - Fixed a bug where products installed via a GenericSetup profile would
+          record the installed items from all of the profile's dependencies.
+          This would then result in too much being removed when the product
+          was uninstalled.
+          [davisagli]
+        
+        - Add some missing test setup.
+          [davisagli]
+        
+        
+        3.0.5 - 2011-03-31
+        ------------------
+        
+        - Register test profile only when needed. Testcase change only.
+          [gotcha]
+        
+        3.0.4 - 2011-02-26
+        ------------------
+        
+        - Protect isProductInstalled so it is only callable by Managers.
+          [davisagli]
+        
+        - Remove utility mapping in site manager's dictionary to enable a
+          complete uninstall. This fixes an issue where a cascade-based
+          uninstall would not entirely remove utilities, but merely unregister
+          them from the component registry.
+        
+        3.0.3 - 2010-11-06
+        ------------------
+        
+        - Updated the delete portalobjects method to NOT delete items that implement
+          IContentish or IFolderish. This will help people who create custom products
+          and put content containers at the root on install
+          [eleddy]
+        
+        3.0.2 - 2010-10-27
+        ------------------
+        
+        - Use the new get_registered_packages API in Zope 2.13+ to get the registered
+          packages, instead of the _registered_packages attribute of the Products
+          module.
+          [davisagli]
+        
+        3.0.1 - 2010-09-09
+        ------------------
+        
+        - Uninstall control panels.
+          [elro]
+        
+        3.0 - 2010-07-18
+        ----------------
+        
+        - Use the standard libraries doctest module.
+          [hannosch]
+        
+        3.0b3 - 2010-02-04
+        ------------------
+        
+        - Reworked the last bits of the install machinery to work without the product
+          registry.
+          [hannosch]
+        
+        - Refactored common code to check and generate the external install methods into
+          helper methods in utils.
+          [hannosch]
+        
+        - Freed listInstallableProducts from its dependency on the product registry.
+          [hannosch]
+        
+        - Added a get_packages helper methods to reduce the dependencies on the
+          persistent product registry and convert the getProductFile method to use it.
+          [hannosch]
+        
+        3.0b2 - 2010-01-02
+        ------------------
+        
+        - Limit the installable products screen to listing only extension profiles
+          which are either registered without a `for` attribute (i.e. for any type
+          of context), or registered for `Products.CMFCore.interfaces.ISiteRoot` or
+          `Products.CMFPlone.interfaces.IPloneSiteRoot`. This allows products to
+          use another marker interface to group profiles together, without fear of
+          those showing up in `portal_quickinstaller`.
+          [optilude]
+        
+        3.0b1 - 2009-12-27
+        ------------------
+        
+        - Removed no longer needed check for CMF < 2.1.
+          [hannosch]
+        
+        - Added missing test dependency on Products.CMFCalendar.
+          [hannosch]
+        
+        3.0a1 - 2009-11-13
+        ------------------
+        
+        - Further optimized the `handleBeforeProfileImportEvent` logic. We ignore any
+          non-installable profiles.
+          [hannosch]
+        
+        - Changed tests to use addProfile instead of addProduct to install this
+          package, as we don't have an Extensions.Install module ourselves anymore.
+          [hannosch]
+        
+        - Updated package metadata and cleaned up old code.
+          [hannosch]
+        
+        - Declare package dependencies and fixed deprecation warnings for use
+          of Globals.
+          [hannosch]
+        
+        
+        2.1.7 (2009-4-4)
+        ----------------
+        
+        - Do not use the GenericSetup profile version: the profile version has
+          no relation to the package version.
+          [wichert]
+        
+        - Do not use the GenericSetup profile version: the profile version has
+          no relation to the package version.
+          [wichert]
+        
+        - Fixed actions installation tests.
+          [hannosch]
+        
+        - Cache listInstallableProducts in event handler to improve portal
+          creation time.
+          [stefan]
+        
+        - Use aq_parent(aq_inner()) to get at the portal root, otherwise
+          we can end up getting the quickinstaller tool by accident if
+          it's acquired through itself.
+          [sidnei]
+        
+        
+        2.1.6 (2008-07-07)
+        ------------------
+        
+        - Applied a tiny fix that caused good installations to fail during
+          log generation.
+          [gogobd]
+        
+        - Use aq_base on all attribute retrieval during InstalledProduct's
+          cascade deletion so we don't inadvertently try to delete something
+          retrieved via acquisition.
+          [rafrombrc]
+        
+        
+        2.1.5 (2008-06-02)
+        ------------------
+        
+        - Improved getInstallMethod to log ImportError instead of silently skipping
+          it. It was unclear why product does not appear in QI even if there is no
+          error raised on instance startup.
+          [naro]
+        
+        - Prefer sorting the list of installable and installed products by title
+          instead of id.
+          [hannosch]
+        
+        - Correct handling of products with pre-CMF2.1 style actions
+          [wichert]
+        
+        
+        2.1.4 (2008-04-27)
+        ------------------
+        
+        - The same error should be displayed only once even if it occurs with the
+          old style install method and with the GenericSetup profile
+          [encolpe]
+        
+        - The getInstallMethod should ignore ImportError when looking for install
+          methods for a product. This makes it possible to install products which
+          have a working GenericSetup profile but a broken Install external method.
+          [wichert]
+        
+        
+        2.1.3 (2008-04-21)
+        ------------------
+        
+        - Fixed getInstallProfile method for packages from the 'Products'
+          namespace. This allows Quickinstaller to show the profile title instead
+          of the product name.
+          [encolpe]
+        
+        
+        2.1.2 (2008-04-20)
+        ------------------
+        
+        - Fix when a product comes from the 'Products' namespace and has both
+          installation profile and an entry in the control panel.
+          [encolpe]
+        
+        - Added getattr code to make sure uninstall for products which have not
+          been installed properly doesn't fail that easily.
+          [hannosch, wichert]
+        
+        - Added initialize code for all values in DEFAULT_CASCADE. Otherwise you
+          could get errors during uninstall of products which where installed
+          via notifyInstalled.
+          [hannosch, wichert]
+        
+        - Display of add on products README file could generate UnicodeDecodeError
+          when the README file included non-ascii characters. This closes
+          http://dev.plone.org/plone/ticket/7524.
+          [hannosch]
+        
+        - Removed all error swallowing options from QuickInstaller. We always
+          raise an error now, if one is encountered during product install.
+          This closes http://dev.plone.org/plone/ticket/7536.
+          [hannosch]
+        
+        
+        2.1.1 (2008-03-26)
+        ------------------
+        
+        - Added getProductDescription method to expose the description from an
+          extension profile.
+          [hannosch]
+        
+        - Added new listInstallableProfiles method, to include products without a
+          Zope2 control panel entry in the listings.
+          [hannosch]
+        
+        - Tighten some security settings.
+          [hannosch]
+        
+        - Fixed actions re/uninstall for products installed prior to CMF 2.1.
+          This closes http://dev.plone.org/plone/ticket/6974.
+          [hannosch]
+        
+        - Restored code which got accidentally removed in c38815.
+          [hannosch]
+        
+        
+        2.1 (2008-03-09)
+        ----------------
+        
+        - Added metadata.xml to GenericSetup profile.
+          [hannosch]
+        
+        - Avoid breakage for InstalledProduct instances without the left or
+          rightslots properties. Thx to Roberto Fontanarosa from the OpenCpi
+          division of Cpi Progetti Spa.
+          [hannosch]
+        
+        - Fixed logging code in utils. This closes
+          http://dev.plone.org/plone/ticket/7093.
+          [bliles, hannosch]
+        
+        - Reverted getUtility usage. Closes http://dev.plone.org/plone/ticket/7314.
+          [hannosch]
+        
+        - Fixed class variables in InstalledProduct. All products would share the
+          same left slots and right slots properties. Thx to Saverio Mucci for
+          noting this.
+          [hannosch]
+        
+        - Hook into the import-events generated by the development version of
+          GenericSetup. This allows us to automatically mark a product as
+          installed if its profile is imported successfully.
+          [wichert]
+        
+        - Avoid an unneeded transaction savepoint.
+          [hannosch]
+        
+        
+        2.0.3 (2007-07-09)
+        ------------------
+        
+        - Use new GenericSetup features, so we don't have to change the current
+          setup tool context anymore.
+          [hannosch]
+        
+        
+        2.0.2b3 (2007-05-01)
+        --------------------
+        
+        - Back to getToolByName.
+          [wichert]
+        
+        - Added uninstall support for utilities. All additional utilities installed
+          by a product are now recorded and uninstalled properly.
+          [hannosch]
+        
+        
+        2.0.2b2 (2007-03-23)
+        --------------------
+        
+        - Added new profile argument to the installProduct method to explicitly set
+          the profile which should be used for installation.
+          [hannosch]
+        
+        - Marked the Products.CMFQI package as uninstallable as well.
+          [hannosch]
+        
+        - Replaced all getToolByName calls by get/queryUtility.
+          [hannosch]
+        
+        
+        2.0.2b1 (2007-03-05)
+        --------------------
+        
+        - Don't show removed products in the standard listings.
+          [hannosch]
+        
+        - Adjusted listInstallable and listInstalled methods to return the title of
+          the GenericSetup profile instead of the package name, for extension
+          profile based installation. These look a lot nicer ;) This fixes
+          http://dev.plone.org/plone/ticket/6129.
+          [hannosch]
+        
+        
+        2.0.1 (2007-02-10)
+        ------------------
+        
+        - Adjusted installProduct method to be compatible with CMF 2.1 (including
+          the conversion of tools as utilities).
+          [hannosch]
+        
+        - Refactored ResourceRegistries support not to require the product itself to
+          be installed in QI.
+          [hannosch]
+        
+        - Added the INonInstallable interface that is used to look up utilities
+          which provide a list of non-installable products. This allows applications
+          to exclude certain products from the list of installable products.
+          [hannosch]
+        
+        - Added an option to omit snapshot creation which defaults to True to speed
+          up test runs and migrations.
+          [hannosch]
+        
+        - We automatically create a GenericSetup snapshot before and after
+          installation now, so you can at least compare the changes a product did
+          during installation. We have no better uninstall yet, though.
+          [hannosch]
+        
+        
+        2.0.0 (2006-10-25)
+        ------------------
+        
+        - Slightly optimize for GenericSetup profile based installations.
+          [hannosch]
+        
+        - Adjusted actions installation tracking to work with CMF 2.1+.
+          [hannosch]
+        
+        - Made profile based installation work with CMF 2.1+. The profile id may use
+          the full package name now, instead of only the product name (for example:
+          Products.CMFCalendar instead of CMFCalendar).
+          [hannosch]
+        
+        - Changed GS profile registration to be zcml based. Fixed some problems with
+          the logging calls. Removed some stale code from the tests.
+          [hannosch]
+        
+        - Removed lots of unused and bbb code. This version requires at least CMF 1.6.
+          [hannosch]
+        
+        - Added support for GenericSetup extension profile-based installation.
+          [hannosch]
+        
+        
+        1.6.1 (2007-04-28)
+        ------------------
+        
+        - Disabled postonly protection for product reinstall. This broke the reinstall
+          functionality on the Plone control panel. The postonly protection can be
+          enabled once the control panel is changed.
+          [hannosch]
+        
+        
+        1.6.0 (2007-04-22)
+        ------------------
+        
+        - Applied postonly protection to product uninstall and reinstall.
+          [alecm]
+        
+        
+        1.5.9 (2006-06-01)
+        ------------------
+        
+        - Fixed two missing imports in utils.py. This closes
+          http://dev.plone.org/plone/ticket/5529.
+          [hannosch]
+        
+        
+        1.5.8 (2006-05-15)
+        ------------------
+        
+        - Some general spring cleaning.
+          [hannosch]
+        
+        - Avoid DeprecationWarning for product_name.
+          [hannosch]
+        
+        - Added methods to display Products directory and debug mode (if enabled)
+          [joelburton]
+        
+        
+        1.5.7 (2005-12-23)
+        ------------------
+        
+        - Cook resources when new types were added and ResourceRegistries is
+          installed.
+          [fschulze]
+        
+        - If we are reinstalling do not say the product is already installed if we
+          see an exception but show the real error message
+          [wichert]
+        
+        
+        1.5.6 (2005-12-18)
+        ------------------
+        
+        - Fix missing import in utils.py. This closes
+          http://dev.plone.org/plone/ticket/4817.
+          [hannosch]
+        
+        
+        1.5.5
+        -----
+        
+        - Keeping track of ResourceRegistries entries.
+          [zwork]
+        
+        
+        1.5.4
+        -----
+        
+        - listInstalledProducts and listInstallableProducts now return alphabetized
+          lists.
+          [geoffd]
+        
+        - Catch errors where the product is there but install cannot by compiled,
+          this picks up syntax errors and adds the them to an errors dict.
+          When listInstallableProducts is called, the errors dict is repoulated.
+          Also added in a few except ConflictErrors.
+          [andym]
+        
+        - Fixing plone bug #3113, where the "uninstall" button would raise an
+          exception if no items were selected; this makes the uninstallProducts()
+          method symmetric with the installProducts() method
+          [optilude]
+        
+        
+        1.5.3
+        -----
+        
+        - Added an Extensions.Install module and an initial test suite.
+          [stefan]
+        
+        - Added optional reinstall argument to install() and uninstall() method
+          [tiran]
+        
+        - Enabled uninstall of deleted products by making the parser.py handle
+          missing product directories slightly more gracefully.
+          [tesdal]
+        
+        - Fixed multiple register bug
+        
+          QI doesn't assign an object to a product when it is already registered
+          for another product. This fixes bugs like the removal of the archetype
+          tool when a product was removed which itself had had installed Archetypes.
+          [tiran]
+        
+        - Added afterInstall / beforeUninstall hooks:
+        
+          out = afterInstall(portal, reinstall=reinstall, qi_product)
+          out, cascade = beforeUninstall(portal, reinstall, qi_product, cascade)
+          [tiran]
+        
+        
+        1.4
+        ---
+        
+        - reinstall button
+        
+          does the same as uninstall/install except that it does _not_ delete
+          objects that have been created on portal_level (portal_objects)
+        
+        - product version info
+        
+          added getProductVersion to the API
+          shows the version of the products
+          for installed products it also shows the version of the prod at install time
+        
+        - By Andy McKay
+        
+          Remove the except: pass from trying to make a External method, if there is
+          an error in the import log the error to ZLOG. Unfortunately there is a
+          string error we have to try and catch as well. That string error occurs
+          when the module cant be found, so we should ignore that.
+        
+        - content type registry support
+        
+          QuickInstaller now also tracks entries in the content_type_registry.
+        
+        - if products have been removed from disc, mark them in the installed list as 'removed'
+        
+        - added a ChangeLog :)
+        
+Keywords: Zope CMF Plone quickinstall install activation
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Framework :: Plone :: 5.0
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.7

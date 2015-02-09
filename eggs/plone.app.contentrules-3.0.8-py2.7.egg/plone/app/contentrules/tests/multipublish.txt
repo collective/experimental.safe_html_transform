@@ -1,0 +1,110 @@
+This test demonstrates a content rule that triggers for multiple objects
+during the same request.
+
+Setup
+-----
+
+  >>> from Testing.ZopeTestCase import user_password
+
+  # BBB Zope 2.12
+  >>> try:
+  ...     from Testing.testbrowser import Browser
+  ... except ImportError:
+  ...     from Products.Five.testbrowser import Browser
+
+  >>> if 'news' not in self.portal:
+  ...     self.loginAsPortalOwner()
+  ...     obj = self.portal.invokeFactory('Folder', 'news')
+
+  >>> browser = Browser()
+  >>> browser.addHeader('Authorization',
+  ...                   'Basic %s:%s' % ('portal_owner', user_password))
+
+Let's visit the control panel and add a content rule.  We'll add a
+rule with a triggering event of `Workflow state changed`:
+
+  >>> browser.open(self.portal.absolute_url())
+  >>> browser.getLink('Site Setup').click()
+  >>> browser.getLink('Content Rules').click()
+  >>> browser.getControl('Add content rule').click()
+  >>> browser.getControl('Title').value = 'Move Published News'
+  >>> ctrl = browser.getControl('Triggering event')
+  >>> ctrl.value = ['Workflow state changed']
+  >>> browser.getControl('Save').click()
+
+We're back at the control panel.  Now we'll edit the content rule.
+We'll add a portal type condition for *news items* and a workflow state
+condition for *published*:
+
+  >>> browser.url
+  'http://nohost/plone/++rule++rule-1/@@manage-elements'
+  >>> browser.getControl('Add condition').value = [
+  ...     'plone.conditions.PortalType']
+  >>> browser.getControl('Add', index=1).click()
+  >>> browser.getControl('Content type').value = ['News Item']
+  >>> browser.getControl('Save').click()
+
+  >>> browser.getControl('Add condition').value = [
+  ...     'plone.conditions.WorkflowState']
+  >>> browser.getControl('Add', index=1).click()
+  >>> browser.getControl('Workflow state').value = ['published']
+  >>> browser.getControl('Save').click()
+
+Now comes the action, we want all news items to be moved into the
+`/news` folder:
+
+  >>> browser.getControl('Add action').value = ['plone.actions.Move']
+  >>> browser.getControl('Add', index=3).click()
+  >>> ctrl = browser.getControl(name='form.target_folder.query') # XXX fix label
+  >>> ctrl.value = '/news'
+  >>> browser.getControl('Search', index=2).click()
+  >>> ctrl = browser.getControl(name='form.target_folder') # XXX fix label
+  >>> ctrl.value = ['/news']
+  >>> browser.getControl('Save').click()
+
+We're done with setting up the content rule.  We need to now apply the
+rule to the root of the site before we try to add some news items:
+
+  >>> browser.getLink('Home').click()
+  >>> browser.getLink('Rules').click()
+  >>> browser.getControl(name='rule_id').displayOptions
+  ['Move Published News']
+  >>> browser.getControl('Add').click()
+
+Let's go back and create two news items now:
+
+  >>> browser.getLink('Home').click()
+  >>> browser.getLink('Add new').click()
+  >>> browser.getControl('News Item').click()
+  >>> browser.getControl('Add').click()
+  >>> browser.getControl('Title').value = 'My news item'
+  >>> browser.getControl('Save').click()
+  >>> 'Changes saved' in browser.contents
+  True
+
+  >>> browser.getLink('Home').click()
+  >>> browser.getLink('Add new').click()
+  >>> browser.getControl('News Item').click()
+  >>> browser.getControl('Add').click()
+  >>> browser.getControl('Title').value = 'Second news item'
+  >>> browser.getControl('Save').click()
+  >>> 'Changes saved' in browser.contents
+  True
+
+Now let's publish both simultaneously.
+
+  >>> browser.getLink('Home').click()
+  >>> browser.open('http://nohost/plone/content_status_history?paths:list=my-news-item&paths:list=second-news-item')
+  >>> browser.getControl('Publish').click()
+  >>> try: # Work around https://bugs.launchpad.net/zope3/+bug/98437
+  ...     browser.getControl('Save').click()
+  ... except:
+  ...     pass
+
+Both news items should have moved into the `news/` folder now:
+
+  >>> browser.open(self.portal.absolute_url() + '/news/folder_listing')
+  >>> 'My news item' in browser.contents
+  True
+  >>> 'Second news item' in browser.contents
+  True

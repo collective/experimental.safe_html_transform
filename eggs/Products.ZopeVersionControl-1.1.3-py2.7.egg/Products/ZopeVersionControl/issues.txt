@@ -1,0 +1,25 @@
+Current Issues:
+
+  - fix up select by date apis
+
+  - fix up "isAVersionableResource"
+
+  - rethink branch structures
+
+  - The UI (such as it is) for version controlled objects (a.k.a 
+    the version control tab) is hacked in a most unsavory way. We 
+    need to finish providing a ZMI UI for the basic VC operations 
+    and integrate the version control tab in a better way.
+
+  - The ZMI for the Repository, VersionHistory and Version objects is 
+    only just started. We should at least have basic UI for these.
+
+  - What happens if a repository goes away or if a version history 
+    were to be deleted somehow is still not well thought out. At a 
+    minimum, the UI elements should be able to tell if something 
+    really bad has happened and tell you (right now you'd probably 
+    get a traceback).
+
+  - We'd like to support some way to set the default state policy 
+    (checked out by default vs. checked-in by default). This is 
+    something that we could add later.

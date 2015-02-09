@@ -1,0 +1,1 @@
+<base href="" tal:attributes="href string:${here/absolute_url}" />

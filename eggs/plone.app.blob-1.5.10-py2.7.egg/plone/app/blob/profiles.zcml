@@ -1,0 +1,51 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone.app.blob">
+
+  <genericsetup:registerProfile
+    name="default"
+    title="plone.app.blob: ZODB Blob support"
+    directory="profiles/default"
+    description="Extension profile to replace the standard 'File' content type with a compatible one based on ZODB 3.8 blobs"
+    for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+    provides="Products.GenericSetup.interfaces.EXTENSION"
+    />
+
+  <genericsetup:registerProfile
+    name="file-replacement"
+    title="plone.app.blob: 'File' replacement type (testing)"
+    directory="profiles/file-replacement"
+    description="Extension profile to replace the standard 'File' content type with a compatible one based on ZODB 3.8 blobs"
+    for="Products.CMFPlone.interfaces.ITestCasePloneSiteRoot"
+    provides="Products.GenericSetup.interfaces.EXTENSION"
+    />
+
+  <genericsetup:registerProfile
+    name="image-replacement"
+    title="plone.app.blob: 'Image' replacement type"
+    directory="profiles/image-replacement"
+    description="Extension profile to replace the standard 'Image' content type with a compatible one based on ZODB 3.8 blobs"
+    for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+    provides="Products.GenericSetup.interfaces.EXTENSION"
+    />
+
+  <genericsetup:registerProfile
+    name="sample-type"
+    title="plone.app.blob: Sample 'Blob' content type"
+    directory="profiles/sample"
+    description="plone.app.blob: Sample content type based on ZODB 3.8 blobs"
+    for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+    provides="Products.GenericSetup.interfaces.EXTENSION"
+    />
+
+  <genericsetup:registerProfile
+    name="testing-lingua"
+    title="plone.app.blob: LinguaPlone testing"
+    directory="profiles/lingua"
+    description="Extension profile for testing LinguaPlone compatibility"
+    for="Products.CMFPlone.interfaces.ITestCasePloneSiteRoot"
+    provides="Products.GenericSetup.interfaces.EXTENSION"
+    />
+
+</configure>

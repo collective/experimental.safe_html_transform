@@ -1,0 +1,363 @@
+# Translation of cmfeditions.pot to Italian
+# Giancarlo & Lele Gaifas, 2007-2009
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: CMFEditions\n"
+"POT-Creation-Date: 2013-05-22 08:09+0000\n"
+"PO-Revision-Date: 2011-05-12 22:00+0200\n"
+"Last-Translator: Giorgio Borelli <giorgio@giorgioborelli.it\n"
+"Language-Team: Plone i18n <plone-i18n@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n!=1\n"
+"Language-Code: it\n"
+"Language-Name: Italiano\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: cmfeditions\n"
+"X-Is-Fallback-For: it-ch it-it\n"
+
+#: CMFEditions/skins/CMFEditions/revertversion.py:30
+msgid "${title} has been reverted to revision ${version}."
+msgstr "${title} è stato riportato alla revisione ${version}."
+
+#: CMFEditions/subscriber.py:52
+msgid "Edited (WebDAV)"
+msgstr "Modificato (WebDAV)"
+
+#: CMFEditions/browser/diff.pt:62
+msgid "First revision"
+msgstr "Prima revisione"
+
+#: CMFEditions/skins/CMFEditions/update_version_before_edit.cpy:22
+#: CMFEditions/subscriber.py:59
+msgid "Initial revision"
+msgstr "Revisione iniziale"
+
+#: CMFEditions/subscriber.py:49
+msgid "Initial revision (WebDAV)"
+msgstr "Revisione iniziale (WebDAV)"
+
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:223
+msgid "Preview is not available."
+msgstr "Anteprima non disponibile"
+
+#: CMFEditions/skins/CMFEditions/revertversion.py:36
+msgid "Reverted to revision ${version}"
+msgstr "Ripristinata la revisione ${version}"
+
+#: CMFEditions/browser/diff.pt:72
+msgid "Second revision"
+msgstr "Seconda revisione"
+
+#. Default: "Show differences"
+#: CMFEditions/browser/diff.pt:96
+msgid "Show differences"
+msgstr "Mostra le differenze"
+
+#: CMFEditions/skins/CMFEditions/revertversion.py:41
+msgid "The most current revision of the file could not be saved before reverting because the file is too large."
+msgstr "La revisione più recente del file non può essere salvata prima del ripristino in quanto il file è troppo grande."
+
+#: CMFEditions/browser/diff.pt:90
+msgid "There are no changes between the selected revisions."
+msgstr "Nessun cambiamento tra le due revisioni selezionate."
+
+#. Default: "This field has no inline difference view."
+#: CMFEditions/browser/diff.pt:117
+msgid "This field has no inline difference view."
+msgstr "Non è possibile mostrare le differenze in linea per questo campo."
+
+#: CMFEditions/skins/CMFEditions/update_version_on_edit.cpy:28
+msgid "Versioning for this file has been disabled because it is too large"
+msgstr "Il versionamento di questo file è stato disabilitato perché è troppo grande"
+
+#. Default: "Working Copy"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:58
+msgid "Working Copy"
+msgstr "Copia di lavoro"
+
+#. Default: "as code"
+#: CMFEditions/browser/diff.pt:104
+msgid "as code"
+msgstr "come codice"
+
+#. Default: "Save as new revision"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:186
+msgid "button_save_as_new_version"
+msgstr "Salva come nuova versione"
+
+#. Default: "You can have different settings for each content type. Content can be automatically versioned, and you can also opt to create a version when you revert a revision."
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:31
+msgid "description_version_settings"
+msgstr "È possibile avere impostazioni differenti per ogni tipo di contenuto. I contenuti possono essere versionati automaticamente ed è possibile anche impostare la creazione di una nuova versione quando si annulla una revisione."
+
+#. Default: "Select to make a version of the current content."
+#: CMFEditions/browser/edit.pt:49
+msgid "help_save_new_version"
+msgstr "Seleziona per creare una versione del contenuto corrente."
+
+#. Default: "Enter a comment that describes the changes you made."
+#: CMFEditions/browser/edit.pt:63
+msgid "help_version_comment"
+msgstr "Inserisci un commento per descrivere le modifiche che hai apportato."
+
+#. Default: "At any moment you can save the content you just edited as a new revision. Enter below a comment to identify the version and hit the \"Save as new revision\" button."
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:176
+msgid "help_versioncomment"
+msgstr "In ogni momento è possibile salvare la copia appena modificata come nuova versione. Inserisci un commento qua sotto per identificare la versione e premi \"Salva una nuova versione\"."
+
+#. Default: "inline"
+#: CMFEditions/browser/diff.pt:100
+msgid "inline"
+msgstr "in linea"
+
+#. Default: "Click here to get the file"
+#: CMFEditions/skins/cmfeditions_views/version_file_view.pt:21
+msgid "label_click_to_get_file"
+msgstr "Clicca qui per ottenere il file"
+
+#. Default: "Compare to current revision"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:131
+msgid "label_compare_current"
+msgstr "Confronta con la versione corrente"
+
+#. Default: "Compare to previous revision"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:139
+msgid "label_compare_previous"
+msgstr "Confronta con la versione precedente"
+
+#. Default: "Compare to previous revision"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:88
+msgid "label_compare_to_previous_revision"
+msgstr "Confronta con la versione precedente"
+
+#. Default: "Compare to revision ${version_id}"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:85
+msgid "label_compare_to_revision"
+msgstr "Confronta con la versione ${version_id}"
+
+#. Default: "Current"
+#: CMFEditions/browser/diff.pt:64
+msgid "label_current"
+msgstr "Corrente"
+
+#. Default: "(+) Added"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:8
+msgid "label_diff_added"
+msgstr "(+) Aggiunte"
+
+#. Default: "Changed"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:10
+msgid "label_diff_changed"
+msgstr "Modifiche"
+
+#. Default: "(-) Deleted"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:9
+msgid "label_diff_deleted"
+msgstr "(-) Cancellazioni"
+
+#. Default: "Legend"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:7
+msgid "label_diff_legend"
+msgstr "Legenda"
+
+#. Default: "Tag Added"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:11
+msgid "label_diff_tag_added"
+msgstr "Parti aggiunte"
+
+#. Default: "Tag Deleted"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:12
+msgid "label_diff_tag_deleted"
+msgstr "Parti rimosse"
+
+#. Default: "Versioning Enabled?"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:67
+msgid "label_enable_versioning"
+msgstr "Attivare il versionamento?"
+
+#. Default: "File type"
+#: CMFEditions/skins/cmfeditions_views/version_file_view.pt:45
+msgid "label_file_type"
+msgstr "Tipo di file"
+
+#. Default: "${version} (${date})"
+#: CMFEditions/browser/diff.pt:68
+msgid "label_history_version"
+msgstr "${version} (${date})"
+
+#. Default: "Item Type"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:66
+msgid "label_item_type"
+msgstr "Tipo di elemento"
+
+#. Default: "modifications from revision ${version_id}"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:69
+msgid "label_modifications_from_revision"
+msgstr "modifiche dalla versione ${version_id}"
+
+#. Default: "New version"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:173
+msgid "label_newversion"
+msgstr "Nuova versione"
+
+#. Default: "No changes"
+#: CMFEditions/skins/CMFEditions/version_diff.pt:36
+msgid "label_no_changes"
+msgstr "Nessuna modifica"
+
+#. Default: "Preview of Revision ${version_id}"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:201
+msgid "label_preview_version"
+msgstr "Anteprima della versione ${version_id}"
+
+#. Default: "(jump down)"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:112
+msgid "label_preview_version_below"
+msgstr "(vai a)"
+
+#. Default: "(preview)"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:107
+msgid "label_preview_version_link"
+msgstr "(anteprima)"
+
+#. Default: "(previously reverted)"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:71
+msgid "label_previously_reverted"
+msgstr "(precedentemente ripristinato)"
+
+#. Default: "Revert to this revision"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:153
+msgid "label_revert"
+msgstr "Ripristina a questa versione"
+
+#. Default: "Save as new version"
+#: CMFEditions/browser/edit.pt:46
+msgid "label_save_new_version"
+msgstr "Salva come nuova versione"
+
+#. Default: "Show code differences"
+#: CMFEditions/skins/CMFEditions/version_diff.pt:48
+msgid "label_show_code_differences"
+msgstr "Mostra le differenze del codice"
+
+#. Default: "show revisions"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:32
+msgid "label_show_version"
+msgstr "Mostra versioni"
+
+#. Default: "Show visual differences"
+#: CMFEditions/skins/CMFEditions/version_diff.pt:59
+msgid "label_show_visual_differences"
+msgstr "Mostra le differenze in maniera visiva"
+
+#. Default: "Versioning Settings"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:29
+msgid "label_title_vers_config"
+msgstr "Impostazioni del versionamento"
+
+#. Default: "Update"
+#: CMFEditions/browser/diff.pt:84
+msgid "label_update"
+msgstr "Aggiorna"
+
+#. Default: "Change note"
+#: CMFEditions/browser/edit.pt:61
+msgid "label_version_comment"
+msgstr "Commento alle modifiche"
+
+#. Default: "Versionable content types"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:43
+msgid "label_versionable_content_types"
+msgstr "Tipi di contenuto versionabili"
+
+#. Default: "Show all types"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:48
+msgid "label_versioning_config_show_all"
+msgstr "Mostra tutti i tipi di contenuto"
+
+#. Default: "Show only searchable types"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:52
+msgid "label_versioning_config_show_friendly"
+msgstr "Mostra solo i tipi di contenuto ricercabili"
+
+#. Default: "Policies"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:68
+msgid "label_versioning_policies"
+msgstr "Criteri"
+
+#. Default: "Recent Versions"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:10
+msgid "label_versions"
+msgstr "Versioni recenti"
+
+#. Default: "Revisions"
+#: CMFEditions/browser/diff.pt:61
+msgid "legend_revisions"
+msgstr "Revisioni"
+
+#. Default: "Actions"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:46
+msgid "listingheader_actions"
+msgstr "Azioni"
+
+#. Default: "Comment"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:21
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:44
+msgid "listingheader_comment"
+msgstr "Commento"
+
+#. Default: "Date and Time"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:20
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:42
+msgid "listingheader_date_and_time"
+msgstr "Data e ora"
+
+#. Default: "Revision"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:18
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:38
+msgid "listingheader_key"
+msgstr "Versione"
+
+#. Default: "Performed by"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:19
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:40
+msgid "listingheader_performed_by"
+msgstr "Effettuato da"
+
+#. Default: "(No file has been uploaded yet)"
+#: CMFEditions/skins/cmfeditions_views/version_file_view.pt:29
+msgid "no_file_uploaded"
+msgstr "(Non è ancora stato caricato nessun file)"
+
+#. Default: "This object has no revision information."
+#: CMFEditions/browser/diff.pt:51
+msgid "no_history"
+msgstr "Questo oggetto non ha informazioni sulle versioni."
+
+#. Default: "Versions History"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:13
+msgid "summary_versions_history"
+msgstr "Storia delle versioni"
+
+#. Default: "Changes from revision ${id2} to revision ${id1}"
+#: CMFEditions/skins/CMFEditions/version_diff.pt:32
+msgid "title_changes_between_revs"
+msgstr "Differenze tra la versione ${id2} e la versione ${id1}"
+
+#. Default: "Changes since revision ${id2}"
+#: CMFEditions/skins/CMFEditions/version_diff.pt:30
+msgid "title_changes_since_rev"
+msgstr "Modifiche fatte a partire dalla versione ${id2}"
+
+#: CMFEditions/browser/diff.py:37
+msgid "version ${version}"
+msgstr "versione ${version}"
+
+#. Default: "Revisions of \"${title}\""
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:24
+msgid "versions_of_title"
+msgstr "Versioni di \"${title}\""
+

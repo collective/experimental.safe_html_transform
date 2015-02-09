@@ -1,0 +1,18 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+    <adapter factory=".policy.RedirectionPolicy" />
+
+    <!-- Register a page the UI -->
+    <browser:page
+        name="plone_redirector_view"
+        for="*"
+        class=".browser.FourOhFourView"
+        permission="zope2.View"
+        allowed_interface=".interfaces.IFourOhFourView"
+        />
+
+    <include package="." file="events.zcml" />
+
+</configure>

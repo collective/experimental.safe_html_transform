@@ -1,0 +1,82 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:zcml="http://namespaces.zope.org/zcml">
+
+  <include package=".widgets" />
+
+  <adapter
+      for="Products.Five.BrowserView"
+      factory="plone.app.form.default_named_template_adapter"
+      name="default"
+      provides="zope.formlib.namedtemplate.INamedTemplate"
+      />
+  
+  <adapter
+      for=".interfaces.IPloneSubPageForm"
+      factory="plone.app.form.default_subpage_template"
+      name="default"
+      provides="zope.formlib.namedtemplate.INamedTemplate"
+      />
+      
+  <adapter
+      for="zope.formlib.interfaces.IAddFormCustomization"
+      factory="plone.app.form.adding_named_template_adapter"
+      name="default"
+      provides="zope.formlib.namedtemplate.INamedTemplate"
+      />
+
+  <browser:page
+      for="*"
+      permission="zope2.Public"
+      name="base-pageform.html"
+      template="pageform.pt"
+      />
+
+  <browser:page
+      for="*"
+      permission="zope2.Public"
+      name="base-subpageform.html"
+      template="subpageform.pt"
+      />
+      
+  <!-- Let Five's add views look pretty in CMF/Plone -->
+  <configure package="Products.CMFDefault.skin">
+      
+      <browser:page
+        name="five_template"
+        for="zope.browser.interfaces.IAdding"
+        template="five_template.pt"
+        permission="zope2.View"
+        />
+      
+  </configure>
+  
+  <!-- Support locking on content that is marked to support it and
+   which uses plone.app.form.base.EditForm
+   -->
+    
+    <subscriber 
+        zcml:condition="installed plone.locking"
+        for="plone.locking.interfaces.ITTWLockable
+             .interfaces.IEditBegunEvent"
+        handler="plone.locking.events.lockOnEditBegins" 
+        />
+    
+    <subscriber 
+        zcml:condition="installed plone.locking"
+        for="plone.locking.interfaces.ITTWLockable
+             .interfaces.IEditFinishedEvent"
+        handler="plone.locking.events.unlockAfterModification"
+        />
+
+  <!-- Inline validation -->
+  <browser:page
+      name="formlib_validate_field"
+      for="*"
+      class=".inline_validation.InlineValidationView"
+      permission="zope2.View"
+      />
+
+</configure>

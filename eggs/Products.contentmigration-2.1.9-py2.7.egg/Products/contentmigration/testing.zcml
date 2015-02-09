@@ -1,0 +1,14 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="Products.contentmigration">
+
+  <genericsetup:registerProfile
+     name="testing"
+     title="Contentmigration testing"
+     directory="profiles/testing"
+     description="Testing setup for contentmigration"
+     for="Products.CMFPlone.interfaces.ITestCasePloneSiteRoot"
+     provides="Products.GenericSetup.interfaces.EXTENSION" />
+
+</configure>

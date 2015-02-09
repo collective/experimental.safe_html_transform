@@ -1,0 +1,76 @@
+<div tal:replace="structure here/manage_page_header"/>
+<div tal:replace="structure here/manage_tabs"/>
+
+    <form action="manage_setLanguageSettings" tal:attributes="action python:here.absolute_url()+'/manage_setLanguageSettings'" method="POST">
+
+        <h2>Default language</h2>
+        <p>If content requested is not available in the language
+           the user preferred, content will be presented in the fallback language</p>
+        <p>
+            <select name="defaultLanguage">
+                <option value="en"
+                        tal:repeat="lang here/listSupportedLanguages"
+                        tal:attributes="value python:lang[0];
+                                        selected python:lang[0]==here.getDefaultLanguage()"
+                        tal:content="python: lang[1]">
+                    English
+                </option>
+            </select>
+       </p>
+
+        <h2>Allowed languages</h2>
+        <p><i>Use the ctlr/alt/option key to select / deselect single items</i><br />
+            <select name="supportedLanguages:list" size="10" multiple="multiple">
+                <option value="en"
+                        tal:repeat="lang here/listAvailableLanguages"
+                        tal:attributes="value python: lang[0];
+                                        selected python:lang[0] in here.getSupportedLanguages()"
+                        tal:content="python: lang[1]+'  ('+lang[0]+')'">
+                    English
+                </option>
+            </select>
+        </p>
+
+        <p><input type="checkbox"
+                  name="setUseCombinedLanguageCodes"
+                  value="1"
+                  tal:attributes="checked here/use_combined_language_codes | nothing"
+                  />
+            Allow combined language codes like de_DE or en_UK.
+        </p>
+
+        <p><input type="checkbox"
+                  name="displayFlags"
+                  value="1"
+                  tal:attributes="checked here/display_flags | nothing"
+                  />
+            Display flags for language selection. </p>
+
+        <h2>Negotiation Scheme</h2>
+        <p>Check the language negotiation schemes that apply to this site</p>
+        <ol>
+            <li><p><input type="checkbox" name="setContentN" value="1" tal:attributes="checked here/use_content_negotiation | nothing" /> Use the language of the content item.</p></li>
+            <li><p><input type="checkbox" name="setPathN" value="1" tal:attributes="checked here/use_path_negotiation| nothing" /> Use language codes in URL path for manual override.</p></li>
+            <li><p><input type="checkbox" name="setCookieN" value="1" tal:attributes="checked here/use_cookie_negotiation| nothing" /> Use cookie for manual override. (Required for the language selector viewlet to be rendered.)</p>
+              <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" name="setAuthOnlyN" value="1" tal:attributes="checked here/authenticated_users_only| nothing" /> Authenticated users only.</p>
+            </li>
+            <li><p><input type="checkbox" name="setCookieEverywhere" value="1" tal:attributes="checked here/set_cookie_everywhere| nothing" /> Set the language cookie always, i.e. also when the 'set_language' request parameter is absent.</p>
+            </li>
+            <li><p><input type="checkbox" name="setSubdomainN" value="1" tal:attributes="checked here/use_subdomain_negotiation| nothing" /> Use subdomain (e.g.: <i>de</i>.plone.org).</p></li>
+            <li><p><input type="checkbox" name="setCcTLDN" value="1" tal:attributes="checked here/use_cctld_negotiation| nothing" /> Use top-level domain (e.g.: www.plone.<i>de</i>).</p></li>
+            <li><p><input type="checkbox" name="setRequestN" value="1" tal:attributes="checked here/use_request_negotiation | nothing" /> Use browser language request negotiation.</p></li>
+            <li><p>Default fallback (always enabled). This is the language specified as default above.</p></li>
+        </ol>
+
+        <h2>Content Control Settings</h2>
+        <p>Check the settings that apply to multilingual content</p>
+        <ol>
+            <li><p><input type="checkbox" name="setForcelanguageUrls" value="1" tal:attributes="checked here/force_language_urls| nothing" /> Force different URLs for each language (redirect).</p></li>
+            <li><p><input type="checkbox" name="setAllowContentLanguageFallback" value="1" tal:attributes="checked here/allow_content_language_fallback| nothing" /> Allow content language fallback.</p></li>
+            <li><p><input type="checkbox" name="startNeutral" value="1" tal:attributes="checked here/start_neutral | nothing" /> Create content initially as neutral language.</p></li>
+        </ol>
+
+        <input type="submit" i18n:attributes="value" value="Save" />
+    </form>
+
+<div tal:replace="structure here/manage_page_footer"/>

@@ -1,0 +1,17 @@
+Metadata-Version: 1.1
+Name: roman
+Version: 1.4.0
+Summary: Integer to Roman numerals converter
+Home-page: http://pypi.python.org/pypi/roman
+Author: Mark Pilgrim
+Author-email: f8dy@diveintopython.org
+License: Python 2.1.1
+Description: UNKNOWN
+Keywords: roman
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Python Software Foundation License
+Classifier: Programming Language :: Python
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent

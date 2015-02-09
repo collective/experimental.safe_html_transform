@@ -1,0 +1,21 @@
+<configure 
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directives namespace="http://namespaces.zope.org/cache">
+    
+    <meta:directive
+        name="rulesetType"
+        schema=".interfaces.IRulesetType"
+        handler=".zcml.rulesetType"
+        />
+    
+    <meta:directive
+        name="ruleset"
+        schema=".zcml.IRuleset"
+        handler=".zcml.ruleset"
+        />
+
+  </meta:directives>
+
+</configure>

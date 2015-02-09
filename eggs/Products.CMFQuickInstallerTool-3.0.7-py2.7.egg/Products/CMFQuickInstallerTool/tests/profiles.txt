@@ -1,0 +1,73 @@
+Tests for QuickInstaller profile management
+===========================================
+
+We want to ensure that the quickinstaller only lists products for installation
+if their extension profiles are either:
+
+* Configured without a ``for`` attribute
+* Configured with a ``for`` attribute that is the interface
+  ``Products.CMFCore.interfaces.ISiteRoot``, or a sub-interface
+
+This allows us to hide extension profiles not intended for site configuration.
+
+First we set three convenience variables for later use:
+
+  >>> from zope.component import getSiteManager
+  >>> from Products.CMFQuickInstallerTool.interfaces import IQuickInstallerTool
+
+  >>> portal = layer['portal']
+  >>> portal
+  <PloneSite at /plone>
+
+  >>> qi = getattr(portal, 'portal_quickinstaller', None)
+  >>> qi
+  <QuickInstallerTool at /plone/portal_quickinstaller>
+
+  >>> actions_tool = portal.portal_actions
+  >>> actions_tool
+  <ActionsTool at /plone/portal_actions>
+
+And register the QI tool as a utility:
+
+  >>> sm = getSiteManager()
+  >>> sm.registerUtility(qi, IQuickInstallerTool)
+
+We will then install some dummy profiles:
+
+  >>> from zope.interface import Interface
+  >>> from Products.CMFCore.interfaces import ISiteRoot
+  >>> class IMarker(Interface):
+  ...     pass
+
+  >>> from Products.GenericSetup import EXTENSION, profile_registry
+  >>> profile_registry.registerProfile('profile1',
+  ...   'Profile for any context',
+  ...   'Should be included',
+  ...   'profiles/default',
+  ...   'Products.Product1',
+  ...   EXTENSION,
+  ...   for_=None)
+
+  >>> profile_registry.registerProfile('profile2',
+  ...   'Profile for ISiteRoot',
+  ...   'Should be included',
+  ...   'profiles/default',
+  ...   'Products.Product2',
+  ...   EXTENSION,
+  ...   for_=ISiteRoot)
+
+  >>> profile_registry.registerProfile('profile3',
+  ...   'Profile for an interface extending IMarker',
+  ...   'Should be excluded',
+  ...   'profiles/default',
+  ...   'Products.Product3',
+  ...   EXTENSION,
+  ...   for_=IMarker)
+
+We now expect to see Products.Product1 and Products.Product2 in the list of
+installable products, but not Products.Product3.
+
+  >>> installable = [x['id'] for x in qi.listInstallableProducts()]
+  >>> self.failUnless('Products.Product1' in installable)
+  >>> self.failUnless('Products.Product2' in installable)
+  >>> self.failIf('Products.Product3' in installable)

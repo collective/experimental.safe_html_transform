@@ -1,0 +1,34 @@
+<configure
+  xmlns="http://namespaces.zope.org/zope"
+  xmlns:zcml="http://namespaces.zope.org/zcml">
+
+  <subscriber
+    for="zope.intid.interfaces.IIntIdAddedEvent"
+    handler=".event.addRelationsEventOnly"
+    />
+
+  <subscriber
+    for="z3c.relationfield.interfaces.IHasOutgoingRelations
+         zope.app.container.interfaces.IObjectRemovedEvent"
+    handler=".event.removeRelations"
+    />
+
+  <subscriber
+    for="z3c.relationfield.interfaces.IHasOutgoingRelations
+         zope.lifecycleevent.IObjectModifiedEvent"
+    handler=".event.updateRelations"
+    />
+
+  <subscriber
+    for="zope.intid.interfaces.IIntIdRemovedEvent"
+    handler=".event.breakRelations"
+    />
+
+  <configure zcml:condition="installed z3c.schema2xml">
+
+    <adapter factory=".xml.RelationListGenerator" />
+    <adapter factory=".xml.RelationGenerator" />
+
+  </configure>
+
+</configure>

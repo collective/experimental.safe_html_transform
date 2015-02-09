@@ -1,0 +1,28 @@
+TTW Template Tests
+------------------
+
+First we create a simple TTWViewTemplate object and then we obtain a
+renderer by calling as if it were a view factory:
+
+    >>> from five.customerize.zpt import TTWViewTemplate
+    >>> template = TTWViewTemplate('test_template', '<html></html>')
+    >>> template = template.__of__(app)
+    >>> renderer = template(self.folder, None)
+    >>> print renderer()
+    <html></html>
+
+We now add some more complex TAL expressions to our template, and
+ensure that it obtains the passed in request and context for rendering:
+
+    >>> template.pt_edit('''\
+    ... <span tal:replace="context/getId"/>
+    ... <span tal:replace="request/foo"/>
+    ... <span tal:replace="python:repr(view)"/>''', 'text/html')
+
+    >>> from zope.publisher.browser import TestRequest
+    >>> request = TestRequest(environ={'foo': 'bar'})
+    >>> renderer = template(self.folder, request)
+    >>> print renderer()
+    test_folder_1_
+    bar
+    None

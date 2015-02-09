@@ -1,0 +1,22 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+	   xmlns:five="http://namespaces.zope.org/five">
+
+  <!-- example of how to hook up txtfilter system for wicked
+       providers -->
+
+  <subscriber
+     handler="wicked.fieldevent.txtfilter.txtfilter_output"
+     for="wicked.interfaces.IAmWickedField
+	  wicked.interfaces.IAmWicked
+	  wicked.fieldevent.IFieldRenderEvent"
+     / -->
+
+  <!-- registers wicked as a subscriber for filtering -->
+  <subscriber
+     provides="wicked.fieldevent.interfaces.ITxtFilter"
+     factory="wicked.txtfilter.WickedFilter"
+     />
+
+  <adapter factory=".txtfilter.filter_list"/>
+
+</configure>

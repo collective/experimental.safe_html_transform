@@ -1,0 +1,368 @@
+Metadata-Version: 1.1
+Name: z3c.caching
+Version: 2.0a1
+Summary: Caching infrastructure for web apps
+Home-page: UNKNOWN
+Author: Wichert Akkerman
+Author-email: zope-dev@zope.org
+License: ZPL
+Description: Introduction
+        ============
+        
+        Caching of web pages is a complicated process: there are many possible
+        policies to choose from, and the right policy can depend on factors such as
+        who is making the request, the URL is being retrieved and resource
+        negotiation settings such as accepted languages and encodings,
+        
+        Hardcoding caching logic in an application is not desirable, especially for
+        reusable code. It is also not possible to allow an administrator to manually
+        configure the caching headers for every resource in an application. This
+        packages tries to address this problem by providing a cache ruleset
+        framework: it allows implementors to specify a ruleset for every component.
+        Administrators can then define a policy which dictates the correct caching
+        behaviour for each ruleset.
+        
+        Depending on your environment there are different options for turning
+        the ruleset into HTTP caching headers.
+        
+        * If you are using Plone_ 3 and CacheFu_ you can use `five.caching`_ to
+          integrate with CacheSetup.
+        * If you are using Zope 2.12 or later, you can use `plone.caching`_ to
+          integrate with the publisher events and `plone.cachepurging`_ if you require
+          support for ``PURGE`` requests.
+        * If you are using Plone 4, you can also use `plone.app.caching`_, which
+          provides UI and default behaviour for `plone.caching`_ and
+          `plone.cachepurging`_.
+        * In a WSGI environment you could set the ruleset in `environ` or a response
+          header and add a piece of middleware which acts on those hints.
+        
+        Usage
+        =====
+        
+        You can register rulesets using either ZCML or directly in python. If you
+        use ZCML you can use the ``<cache:ruleset />`` directive::
+        
+          <configure
+              xmlns="http://namespaces.zope.org/zope"
+              xmlns:browser="http://namespaces.zope.org/browser"
+              xmlns:cache="http://namespaces.zope.org/cache"/>
+            
+            <include package="z3c.caching" file="meta.zcml" />
+            
+            <cache:rulesetType
+                name="plone.contentTypes"
+                title="Plone content types"
+                description="Non-folderish content types"
+                />
+            
+            <cache:ruleset
+                for=".frontpage.FrontpageView"
+                ruleset="plone.contentTypes"
+                />
+        
+            <browser:page
+                for="..interfaces.IFrontpage"
+                class=".frontpage.FrontpageView"
+                name="frontpage_view"
+                template="templates/frontpage_view.pt"
+                permission="zope2.View" />
+        
+          </configure>
+        
+        This example sets up a browser view called ``frontpage_view`` and
+        associates it with the ``plone.contentTypes`` ruleset.
+        
+        **NOTE:** Ruleset names should be *dotted names*. That is, they should consist
+        only of upper or lowercase letters, digits, underscores and/or periods (dots).
+        The idea is that this forms a namespace similar to namespaces created by
+        packages and modules in Python.
+        
+        You can specify either a class or an interface in the ``for`` attribute. As
+        with an adapter registration, a more specific registration can be used to
+        override a more generic one.
+        
+        Above, we also add some metadata about the type of ruleset using the
+        ``<cache:rulesetType />`` directive. This is principally useful for UI support
+        and can be often be skipped.
+        
+        If you prefer to use python directly you can do so::
+        
+           from z3c.caching.registry import register
+           from frontpage import FrontpageView
+        
+           register(FrontpageView, "plone.contentTypes")
+        
+        To find the ruleset for an object use the ``lookup()`` method::
+        
+           from z3c.caching.registry import lookup
+           cacheRule = lookup(FrontpageView)
+        
+        To declare the ruleset type metadata, use the ``declareType`` method::
+        
+           from z3c.caching.registry import declareType
+           declareType = declareType(name="plone.contentTypes", \
+                                     title=u"Plone content types", \
+                                     description=u"Non-folderish content types")
+        
+        If you want to get a list of all declared types, use the ``enumerateTypes()``
+        method::
+        
+            from z3c.caching.registry import enumerate
+            for type_ in enumerateTypes():
+                ...
+        
+        The ``type_`` object provides ``IRulesetType`` and has attributes for
+        ``name``, ``title`` and ``description``.
+        
+        Strict mode
+        -----------
+        
+        By default, you are not required to declare the type of a ruleset before using
+        it. This is convenient, but increases the risk of typos or a proliferation of
+        rulesets that are semantically equivalent. If you want to guard against this
+        case, you can put the ruleset into explicit mode, like this::
+        
+            from z3c.caching.registry import setExplicitMode
+            setExplicitMode(True)
+        
+        Information about cacheable resources
+        =====================================
+        
+        This package is intentionally simple, and depends only on a small set of core
+        Zope Toolkit packages. However, real-world caching often requires specific
+        information about published (and potentially cacheable) resources, such as
+        when the underlying resource was last modified, and which URLs to purge if
+        the caching proxy needs to be purged.
+        
+        ``z3c.caching`` aims to be a "safe" and minimalist dependency for packages
+        which want to declare how they can be cached. Hence, whilst the implementation
+        of such things as setting cache control response headers and supporting
+        purging of a caching reverse proxy are left up to other packages,
+        ``z3c.caching`` provides a few interfaces which "caching-aware" packages can
+        implement, for higher level frameworks (such as `plone.caching`_ and
+        `plone.cachepurging`_) to rely on. This avoids a direct dependency between
+        such packages and those higher level frameworks.
+        
+        These interfaces are described below. A few helper components are also
+        provided. To configure them, you can include ``z3c.caching``'s ZCML
+        configuration::
+        
+            <include package="z3c.caching" />
+        
+        Last modified date/time
+        -----------------------
+        
+        The ``ILastModified`` adapter interface can be used to describe the last
+        modified date of a given published object::
+        
+            class ILastModified(Interface):
+                """An abstraction to help obtain a last-modified date for a published
+                resource.
+            
+                Should be registered as an unnamed adapter from a published object
+                (e.g. a view).
+                """
+            
+                def __call__():
+                    """Return the last-modified date, as a Python datetime object.
+                    
+                    The datetime returned must be timezone aware and should normally
+                    be in the local timezone.
+                
+                    May return None if the last modified date cannot be determined.
+                    """
+        
+        One implementation for this interface is provided by default: When looked up
+        for a Zope browser view, it will delegate to an ``ILastModified`` adapter on
+        the view's context. Higher level packages may choose to implement this adapter
+        for other types of publishable resources, and/or different types of view
+        context.
+        
+        Cache purging
+        -------------
+        
+        High-traffic sites often put a caching proxy such as `Squid`_ or `Varnish`_
+        in front of the web application server to offload the caching of resources.
+        Such proxies can be controlled via response headers (perhaps set via caching
+        operations looked up based on ``z3c.caching`` rulesets). Most caching proxies
+        also support so-called ``PURGE`` requests, where the web application sends a
+        request directly to the caching proxy asking it to purge (presumably old)
+        copies it may hold of a resource (e.g. because that resource has changed).
+        
+        This package does not implement any communication with caching proxies. If
+        you need that in a Zope 2 context, consider `plone.cachepurging`_. However,
+        a few components are included to help packages declare their behaviour in
+        relation to a caching proxy that supports purging.
+        
+        Firstly, ``z3.caching`` defines a ``Purge`` event, described the interface
+        ``z3c.caching.interfaces.IPurgeEvent``::
+        
+            class IPurgeEvent(IObjectEvent):
+                """Event which can be fired to purge a particular object.
+            
+                This event is not fired anywhere in this package. Instead, higher level
+                frameworks are expected to fire this event when an object may need to be
+                purged.
+            
+                It is safe to fire the event multiple times for the same object. A given
+                object will only be purged once.
+                """
+        
+        If an object has been changed so that it may need to be purged, you can fire
+        the event, like so::
+        
+            from z3c.caching.purge import Purge
+            from zope.event import notify
+            
+            notify(Purge(context))
+        
+        A higher level framework such as `plone.cachepurging`_ can listen to this
+        event to queue purge requests for the object.
+        
+        Of course, the most common reason to purge an object's cached representations
+        is that it has been modified or removed. ``z3c.caching`` provides event
+        handlers for the standard ``IObjectModifiedEvent``, ``IObjectMovedEvent`` and
+        ``IObjectRemovedEvent`` events, which re-broadcasts a ``Purge`` event for
+        the modified/moved/removed object.
+        
+        To opt into these event handlers, simply mark your content object with the
+        ``IPurgeable`` interface, e.g.::
+        
+            from z3c.caching.interfaces import IPurgeable
+            
+            class MyContent(Persistent):
+                implements(IPurgeable)
+                
+                ...
+        
+        You can also do this declaratively in ZCML, even for classes not under your
+        control::
+        
+            <class class=".content.MyContent">
+                <implements interface="z3c.caching.interfaces.IPurgeable" />
+            </class>
+        
+        These helpers can signal to a framework like `plone.cachepurging`_ that the
+        object needs to be purged, but this is not enough to know how to construct
+        the ``PURGE`` request. The caching proxy also needs to be told which path or
+        paths to purge. This is the job of the ``IPurgePaths`` adapter interface::
+        
+            class IPurgePaths(Interface):
+                """Return paths to send as PURGE requests for a given object.
+            
+                The purging hook will look up named adapters from the objects sent to
+                the purge queue (usually by an IPurgeEvent being fired) to this interface.
+                The name is not significant, but is used to allow multiple implementations
+                whilst still permitting per-type overrides. The names should therefore
+                normally be unique, prefixed with the dotted name of the package to which
+                they belong.
+                """
+            
+                def getRelativePaths():
+                    """Return a list of paths that should be purged. The paths should be
+                    relative to the virtual hosting root, i.e. they should start with a
+                    '/'.
+                
+                    These paths will be rewritten to incorporate virtual hosting if
+                    necessary.
+                    """
+                
+                def getAbsolutePaths():
+                    """Return a list of paths that should be purged. The paths should be
+                    relative to the  domain root, i.e. they should start with a '/'.
+                
+                    These paths will *not* be rewritten to incorporate virtual hosting.
+                    """
+        
+        The difference between the "relative" and "absolute" paths only comes into
+        effect if virtual hosting is used. In most cases, you want to implement
+        ``getRelativePaths()`` to return a path that is relative to the current
+        virtual hosting root. In Zope 2, you can get this via the
+        ``absolute_url_path()`` function on any traversable item. Alternatively,
+        you can look up an ``IAbsoluteURL`` adapter and discard the domain portion.
+        
+        ``getAbsolutePaths()`` is mainly useful for paths that are "special" to the
+        caching proxy. For example, you could configure Varnish to purge the entire
+        cache when sending a request to ``/_purge_all``, and then implement
+        ``getAbsolutePaths()`` to return an iterable with that string in it.
+        
+        Here is the default implementation from `plone.cachepurging`_, which purges
+        the default path of an object derived from Zope 2's ``OFS.Traversable``::
+        
+            class TraversablePurgePaths(object):
+                """Default purge for OFS.Traversable-style objects
+                """
+            
+                implements(IPurgePaths)
+                adapts(ITraversable)
+            
+                def __init__(self, context):
+                    self.context = context
+                
+                def getRelativePaths(self):
+                    return [self.context.absolute_url_path()]
+            
+                def getAbsolutePaths(self):
+                    return []    
+        
+        In ZCML, this is registered as::
+        
+            <adapter factory=".paths.TraversablePurgePaths" name="default" />
+        
+        The Plone-specific `plone.app.caching` implements further adapters (with 
+        other, unique names) for things like the default view method alias (``/view``)
+        and downloadable paths for Archetypes image and file fields.
+        
+        .. _Plone: http://plone.org/
+        .. _CacheFu: http://plone.org/products/cachefu
+        .. _five.caching: http://pypi.python.org/pypi/five.caching
+        .. _plone.caching: http://pypi.python.org/pypi/plone.caching
+        .. _plone.cachepurging: http://pypi.python.org/pypi/plone.cachepurging
+        .. _plone.app.caching: http://pypi.python.org/pypi/plone.app.caching
+        .. _Squid: http://squid-cache.org
+        .. _Varnish: http://varnish-cache.org
+        
+        Changelog
+        =========
+        
+        2.0a1 - April 22, 2010
+        ----------------------
+        
+        * Added `Purge`` event and ``IPurgeable` and ``IPurgePaths`` interfaces.
+          Although this package doesn't provide any purging support, it is convenient
+          to keep the interfaces necessary for other packages to describe their cache
+          purging behaviour here. This allows a relatively harmless dependency on
+          z3c.caching, even in generic code, as distinct from a higher-level,
+          application server specific framework.
+          [optilude]
+        
+        * Added concept of an explicitly declare ruleset type. Optional by default,
+          but can be made required by setting `explicit` to `True`.
+          [optilude]
+        
+        * Added ``ILastModified`` implementation for a view which delegates to the
+          view's context.
+          [optilude]
+        
+        * Added ``enumerateTypes()`` method to the registry, used to list all currently
+          used cache rule ids.
+          [optilude]
+        
+        * Made the registry use the ZCA more directly.
+          [matthewwilkes]
+        
+        1.0b1 - October 15, 2008
+        ------------------------
+        
+        * Initial release
+          [wichert]
+        
+        
+        
+Keywords: zope caching
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

@@ -1,0 +1,11 @@
+setuptools
+plone.batching
+z3c.form
+zope.i18n>=3.4
+zope.browserpage
+zope.component
+Zope2
+
+[test]
+lxml
+plone.testing

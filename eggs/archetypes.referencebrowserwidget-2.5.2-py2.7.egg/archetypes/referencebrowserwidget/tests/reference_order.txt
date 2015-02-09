@@ -1,0 +1,68 @@
+This test demonstrates, that the reference widget keep order when changed
+The setup consists of a source (context) and two documents (targets):
+
+  >>> self.setRoles(['Manager'])
+  >>> from Products.Archetypes.tests.utils import makeContent
+  >>> context = makeContent(self.folder, portal_type='RefBrowserDemo', id='ref')
+  >>> doc1 = makeContent(self.folder, portal_type='Document', id='doc1')
+  >>> doc2 = makeContent(self.folder, portal_type='Document', id='doc2')
+
+We want to test for doc1 and doc2 in the browser output later, so we turn off
+both portlet columns, since they will contain references to both at all times
+(i.e. the navigation portlet, recent items etc.)
+
+  >>> from zope.component import getMultiAdapter, getUtility
+  >>> from plone.portlets.interfaces import IPortletManager
+  >>> from plone.portlets.interfaces import IPortletAssignmentMapping
+
+  >>> left_column = getUtility(IPortletManager, name=u"plone.leftcolumn")
+  >>> left_assignable = getMultiAdapter((self.portal, left_column), IPortletAssignmentMapping)
+  >>> for name in left_assignable.keys():
+  ...     del left_assignable[name]
+
+  >>> right_column = getUtility(IPortletManager, name=u"plone.rightcolumn")
+  >>> right_assignable = getMultiAdapter((self.portal, right_column), IPortletAssignmentMapping)
+  >>> for name in right_assignable.keys():
+  ...     del right_assignable[name]
+
+  >>> DOC1LABEL = ">plone/Members/test_user_1_/doc1<"
+  >>> DOC2LABEL = ">plone/Members/test_user_1_/doc2<"
+
+  >>> context.setMultiRef((doc1.UID(), doc2.UID()))
+  >>> context.reindexObject()
+
+For now, doc1 appears before doc2 (order is kept) on the edit form:
+  >>> try:
+  ...     from Testing.testbrowser import Browser
+  ... except ImportError:
+  ...     from Products.Five.testbrowser import Browser
+  >>> browser = Browser()
+  >>> browser.addHeader('Authorization', 'Basic %s:%s' % ('test_user_1_', 'secret'))
+  >>> browser.open(context.absolute_url() + "/edit")
+  >>> browser.url
+  'http://nohost/plone/Members/test_user_1_/ref/edit'
+
+  >>> browser.getControl(name="multiRef:list").value == [doc1.UID(), doc2.UID()]
+  True
+
+And on the view :
+  >>> browser.open(context.absolute_url())
+  >>> browser.url
+  'http://nohost/plone/Members/test_user_1_/ref'
+  >>> browser.contents.find(DOC1LABEL) < browser.contents.find(DOC2LABEL)
+  True
+
+Change order and re-edit :
+  >>> context.setMultiRef((doc2.UID(), doc1.UID()))
+  >>> context.reindexObject()
+  >>> browser.open(context.absolute_url() + "/edit")
+  >>> browser.getControl(name="multiRef:list").value == [doc2.UID(), doc1.UID()]
+  True
+
+Now doc2 appears before doc1 (order is kept) :
+
+  >>> browser.open(context.absolute_url())
+  >>> browser.url
+  'http://nohost/plone/Members/test_user_1_/ref'
+  >>> browser.contents.find(DOC1LABEL) > browser.contents.find(DOC2LABEL)
+  True

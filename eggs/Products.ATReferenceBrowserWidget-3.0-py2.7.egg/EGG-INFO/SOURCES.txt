@@ -1,0 +1,17 @@
+README.txt
+setup.cfg
+setup.py
+Products/__init__.py
+Products.ATReferenceBrowserWidget.egg-info/PKG-INFO
+Products.ATReferenceBrowserWidget.egg-info/SOURCES.txt
+Products.ATReferenceBrowserWidget.egg-info/dependency_links.txt
+Products.ATReferenceBrowserWidget.egg-info/namespace_packages.txt
+Products.ATReferenceBrowserWidget.egg-info/not-zip-safe
+Products.ATReferenceBrowserWidget.egg-info/requires.txt
+Products.ATReferenceBrowserWidget.egg-info/top_level.txt
+Products/ATReferenceBrowserWidget/ATRefBrowserDemo.py
+Products/ATReferenceBrowserWidget/ATReferenceBrowserWidget.py
+Products/ATReferenceBrowserWidget/HISTORY.txt
+Products/ATReferenceBrowserWidget/__init__.py
+Products/ATReferenceBrowserWidget/configure.zcml
+docs/LICENSE.txt

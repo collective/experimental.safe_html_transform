@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<contentrules>
+
+    <rule
+        name="test1"
+        title="Test rule 1"
+        description="A test rule"
+        event="zope.lifecycleevent.interfaces.IObjectModifiedEvent"
+        enabled="True"
+        stop-after="False">
+        <conditions>
+            <condition type="plone.conditions.PortalType">
+                <property name="check_types">
+                    <element>Document</element>
+                    <element>News Item</element>
+                </property>
+            </condition>
+            <condition type="plone.conditions.Role">
+                <property name="role_names">
+                    <element>Manager</element>
+                </property>
+            </condition>
+        </conditions>
+        <actions>
+            <action type="plone.actions.Notify">
+                <property name="message">A message: Hej då</property>
+                <property name="message_type">info</property>
+            </action>
+        </actions>
+    </rule>
+
+    <rule
+        name="test2"
+        title="Test rule 2"
+        description="Another test rule"
+        event="zope.lifecycleevent.interfaces.IObjectModifiedEvent"
+        enabled="False"
+		stop-after="True">
+        <conditions>
+            <condition type="plone.conditions.PortalType">
+                <property name="check_types">
+                    <element>Event</element>
+                </property>
+            </condition>
+        </conditions>
+        <actions>
+            <action type="plone.actions.Workflow">
+                <property name="transition">publish</property>
+            </action>
+        </actions>
+    </rule>
+
+    <rule
+        name="test3"
+        title="Test rule 3"
+        description="Third test rule"
+        event="zope.lifecycleevent.interfaces.IObjectMovedEvent"
+        />
+
+    <rule
+        name="test4"
+        title="Test rule 4"
+        description="We move published events in a folder"
+        event="Products.CMFCore.interfaces.IActionSucceededEvent"
+        enabled="True"
+        stop-after="True">
+        <conditions>
+            <condition type="plone.conditions.PortalType">
+                <property name="check_types">
+                    <element>Event</element>
+                </property>
+            </condition>
+            <condition type="plone.conditions.WorkflowTransition">
+                <property name="wf_transitions">
+                    <element>publish</element>
+                </property>
+            </condition>
+        </conditions>
+        <actions>
+            <action type="plone.actions.Move">
+                <property name="target_folder">/events</property>
+            </action>
+        </actions>
+    </rule>
+
+    <rule
+        name="test5"
+        title="Test rule 5"
+        description="Auto publish events"
+        event="zope.lifecycleevent.interfaces.IObjectAddedEvent"
+        enabled="True"
+        cascading="True" stop-after="False">
+        <conditions>
+            <condition type="plone.conditions.PortalType">
+                <property name="check_types">
+                    <element>Event</element>
+                </property>
+            </condition>
+        </conditions>
+        <actions>
+            <action type="plone.actions.Workflow">
+                <property name="transition">publish</property>
+            </action>
+        </actions>
+    </rule>
+
+    <assignment
+        location="/news"
+        name="test1"
+        enabled="True"
+        bubbles="False"
+        />
+    <assignment
+        location="/news"
+        name="test2"
+        enabled="False"
+        bubbles="True"
+        insert-before="test1"
+        />
+    <assignment
+        location="/news"
+        name="test3"
+        insert-before="*"
+        />
+    <assignment
+        location="/"
+        name="test4"
+        insert-before="*"
+        enabled="False"
+        />
+    <assignment
+        location="/"
+        name="test5"
+        enabled="False"
+        />
+
+</contentrules>

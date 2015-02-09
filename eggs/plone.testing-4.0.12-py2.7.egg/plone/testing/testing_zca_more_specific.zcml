@@ -1,0 +1,5 @@
+<configure package="plone.testing" xmlns="http://namespaces.zope.org/zope">
+    <utility factory=".tests.DummyUtility"
+             provides="zope.interface.Interface"
+             name="more_specific_layer" />
+</configure>

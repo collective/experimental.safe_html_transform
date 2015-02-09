@@ -1,0 +1,10 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="zope"
+    >
+
+  <subscriber handler=".removeIntIdSubscriber" />
+  <subscriber handler=".addIntIdSubscriber" />
+  <subscriber handler=".intIdEventNotify" />
+
+</configure>

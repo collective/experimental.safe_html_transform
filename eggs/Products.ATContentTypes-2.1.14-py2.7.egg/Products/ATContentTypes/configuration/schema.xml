@@ -1,0 +1,37 @@
+<schema prefix="Products.ATContentTypes.configuration.datatype">
+
+  <description format="plain">
+    ATContentTypes configuration schema
+  </description>
+
+  <import package="Products.ATContentTypes.configuration" />
+
+  <section type="mxtidy" name="*" attribute="mxtidy" required="yes"
+   datatype=".mxtidy_handler">
+    <description>
+      mxTidy options
+    </description>
+  </section>
+
+  <section type="feature" name="swallowImageResizeExceptions"
+   attribute="swallowImageResizeExceptions" required="yes" />
+
+  <section type="pil_config" name="*"
+   attribute="pil_config" required="yes" />
+
+  <section type="archetype" name="ATDocument"
+   attribute="ATDocument" required="yes" />
+
+  <section type="archetype" name="ATEvent"
+   attribute="ATEvent" required="yes" />
+
+  <section type="archetype" name="ATNewsItem"
+   attribute="ATNewsItem" required="yes" />
+
+  <section type="archetype" name="ATFile"
+   attribute="ATFile" required="yes" />
+
+  <section type="archetype" name="ATImage"
+  attribute="ATImage" required="yes" />
+
+</schema>

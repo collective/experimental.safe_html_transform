@@ -1,0 +1,17 @@
+#!/bin/sh
+
+if [ $# -ge 1 ]; then
+
+  ${squid-runner:daemon} \
+    -f "${squid-runner:config}" \
+    "$@"
+
+else
+
+  ${squid-runner:daemon} -z \
+    -f "${squid-runner:config}"
+
+  ${squid-runner:daemon} \
+    -f "${squid-runner:config}"
+
+fi

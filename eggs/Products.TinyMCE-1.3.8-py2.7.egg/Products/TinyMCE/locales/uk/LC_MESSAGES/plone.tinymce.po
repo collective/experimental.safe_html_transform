@@ -1,0 +1,838 @@
+# --- PLEASE EDIT THE LINES BELOW CORRECTLY ---
+# SOME DESCRIPTIVE TITLE.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2014-10-29 12:22+0000\n"
+"PO-Revision-Date: 2013-04-25 15:31+0300\n"
+"Last-Translator: Roman Kozlovskyi <krzroman@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language-Code: en\n"
+"Language-Name: English\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: plone.tinymce\n"
+"X-Generator: Poedit 1.5.4\n"
+
+#: TinyMCE/utility.py:743
+msgid "(remove style)"
+msgstr "(видалити стиль)"
+
+#: TinyMCE/utility.py:742
+msgid "Add new File"
+msgstr "Додати новий файл"
+
+#: TinyMCE/utility.py:741
+msgid "Add new Image"
+msgstr "Додати нове зображення"
+
+#: TinyMCE/interfaces/utility.py:339
+msgid "After the deadline (FLOSS)"
+msgstr "Перевірка правопису за допомогою After the Deadline (ВВПЗ)"
+
+#: TinyMCE/interfaces/utility.py:190
+msgid "Align center"
+msgstr "Вирівнювання по центру"
+
+#: TinyMCE/interfaces/utility.py:198
+msgid "Align full"
+msgstr "Вирівнювання по ширині"
+
+#: TinyMCE/interfaces/utility.py:186
+msgid "Align left"
+msgstr "Вирівнювання по лівому краю"
+
+#: TinyMCE/interfaces/utility.py:194
+msgid "Align right"
+msgstr "Вирівнювання по правому краю"
+
+#: TinyMCE/interfaces/utility.py:389
+msgid "Allow captioned images"
+msgstr "Дозволити підпис зображень"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:32
+msgid "Anchor"
+msgstr "Якір"
+
+#: TinyMCE/interfaces/utility.py:475
+msgid "Anchor selector expression"
+msgstr "Вираз селектора якоря"
+
+#: TinyMCE/interfaces/utility.py:356
+msgid "AtD Error types to show"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:345
+msgid "AtD Ignore strings"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:369
+msgid "AtD Service URL"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:182
+msgid "Backcolor"
+msgstr "Колір фону"
+
+#: TinyMCE/adapters/Upload.py:141
+msgid "Bad filename, please rename."
+msgstr "Не правильне ім'я файлу, перейменуйте."
+
+#: TinyMCE/interfaces/utility.py:154
+msgid "Bold"
+msgstr "Напівжирний"
+
+#: TinyMCE/utility.py:754
+msgid "Browser"
+msgstr "Браузер"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:295
+msgid "CSS Style"
+msgstr "стиль CSS "
+
+msgid "Call-out"
+msgstr "Примітка"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:92
+msgid "Caption"
+msgstr "Підпис"
+
+#: TinyMCE/interfaces/utility.py:71
+msgid "Choose the CSS used in WYSIWYG Editor Area"
+msgstr "Виберіть CSS, який використовуватиметься у вікні редактора"
+
+msgid "Circle"
+msgstr "Коло"
+
+#: TinyMCE/interfaces/utility.py:294
+msgid "Cleanup messy code"
+msgstr "Очистити брудний код"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:43
+msgid "Clear"
+msgstr "Очистити"
+
+msgid "Clear floats"
+msgstr "Очистити стилі"
+
+#: TinyMCE/interfaces/utility.py:404
+msgid "Contains Anchors"
+msgstr "Містить якорі"
+
+#: TinyMCE/interfaces/utility.py:399
+msgid "Contains Objects"
+msgstr "Містить об'єкти"
+
+#: TinyMCE/browser/controlpanel.py:50
+msgid "Content Browser"
+msgstr "Переглядач вмісту"
+
+#: TinyMCE/interfaces/utility.py:118
+msgid "Copy"
+msgstr "Копіювати"
+
+#: TinyMCE/adapters/Upload.py:177
+msgid "Could not upload the file"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:448
+#: TinyMCE/shortcut.py:9
+msgid "Current Folder"
+msgstr "Поточна тека"
+
+#: TinyMCE/interfaces/utility.py:429
+msgid "Custom Plugins"
+msgstr "Спеціальні плагіни"
+
+#: TinyMCE/interfaces/utility.py:318
+msgid "Custom Toolbar Buttons"
+msgstr "Спеціальні кнопки панелі інструментів"
+
+#: TinyMCE/interfaces/utility.py:114
+msgid "Cut"
+msgstr "Вирізати"
+
+#: TinyMCE/interfaces/utility.py:335
+msgid "Default browser spellchecker"
+msgstr "Типова програма перевірки правопису браузера"
+
+msgid "Definition description"
+msgstr "Опис визначення"
+
+#: TinyMCE/interfaces/utility.py:210
+msgid "Definition list"
+msgstr "Список визначень"
+
+msgid "Definition term"
+msgstr "Термін визначення"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:83
+msgid "Description"
+msgstr "Опис"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:67
+msgid "Details"
+msgstr "Деталі"
+
+msgid "Disc"
+msgstr "Диск"
+
+msgid "Discreet"
+msgstr ""
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:232
+msgid "E-mail"
+msgstr "Електронна пошта"
+
+#: TinyMCE/interfaces/utility.py:310
+msgid "Edit HTML Source"
+msgstr "Редагувати HTML код"
+
+#: TinyMCE/interfaces/utility.py:61
+msgid "Editor height"
+msgstr "Висота редактора"
+
+#: TinyMCE/interfaces/utility.py:55
+msgid "Editor width"
+msgstr "Ширина редактора"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:28
+msgid "Email"
+msgstr "Електронна пошта"
+
+#: TinyMCE/interfaces/utility.py:266
+msgid "Emotions"
+msgstr "Смайли"
+
+#: TinyMCE/interfaces/utility.py:49
+msgid "Enable auto resizing of the editor window."
+msgstr "Увімкнути можливість автоматичної зміни розміру вікна редактора."
+
+#: TinyMCE/interfaces/utility.py:66
+msgid "Enable contextmenu"
+msgstr "Включити контекстне меню"
+
+#: TinyMCE/interfaces/utility.py:44
+msgid "Enable resizing the editor window."
+msgstr "Увімкнути можливість зміни розміру вікна редактора."
+
+#: TinyMCE/interfaces/utility.py:82
+msgid "Enter a JSON-formatted style format configuration. A format is for example the style that get applied when you press the bold button inside the editor. See http://www.tinymce.com/wiki.php/Configuration:formats"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:410
+msgid "Enter a list of content types which can be linked. Format is one contenttype per line."
+msgstr "Введіть перелік типів вмісту, до яких можна зробити посилання, кожен з нового рядка."
+
+#: TinyMCE/interfaces/utility.py:415
+msgid "Enter a list of content types which can be used as images. Format is one contenttype per line."
+msgstr "Введіть перелік типів вмісту, які можна використати як зображення, кожен з нового рядка."
+
+#: TinyMCE/interfaces/utility.py:405
+msgid "Enter a list of content types which can contain anchors. Format is one contenttype per line."
+msgstr "Введіть перелік типів вмісту, які можуть містити якорі, кожен з нового рядка."
+
+#: TinyMCE/interfaces/utility.py:400
+msgid "Enter a list of content types which can contain other objects. Format is one contenttype per line."
+msgstr "Введіть перелік типів вмісту, які можуть містити інші об'єкти, кожен з нового рядка."
+
+#: TinyMCE/interfaces/utility.py:430
+msgid "Enter a list of custom plugins which will be loaded in the editor. Format is pluginname or pluginname|location, one per line."
+msgstr "Введіть перелік додаткових плагінів, які буде завантажено в редактор, у форматі ім'я плагіна або ім'я плагіна|розміщення, по одному в рядку."
+
+#: TinyMCE/interfaces/utility.py:319
+msgid "Enter a list of custom toolbar buttons which will be loaded in the editor, one per line."
+msgstr "Введіть перелік спеціальних кнопок, які буде завантажено в панель інструментів редактора, по одній в кожному рядку."
+
+#: TinyMCE/interfaces/utility.py:77
+msgid "Enter a list of styles to appear in the style pulldown. Format is title|tag or title|tag|className, one per line."
+msgstr "Введіть список стилів, які з'являться у меню Стилів. Формат вводу: назва|теґ або назва|теґ|ім'яКласу, кожен з нового рядка."
+
+#: TinyMCE/interfaces/utility.py:92
+msgid "Enter a list of styles to appear in the table style pulldown. Format is title|class, one per line."
+msgstr "Введіть список стилів, які з'являться у меню стилів таблиці. Формат вводу: назва|клас, кожен з нового рядка."
+
+#: TinyMCE/interfaces/utility.py:434
+msgid "Entity encoding"
+msgstr ""
+
+msgid "Even row"
+msgstr "Парний рядок"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:24
+msgid "External"
+msgstr "Зовнішній"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:199
+msgid "External link"
+msgstr "Зовнішнє посилання"
+
+#, fuzzy
+msgid "Fancy grid listing"
+msgstr "Сітка повністю"
+
+msgid "Fancy listing"
+msgstr ""
+
+#, fuzzy
+msgid "Fancy vertical listing"
+msgstr "Лише рядки сітки"
+
+#: TinyMCE/interfaces/utility.py:142
+msgid "Find"
+msgstr "Знайти"
+
+#: TinyMCE/interfaces/utility.py:146
+msgid "Find/Replace"
+msgstr "Знайти/Замінити"
+
+#: TinyMCE/interfaces/utility.py:178
+msgid "Forecolor"
+msgstr "Колір тексту"
+
+#: TinyMCE/interfaces/utility.py:81
+msgid "Formats"
+msgstr "Формати"
+
+msgid "Heading"
+msgstr "Заголовок"
+
+msgid "Heading cell"
+msgstr "Комірка-заголовок"
+
+msgid "Highlight"
+msgstr "Виділити"
+
+#: TinyMCE/interfaces/utility.py:448
+#: TinyMCE/shortcut.py:20
+msgid "Home"
+msgstr "Головна"
+
+#: TinyMCE/utility.py:739
+msgid "Image Browser"
+msgstr "Переглядач зображень"
+
+#: TinyMCE/interfaces/utility.py:414
+msgid "Image Objects"
+msgstr "Об'єкти-зображення"
+
+#: TinyMCE/interfaces/utility.py:453
+msgid "Image Shortcuts"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:390
+msgid "Images will be automatically captioned."
+msgstr "Зображення будуть автоматично отримувати підписи."
+
+#: TinyMCE/interfaces/utility.py:218
+msgid "Indent"
+msgstr "Збільшити відступ"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:100
+msgid "Inline"
+msgstr "Всередині"
+
+#: TinyMCE/interfaces/utility.py:254
+msgid "Insert advanced horizontal ruler"
+msgstr "Вставити розширений горизонтальний роздільник"
+
+#: TinyMCE/interfaces/utility.py:246
+msgid "Insert custom character"
+msgstr "Вставити спеціальні символи"
+
+#: TinyMCE/interfaces/utility.py:258
+msgid "Insert date"
+msgstr "Вставити дату"
+
+#: TinyMCE/interfaces/utility.py:250
+msgid "Insert horizontal ruler"
+msgstr "Вставити горизонтальний роздільник"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:169
+msgid "Insert image from URL"
+msgstr "Вставити зображення за URL"
+
+#: TinyMCE/interfaces/utility.py:270
+msgid "Insert non-breaking space character"
+msgstr "Вставити нерозривний проміжок"
+
+#: TinyMCE/interfaces/utility.py:274
+msgid "Insert page break"
+msgstr "Вставити роздільник сторінок "
+
+#: TinyMCE/interfaces/utility.py:262
+msgid "Insert time"
+msgstr "Вставити час"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:5
+msgid "Insert/Edit"
+msgstr "Вставити/Редагувати"
+
+#: TinyMCE/interfaces/utility.py:234
+msgid "Insert/edit anchor"
+msgstr "Вставити/редагувати якір"
+
+#: TinyMCE/interfaces/utility.py:306
+msgid "Insert/edit attributes"
+msgstr "Вставити/редагувати атрибути"
+
+#: TinyMCE/interfaces/utility.py:238
+msgid "Insert/edit image"
+msgstr "Вставити/редагувати зображення"
+
+#: TinyMCE/interfaces/utility.py:226
+msgid "Insert/edit link"
+msgstr "Вставити/редагувати посилання"
+
+#: TinyMCE/interfaces/utility.py:242
+msgid "Insert/edit media"
+msgstr "Вставити/редагувати медіа об'єкт"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:20
+msgid "Internal"
+msgstr "Внутрішні посилання"
+
+msgid "Invisible grid"
+msgstr "Невидима сітка"
+
+#: TinyMCE/interfaces/utility.py:158
+msgid "Italic"
+msgstr "Курсив"
+
+#: TinyMCE/browser/controlpanel.py:34
+msgid "Layout"
+msgstr "Вигляд"
+
+#: TinyMCE/browser/controlpanel.py:42
+msgid "Libraries"
+msgstr "Бібліотеки"
+
+#: TinyMCE/utility.py:740
+msgid "Link Browser"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:445
+msgid "Link Shortcuts"
+msgstr ""
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:275
+msgid "Link Title"
+msgstr ""
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:248
+msgid "Link to anchor"
+msgstr "Посилання на якір"
+
+#: TinyMCE/interfaces/utility.py:384
+msgid "Link using UIDs"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:409
+msgid "Linkable Objects"
+msgstr "Об'єкти-посилання"
+
+#: TinyMCE/interfaces/utility.py:385
+msgid "Links to objects on this site can use unique object ids so that the links remain valid even if the target object is renamed or moved elsewhere on the site."
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:454
+msgid "List of shortcuts to appear in image browser for quick navigation."
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:446
+msgid "List of shortcuts to appear in link browser for quick navigation."
+msgstr ""
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:48
+msgid "List view"
+msgstr "Перегляд списком"
+
+#: TinyMCE/utility.py:750
+msgid "Lists"
+msgstr "Списки"
+
+msgid "Literal"
+msgstr ""
+
+msgid "Lower Alpha"
+msgstr "Маленькі букви"
+
+msgid "Lower Roman"
+msgstr "Маленькі римські букви"
+
+#: TinyMCE/interfaces/utility.py:31
+msgid "Must be empty or a valid JSON-formatted configuration – ${message}."
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:437
+msgid "Named"
+msgstr ""
+
+#: TinyMCE/utility.py:753
+msgid "No anchors in this page"
+msgstr "На цій сторінці нема якорів"
+
+#: TinyMCE/utility.py:752
+msgid "No items in this folder"
+msgstr "В цій теці нема жодного об'єкта."
+
+#: TinyMCE/utility.py:744
+msgid "Normal paragraph"
+msgstr "Звичайний параграф"
+
+#: TinyMCE/adapters/Upload.py:144
+msgid "Not allowed to upload a file of this type to this folder"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:468
+msgid "Number of columns in thumbnails mode"
+msgstr ""
+
+msgid "Numbers"
+msgstr "Цифри"
+
+#: TinyMCE/interfaces/utility.py:437
+msgid "Numeric"
+msgstr "Числовий"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:265
+msgid "OK"
+msgstr ""
+
+msgid "Odd row"
+msgstr "Непарний рядок"
+
+#: TinyMCE/interfaces/utility.py:206
+msgid "Ordered list"
+msgstr "Пронумерований список"
+
+#: TinyMCE/interfaces/utility.py:214
+msgid "Outdent"
+msgstr "Зменшити відступ"
+
+msgid "Page break (print only)"
+msgstr "Роздільник сторінок (для друку)"
+
+#: TinyMCE/interfaces/utility.py:122
+msgid "Paste"
+msgstr "Вставити"
+
+#: TinyMCE/interfaces/utility.py:126
+msgid "Paste as Plain Text"
+msgstr "Вставити простим текстом"
+
+#: TinyMCE/interfaces/utility.py:130
+msgid "Paste from Word"
+msgstr "Вставити з Word"
+
+#: TinyMCE/interfaces/utility.py:105
+msgid "Place toolbar on top of the page"
+msgstr ""
+
+#: TinyMCE/utility.py:745
+msgid "Plain cell"
+msgstr "Звичайна комірка"
+
+#: TinyMCE/interfaces/utility.py:282
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:182
+msgid "Preview"
+msgstr "Перегляд"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:218
+msgid "Preview URL"
+msgstr "Показати адресу URL"
+
+#: TinyMCE/interfaces/utility.py:278
+#: TinyMCE/utility.py:751
+msgid "Print"
+msgstr "Друк"
+
+msgid "Pull-quote"
+msgstr "Цитата"
+
+#: TinyMCE/interfaces/utility.py:437
+msgid "Raw"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:138
+msgid "Redo"
+msgstr "Повернути "
+
+#: TinyMCE/interfaces/utility.py:290
+msgid "Remove formatting"
+msgstr "Забрати форматування"
+
+#: TinyMCE/browser/controlpanel.py:46
+msgid "Resource Types"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:394
+msgid "Rooted to current object"
+msgstr "Прив'язати до поточного об'єкту"
+
+#: TinyMCE/interfaces/utility.py:110
+msgid "Save"
+msgstr "Зберегти"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:44
+msgid "Search"
+msgstr "Пошук"
+
+#: TinyMCE/utility.py:756
+msgid "Search results:"
+msgstr "Результати пошуку:"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:42
+msgid "Search site"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:150
+msgid "Select Style"
+msgstr "Вибрати стиль"
+
+#: TinyMCE/utility.py:749
+msgid "Selection"
+msgstr "Виділення"
+
+#: TinyMCE/browser/controlpanel.py:61
+msgid "Settings for the TinyMCE Wysiwyg editor."
+msgstr "Налаштування конфіґурації текстового редактора TinyMCE."
+
+#: TinyMCE/utility.py:755
+msgid "Shortcuts"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:286
+msgid "Spellchecker"
+msgstr "Перевірка правопису"
+
+#: TinyMCE/interfaces/utility.py:327
+msgid "Spellchecker plugin to use"
+msgstr ""
+
+msgid "Square"
+msgstr "Квадрат"
+
+#: TinyMCE/interfaces/utility.py:166
+msgid "Strikethrough"
+msgstr "Закреслити"
+
+#: TinyMCE/utility.py:746
+msgid "Style..."
+msgstr "Стиль..."
+
+#: TinyMCE/interfaces/utility.py:76
+msgid "Styles"
+msgstr "Стилі"
+
+#: TinyMCE/skins/tinymce/plugins/table/table.htm.pt:33
+#, fuzzy
+msgid "Subdued grid"
+msgstr "Слабка сітка"
+
+msgid "Subheading"
+msgstr "Підзаголовок"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:239
+msgid "Subject"
+msgstr "Предмет"
+
+#: TinyMCE/interfaces/utility.py:170
+msgid "Subscript"
+msgstr "Нижній індекс"
+
+#: TinyMCE/interfaces/utility.py:174
+msgid "Superscript"
+msgstr "Верхній індекс"
+
+#: TinyMCE/interfaces/utility.py:222
+msgid "Table controls"
+msgstr "Властивості таблиці"
+
+#: TinyMCE/interfaces/utility.py:91
+msgid "Table styles"
+msgstr "Стилі таблиці"
+
+#: TinyMCE/utility.py:748
+msgid "Tables"
+msgstr "Таблиці"
+
+#: TinyMCE/utility.py:747
+msgid "Text"
+msgstr "Текст"
+
+#: TinyMCE/adapters/Upload.py:169
+msgid "The content-type '${type}' has no image- or file-field!"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:328
+msgid "This option allows you to choose the spellchecker for TinyMCE. If you want the spellchecker button to be visible, make sure it is enabled in the toolbar settings."
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:435
+msgid "This option controls how entities/characters get processed. Named: Characters will be converted into named entities based on the entities option. Numeric: Characters will be converted into numeric entities. Raw: All characters will be stored in non-entity form except these XML default entities: amp lt gt quot"
+msgstr ""
+
+#: TinyMCE/interfaces/utility.py:106
+msgid "This option enables the external toolbar which will be placed at the top of the page."
+msgstr "Ця опція дозволяє розмістити зовнішню панель інструментів у верхній частині сторінки."
+
+#: TinyMCE/interfaces/utility.py:72
+msgid "This option enables you to specify a custom CSS file that replaces the theme content CSS. This CSS file is the one used within the editor (the editable area)."
+msgstr "Ця опція дозволяє вказати спеціальний CSS файл, який замінить CSS даної теми. Цей CSS файл буде використовуватися в редакторі (в полі редагування)."
+
+#: TinyMCE/interfaces/utility.py:50
+msgid "This option gives you the ability to enable/disable auto resizing the editor window depending on the content."
+msgstr "Ця опція дозволяє увімкнути/вимкнути можливість автоматичної зміни розміру вікна редактора в залежності від контенту."
+
+#: TinyMCE/interfaces/utility.py:45
+msgid "This option gives you the ability to enable/disable resizing the editor window. If the editor width is set to a percentage only vertical resizing is enabled."
+msgstr "Ця опція дозволяє увімкнути/вимкнути можливість зміни розміру вікна редактора. Якщо ширина редактора встановлена у відсотках - тоді налаштувати можна лише його висоту."
+
+#: TinyMCE/interfaces/utility.py:67
+msgid "This option gives you the ability to enable/disable the use of the contextmenu."
+msgstr "Ця опція дає вам можливість включити / відключити використання контекстного меню."
+
+#: TinyMCE/interfaces/utility.py:62
+msgid "This option gives you the ability to specify the height of the editor in pixels. If auto resize is enabled this value is used as minimum height."
+msgstr "Ця опція дає вам можливість вказати висоту редактора в пікселях. Якщо увімкнена можливість автоматичної зміни розміру вінка редактора - тоді це значення буде використовуватися як значення мінімальної висоти."
+
+#: TinyMCE/interfaces/utility.py:56
+msgid "This option gives you the ability to specify the width of the editor (like 100% or 400px)."
+msgstr "Цей параметр дозволяє встановити ширину вікна редактора (100% чи 400px)"
+
+#: TinyMCE/interfaces/utility.py:101
+msgid "This option gives you the ability to specify the width of the toolbar in pixels."
+msgstr "Ця опція дозволяє вказати ширину панелі інструментів в пікселях."
+
+#: TinyMCE/interfaces/utility.py:461
+msgid "Thumbnail size in thumbnails mode"
+msgstr ""
+
+#: TinyMCE/profiles/upgrade_10_to_11/controlpanel.xml
+msgid "TinyMCE"
+msgstr "TinyMCE"
+
+#: TinyMCE/browser/controlpanel.py:60
+msgid "TinyMCE Settings"
+msgstr "Налаштування TinyMCE"
+
+#: TinyMCE/profiles/default/controlpanel.xml
+#: TinyMCE/profiles/upgrade_10_to_11/controlpanel.xml
+msgid "TinyMCE Visual Editor"
+msgstr "Візуальний редактор TinyMCE "
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:76
+msgid "Title"
+msgstr "Назва"
+
+#: TinyMCE/interfaces/utility.py:314
+msgid "Toggle fullscreen mode"
+msgstr "Включити повноекранний режим"
+
+#: TinyMCE/interfaces/utility.py:298
+msgid "Toggle guidelines/invisible objects"
+msgstr "Перемкнути основні/приховані елементи"
+
+#: TinyMCE/browser/controlpanel.py:38
+msgid "Toolbar"
+msgstr "Панель інструментів"
+
+#: TinyMCE/interfaces/utility.py:100
+msgid "Toolbar width"
+msgstr "Ширина панелі інструментів"
+
+#: TinyMCE/interfaces/utility.py:162
+msgid "Underline"
+msgstr "Підкреслити"
+
+#: TinyMCE/interfaces/utility.py:134
+msgid "Undo"
+msgstr "Відмінити"
+
+#: TinyMCE/interfaces/utility.py:230
+msgid "Unlink"
+msgstr "Видалити посилання"
+
+#: TinyMCE/interfaces/utility.py:202
+msgid "Unordered list"
+msgstr "Ненумерований список"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:158
+msgid "Upload"
+msgstr "Вивантажити"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:131
+msgid "Upload File"
+msgstr "Вивантажити файл"
+
+msgid "Upper Alpha"
+msgstr "Великі букви"
+
+msgid "Upper Roman"
+msgstr "Великі римські букви"
+
+#: TinyMCE/interfaces/utility.py:302
+msgid "Visual control characters on/off"
+msgstr "Увімкнути/вимкнути візуальний контроль символів "
+
+#: TinyMCE/interfaces/utility.py:395
+msgid "When enabled the user will be rooted to the current object and can't add links and images from other parts of the site."
+msgstr "Якщо увімкнено, то користувача буде прив'язано до поточного об'єкту і він не зможе додати посилання та зображення з інших частин сайту."
+
+#: TinyMCE/adapters/Upload.py:113
+msgid "You do not have permission to upload files in this folder"
+msgstr ""
+
+#. Default: "A CSS level 3 pattern used to match elements that can serve as anchors. The default value is to match headings."
+#: TinyMCE/interfaces/utility.py:476
+msgid "help_anchor_selector"
+msgstr ""
+
+#. Default: "The URL of the \"After the Deadline\" grammar and spell checking server. The default value is the public server, but ideally you should download and install your own and specify its address here."
+#: TinyMCE/interfaces/utility.py:370
+msgid "help_atd_service_url"
+msgstr ""
+
+#. Default: "A list of error types which the \"After the Deadline\" spellchecker should check for. By default, all the available error type will be listed here."
+#: TinyMCE/interfaces/utility.py:357
+msgid "help_atderrortypes_to_show"
+msgstr ""
+
+#. Default: "Enter a list of custom plugins which will be loaded in the editor. Format is pluginname or pluginname|location, one per line."
+#: TinyMCE/interfaces/utility.py:420
+msgid "help_tinymce_plugins"
+msgstr "Введіть список власних додатків, які буде завантажено у редактор. Формат вводу назва додатка або назва додатка|розташування, кожен з нового рядка."
+
+#: TinyMCE/interfaces/utility.py:337
+msgid "ieSpell (free for personal use)"
+msgstr "перевірка правопису за допомогою ieSpell"
+
+#. Default: "A list of strings which the \"After the Deadline\"spellchecker should ignore. Note: This option is only applicable when the appropriate spellchecker has been chosen above."
+#: TinyMCE/interfaces/utility.py:346
+msgid "label_atd_ignore_strings"
+msgstr "Список слів, які під час перевірки правопису не будуть враховуватись. Примітка: Цей параметр працює лише за умови, що обрано програму After the Deadline."
+
+#. Default: "Editor Plugins"
+#: TinyMCE/interfaces/utility.py:419
+msgid "label_tinymce_plugins"
+msgstr "Додатки редактора"
+
+#: TinyMCE/skins/tinymce/plugins/plonebrowser/plonebrowser.htm.pt:152
+msgid "or External URL"
+msgstr "або Зовнішнє посилання"
+
+#. Default: "Edit without visual editor"
+#: TinyMCE/skins/tinymce/tinymce_wysiwyg_support.pt:32
+msgid "suppress_visual_editor"
+msgstr "Редагувати без візуального редактора"
+
+#. Default: "Edit with visual editor"
+#: TinyMCE/skins/tinymce/tinymce_wysiwyg_support.pt:40
+msgid "suppress_visual_editor_with"
+msgstr "Редагувати за допомогою візуального редактора"
+

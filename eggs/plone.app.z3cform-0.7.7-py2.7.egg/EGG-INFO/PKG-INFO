@@ -1,0 +1,1113 @@
+Metadata-Version: 1.1
+Name: plone.app.z3cform
+Version: 0.7.7
+Summary: A collection of widgets, templates and other components for use with z3c.form and Plone
+Home-page: http://pypi.python.org/pypi/plone.app.z3cform
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL
+Description: =================
+        plone.app.z3cform
+        =================
+        
+        A Plone specific integration and HTML mark-up for z3c.form.
+        
+        .. contents:: Table of Contents
+        
+        Introduction
+        ==============
+        
+        This Plone package is aimed for developers who want to create forms
+        in Python code.
+        
+        Please read the documentation for `z3c.form`_, which contains important
+        information about using z3c.form in Zope 2 in general. For the most part,
+        that package contains the "active" parts that you need to know about, and
+        this package provides "passive" overrides that make the forms integrate with
+        Plone.
+        
+        Installation
+        ============
+        
+        Plone 4.1 and later include *plone.app.z3cform* in Plone core. Older versions need to install
+        the addon separately as your own add-on dependency.
+        
+        Features
+        ============
+        
+        The following Plone and z3c.form integration is added
+        
+        * Plone *main_template.pt* integration
+        
+        * Plone specific widget frame
+        
+        * Date/time pickers
+        
+        * WYSIWYG widget (TinyMCE visual editor with Plone support)
+        
+        * CRUD forms
+        
+        Out of the box form templates
+        ==================================
+        
+        The form and widget templates are applied in the following order
+        
+        * *plone.app.z3cform* specific
+        
+        * *plone.z3cform* specific
+        
+        * *z3c.form* specific
+        
+        *plone.app.z3cform* package overrides the ``@@ploneform-macros`` view from `plone.z3cform`_,
+        using standard Plone markup for form fields, fieldsets, etc.
+        
+        All the macros described in `plone.z3cform`_ are still available. In addition,
+        you can use the ``widget_rendering`` macro to render all the default widgets,
+        but none of the fieldsets (groups) or the fieldset headers (which would be
+        rendered with the ``fields`` macro).
+        
+        Each widget is rendered using the ``@@ploneform-render-widget`` view, which by
+        default includes the widget's label, required indicator, description, errors,
+        and the result of ``widget.render()``.  This view may be overridden for
+        particular widget types in order to customize this widget chrome.
+        
+        Customizing form behavior
+        ============================
+        
+        Form method
+        -------------
+        
+        If your form instance defines a property called ``method`` it allows
+        you to set whether form is HTTP POST or HTTP GET. The default is POST.
+        This translates to ``<form method="post">`` attribute.
+        
+        Example::
+        
+            class HolidayServiceSearchForm(form.Form):
+                    """ Example search form of which results can be bookmarked.
+        
+                    Bookmarking is possible because we use HTTP GET method.
+                    """
+        
+                    method = "get"
+        
+        Form action
+        ------------
+        
+        Form ``action`` property defines HTTP target where the form is posted. The default is
+        the same page where the form was rendered, ``request.getURL()``.
+        
+        Example::
+        
+                class HolidayServiceSearchForm(form.Form):
+        
+                    def action(self):
+                        """ Redefine <form action=''> attribute.
+        
+                        We use URL fragment to define the <a> anchor
+                        were we directly scroll at the results when the form is posted,
+                        skipping unnecessary form fields part. The user can scroll
+                        back there if he/she wants modify the parameters.
+                        """
+        
+                        # Context item URL + form view name + link fragment.
+                        # This works for HTTP GET forms only.
+                        # Note that we cannot use request.getURL() as it might contain
+                        # 1) prior fragment 2) GET query parameters messing up the UrL
+                        return self.context.absolute_url() + "/holidayservice_view" + "#searched"
+        
+        Fieldsets and tabs
+        --------------------
+        
+        You can fieldsets to your form if you subclass the form from z3c.form.group.GroupForm.
+        The default behavior of Plone is to turn these fieldsets to tabs (as seen on
+        any *Edit* view of content item).
+        
+        You can disable this behavior for your form::
+        
+        
+        
+            class ReportForm(z3c.form.group.GroupForm, z3c.form.form.Form):
+        
+                # Disable turn fieldsets to tabs behavior
+                enable_form_tabbing  = False
+        
+        Unload protection
+        -----------------
+        
+        The default behaviour on Plone is to add a confirm box
+        if you leave a form you have modified without having submitted it.
+        
+        You can disable this behavior for your form::
+        
+            class SearchForm(z3c.form.group.GroupForm, z3c.form.form.Form):
+        
+                # Disable unload protection behavior
+                enable_unload_protection  = False
+        
+        
+        CSRF Protection
+        ===============
+        
+        A common vulnerability affecting web forms is cross-site request forgery (CSRF).
+        This attack occurs when the user of your site visits a third-party site that
+        uses Javascript to post to a URL on your site without the user's knowledge,
+        taking advantage of the user's active session.
+        
+        
+        
+        plone.app.z3cform can protect against this type of attack by adding a unique
+        token as a hidden input when rendering the form, and checking to make sure it
+        is present as a request parameter when form actions are executed.
+        
+        To turn on this protection, enable the form's enableCSRFProtection attribute.
+        Example::
+        
+            class PasswordForm(form.Form):
+                """Form to set the user's password."""
+                enableCSRFProtection = True
+        
+        Form main template override
+        =============================
+        
+        Forms are framed by *FormWrapper* views. It places rendered
+        form inside Plone page frame. The default *FormWrapper* is supplied automatically,
+        but you can override it.
+        
+        Below is a placeholder example with few `<select>` inputs.
+        
+        Example ``reporter.py``::
+        
+            import zope.schema
+            import zope.interface
+            from zope.i18nmessageid import MessageFactory
+            from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile as FiveViewPageTemplateFile
+        
+            from zope.schema.vocabulary import SimpleVocabulary
+            from zope.schema.vocabulary import SimpleTerm
+        
+            import z3c.form
+        
+            import plone.app.z3cform
+            import plone.z3cform.templates
+        
+            _ = MessageFactory('your.addon')
+        
+        
+            def make_terms(items):
+                """ Create zope.schema terms for vocab from tuples """
+                terms = [SimpleTerm(value=pair[0], token=pair[0], title=pair[1]) for pair in items]
+                return terms
+        
+        
+            output_type_vocab = SimpleVocabulary(make_terms([("list", "Patient list"), ("summary", "Summary")]))
+        
+        
+            class IReportSchema(zope.interface.Interface):
+                """ Define reporter form fields """
+                outputType = zope.schema.Choice(
+                    title=u"Output type",
+                    description=u"How do you want the output",
+                    source=output_type_vocab)
+        
+                country = zope.schema.Choice(
+                    title=u"Country",
+                    required=False,
+                    description=u"Which country to report",
+                    vocabulary="allowed_countries")
+        
+                hospital = zope.schema.Choice(
+                    title=u"Hospital",
+                    required=False,
+                    description=u"Which hospital to report",
+                    vocabulary="allowed_hospitals")
+        
+        
+            class ReportForm(z3c.form.form.Form):
+                """ A form to output a HTML report from chosen parameters """
+        
+                fields = z3c.form.field.Fields(IReportSchema)
+        
+                ignoreContext = True
+        
+                output = None
+        
+                @z3c.form.button.buttonAndHandler(_('Make Report'), name='report')
+                def report(self, action):
+                    data, errors = self.extractData()
+                    if errors:
+                        self.status = "Please correct errors"
+                        return
+        
+                    # Create sample item which we can consume in the page template
+                    self.output = dict(country="foobar")
+        
+                    self.status = _(u"Report complete")
+        
+        
+            # IF you want to customize form frame you need to make a custom FormWrapper view around it
+            # (default plone.z3cform.layout.FormWrapper is supplied automatically with form.py templates)
+            report_form_frame = plone.z3cform.layout.wrap_form(ReportForm, index=FiveViewPageTemplateFile("templates/reporter.pt"))
+        
+        Example ``configure.zcml``::
+        
+            <configure
+                xmlns="http://namespaces.zope.org/zope"
+                xmlns:browser="http://namespaces.zope.org/browser"
+                i18n_domain="your.addon">
+        
+               <browser:page
+                   for="*"
+                   name="reporter"
+                   class=".reporter.report_form_frame"
+                   permission="zope2.View"
+                   />
+        
+            </configure>
+        
+        
+        Example ``templates/reporter.html``::
+        
+            <html metal:use-macro="context/main_template/macros/master"
+                  i18n:domain="sits.reporttool">
+            <body>
+        
+                <metal:block fill-slot="main">
+        
+                    <h1 class="documentFirstHeading" tal:content="view/label | nothing" />
+        
+                    <div id="content-core">
+        
+                        <div id="form-input">
+                            <span tal:replace="structure view/contents" />
+                        </div>
+        
+                        <div id="form-output" tal:condition="view/form_instance/output">
+                            Chosen country: <b tal:content="view/form_instance/output/country" />
+                        </div>
+                    </div>
+        
+                </metal:block>
+        
+            </body>
+            </html>
+        
+        Widget frame override
+        =============================
+        
+        You can override widget templates as instructed for ``z3c.form``.
+        ``plone.app.z3cform`` renders `a frame around each widget <https://github.com/plone/plone.app.z3cform/blob/master/plone/app/z3cform/templates/widget.pt>`_
+        which usually consists of
+        
+        * Label
+        
+        * Required marker
+        
+        * Description
+        
+        You might want to customize this widget frame for your own form.
+        Below is an example how to do it.
+        
+        * Copy `widget.pt <https://github.com/plone/plone.app.z3cform/blob/master/plone/app/z3cform/templates/widget.pt>`_ to your own package and customize it in way you wish
+        
+        * Add the following to ``configure.zcml``
+        
+        ::
+        
+            <browser:page
+                name="ploneform-render-widget"
+                for=".demo.IDemoWidget"
+                class="plone.app.z3cform.templates.RenderWidget"
+                permission="zope.Public"
+                template="demo-widget.pt"
+                />
+        
+        * Create a new marker interface in Python code
+        
+        ::
+        
+            from zope.interface import Interface
+        
+            class IDemoWidget(Interface):
+                pass
+        
+        * Then apply this marker interface to all of your widgets in ``form.update()``
+        
+        ::
+        
+            from zope.interface import alsoProvides
+        
+            class MyForm(...):
+                ...
+                def update(self):
+                    super(MyForm, self).update()
+                    for widget in form.widgets.values():
+                        alsoProvides(widget, IDemoWidget)
+        
+        Hide fields that have no value
+        ==================================
+        
+        The ``.empty`` css class marks the fields that have no value. If you don't want
+        to display these fields in view mode, add the following css in your theme::
+        
+            .template-view .empty.field {
+               display: none;
+            }
+        
+        Testing
+        ===============
+        
+        To test ``plone.app.z3form`` it is recommended to use
+        `plone.app.testing <https://pypi.python.org/pypi/plone.app.testing/>`_
+        function test layer which will do ``plone.app.z3cform`` setup for you.
+        Read ``plone.app.z3cform`` manual for further instructions.
+        
+        If you still need to test forms on lower level in unit tests
+        you need to enable ``plone.app.z3cform`` support manually.
+        Below is an example::
+        
+            import unittest2 as unittest
+        
+            from zope.interface import alsoProvides
+            from zope.publisher.browser import setDefaultSkin
+        
+            from z3c.form.interfaces import IFormLayer
+        
+            class TestFilteringIntegration(unittest.TestCase):
+                """ Test that filtering options work on the form """
+        
+                layer = MY_TEST_LAYER_WITH_PLONE
+        
+                def setUp(self):
+                    super(TestFilteringIntegration, self).setUp()
+                    request = self.layer["request"]
+                    setDefaultSkin(request)
+                    alsoProvides(request, IFormLayer) #suitable for testing z3c.form views
+        
+                def test_report_form_filtering(self):
+                    reporter = ReportForm(self.layer["portal"], self.layer["request"])
+                    reporter.update()
+        
+        
+        
+        Troubleshooting
+        ================
+        
+        Here are some common errors you might encounter with plone.app.z3cform.
+        
+        ComponentLookupError in updateWidgets()
+        ----------------------------------------
+        
+        ::
+        
+                Traceback (innermost last):
+                  Module ZPublisher.Publish, line 119, in publish
+                  Module ZPublisher.mapply, line 88, in mapply
+                  Module ZPublisher.Publish, line 42, in call_object
+                  Module plone.z3cform.layout, line 64, in __call__
+                  Module plone.z3cform.layout, line 54, in update
+                  Module getpaid.expercash.browser.views, line 63, in update
+                  Module z3c.form.form, line 208, in update
+                  Module z3c.form.form, line 149, in update
+                  Module z3c.form.form, line 128, in updateWidgets
+                  Module zope.component._api, line 103, in getMultiAdapter
+                ComponentLookupError: ((<getpaid.expercash.browser.views.CheckoutForm object at 0xdb052ac>, <HTTPRequest, URL=http://localhost:8080/test/@@getpaid-checkout-wizard>, <PloneSite at /test>), <InterfaceClass z3c.form.interfaces.IWidgets>, u'')
+        
+        plone.app.z3cform layers are not in place (configuration ZCML is not read). You probably forgot to include plone.app.z3cform in your
+        product's configuration.zcml. See *Installation* above.
+        
+        
+        KSS inline validation (deprecared)
+        ====================================
+        
+        .. note ::
+        
+            Plone 4.3+ and later no longer includes KSS
+        
+        This package installs AJAX handlers to perform inline field validation. On any
+        form, the field will be validated when the user blurs a field.
+        
+        This relies on the KSS framework, and is only installed if ``plone.app.kss``
+        is available. If you are using a custom form, note that you must define the
+        following "kassattr" variables:
+        
+        * ``formname``, the name of the form view, defined on the ``<form />``
+          element.
+        * ``fieldname``, the name of the current field (same as the widget name),
+          defined on an element wrapping the field.
+        * ``fieldset``, defined for non-default fieldsets on the ``<fieldset />``
+          element.
+        
+        This also assumes the standard Plone form markup is used. See
+        ``templaes/macros.pt`` for details.
+        
+        .. _z3c.form: http://pypi.python.org/pypi/z3c.form
+        .. _Plone: http://plone.org
+        .. _plone.z3cform: http://pypi.python.org/pypi/plone.z3cform
+        
+        WYSIWYG widget
+        ==============
+        
+        The ``plone.app.z3cform.wysiwyg`` package provides an implementation of the
+        Plone WYSIWYG widget compatible with ``z3c.form``.  This will allow you to
+        use Kupu, FCKeditor and other editors compatible with the Plone
+        WYSIWYG interface in your ``z3c.form`` forms.
+        
+        To use, simply set the widget factory for the widget you'd like to be
+        displayed with the WYSIWYG widget:
+        
+          >>> from zope import interface, schema
+          >>> from z3c.form import form, field
+          >>> from z3c.form.interfaces import INPUT_MODE
+          >>> from plone.app.z3cform.wysiwyg.widget import WysiwygFieldWidget
+        
+          >>> class IProfile(interface.Interface):
+          ...     name = schema.TextLine(title=u"Name")
+          ...     age = schema.Int(title=u"Age")
+          ...     bio = schema.Text(title=u"Bio")
+        
+          >>> class MyForm(form.Form):
+          ...     fields = field.Fields(IProfile)
+          ...     fields['bio'].widgetFactory[INPUT_MODE] = WysiwygFieldWidget
+        
+        
+        Query select widget
+        ===================
+        
+        The ``plone.app.z3cform.queryselect`` module provides a query source
+        compatible with ``z3c.formwidget.query`` which combines to a selection field
+        that can be queried.
+        
+        The native value type for the widget is Archetypes UID collections.
+        The default implementation will simply search using the
+        ``SearchableText`` index in the portal catalog.
+        
+        This is how your form schema could look like:
+        
+          >>> from zope import interface, schema
+          >>> from plone.app.z3cform.queryselect import ArchetypesContentSourceBinder
+          
+          >>> class ISelection(interface.Interface):
+          ...     items = schema.Set(
+          ...         title=u"Selection",
+          ...         description=u"Search for content",
+          ...         value_type=schema.Choice(
+          ...             source=ArchetypesContentSourceBinder()))
+        
+        Optionally, instead of storing Archetypes UIDs, you can choose to use
+        ``persistent.wref``, i.e. weak references, instead of UIDs:
+        
+          >>> from plone.app.z3cform.queryselect import uid2wref
+          >>> factory = uid2wref(ISelection['items'])
+        
+        To store weak references instead of UIDs you would register such a
+        factory as a component adapting the context.  The factory
+        automatically provides the interface which defines the field.
+        
+        Inline validation
+        =================
+        
+        First, let's set up some infrastructure:
+        
+            >>> from zope.interface import alsoProvides
+            >>> from Testing.ZopeTestCase import ZopeLite
+            >>> from Testing.makerequest import makerequest
+            >>> from zope.annotation.interfaces import IAttributeAnnotatable
+            >>> from z3c.form.interfaces import IFormLayer
+        
+            >>> app = ZopeLite.app()
+            >>> def make_request(form={}, lang='en'):
+            ...     request = makerequest(app, environ = {'HTTP_ACCEPT_LANGUAGE': lang}).REQUEST
+            ...     request.form.update(form)
+            ...     alsoProvides(request, IFormLayer)
+            ...     alsoProvides(request, IAttributeAnnotatable)
+            ...     return request
+        
+        Then we create a simple z3c form
+        
+            >>> from zope import interface, schema
+            >>> from z3c.form import form, field, button
+            >>> from plone.app.z3cform.layout import FormWrapper
+        
+            >>> class MySchema(interface.Interface):
+            ...     age = schema.Int(title=u"Age")
+        
+            >>> class MyForm(form.Form):
+            ...     fields = field.Fields(MySchema)
+            ...     ignoreContext = True # don't use context to get widget data
+            ...
+            ...     @button.buttonAndHandler(u'Apply')
+            ...     def handleApply(self, action):
+            ...         data, errors = self.extractData()
+            ...         print data['age'] # ... or do stuff
+        
+            >>> class MyFormWrapper(FormWrapper):
+            ...     form = MyForm
+            ...     label = u"Please enter your age"
+        
+            >>> from zope.component import provideAdapter
+            >>> from zope.publisher.interfaces.browser import IBrowserRequest
+            >>> from zope.interface import Interface
+        
+            >>> provideAdapter(adapts=(Interface, IBrowserRequest),
+            ...                provides=Interface,
+            ...                factory=MyFormWrapper,
+            ...                name=u"test-form")
+        
+        Let's verify that worked:
+        
+            >>> from zope.component import getMultiAdapter
+            >>> from zope.interface import Interface, implements
+            >>> from Acquisition import Implicit
+            >>> class Bar(Implicit):
+            ...     implements(Interface)
+            ...     def restrictedTraverse(self, name):
+            ...         # fake traversal to the form
+            ...         if name.startswith('@@'):
+            ...             return getMultiAdapter((self, self._REQUEST), Interface, name[2:]).__of__(self)
+            ...         else:
+            ...             return getattr(self, name)
+            ...         
+            >>> context = Bar()
+            >>> request = make_request()
+            >>> context._REQUEST = request # evil test fake
+            >>> formWrapper = getMultiAdapter((context, request), name=u"test-form")
+            >>> formWrapper
+            <Products.Five.metaclass.MyFormWrapper object ...>
+            >>> formWrapper.form
+            <class 'plone.app.z3cform.tests.example.MyForm'>
+        
+            >>> del context, request
+        
+        Inline validation
+        -----------------
+        
+        Inline validation is invoked via the @@z3cform_validate_field view.
+        
+            >>> context = Bar()
+            >>> request = make_request(form={'form.widgets.age': 'Title'})
+            >>> context._REQUEST = request
+            >>> form = MyForm(context, request)
+            >>> z3cform_validate_field = getMultiAdapter((form, request), name=u"z3cform_validate_field")
+        
+        This is wired up with jQuery. When the user leaves a form control with inline
+        validation enabled, it will be called with the following parameters:
+        
+            >>> z3cform_validate_field(fname=u'form.widgets.age')
+            '{"errmsg": "The entered value is not a valid integer literal."}'
+        
+            >>> request = make_request(form={'form.widgets.age': '20'})
+            >>> context._REQUEST = request
+            >>> form = MyForm(context, request)
+            >>> z3cform_validate_field = getMultiAdapter((form, request), name=u"z3cform_validate_field")
+            >>> z3cform_validate_field(fname=u'form.widgets.age')
+            '{"errmsg": ""}'
+        
+        If the field name (fname) is not provided by the client, the validation
+        should return without issue:
+        
+            >>> z3cform_validate_field()
+            '{"errmsg": ""}'
+            >>> z3cform_validate_field(fname=None)
+            '{"errmsg": ""}'
+        
+        Inline validation with groups
+        -----------------------------
+        
+        We use plone.app.z3cform.tests.example.MyGroupFormWrapper and validate the 
+        field 'name' that's part of a group. Inline validation is invoked via the 
+        @@z3cform_validate_field view.
+        
+            >>> request = make_request(form={'form.widgets.name': ''})
+            >>> context._REQUEST = request
+            >>> from plone.app.z3cform.tests.example import MyGroupFormWrapper
+            >>> form = MyGroupFormWrapper(context, request)
+            >>> z3cform_validate_field = getMultiAdapter((form, request), name=u"z3cform_validate_field")
+        
+        The validation view takes an Attribute fset with ether the numeric index or
+        the name of the group.
+        
+            >>> z3cform_validate_field(fname=u'form.widgets.name', fset="0")
+            '{"errmsg": "Required input is missing."}'
+            >>> z3cform_validate_field(fname=u'form.widgets.name', fset="mygroup")
+            '{"errmsg": "Required input is missing."}'
+        
+            >>> request = make_request(form={'form.widgets.name': u'Name'})
+            >>> context._REQUEST = request
+            >>> form = MyGroupFormWrapper(context, request)
+            >>> z3cform_validate_field = getMultiAdapter((form, request), name=u"z3cform_validate_field")
+            >>> z3cform_validate_field(fname=u'form.widgets.name', fset="0")
+            '{"errmsg": ""}'
+            >>> z3cform_validate_field(fname=u'form.widgets.name', fset="mygroup")
+            '{"errmsg": ""}'
+        
+        
+        Inline-Validation and Translation of ErrorSnippets
+        --------------------------------------------------
+        
+        We use plone.app.z3cform.tests.example.MyGroupFormWrapper and validate the 
+        field 'name' that's part of a group. Inline validation is invoked via the 
+        @@z3cform_validate_field view.
+        
+            >>> request = make_request(form={'form.widgets.name': ''}, lang='de',)
+            >>> context._REQUEST = request
+            >>> form = MyGroupFormWrapper(context, request)
+            >>> z3cform_validate_field = getMultiAdapter((form, request), name=u"z3cform_validate_field")
+        
+        The validation view takes an Attribute fieldset with the index of the group.
+        The error is only shown when warning_only is explicitly switched off (matching
+        the behavior of archetypes.)
+        
+            >>> z3cform_validate_field(fname=u'form.widgets.name', fset="0")
+            '{"errmsg": "Erforderliche Eingabe fehlt."}'
+        
+        Forms embedded inside normal views
+        -----------------------------------
+        
+        It's possible to embed z3c.form Forms inside a normal BrowserView via viewlets,
+        portlets or tiles.
+        
+        Currently the name of the form to be validated is gotten from the URL. For embedded
+        forms this can't work since the URL only has the containing view's name.
+        
+        Until a lasting solution is found, we just make sure that validation
+        doesn't raise an exception if it receives a normal browerview as the supposed
+        form.
+        
+            >>> from zope.publisher.browser import BrowserView
+            >>> class MyNormalView(BrowserView):
+            ...     """ """
+        
+            >>> provideAdapter(adapts=(Interface, IBrowserRequest),
+            ...                provides=Interface,
+            ...                factory=MyNormalView,
+            ...                name=u"my-view")
+        
+        Let's verify that it gets called...
+        
+            >>> context = Bar()
+            >>> request = make_request()
+            >>> view = getMultiAdapter((context, request), name=u"my-view")
+            >>> view
+            <MyNormalView object ...>
+        
+        Inline validation is invoked via the @@z3cform_validate_field view. But
+        in this case no validation output should be returned.
+        
+            >>> context = Bar()
+            >>> request = make_request(form={'form.widgets.age': 'Title'})
+            >>> z3cform_validate_field = getMultiAdapter((view, request), name=u"z3cform_validate_field")
+            >>> z3cform_validate_field(fname=u'form.widgets.age')
+        
+        Changelog
+        =========
+        
+        0.7.7 (2014-10-20)
+        ------------------
+        
+        - Handle an error where group.__name__ being None caused fieldsets to be given
+          the id 'fieldset-none', which causes issues the inline validation.
+          [esteele]
+        
+        
+        0.7.6 (2014-01-27)
+        ------------------
+        
+        - Translate fieldset labels correctly.
+          [maurits]
+        
+        - We can add enable_unload_protection = False on a Form to disable unload protection.
+          [thomasdesvenain]
+        
+        - Add '.empty' css class to fields that have no value.
+          [cedricmessiant]
+        
+        - Indicate 'error' status when reporting errors from group forms.
+          [davisagli]
+        
+        - Replace deprecated test assert statements.
+          [timo]
+        
+        - Solve #13567: InlineValidation broken for MultiWidget.
+          [sunew]
+        
+        
+        0.7.5 (2013-10-09)
+        ------------------
+        
+        - Fix an issue with the inline validator, KSS was giving values for
+          fieldset attr than can't be converted to an integer.
+          [jpgimenez]
+        - Inline validation supports fieldset names instead of integer-indexed naming.
+          [seanupton]
+        - Use group __name__, not label value to have stable fieldset_name used in
+          DOM id, and for inline validation.
+          [seanupton]
+        - Inline validation robustness if no field name is passed by client request.
+          [seanupton]
+        - Support for IDict in the MultiWidget. Makes it compatible with z3c.form 3.0 (released 2013-06-24)
+          [djay]
+        - Give fieldset legends ids based on their name, for compatibility with
+          Archetypes.
+          [davisagli]
+        - Fixed chechbox inline validation.
+          [kroman0]
+        
+        
+        0.7.4 (2013-08-13)
+        ------------------
+        
+        - Display 'required' span only on input mode.
+          [cedricmessiant]
+        
+        
+        0.7.3 (2013-05-23)
+        ------------------
+        
+        - Added possibility to use z3c.form's ContentProviders [gbastien, jfroche, gotcha]
+        
+        
+        0.7.2 (2013-03-05)
+        ------------------
+        
+        - Add a macro and slot to the @@ploneform-render-widget templates
+          so it's possible to override the widget rendering without
+          changing the markup surrounding it.
+          [davisagli]
+        
+        - Restored support for contents without acquisition chain
+          [keul]
+        
+        
+        0.7.1 (2013-01-01)
+        ------------------
+        
+        
+        - Overrode ObjectSubForm for IObject field in order to provide get_closest_content
+          method. Now it is possible to guess the closest content from a Multiwidget subform.
+          [gborelli]
+        
+        - Added utils.closest_content from plone.formwidget.contenttree.utils
+          [gborelli]
+        
+        - Primarily use form name for 'kssattr-formname' form attribute.
+          [vipod]
+        
+        - Rename the 'fieldset.current' hidden input to 'fieldset' for consistency
+          with Archetypes.
+          [davisagli]
+        
+        
+        0.7.0 (2012-10-16)
+        ------------------
+        
+        - Support inline validation without depending on KSS.
+          [davisagli]
+        
+        - Fix a case where the widget broke if its form's content was a dict.
+          [davisagli]
+        
+        
+        0.6.1 (2012-08-30)
+        ------------------
+        
+        - Fix the single checkbox widget to cope with widgets with a __call__ method.
+          [davisagli]
+        
+        
+        0.6.0 (2012-05-25)
+        ------------------
+        
+        - Remove hard-coded &#x25a0; (box) markers from required labels to match
+          changes made in sunburst/public.css and archetypes. Fixes double required
+          markers in Plone 4.2rc1.
+        
+        - Pull form help inside label tag and make it a span rather than a div. The
+          purpose is to improve accessibility by making the semantic connection between
+          label and help. Related to http://dev.plone.org/ticket/7212
+        
+        - Use ViewPageTemplateFile from zope.browserpage.
+          [hannosch]
+        
+        0.5.8 (2012-05-07)
+        ------------------
+        
+        - Prevent empty error divs from being generated if errors are already associated
+          with a field.
+          [davidjb]
+        
+        0.5.7 - 2011-11-26
+        ------------------
+        
+        - Corrected formatting for errors on the FieldWidgets object (i.e. from
+          invariants). This closes http://code.google.com/p/dexterity/issues/detail?id=238
+          [davisagli]
+        
+        - Added the ``i18n:domain`` attribute in the first ``div`` of ``widget.pt`` in order to make the
+          "required" tooltip translatable. Fixes http://dev.plone.org/plone/ticket/12209
+          [rafaelbco]
+        
+        0.5.6 - 2011-06-30
+        ------------------
+        
+        - Make sure group errors get styled like field errors.
+          [davisagli]
+        
+        - Include group and field descriptions as structure.
+          [davisagli]
+        
+        0.5.5 - 2011-06-26
+        ------------------
+        
+        - Make it possible to add a custom CSS class to a form by setting its
+          ``css_class`` attribute.
+          [davisagli]
+        
+        - Match plone.z3cform's template in including the form description as
+          structure.
+          [davisagli]
+        
+        0.5.4 - 2011-05-04
+        ------------------
+        
+        - Customize templates for multi and object widgets for more consistent styling.
+          [elro]
+        
+        - Remove dependency on zope.app.component.
+          [davisagli]
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        - Raise LookupError when terms are not found (e.g. they are no longer visible due to security)
+          [lentinj]
+        
+        
+        0.5.3 - 2011-01-22
+        ------------------
+        
+        - Fix test setup in Zope 2.10.
+          [davisagli]
+        
+        
+        0.5.2 - 2011-01-18
+        ------------------
+        
+        - Don't use collective.testcaselayer based IntegrationTestLayer as it leads to
+          PicklingError on Plone 4.1.
+          [elro]
+        
+        - Change inline validation to match archetypes behavior - add a warning class and
+          omit the error message.
+          [elro]
+        
+        
+        0.5.1 - 2010-11-02
+        ------------------
+        
+        - Make sure form.extractData() does not raise an AttributeError if the method is
+          called before the form is available (first page load).
+          [timo]
+        
+        - This package now uses the plone i18n domain.
+          [vincentfretin]
+        
+        - Added option to override <form action="">.
+          [miohtama]
+        
+        - Updated README regarding form action and method.
+          [miohtama]
+        
+        
+        0.5.0 - 2010-04-20
+        ------------------
+        
+        - Render errors from group form widget manager validators.  Fixes
+          http://code.google.com/p/dexterity/issues/detail?id=96
+          [davisagli]
+        
+        - Default to showing the default fieldset, rather than the first non-default
+          fieldset.
+          [davisagli]
+        
+        - Replace the required field indicator image with a unicode box, refs
+          http://dev.plone.org/plone/ticket/10352
+          [davisagli, limi]
+        
+        - Replaced the existing radiobutton-based boolean widget with the standard
+          single checkbox Plone version.
+          [limi]
+        
+        - Add @@ploneform-render-widget view, so that the widget chrome can be
+          customized for particular widget types.
+          [davisagli]
+        
+        - Added slots to the ``titlelessform`` macro. See ``README.txt`` in
+          ``plone.z3cform`` for details.
+          [optilude, davisagli]
+        
+        - Cleaned up templates to match Plone 4 conventions.
+          [optilude]
+        
+        - Made templates and inline validation work with standalone forms as supported
+          by plone.z3cform 0.6 and later.
+          [optilude]
+        
+        - Installed a browser layer IPloneFormLayer with this package's extension
+          profile. This inherits from z3c.form's IFormLayer, allowing the default
+          widgets to work. You should always install this package in
+          portal_quickinstaller before using z3c.form forms in Plone.
+          [optilude]
+        
+        - Made the textlines widget the default for sequence types with text/ascii
+          line value types. The default widget from z3c.form is too confusing.
+          [optilude]
+        
+        - Use form method defined in form class. This allows HTTP GET forms.
+          Before method was hardcoded to "post" in the template. [miohtama]
+        
+        
+        0.4.9 - 2010-01-08
+        ------------------
+        
+        - Remove unused (and broken on Plone 4) lookup of the current user's WYSIWYG
+          editor preference.  The wysiwyg_support template does this for us.
+          [davisagli]
+        
+        
+        0.4.8 - 2009-10-23
+        ------------------
+        
+        - Made the KSS validator use publish traversal instead of OFS traversal to find
+          the form. This makes it usable with forms reached by custom IPublishTraverse
+          adapters.
+          [davisagli]
+        
+        - Added enable_form_tabbing option to not transform fieldsets into tabs.
+          [vincentfretin]
+        
+        - Added an id to the generated form.
+          [vincentfretin]
+        
+        - Fixed issue in macros.pt: fieldset.current hidden input was never generated.
+          [vincentfretin]
+        
+        
+        0.4.7 - 2009-09-25
+        ------------------
+        
+        - Set plone i18n domain for "Info" and "Error" messages in macros.pt so they are translated.
+          [vincentfretin]
+        
+        
+        0.4.6 - 2009-07-26
+        ------------------
+        
+        - Include plone.z3cform's overrides.zcml from our own overrides.zcml.
+          [optilude]
+        
+        - Updated to collective.z3cform.datetimewidget>=0.1a2 to fix a ZCML conflict
+          with z3c.form.
+          [davisagli]
+        
+        
+        0.4.5 - 2009-05-25
+        ------------------
+        
+        - Made the KSS form support conditional on both kss.core and Archetypes being
+          installed.
+          [hannosch]
+        
+        - Use the date/time widgets from collective.z3cform.datetimewidget as the default
+          widget for Date and Datetime fields.
+          [davisagli]
+        
+        
+        0.4.4 - 2009-05-03
+        ------------------
+        
+        - Made the KSS validator use traversal instead of getMultiAdapter() to find
+          the form. This makes it work on add forms.
+          See http://code.google.com/p/dexterity/issues/detail?id=27
+          [optilude]
+        
+        
+        0.4.3 - 2009-04-17
+        ------------------
+        
+        - Added a display template for the WYSIWYG widget.
+          [optilude]
+        
+        - Make the ?fieldset.current query string variable work. Set it to the id
+          of a fieldset other than default to pre-select a different fieldset, e.g.
+          .../@@formview?fieldset.current=3
+          [optilude]
+        
+        - Hide the 'default' fieldset if there's nothing to show there.
+          [optilude]
+        
+        - Provide 'portal' variable in wysiwyg template, as its used by some editors.
+          [davisagli]
+        
+        
+        0.4.2 - 2008-09-04
+        ------------------
+        
+        - Make the WYSIWYG widget work also for non-Acquisition wrapped
+          content.
+        
+        
+        0.4.1 - 2008-08-21
+        ------------------
+        
+        - Removed maximum version dependency on zope.component. This should be left
+          to indexes, known good sets or explicit version requirements in buildouts.
+          If you work with zope.component >= 3.5 you will also need five.lsm >= 0.4.
+          [hannosch]
+        
+        - Make use of new plone.z3cform support for looking up the layout template by
+          adapter. This means that forms now no longer need to depend on
+          plone.app.z3cform unless they want to use Plone-specific widgets.
+        
+        
+        0.4.0 - 2008-07-31
+        ------------------
+        
+        - Add inline validation support with KSS
+        
+        - Require zope.component <= 3.4.0 to prevent compatibility issues with
+          five.localsitemanager, of which a buggy version (0.3) is pinned by
+          plone.recipe.plone 3.1.4.  Upgrade to this version if you're seeing::
+        
+            ...
+            Module five.localsitemanager.registry, line 176, in registeredUtilities
+            ValueError: too many values to unpack
+        
+        
+        0.3.2 - 2008-07-25
+        ------------------
+        
+        - Fixed a bug in macros.pt where 'has_groups' and 'show_default_label'
+          for fieldsets were set in the 'form' macro, rendering the 'field'
+          macro unusable by itself.
+        
+        
+        0.3.1 - 2008-07-24
+        ------------------
+        
+        - Fixed a bug where we would use the form macros defined in
+          plone.z3cform instead of our own.
+        
+        
+        0.3 - 2008-07-24
+        ----------------
+        
+        - Create this package from Plone-specific bits that have been factored
+          out of plone.z3cform.
+        
+        
+Keywords: zope plone form widget template
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: Programming Language :: Python

@@ -1,0 +1,55 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:browser="http://namespaces.zope.org/browser"
+   i18n_domain="zope"
+   package="zope.traversing"
+   >
+
+  <include package="zope.browserpage" file="meta.zcml" />
+  <include package="zope.component" file="meta.zcml" />
+  <include package="zope.publisher" file="meta.zcml" />
+  <include package="zope.security" file="meta.zcml" />
+
+  <include package="zope.browserresource" />
+  <include package="zope.container" />
+  <include package="zope.location" />
+  <include package="zope.publisher" />
+  <include package="zope.security" />
+  <include package="zope.site" />
+  <include package="zope.traversing" />
+
+  <browser:defaultView name="index.html" />
+  <include package="zope.traversing.browser" />
+
+  <browser:page
+      for="zope.site.interfaces.IFolder"
+      permission="zope.View"
+      class="zope.traversing.tests.test_vhosting.MyFolderPage"
+      name="index.html" attribute="index"
+      />
+
+  <browser:page
+      name="index.html"
+      for="zope.traversing.tests.test_vhosting.MyPageTemplate"
+      class="zope.traversing.tests.test_vhosting.MyPageEval"
+      attribute="index"
+      permission="zope.View"
+      />
+
+  <class class="zope.traversing.tests.test_vhosting.MyPageTemplate">
+    <factory
+        id="zope.traversing.tests.test_vhosting.MyPageTemplate"
+        />
+    <require
+        permission="zope.View"
+        attributes="__call__ render"
+        />
+  </class>
+
+  <!-- Principals -->
+
+  <securityPolicy
+    component="zope.security.simplepolicies.PermissiveSecurityPolicy" />
+
+
+</configure>

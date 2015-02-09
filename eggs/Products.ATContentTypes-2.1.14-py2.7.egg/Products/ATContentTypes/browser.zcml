@@ -1,0 +1,51 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+    <!-- Enable next/previous links for folders -->
+    <adapter factory=".browser.nextprevious.ATFolderNextPrevious" />
+
+    <browser:view
+        for=".interfaces.IATTopic"
+        name="jsoncriteria"
+        class=".browser.criteria.JSONCriteriaForField"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for=".interfaces.IATFolder"
+        name="ics_view"
+        class=".browser.calendar.CalendarView"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for=".interfaces.IATBTreeFolder"
+        name="ics_view"
+        class=".browser.calendar.CalendarView"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for=".interfaces.IATTopic"
+        name="ics_view"
+        class=".browser.calendar.TopicCalendarView"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="Products.CMFCore.interfaces.ISiteRoot"
+        name="ics_view"
+        class=".browser.calendar.CalendarView"
+        permission="zope2.View"
+        />
+
+
+    <browser:page
+        for="Products.ATContentTypes.interfaces.file.IFileContent"
+        name="download"
+        class=".browser.download.DownloadArchetypeFile"
+        permission="zope2.View"
+        />
+
+</configure>

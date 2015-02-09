@@ -1,0 +1,5 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta">
+  <test test_string="f.g meta has been loaded" />
+</configure>

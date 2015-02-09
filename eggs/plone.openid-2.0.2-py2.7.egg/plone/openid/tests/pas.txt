@@ -1,0 +1,29 @@
+Pluggable Authentication Service plugin
+=======================================
+
+Lets start with some initial setup. First we create a plugin:
+
+  >>> from plone.openid.plugins.oid import OpenIdPlugin
+  >>> plugin=OpenIdPlugin("openid")
+
+Next we create a fake request:
+
+  >>> from Testing.makerequest import makerequest
+  >>> plugin=makerequest(plugin)
+  >>> request=plugin.REQUEST
+
+Lets  log all exceptions, which is useful for debugging. 
+
+  >>> self.portal.error_log._ignored_exceptions = ()
+  >>> self.portal.left_slots = self.portal.right_slots = []
+
+
+Login challenge
+---------------
+
+The login sequence works by hooking into a form submit containing an
+identity URL and redirecting to an OpenID server.
+
+  >>> request.form["__ac_identity_url"]="http://plone.myopenid.com"
+  >>> plugin.extractCredentials(request)
+

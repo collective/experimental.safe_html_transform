@@ -1,0 +1,22 @@
+setuptools
+five.formlib
+plone.protect
+plone.app.controlpanel >=2.1b1
+plone.app.layout
+zope.component
+zope.formlib
+zope.i18nmessageid
+zope.interface
+zope.schema
+zope.site
+Products.CMFPlone
+Products.CMFCore
+Products.PlonePAS
+Products.statusmessages
+Zope2 >= 2.12.3
+ZODB3
+
+[test]
+zope.testing
+Products.PloneTestCase
+Pillow

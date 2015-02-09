@@ -1,0 +1,291 @@
+Metadata-Version: 1.1
+Name: Products.DCWorkflow
+Version: 2.2.4
+Summary: DCWorkflow product for the Zope Content Management Framework
+Home-page: http://pypi.python.org/pypi/Products.DCWorkflow
+Author: Zope Foundation and Contributors
+Author-email: zope-cmf@zope.org
+License: ZPL 2.1 (http://www.zope.org/Resources/License/ZPL-2.1)
+Description: =====================
+         Products.DCWorkflow
+        =====================
+        
+        This product provides fully customizable workflows for the CMF 
+        portal_workflow tool.
+        
+        Usage
+        =====
+        
+        To see an example, after installing DCWorkflow, using the "Contents"
+        tab of your portal_workflow instance add a "CMF default workflow (rev 2)"
+        instance. 
+        
+        Developing a workflow
+        =====================
+        
+        This tool is easiest to use if you draw a state diagram first.  Your
+        diagram should have:
+        
+        - States (bubbles)
+        
+        - Transitions (arrows)
+        
+        - Variables (both in states and transitions)
+        
+        Remember to consider all the states your content can be in.  Consider
+        the actions users will perform to make the transitions between states.
+        And consider not only who will be allowed to perform what functions,
+        but also who will be *required* to perform certain functions.
+        
+        On the "States" tab, add a state with a simple ID for each state on
+        your diagram.  On the "Transitions" tab, add a transition with a simple
+        ID for each group of arrows that point to the same state and have
+        similar characteristics.  Then for each state choose which transitions
+        are allowed to leave that state.
+        
+        Variables are useful for keeping track of things that aren't very well
+        represented as separate states, such as counters or information about
+        the action that was last performed.  You can create variables that get
+        stored alongside the workflow state and you can make those variables
+        available in catalog searches.  Some variables, such as the review
+        history, should not be stored at all.  Those variables are accessible
+        through the getInfoFor() interface.
+        
+        Worklists are a way to make people aware of tasks they are required
+        to perform.  Worklists are implemented as a catalog query that puts
+        actions in the actions box when there is some task the user needs to
+        perform.  Most of the time you just need to enter a state ID,
+        a role name, and the information to put in the actions box.
+        
+        You can manage all of the actions a user can perform on an object by
+        setting up permissions to be managed by the workflow.  Using the
+        "Permissions" tab, select which permissions should be state-dependent.
+        Then in each state, using the "permissions" tab, set up the
+        role to permission mappings appropriate for that state.
+        
+        Finally, you can extend the workflow with scripts.  Scripts can be
+        External Methods, Python Scripts, DTML methods, or any other callable
+        Zope object.  They are accessible by name in expressions.  Scripts
+        are invoked with a state_change object as the first argument; see
+        expressions.stx.
+        
+        Once you've crafted your workflow, you hook it up with a content type
+        by using the portal_workflow top-level "Workflows" tab.  Specify the
+        workflow name in the target content type's box.
+        
+        ------------------------------------------------------------
+        
+        Products.DCWorkflow Changelog
+        =============================
+        
+        2.2.4 (2011-11-01)
+        ------------------
+        
+        - Fixed issue with non-ascii chars in workflow definitions
+        
+        - Don't crash worklist's ``manage_main`` if variables are Expression objects.
+          (https://bugs.launchpad.net/zope-cmf/+bug/731394)
+        
+        - Allow renaming of states, transitions, variables and worklists
+        
+        
+        2.2.3 (2011-01-12)
+        ------------------
+        
+        - Explicitly include permissions from CMFCore, which are needed now that
+          they aren't declared in Five in Zope 2.13.
+        
+        
+        2.2.2 (2010-11-11)
+        ------------------
+        
+        - Fixed Chameleon compatibility in `state_groups.pt`.
+        
+        - Workflow states cannot be renamed through the ZMI.
+          (https://bugs.launchpad.net/zope-cmf/+bug/625722)
+        
+        
+        2.2.1 (2010-07-04)
+        ------------------
+        
+        - Deal with deprecation warnings for Zope 2.13.
+        
+        
+        2.2.0 (2010-01-04)
+        ------------------
+        
+        - no changes from version 2.2.0-beta
+        
+        
+        2.2.0-beta (2009-12-06)
+        -----------------------
+        
+        - no changes from version 2.2.0-alpha
+        
+        
+        2.2.0-alpha (2009-11-13)
+        ------------------------
+        
+        - moved the Zope dependency to version 2.12.0b3dev
+        
+        - Worklists: The catalog variable match setting can now be a 
+          formatted string (as before), but also a qualified TAL 
+          expression, meaning it has a prefix like "string:", "python:".
+          (https://bugs.launchpad.net/zope-cmf/+bug/378292)
+        
+        - exportimport: Support for instance creation guards and manager 
+          bypass added.
+          (https://bugs.launchpad.net/zope-cmf/+bug/308947)
+        
+        - Cleaned up / normalized imports:
+        
+          o Don't import from Globals;  instead, use real locations.
+        
+          o Make other imports use the actual source module, rather than an
+            intermediate (e.g., prefer importing 'ClassSecurityInfo' from
+            'AccessControl.SecurityInfo' rather than from 'AccessControl').
+        
+          o Avoid relative imports, which will break in later versions of Python.
+        
+        - Strip trailing newlines in order to properly match with a msgid when
+          translating transition descriptions.
+        
+        - Workflow UI: Remove ancient cruft to accommodate the proprietary
+          (and long dead) base_cms product.
+        
+        - Worklists and Transitions: Add icon expression properties to worklist
+          and transition actions and their GenericSetup profiles.
+        
+        - Fixed an import error (Products.PageTemplates.TALES is gone on 
+          Zope trunk).  Because we require Zope >= 2.10, we don't need a
+          BBB conditional import.
+        
+        
+        2.1.2 (2008-09-13)
+        ------------------
+        
+        - test fixture: Fix failng tests with GenericSetup > 1.3 by explicitly
+          loading GS' meta.zcml during setup.
+        
+        
+        2.1.2-beta (2008-08-26)
+        -----------------------
+        
+        - completed devolution from monolithic CMF package into its component
+          products that are distributed as eggs from PyPI.
+        
+        
+        2.1.1 (2008-01-06)
+        ------------------
+        
+        - no changes
+        
+        
+        2.1.1-beta(2007-12/29)
+        ----------------------
+        
+        - Testing: Derive test layers from ZopeLite layer if available.
+        
+        - exportimport: Scripts with invalid types imported
+          after scripts with valid types will no longer place the valid
+          script twice.  Scripts can also now be specified with meta_types
+          other than the hard-coded meta_types.
+        
+        - AfterTransitionEvent now passes along the new status of the
+          object, just as StateChangeInfo passes on the new status to
+          after-transition scripts.
+          (http://www.zope.org/Collectors/CMF/490)
+        
+        
+        2.1.0 (2007-08-08)
+        ------------------
+        
+        - Fixed all componentregistry.xml files to use plain object paths and strip
+          and slashes. GenericSetup does only support registering objects which are
+          in the site root.
+        
+        
+        2.1.0-beta2 (2007-07-12)
+        ------------------------
+        
+        - moved the Zope dependency to version 2.10.4
+        
+        - Remove antique usage of marker attributes in favor of interfaces,
+          leaving BBB behind for places potentially affecting third-party code.
+          (http://www.zope.org/Collectors/CMF/440)
+        
+        - Add POST-only protections to security critical methods.
+          http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2007-0240)
+        
+        - Workflow definition instances now have a description field
+          (http://www.zope.org/Collectors/CMF/480)
+        
+        
+        2.1.0-beta (2007-03-09)
+        -----------------------
+        
+        - moved the Zope dependency to verson 2.10.2
+        
+        - Tool lookup and registration is now done "the Zope 3 way" as utilities, see
+          http://svn.zope.org/CMF/branches/2.1/docs/ToolsAreUtilities.stx?view=auto
+        
+        - Merged patches from Martin Aspeli to enable generating events before
+          and after DCWorkflow transitions, and in the 'notify' methods of the
+          workflow tool (http://www.zope.org/Collectors/CMF/461).
+        
+        
+        2.1.0-alpha2 (2006-11-23)
+        -------------------------
+        
+        - moved the Zope dependency to version 2.10.1
+        
+        - Fixed test breakage induced by use of Z3 pagetemplates in Zope 2.10+.
+        
+        - browser views: Added some zope.formlib based forms.
+        
+        - testing: Added test layers for setting up ZCML.
+        
+        
+        2.1.0-alpha (2006-10-09)
+        ------------------------
+        
+        - skins: Changed encoding of translated portal_status_messages.
+          Now getBrowserCharset is used to play nice with Five forms. Customized
+          setRedirect and getMainGlobals scripts have to be updated.
+        
+        - Profiles: All profiles are now registered by ZCML.
+        
+        - ZClasses: Removed unmaintained support for ZClasses.
+          Marked the 'initializeBases*' methods as deprecated.
+        
+        - Content: Added IFactory utilities for all content classes.
+          They are now used by default instead of the old constructor methods.
+        
+        - Content: All content classes are now registered by ZCML.
+          ContentInit is still used to register oldstyle constructors.
+        
+        - setup handlers: Removed support for CMF 1.5 CMFSetup profiles.
+        
+        
+        Earlier releases
+        ----------------
+        
+        For a complete list of changes before version 2.1.0-alpha, see the HISTORY.txt
+        file on the CMF-2.1 branch:
+        http://svn.zope.org/CMF/branches/2.1/HISTORY.txt?view=auto
+        
+        
+        ------------------------------------------------------------
+        
+        Download
+        ========
+Keywords: web application server zope zope2 cmf
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Libraries :: Application Frameworks

@@ -1,0 +1,82 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+
+    <!-- Locking -->
+
+    <subscriber
+       for="..interfaces.ICheckoutEvent"
+       handler=".locking.handleCheckout"
+       />
+       
+    <subscriber
+       for="..interfaces.ICheckinEvent"
+       handler=".locking.handleCheckin"
+       />
+
+    <subscriber
+       for="..interfaces.ICancelCheckoutEvent"
+       handler=".locking.handleCancelCheckout"
+       />
+
+    <subscriber
+       for="..interfaces.IWorkingCopyDeletedEvent"
+       handler=".locking.handleWCDeleted"
+       />
+
+    <!-- Marker  -->
+
+    <subscriber
+       for="..interfaces.ICheckoutEvent"
+       handler=".marker.handleCheckout"
+       />
+
+    <subscriber
+       for="..interfaces.ICheckinEvent"
+       handler=".marker.handleCheckin"
+       />
+
+    <subscriber
+       for="..interfaces.ICancelCheckoutEvent"
+       handler=".marker.handleCancelCheckout"
+       />
+
+    <subscriber
+       for="..interfaces.IWorkingCopyDeletedEvent"
+       handler=".marker.handleWCDeleted"
+       />
+
+
+    <!-- Metadata -->
+
+    <subscriber
+       for="..interfaces.ICheckoutEvent"
+       handler=".metadata.handleCheckout"
+       />
+
+    <!-- Versioning -->
+
+    <subscriber
+       for="..interfaces.IBeforeCheckoutEvent"
+       handler=".versioning.handleBeforeCheckout"
+       />
+
+    <subscriber
+       for="..interfaces.IAfterCheckinEvent"
+       handler=".versioning.handleAfterCheckin"
+       />
+
+
+    <!-- Workflow -->
+
+    <subscriber
+       for="..interfaces.ICheckoutEvent"
+       handler=".workflow.handleCheckout"
+       />
+
+    <subscriber
+       for="..interfaces.ICheckinEvent"
+       handler=".workflow.handleCheckin"
+       />
+
+</configure>

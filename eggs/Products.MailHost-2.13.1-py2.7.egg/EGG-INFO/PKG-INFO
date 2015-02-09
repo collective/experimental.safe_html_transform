@@ -1,0 +1,46 @@
+Metadata-Version: 1.0
+Name: Products.MailHost
+Version: 2.13.1
+Summary: zope.sendmail integration for Zope 2.
+Home-page: http://pypi.python.org/pypi/Products.MailHost
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        The MailHost product provides support for sending email from within the Zope
+        environment using MailHost objects.
+        
+        An optional character set can be specified to automatically encode unicode
+        input, and perform appropriate RFC 2822 header and body encoding for the
+        specified character set. Full python email.Message.Message objects may be sent.
+        
+        Email can optionally be encoded using Base64, Quoted-Printable or UUEncode
+        encoding (though automatic body encoding will be applied if a character set is
+        specified).
+        
+        MailHost provides integration with the Zope transaction system and optional
+        support for asynchronous mail delivery. Asynchronous mail delivery is
+        implemented using a queue and a dedicated thread processing the queue. The
+        thread is (re)-started automatically when sending an email. The thread can be
+        started manually (in case of restart) by calling its
+        manage_restartQueueThread?action=start method through HTTP. There is currently
+        no possibility to start the thread at Zope startup time.
+        
+        Supports TLS/SSL encryption (requires Python compiled with SSL support).
+        
+        Changelog
+        =========
+        
+        2.13.1 (2010-09-25)
+        -------------------
+        
+        - LP #642728: Fixed TypeError on nested multi part messages in MailHost.
+        
+        2.13.0 (2010-07-13)
+        -------------------
+        
+        - Released as separate package.
+        
+Platform: UNKNOWN

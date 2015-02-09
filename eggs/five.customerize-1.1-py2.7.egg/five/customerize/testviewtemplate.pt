@@ -1,0 +1,10 @@
+<html metal:use-macro="context/@@standard_macros/view"
+      i18n:domain="zope">
+  <body>
+  <div metal:fill-slot="body">
+
+    A simple view template with a class
+    <span tal:replace="view/foo_method"/>
+  </div>
+  </body>
+</html>

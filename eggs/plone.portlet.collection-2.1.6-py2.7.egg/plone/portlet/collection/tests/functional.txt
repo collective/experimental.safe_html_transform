@@ -1,0 +1,131 @@
+====================
+A functional doctest
+====================
+
+Set up testbrowser::
+
+    >>> app = layer['app']
+    >>> from plone.testing.z2 import Browser
+    >>> browser = Browser(app)
+    >>> browser.handleErrors = False
+    >>> browser.addHeader('Authorization', 'Basic admin:secret')
+    >>> portal = layer['portal']
+    >>> portal_url = 'http://nohost/plone'
+
+    >>> browser.open(portal_url)
+    >>> browser.getLink(url=portal_url + "/folder_factories").click()
+    >>> browser.getControl(label="Page").selected = True
+    >>> browser.getControl(name="form.button.Add").click()
+    >>> browser.getControl(name="title").value = "Test Document"
+    >>> browser.getControl(name="form.button.save").click()
+    >>> 'Changes saved' in browser.contents
+    True
+
+Create a collection for testing purposes. Just make it a collection of
+everything.
+
+    >>> browser.open(portal_url + '/createObject?type_name=Collection')
+    >>> browser.getControl(name="title").value = "Test Collection"
+    >>> browser.getControl(name="addindex").value = ["portal_type"]
+    >>> browser.getControl('Add').click()
+    >>> browser.getControl(name="addoperator").value = ['plone.app.querystring.operation.selection.is']
+    >>> browser.getControl('Add').click()
+    >>> browser.getControl(name='query.v:records:list').value = ['Document']
+    >>> browser.getControl(name="form.button.save").click()
+    >>> browser.url == portal_url + "/test-collection/"
+    True
+
+Now open the portlet manager for the site.
+
+    >>> browser.open(portal_url + '/@@manage-portlets')
+
+Use the 'Add portlet' select box to add a collection portlet.
+
+    >>> leftcolumn_form = browser.getForm(action=portal_url, index=1)
+    >>> add_portlet_select = leftcolumn_form.getControl(name=":action", index=0)
+    >>> val = "/++contextportlets++plone.leftcolumn/+/plone.portlet.collection.Collection"
+    >>> add_portlet_select.getControl(value=val).selected = True
+    >>> leftcolumn_form.submit()
+    >>> import re  # '\s' is white space, '+' is at least one, '*' is zero or more matches.
+    >>> re.search('<h1\s+class="documentFirstHeading"\s*>\s*Add Collection Portlet\s*</h1>', browser.contents) is not None
+    True
+
+Use your new collection for testing. It should already be available at the root
+of the site. Show only two items to make the test sanely terse.
+
+    >>> browser.getControl(name="form.target_collection").getControl(value="/test-collection").selected = True
+    >>> browser.getControl(name="form.target_collection.update").click()
+    >>> browser.getControl(name="form.header").value = "Test Collection"
+    >>> browser.getControl(label="Limit").value = "2"
+    >>> browser.getControl(name="form.actions.save").click()
+    >>> browser.url == portal_url + "/@@manage-portlets"
+    True
+
+Go to the home page and see if the portlet looks OK.
+
+    >>> browser.open(portal_url)
+    >>> import re
+    >>> match = re.search('<dl class="portlet portletCollection.*?</dl>', browser.contents, flags=re.DOTALL)
+    >>> portlet_contents = match.group()
+    >>> def strip_white_space(contents):
+    ...     lines = [line.strip() for line in contents.splitlines() if line.strip()]
+    ...     return '\n'.join(lines)
+    >>> print strip_white_space(portlet_contents)
+    <dl class="portlet portletCollection portlet-collection-test-collection">
+    <dt class="portletHeader">
+    <span class="portletTopLeft"></span>
+    <a href="http://nohost/plone/test-collection">
+    <span>Test Collection</span>
+    </a>
+    <span class="portletTopRight"></span>
+    </dt>
+    <dd class="portletItem odd">
+    <a href="http://nohost/plone/test-document" class="tile contenttype-document" title="">
+    Test Document
+    </a>
+    </dd>
+    <dd class="portletFooter">
+    <span class="portletBottomLeft"></span>
+    <span>
+    <a href="http://nohost/plone/test-collection">
+    <span class="hiddenStructure">Test Collection - </span>
+    <span>More&hellip;</span>
+    </a>
+    </span>
+    <span class="portletBottomRight"></span>
+    </dd>
+    </dl>
+
+Now test what happens if we toggle the "show more link" option.
+
+    >>> browser.open(portal_url + '/@@manage-portlets')
+    >>> browser.getLink(url="http://nohost/plone/++contextportlets++plone.leftcolumn/test-collection/edit?referer=http%3A//nohost/plone/%40%40manage-portlets").click()
+    >>> re.search('<h1\s+class="documentFirstHeading"\s*>\s*Edit Collection Portlet\s*</h1>', browser.contents) is not None
+    True
+    >>> browser.getControl(label="Show more... link").selected = False
+    >>> browser.getControl(name="form.actions.save").click()
+    >>> print browser.url
+    http://nohost/plone/@@manage-portlets
+
+Go back to the home page and see if it looks OK.
+
+    >>> browser.open(portal_url)
+    >>> match = re.search('<dl class="portlet portletCollection.*?</dl>', browser.contents, flags=re.DOTALL)
+    >>> portlet_contents = match.group()
+    >>> print strip_white_space(portlet_contents)
+    <dl class="portlet portletCollection portlet-collection-test-collection">
+    <dt class="portletHeader">
+    <span class="portletTopLeft"></span>
+    <span>Test Collection</span>
+    <span class="portletTopRight"></span>
+    </dt>
+    <dd class="portletItem odd">
+    <a href="http://nohost/plone/test-document" class="tile contenttype-document" title="">
+    Test Document
+    </a>
+    </dd>
+    <dd class="portletFooter">
+    <span class="portletBottomLeft"></span>
+    <span class="portletBottomRight"></span>
+    </dd>
+    </dl>

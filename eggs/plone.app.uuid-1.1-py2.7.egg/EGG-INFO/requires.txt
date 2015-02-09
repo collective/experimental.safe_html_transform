@@ -1,0 +1,10 @@
+setuptools
+plone.uuid
+plone.indexer
+zope.publisher
+zope.interface
+
+[test]
+plone.dexterity
+plone.app.testing
+Products.Archetypes >= 1.7

@@ -1,0 +1,36 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="plone.app.workflow">
+
+    <!-- Permissions that Five don't give us -->
+    <permission
+        id="cmf.ChangeLocalRoles"
+        title="Change local roles"
+        />
+
+    <!-- Our custom permissions -->
+    <permission
+        id="plone.DelegateRoles"
+        title="Sharing page: Delegate roles"
+        />
+
+    <permission
+        id="plone.DelegateReaderRole"
+        title="Sharing page: Delegate Reader role"
+        />
+
+    <permission
+        id="plone.DelegateEditorRole"
+        title="Sharing page: Delegate Editor role"
+        />
+
+    <permission
+        id="plone.DelegateContributorRole"
+        title="Sharing page: Delegate Contributor role"
+        />
+
+    <permission
+        id="plone.DelegateReviewerRole"
+        title="Sharing page: Delegate Reviewer role"
+        />
+
+</configure>

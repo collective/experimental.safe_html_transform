@@ -1,0 +1,140 @@
+<configure
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:z3c="http://namespaces.zope.org/z3c"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    xmlns:gs="http://namespaces.zope.org/genericsetup"
+    i18n_domain="collective.z3cform.datetimewidget">
+
+
+    <include package="z3c.form" />
+    <i18n:registerTranslations directory="locales" />
+
+    <!-- WIDGETS -->
+
+    <!-- Date widget -->
+    <class class=".widget_date.DateWidget">
+        <require permission="zope.Public"
+                 interface=".interfaces.IDateWidget" />
+    </class>
+    <!-- use Date by default -->
+    <class class="zope.schema._field.Date">
+        <implements interface=".interfaces.IDateField"/>
+    </class>
+    <adapter
+        factory=".widget_date.DateFieldWidget"
+        for=".interfaces.IDateField
+             z3c.form.interfaces.IFormLayer" />
+
+    <!-- Datetime widget -->
+    <class class=".widget_datetime.DatetimeWidget">
+        <require permission="zope.Public"
+                 interface=".interfaces.IDatetimeWidget" />
+    </class>
+    <!-- use Datetime by default -->
+    <class class="zope.schema._field.Datetime">
+        <implements interface=".interfaces.IDatetimeField"/>
+    </class>
+    <adapter
+        factory=".widget_datetime.DatetimeFieldWidget"
+        for=".interfaces.IDatetimeField
+             z3c.form.interfaces.IFormLayer" />
+
+    <!-- MonthYear widget -->
+    <class class=".widget_monthyear.MonthYearWidget">
+        <require permission="zope.Public"
+                 interface=".interfaces.IMonthYearWidget" />
+    </class>
+
+
+    <!-- CONVERTORS -->
+
+    <adapter
+        factory=".converter.DateDataConverter"
+        for="zope.schema.interfaces.IDate
+             .interfaces.IDateWidget" />
+    <adapter
+        factory=".converter.DatetimeDataConverter"
+        for="zope.schema.interfaces.IDatetime
+             .interfaces.IDatetimeWidget" />
+    <adapter
+        factory=".converter.MonthYearDataConverter"
+        for="zope.schema.interfaces.IDate
+             .interfaces.IMonthYearWidget" />
+
+
+    <!-- TEMPLATES -->
+
+    <!-- Date widget -->
+    <z3c:widgetTemplate
+        mode="display"
+ 		widget=".interfaces.IDateWidget"        
+ 		layer="z3c.form.interfaces.IFormLayer"
+ 		template="templates/display.pt" />
+    <z3c:widgetTemplate
+        mode="input"
+ 		widget=".interfaces.IDateWidget"        
+ 		layer="z3c.form.interfaces.IFormLayer"
+ 		template="templates/date_input.pt" />
+    <z3c:widgetTemplate
+        mode="hidden"
+ 		widget=".interfaces.IDateWidget"        
+ 		layer="z3c.form.interfaces.IFormLayer"
+ 		template="templates/hidden.pt" />
+
+    <!-- Datetime widget -->
+    <z3c:widgetTemplate
+        mode="display"
+ 		widget=".interfaces.IDatetimeWidget"        
+ 		layer="z3c.form.interfaces.IFormLayer"
+ 		template="templates/display.pt" />
+    <z3c:widgetTemplate
+        mode="input"
+ 		widget=".interfaces.IDatetimeWidget"        
+ 		layer="z3c.form.interfaces.IFormLayer"
+ 		template="templates/datetime_input.pt" />
+    <z3c:widgetTemplate
+        mode="hidden"
+ 		widget=".interfaces.IDatetimeWidget"        
+ 		layer="z3c.form.interfaces.IFormLayer"
+ 		template="templates/hidden.pt" />
+
+    <!-- MonthYear widget -->
+    <z3c:widgetTemplate
+        mode="display"
+ 		widget=".interfaces.IMonthYearWidget"        
+ 		layer="z3c.form.interfaces.IFormLayer"
+ 		template="templates/display.pt" />
+    <z3c:widgetTemplate
+        mode="input"
+ 		widget=".interfaces.IMonthYearWidget"        
+ 		layer="z3c.form.interfaces.IFormLayer"
+ 		template="templates/monthyear_input.pt" />
+    <z3c:widgetTemplate
+        mode="hidden"
+ 		widget=".interfaces.IMonthYearWidget"        
+ 		layer="z3c.form.interfaces.IFormLayer"
+ 		template="templates/hidden.pt" />
+
+    <configure zcml:condition="installed Products.GenericSetup">
+        <configure zcml:condition="installed plone.app.jquerytools">
+            <include package="Products.GenericSetup" file="meta.zcml"/>
+          
+            <gs:registerProfile
+              name="default"
+              title="collective.z3cform.datetimewidget"
+              directory="profiles/default"
+              description="Enable plone.app.jquerytools support for date-time widget"
+              provides="Products.GenericSetup.interfaces.EXTENSION"
+              />
+
+            <gs:importStep
+                name="collective.z3cform.datetimewidget_various"
+                title="collective.z3cform.datetimewidget date picker support"
+                description="Enable JQuery Tools date picker"
+                handler="collective.z3cform.datetimewidget.setuphandlers.importVarious" />
+        </configure>
+    </configure>
+
+</configure>

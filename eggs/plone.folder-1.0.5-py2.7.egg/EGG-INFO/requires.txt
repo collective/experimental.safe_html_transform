@@ -1,0 +1,10 @@
+setuptools
+plone.memoize
+zope.interface
+zope.component
+zope.annotation
+zope.container
+
+[test]
+profilehooks
+Products.CMFCore

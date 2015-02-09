@@ -1,0 +1,14 @@
+Package configuration
+=====================
+
+The ``zope.location`` package provides a ZCML file that configures some
+location-related adapters. As we don't have ``zope.copy`` available in our
+test environment, three adapters get registered:
+
+  >>> from zope.configuration.xmlconfig import XMLConfig
+  >>> import zope.location
+
+  >>> XMLConfig('configure.zcml', zope.location)()
+
+  >>> len(list(zope.component.getGlobalSiteManager().registeredAdapters()))
+  3

@@ -1,0 +1,27 @@
+setuptools
+transaction
+zope.formlib >= 4.0
+zope.browser>=1.1
+zope.browserpage>=3.10.1
+zope.browsermenu
+zope.component
+zope.configuration
+zope.datetime
+zope.exceptions
+zope.i18n
+zope.interface
+zope.proxy
+zope.publisher
+zope.schema>=3.5.1dev
+zope.security
+
+[test]
+ZODB3
+zc.sourcefactory
+zope.container
+zope.principalregistry
+zope.site
+zope.traversing
+zope.app.appsetup
+zope.app.publication
+zope.app.testing

@@ -1,0 +1,9 @@
+setuptools
+AccessControl
+Acquisition
+transaction
+Persistence
+zExceptions
+ZODB3
+Zope2 >= 2.13.0dev
+zope.interface

@@ -1,0 +1,270 @@
+<registry>
+
+    <!-- Basic cache settings from plone.caching -->
+    <records interface="plone.caching.interfaces.ICacheSettings" />
+
+    <!-- Purge settings -->
+    <records interface="plone.cachepurging.interfaces.ICachePurgingSettings" />
+
+    <!-- Plone-specific settings from this package -->
+    <records interface="plone.app.caching.interfaces.IPloneCacheSettings" />
+
+    <!-- Default content type/template mappings
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <!-- <record name="plone.app.caching.interfaces.IPloneCacheSettings.contentTypeRulesetMapping">
+        <value purge="False">
+        </value>
+    </record> -->
+
+    <record name="plone.app.caching.interfaces.IPloneCacheSettings.templateRulesetMapping">
+        <value purge="False">
+          <element key="search_rss">plone.content.feed</element>
+          <element key="RSS">plone.content.feed</element>
+          <element key="atom.xml">plone.content.feed</element>
+          <element key="rss.xml">plone.content.feed</element>
+          <element key="itunes.xml">plone.content.feed</element>
+          <element key="sitemap">plone.content.itemView</element>
+          <element key="accessibility-info">plone.content.itemView</element>
+          <element key="file_view">plone.content.itemView</element>
+          <element key="image_view">plone.content.itemView</element>
+          <element key="image_view_fullscreen">plone.content.itemView</element>
+        </value>
+    </record>
+
+    <record name="plone.app.caching.interfaces.IPloneCacheSettings.purgedContentTypes">
+        <value purge="False">
+          <element>File</element>
+          <element>Image</element>
+          <element>News Item</element>
+        </value>
+    </record>
+
+    <!-- Settings for default operations
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <!-- Chain -->
+    <record name="plone.caching.operations.chain.operations">
+        <field type="plone.registry.field.List">
+            <title>Operations</title>
+            <description>A list of operations to call, in order</description>
+            <value_type type="plone.registry.field.DottedName" />
+        </field>
+        <value></value>
+    </record>
+
+
+    <!-- Weak caching -->
+    <record name="plone.app.caching.weakCaching.etags">
+        <field type="plone.registry.field.Tuple">
+            <title>ETags</title>
+            <description>A list of ETag component names to include</description>
+            <value_type type="plone.registry.field.ASCIILine" />
+            <required>False</required>
+        </field>
+        <value>
+        </value>
+    </record>
+    <record name="plone.app.caching.weakCaching.lastModified">
+        <field type="plone.registry.field.Bool">
+            <title>Last-modified validation</title>
+            <description>Turn on Last-Modified headers</description>
+            <required>False</required>
+        </field>
+        <value>False</value>
+    </record>
+    <record name="plone.app.caching.weakCaching.ramCache">
+        <field type="plone.registry.field.Bool">
+            <title>RAM cache</title>
+            <description>Turn on caching in Zope memory</description>
+            <required>False</required>
+        </field>
+        <value>False</value>
+    </record>
+    <record name="plone.app.caching.weakCaching.vary">
+        <field type="plone.registry.field.ASCIILine">
+            <title>Vary</title>
+            <description>Name(s) of HTTP headers that must match for the caching proxy to return a cached response</description>
+            <required>False</required>
+        </field>
+        <value></value>
+    </record>
+    <record name="plone.app.caching.weakCaching.anonOnly">
+        <field type="plone.registry.field.Bool">
+            <title>Only cache for anonymous users</title>
+            <description>Ensure logging users always get a fresh page. Note that if you are caching pages in a proxy cache, you'll still need to use a Vary response header to keep anonymous and authenticated content separate.</description>
+            <required>False</required>
+        </field>
+        <value>False</value>
+    </record>
+
+
+    <!-- Moderate caching -->
+    <record name="plone.app.caching.moderateCaching.smaxage">
+        <field type="plone.registry.field.Int">
+            <title>Shared maximum age</title>
+            <description>Time (in seconds) to cache the response in the caching proxy</description>
+            <required>False</required>
+        </field>
+        <value>86400</value>
+    </record>
+    <record name="plone.app.caching.moderateCaching.etags">
+        <field type="plone.registry.field.Tuple">
+            <title>ETags</title>
+            <description>A list of ETag component names to include</description>
+            <value_type type="plone.registry.field.ASCIILine" />
+            <required>False</required>
+        </field>
+        <value>
+        </value>
+    </record>
+    <record name="plone.app.caching.moderateCaching.lastModified">
+        <field type="plone.registry.field.Bool">
+            <title>Last-modified validation</title>
+            <description>Turn on Last-Modified headers</description>
+            <required>False</required>
+        </field>
+        <value>False</value>
+    </record>
+    <record name="plone.app.caching.moderateCaching.ramCache">
+        <field type="plone.registry.field.Bool">
+            <title>RAM cache</title>
+            <description>Turn on caching in Zope memory</description>
+            <required>False</required>
+        </field>
+        <value>False</value>
+    </record>
+    <record name="plone.app.caching.moderateCaching.vary">
+        <field type="plone.registry.field.ASCIILine">
+            <title>Vary</title>
+            <description>Name(s) of HTTP headers that must match for the caching proxy to return a cached response</description>
+            <required>False</required>
+        </field>
+        <value></value>
+    </record>
+    <record name="plone.app.caching.moderateCaching.anonOnly">
+        <field type="plone.registry.field.Bool">
+            <title>Only cache for anonymous users</title>
+            <description>Ensure logging users always get a fresh page. Note that if you are caching pages in a proxy cache, you'll still need to use a Vary response header to keep anonymous and authenticated content separate.</description>
+            <required>False</required>
+        </field>
+        <value>False</value>
+    </record>
+
+    <!-- Strong caching -->
+    <record name="plone.app.caching.strongCaching.maxage">
+        <field type="plone.registry.field.Int">
+            <title>Maximum age</title>
+            <description>Time (in seconds) to cache the response in the browser or caching proxy</description>
+            <required>False</required>
+        </field>
+        <value>86400</value>
+    </record>
+    <record name="plone.app.caching.strongCaching.smaxage">
+        <field type="plone.registry.field.Int">
+            <title>Shared maximum age</title>
+            <description>Time (in seconds) to cache the response in the caching proxy. Leave blank to use value from "Maximum age" field.</description>
+            <required>False</required>
+        </field>
+        <value></value>
+    </record>
+    <record name="plone.app.caching.strongCaching.etags">
+        <field type="plone.registry.field.Tuple">
+            <title>ETags</title>
+            <description>A list of ETag component names to include</description>
+            <value_type type="plone.registry.field.ASCIILine" />
+            <required>False</required>
+        </field>
+        <value>
+        </value>
+    </record>
+    <record name="plone.app.caching.strongCaching.lastModified">
+        <field type="plone.registry.field.Bool">
+            <title>Last-modified validation</title>
+            <description>Turn on Last-Modified headers</description>
+            <required>False</required>
+        </field>
+        <value>False</value>
+    </record>
+    <record name="plone.app.caching.strongCaching.ramCache">
+        <field type="plone.registry.field.Bool">
+            <title>RAM cache</title>
+            <description>Turn on caching in Zope memory</description>
+            <required>False</required>
+        </field>
+        <value>False</value>
+    </record>
+    <record name="plone.app.caching.strongCaching.vary">
+        <field type="plone.registry.field.ASCIILine">
+            <title>Vary</title>
+            <description>Name(s) of HTTP headers that must match for the caching proxy to return a cached response</description>
+            <required>False</required>
+        </field>
+        <value></value>
+    </record>
+    <record name="plone.app.caching.strongCaching.anonOnly">
+        <field type="plone.registry.field.Bool">
+            <title>Only cache for anonymous users</title>
+            <description>Ensure logging users always get a fresh page. Note that if you are caching pages in a proxy cache, you'll still need to use a Vary response header to keep anonymous and authenticated content separate.</description>
+            <required>False</required>
+        </field>
+        <value>False</value>
+    </record>
+
+    <!-- Uncomment if showing "Generic caching" in the UI.
+         Also see operations/configure.zcml
+
+    <record name="plone.app.caching.baseCaching.maxage">
+        <field type="plone.registry.field.Int">
+            <title>Maximum age</title>
+            <description>Time (in seconds) to cache the response in the browser or caching proxy</description>
+            <required>False</required>
+        </field>
+        <value></value>
+    </record>
+    <record name="plone.app.caching.baseCaching.smaxage">
+        <field type="plone.registry.field.Int">
+            <title>Shared maximum age</title>
+            <description>Time (in seconds) to cache the response in the caching proxy. Leave blank to use value from "Maximum age" field.</description>
+            <required>False</required>
+        </field>
+        <value></value>
+    </record>
+    <record name="plone.app.caching.baseCaching.etags">
+        <field type="plone.registry.field.Tuple">
+            <title>ETags</title>
+            <description>A list of ETag component names to include</description>
+            <value_type type="plone.registry.field.ASCIILine" />
+            <required>False</required>
+        </field>
+        <value>
+        </value>
+    </record>
+    <record name="plone.app.caching.baseCaching.lastModified">
+        <field type="plone.registry.field.Bool">
+            <title>Last-modified validation</title>
+            <description>Turn on Last-Modified headers</description>
+            <required>False</required>
+        </field>
+        <value>False</value>
+    </record>
+    <record name="plone.app.caching.baseCaching.ramCache">
+        <field type="plone.registry.field.Bool">
+            <title>RAM cache</title>
+            <description>Turn on caching in Zope memory</description>
+            <required>False</required>
+        </field>
+        <value>False</value>
+    </record>
+    <record name="plone.app.caching.baseCaching.vary">
+        <field type="plone.registry.field.ASCIILine">
+            <title>Vary</title>
+            <description>Name(s) of HTTP headers that must match for the caching proxy to return a cached response</description>
+            <required>False</required>
+        </field>
+        <value></value>
+    </record>
+    -->
+
+
+</registry>

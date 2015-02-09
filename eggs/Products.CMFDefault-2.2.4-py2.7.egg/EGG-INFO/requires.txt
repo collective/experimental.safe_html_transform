@@ -1,0 +1,11 @@
+setuptools
+five.formlib >= 1.0.2
+Zope2 >= 2.12.3
+Products.CMFCore
+Products.GenericSetup
+
+[test]
+Products.DCWorkflow
+
+[locales]
+zope.app.locales

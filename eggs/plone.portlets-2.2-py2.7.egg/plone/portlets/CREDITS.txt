@@ -1,0 +1,16 @@
+======================
+plone.portlets credits
+======================
+
+plone.portlets is a Zope 3 re-implementation of PlonePortlets by Plone Solutions A/S (http://plonesolutions.com). The original implementation was sponsored IBAS Data Recovery ASA.
+
+Development of plone.portlets and plone.app.portlets was generously sponsored by Graduate School of Social Sciences, Hitotsubashi University.
+
+ - Martin Aspeli <optilude@gmx.net>
+    plone.portlets implementation
+    
+ - Philipp von Weitershausen
+    zope 3 life line and design guru
+    
+ - Geir Baekholt
+    original design, use case support and sanity checking

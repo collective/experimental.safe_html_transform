@@ -1,0 +1,17 @@
+setuptools
+plone.portlets
+zope.component
+zope.componentvocabulary
+zope.dottedname
+zope.interface
+zope.lifecycleevent
+zope.pagetemplate
+zope.publisher
+zope.schema
+zope.site
+zope.testing
+zope.traversing
+zope.viewlet
+transaction
+Acquisition
+Zope2

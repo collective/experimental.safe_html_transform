@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<object name="working-copy" meta_type="WorkflowPolicy">
+    <property name="title">Working Copy</property>
+    <bindings>
+        <default>
+            <bound-workflow workflow_id="workingcopy_workflow" />
+        </default>
+            <type default_chain="true" type_id="Document" />
+    </bindings>
+</object>

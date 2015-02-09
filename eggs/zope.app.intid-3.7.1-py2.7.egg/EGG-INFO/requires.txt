@@ -1,0 +1,13 @@
+setuptools
+zope.intid
+zope.security
+zope.traversing
+
+[test]
+zope.app.authentication
+zope.app.securitypolicy
+zope.app.testing
+zope.app.zcmlfiles
+zope.site
+zope.login
+zope.publisher >= 3.12

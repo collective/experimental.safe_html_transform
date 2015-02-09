@@ -1,0 +1,12 @@
+setuptools
+zope.component
+zope.event
+zope.interface
+zope.location
+zope.publisher
+zope.schema
+zope.tales
+
+[test]
+zope.browserpage>=3.12
+zope.testing

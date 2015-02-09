@@ -1,0 +1,14 @@
+ChangeLog
+DebugLibrary.py
+LICENSE
+MANIFEST.in
+README.rst
+setup.cfg
+setup.py
+robotframework_debuglibrary.egg-info/PKG-INFO
+robotframework_debuglibrary.egg-info/SOURCES.txt
+robotframework_debuglibrary.egg-info/dependency_links.txt
+robotframework_debuglibrary.egg-info/entry_points.txt
+robotframework_debuglibrary.egg-info/not-zip-safe
+robotframework_debuglibrary.egg-info/requires.txt
+robotframework_debuglibrary.egg-info/top_level.txt

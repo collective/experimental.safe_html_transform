@@ -1,0 +1,275 @@
+Metadata-Version: 1.1
+Name: Products.CMFFormController
+Version: 3.0.3
+Summary: CMFFormController provides a form validation mechanism for CMF.
+Home-page: http://pypi.python.org/pypi/Products.CMFFormController
+Author: Geoff Davis
+Author-email: plone-developers@lists.sourceforge.net
+License: BSD
+Description: Overview
+        ========
+        
+        CMFFormController replaces the portal_form form validation mechanism from
+        Plone. It should work just fine in plain CMF as well.
+        
+        Changelog
+        =========
+        
+        3.0.3 (2013-01-13)
+        ------------------
+        
+        - Use obj.__parent__ instead of obj getParentNode() for Zope trunk
+          compatibility.
+          [elro]
+        
+        - ControllerState.py: Don't use list as default parameter value.
+          [kleist]
+        
+        3.0.2 - 2011-04-03
+        ------------------
+        
+        - Update RoleManager imports to avoid deprecation warning on Zope 2.13.
+          [davisagli]
+        
+        3.0.1 - 2010-10-27
+        ------------------
+        
+        - Fixed template with chameleon incompatibility.
+          [swampmonkey]
+        
+        3.0 - 2010-07-18
+        ----------------
+        
+        - No changes.
+        
+        3.0a1 - 2009-11-13
+        ------------------
+        
+        - Adjust this package's FSPythonScript subclass to reflect cleanup in Zope2
+          and CMF.
+          [davisagli]
+        
+        - Silence more warnings for calling `manage_*` methods.
+          [hannosch]
+        
+        - Avoid acquiring `portal_properties` and call it via a proper API.
+          [hannosch]
+        
+        - Cleaned up package metadata.
+          [hannosch]
+        
+        - Declare package dependencies and fixed deprecation warnings for use
+          of Globals.
+          [hannosch]
+        
+        - Correct license in egg metadata.
+          [wichert]
+        
+        - Purged old Zope 2 Interface interfaces for Zope 2.12 compatibility.
+          [elro]
+        
+        2.1.2 - 2008-03-26
+        ------------------
+        
+        - Added metadata.xml to GenericSetup profile.
+          [hannosch]
+        
+        2.1.1 - 2007-10-07
+        ------------------
+        
+        - Removed two __traceback_info__'s from ControllerBase which where both
+          causing too much speed cost and optimized some Acquisition handling.
+          [hannosch]
+        
+        - Fixed #7027 : ControllerState.__str__ loaded files in memory
+          [zegor]
+        
+        - Made tests pass without Plone being installed.
+          [hannosch]
+        
+        2.1 - 2007-08-09
+        ----------------
+        
+        - No changes.
+          [hannosch]
+        
+        2.1rc1 - 2007-07-09
+        -------------------
+        
+        - Removed utility registration - the formcontroller tool uses self.REQUEST
+          which is not available in utilities.
+          [wichert]
+        
+        2.1b4 - 2007-05-05
+        ------------------
+        
+        - Removed five:registerPackage again, as it is causing problems in ZEO
+          environments.
+          [hannosch]
+        
+        2.1b3 - 2007-05-01
+        ------------------
+        
+        - Back to getToolByName we go.
+          [wichert]
+        
+        2.1b2 - 2007-03-23
+        ------------------
+        
+        - Converted installation code to be based on a GenericSetup extension
+          profile.
+          [hannosch]
+        
+        - Let the form controller tool implement and interface and added a bbb
+          registerToolInterface call.
+          [hannosch]
+        
+        - Replaced getToolByName by getUtility calls.
+          [hannosch]
+        
+        2.1b1 - 2007-03-05
+        ------------------
+        
+        - Converted to a regular Python package in the Products namespace.
+          [hannosch]
+        
+        - Fixed deprecation warnings for minimalpath and expandpath methods. These
+          weren't needed at all anymore, as the stored filepath is absolut anyways.
+          [hannosch]
+        
+        - Removed all occurrences of portal_status_message.
+          [hannosch]
+        
+        2.0.7 - 2006-01-27
+        ------------------
+        
+        - Fixed the combineArgs method of BaseFormAction to decode Unicode values
+          in the query string to a defined encoding. You can specify this encoding
+          in config.py and it defaults to utf-8.
+          [hannosch]
+        
+        - Fixed the import of XML files where the context_type/button attributes
+          are missing. It's not exported when the value is None, which means any
+          button or any content-type.
+          [deo]
+        
+        2.0.6 - 2006-11-04
+        ------------------
+        
+        - General code cleaned, removed unused imports.
+          [hannosch]
+        
+        - Converted log functions to use the logging package instead of zLOG.
+          [hannosch]
+        
+        2.0.5 - 2006-09-08
+        ------------------
+        
+        - Modernized type checking to use isinstance() instead of type() as the
+          latter does not recognize derived types. As an example checking for
+          UnicodeType or unicode with type() does not recognize Zope3 Messages,
+          which are derived from unicode. Usually for checking for stringish types
+          you want to do isinstance(foo, basestring) nowadays. This fixes
+          http://dev.plone.org/plone/ticket/5741.
+          [hannosch]
+        
+        - Fixed some deprecation warnings for CompilerError.
+          [hannosch]
+        
+        - Cleaned up test infrastructure, removed custom testrunner.
+          [hannosch]
+        
+        2.0.4 - 2006-06-17
+        ------------------
+        
+        - Fix issue with usage of relative urls for action traversal, rather than
+          actual physical paths, which are necessary.
+          [alecm]
+        
+        2.0.3 - 2006-06-09
+        ------------------
+        
+        - Fix issue with redirecting/traversing to FTI actions which are defined
+          in the folder category. Also, made action traversal/redirection less
+          error prone.
+          [alecm]
+        
+        2.0.2 - 2006-05-15
+        ------------------
+        
+        - Only export ZODB controller scripts and validators, not FS versions.
+          [rafrombrc]
+        
+        - Changed exportimport handlers to depend on GenericSetup directly instead
+          of the soon to be removed CMFSetup.
+          [hannosch]
+        
+        - RedirectToActions call to getActionObject on objects would always fail.
+          Fixed http://dev.plone.org/plone/ticket/5446.
+          [regebro]
+        
+        - Avoid DeprecationWarning for manageAddDelete.
+          [hannosch]
+        
+        - Update tests to comply with PloneTestCase 0.8 API.
+          [hannosch]
+        
+        2.0.1 - 2006-03-28
+        ------------------
+        
+        - Fix method alias lookup on TraverseToAction, so that the conversion of
+          urls to aliases doesn't cause empty pages to be returned. Remove the alias
+          lookup on RedirectToAction because it is entirely unnecessary and
+          counter-intuitive. Removed some useless print statements.
+          [alecm]
+        
+        - Fix two typos in documentation.
+          [vinsci]
+        
+        - Shut down DeprecationWarning for product_name of ToolInit.
+          [hannosch]
+        
+        2.0 - 2006-02-25
+        ----------------
+        
+        - Moved xml folder into exportimport module, as tests were expecting it in
+          this location.
+          [hannosch]
+        
+        - Changed exportimport module to a package, added some interfaces
+          and configure.zcml in order to register separate import / export
+          handlers for .vpy and .cpy, since snapshot exports were breaking
+          when these were handled like default .py files
+          [RaFromBRC]
+        
+        - Renamed importexport.py to exportimport.py
+          [RaFromBRC]
+        
+        - Added importexport.py for CMFSetup
+          [plonista]
+        
+        - Moved to new ZODB transaction API, fixed import locations of
+          format_stx and expandPath
+          [hannosch]
+        
+        1.0.7 - 2005-12-18
+        ------------------
+        
+        - Correct some wrong security settings.
+          [hannosch]
+        
+        - Made tests compatible with Zope 2.9 (transaction module)
+          [hannosch]
+        
+        1.0.6 - 2005-10-09
+        ------------------
+        
+        - For details see the ChangeLog file
+        
+Keywords: Zope CMF Plone form validation
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: BSD License
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python

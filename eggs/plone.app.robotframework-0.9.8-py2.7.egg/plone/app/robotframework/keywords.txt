@@ -1,0 +1,5 @@
+*** Settings ***
+
+Documentation  *DEPRECATED* Use resource ``keywords.robot`` instead.
+
+Resource  plone/app/robotframework/keywords.robot

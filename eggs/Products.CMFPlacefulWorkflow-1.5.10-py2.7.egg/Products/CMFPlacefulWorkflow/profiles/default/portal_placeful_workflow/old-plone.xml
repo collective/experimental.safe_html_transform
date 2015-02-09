@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<object name="old-plone" meta_type="WorkflowPolicy">
+ <property name="title">Old Plone</property>
+ <bindings>
+  <default>
+   <bound-workflow workflow_id="plone_workflow"/>
+  </default>
+  <type default_chain="true" type_id="Document"/>
+  <type default_chain="true" type_id="Event"/>
+  <type default_chain="true" type_id="File"/>
+  <type type_id="Folder">
+   <bound-workflow workflow_id="folder_workflow"/>
+  </type>
+  <type default_chain="true" type_id="Image"/>
+  <type default_chain="true" type_id="Link"/>
+  <type default_chain="true" type_id="News Item"/>
+  <type type_id="Topic">
+   <bound-workflow workflow_id="folder_workflow"/>
+  </type>
+ </bindings>
+</object>

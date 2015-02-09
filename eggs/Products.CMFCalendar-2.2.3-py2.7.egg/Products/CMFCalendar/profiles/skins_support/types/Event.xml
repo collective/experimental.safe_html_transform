@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<object name="Event">
+ <alias from="(Default)" to="event_view"/>
+ <alias from="edit.html" to="event_edit_form"/>
+ <alias from="view.html" to="event_view"/>
+ <alias from="view" to="event_view"/>
+</object>

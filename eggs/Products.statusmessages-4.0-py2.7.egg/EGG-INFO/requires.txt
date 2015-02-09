@@ -1,0 +1,8 @@
+setuptools
+zope.annotation
+zope.i18n
+zope.interface
+
+[test]
+zope.component
+Zope2

@@ -1,0 +1,107 @@
+Blob-aware LinguaPlone content
+==============================
+
+This test tries to make sure blob-based, multi-lingual content can be
+properly created and edited.
+
+
+Creation
+--------
+
+Before we can start creating a content item we need to set the supported
+languages to more than one, so creation of copies for multi-language content
+can be testet:
+
+  >>> self.setRoles('Manager')
+  >>> browser = self.getBrowser()
+  >>> browser.open(portal.absolute_url())
+  >>> browser.getLink('Site Setup').click()
+  >>> browser.getLink('Language').click()
+  >>> browser.getControl('Available languages').displayValue = ['English', 'German']
+  >>> browser.getControl('Save').click()
+
+Now we can try to create an instance of the multi-lingual, file-like
+sample type:
+
+  >>> browser.open(self.folder.absolute_url())
+  >>> browser.getLink(url='createObject?type_name=BlobelFish').click()
+  >>> browser.url
+  'http://nohost/plone/.../portal_factory/BlobelFish/blobelfish.../edit'
+  >>> browser.getControl(name='title').value = 'Flobby'
+
+  >>> from plone.app.blob.tests.utils import getFile
+  >>> control = browser.getControl(name='guide_file')
+  >>> control.filename = 'guide.pdf'
+  >>> control.value = getFile('plone.pdf')
+  >>> browser.getControl('Save').click()
+
+Let's check the default view:
+
+  >>> browser.url
+  'http://nohost/plone/.../flobby/...'
+  >>> browser.contents
+  '...Info...Changes saved...
+   ...Flobby...
+   ...guide.pdf...PDF document,...28Kb...'
+
+Next we add a translation and check it:
+
+  >>> browser.getLink(url='@@translate?newlanguage=de').click()
+  >>> browser.getControl('Title').value = 'Flubbie'
+  >>> browser.getControl('Save').click()
+  >>> '/flubbie/' in browser.url or '/flobby-de/' in browser.url
+  True
+  >>> browser.contents
+  '...Info...Changes saved...
+   ...Flubbie...
+   ...guide.pdf...PDF document,...28Kb...'
+
+We also check if the two items are using the same underlying ZODB blob for
+storing the PDF data.  This should be the case, since the field was marked
+to be language-independent:
+
+  >>> flobby = self.folder.flobby
+  >>> flubbie = flobby.getTranslation('de')
+  >>> flobby is flubbie
+  False
+  >>> flobby.getGuide().getBlob() is flubbie.getGuide().getBlob()
+  True
+
+
+Editing
+-------
+
+Let's also make sure we can edit the new content item:
+
+  >>> browser.getLink('Edit').click()
+  >>> browser.getControl(name='title').value = 'Ein schlauer Fisch'
+  >>> browser.getControl('Replace with new file').selected = True
+  >>> control = browser.getControl(name='guide_file')
+  >>> control.filename = 'test.pdf'
+  >>> control.value = getFile('test.pdf')
+  >>> browser.getControl('Save').click()
+
+  >>> '/flubbie/' in browser.url or '/flobby-de/' in browser.url
+  True
+  >>> browser.contents
+  '...Info...Changes saved...
+   ...Ein schlauer Fisch...
+   ...test.pdf...PDF document,...18Kb...'
+
+The field holding the file-content is language-independent, so the PDF should
+have changed in the english version as well:
+
+  >>> browser.getLink('English').click()
+  >>> browser.url
+  'http://nohost/plone/.../flobby...'
+  >>> browser.contents
+  '...Flobby...
+   ...test.pdf...PDF document,...18Kb...'
+
+Let's also check if they're still using the same, albeit now different blob:
+
+  >>> flobby.getGuide().getBlob() is flubbie.getGuide().getBlob()
+  True
+  >>> str(flobby.getGuide()) == getFile('test.pdf').read()
+  True
+

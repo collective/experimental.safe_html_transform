@@ -1,0 +1,248 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      lang="en"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      metal:use-macro="context/main_template/macros/master"
+      i18n:domain="plone">
+
+<head>
+</head>
+
+<body>
+
+<metal:body fill-slot="body">
+
+    <dl tal:condition="not:view/globally_enabled"
+         class="portalMessage info">
+        <dt i18n:translate="">
+            Info
+        </dt>
+        <dd i18n:translate="warning_contentrules_disabled">
+            Content rules are disabled globally. No assigned rules will execute
+            until they are re-enabled. Use the
+            <a href=""
+               i18n:name="controlpanel_link"
+               i18n:translate="contentrules_control_panel"
+               tal:attributes="href string:${portal_url}/@@rules-controlpanel">
+                content rules control panel
+            </a>to enable them again.
+        </dd>
+    </dl>
+
+    <div id="content">
+        <h1 class="documentFirstHeading"
+            i18n:translate="title_contentrules_assigned">
+            Content rules for <q i18n:name="context" tal:content="context/Title">title</q>
+        </h1>
+
+        <div class="documentDescription"
+           i18n:translate="description_contentrules_assigned" tal:condition="view/has_rules">
+            The following content rules are active in this
+            <span i18n:name="type_name" tal:content="view/type_name" />.
+        </div>
+        <div class="documentDescription"
+           i18n:translate="description_contentrules_assigned_norules" tal:condition="not:view/has_rules">
+            There are currently no active content rules in this
+            <span i18n:name="type_name" tal:content="view/type_name" />.
+        </div>
+
+        <div id="content-core">
+            <p i18n:translate="contentrules_controlpanel_link">
+                Use the
+                <a i18n:name="controlpanel_link"
+                   i18n:translate="contentrules_control_panel"
+                   tal:attributes="href string:${portal_url}/@@rules-controlpanel">
+                    content rules control panel
+                </a>
+                to create new rules or delete or modify existing ones.
+            </p>
+            <div class="active">
+                <div tal:define="acquired_rules view/acquired_rules"
+                     tal:condition="acquired_rules">
+                    <table class="listing nosort">
+                        <thead>
+                            <tr>
+                                <th i18n:translate="label_contentrules_from_parent">
+                                    Content rules from parent folders
+                                </th>
+                                <th class="smallcolumn" i18n:translate="label_contentrules_active">Active</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tal:rules repeat="rule acquired_rules">
+                                <tr tal:define="oddrow repeat/rule/odd"
+                                    tal:attributes="class python:oddrow and 'even' or 'odd'">
+                                    <td>
+                                        <dl>
+                                            <dt><a tal:attributes="href rule/url">
+                                                <span tal:replace="rule/title" />
+                                                (<span class="trigger"
+                                                    i18n:translate=""
+                                                    tal:content="rule/trigger">trigger</span>)</a></dt>
+                                            <dd tal:content="rule/description">
+                                                Rule Description.
+                                            </dd>
+                                        </dl>
+                                    </td>
+                                    <td class="checker">
+                                        <img tal:condition="rule/enabled"
+                                             tal:attributes="src string:$portal_url/confirm_icon.png"
+                                             alt="Active"
+                                             width="16"
+                                             height="16"
+                                             i18n:attributes="alt label_contentrules_active;" />
+                                    </td>
+                                </tr>
+                            </tal:rules>
+                        </tbody>
+                    </table>
+                </div>
+
+                <form tal:define="assignable_rules view/assignable_rules" tal:condition="assignable_rules"
+                      tal:attributes="action string:${view/view_url}" method="post">
+                    <div class="field chooser-right">
+                        <label for="" i18n:translate="contentrules_add_assignment">
+                            Assign rule here
+                        </label>
+                        <select name="rule_id" size="1">
+                            <tal:options repeat="rule assignable_rules">
+                                <option tal:attributes="value rule/id"
+                                        tal:content="rule/title">Addable rule name</option>
+                            </tal:options>
+                        </select>
+                        <input class="context"
+                               type="submit"
+                               name="form.button.AddAssignment"
+                               value="Add"
+                               i18n:attributes="value label_add;" />
+                    </div>
+                </form>
+
+                <div class="visualClear"><!-- --></div>
+
+                <form tal:attributes="action view/view_url" method="post"
+                      tal:define="assigned_rules view/assigned_rules" tal:condition="assigned_rules">
+                    <table class="listing nosort">
+                        <thead>
+                            <tr>
+                                <th class="smallcolumn">&nbsp;</th>
+                                <th i18n:translate="label_contentrules_active_assignments">
+                                    Active content rules in this
+                                    <span i18n:name="content_type"
+                                          tal:replace="view/type_name" />
+                                </th>
+                                <th class="smallcolumn">
+                                    &nbsp;
+                                </th>
+                                <th class="smallcolumn" i18n:translate="label_contentrules_subfolders">
+                                    Applies to subfolders?
+                                </th>
+                                <th class="smallcolumn" i18n:translate="label_contentrules_assignment_enabled">
+                                    Enabled here?
+                                </th>
+                                <th class="smallcolumn" i18n:translate="label_contentrules_rule_enabled_question">
+                                    Enabled?
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tal:rules repeat="rule assigned_rules">
+                            <tr tal:define="oddrow repeat/rule/odd"
+                                tal:attributes="class python:oddrow and 'even' or 'odd'">
+                                <td>
+                                    <input type="checkbox"
+                                           name="rule_ids:list"
+                                           tal:attributes="value rule/id" />
+                                </td>
+                                <td>
+                                    <dl>
+                                        <dt><a tal:attributes="href rule/url">
+                                            <span tal:replace="rule/title" />
+                                            (<span class="trigger"
+                                                i18n:translate=""
+                                                tal:content="rule/trigger">trigger</span>)</a></dt>
+                                        <dd tal:content="rule/description">
+                                            Rule Description.
+                                        </dd>
+                                    </dl>
+                                </td>
+                                <td class="checker">
+                                    <a tal:condition="not:repeat/rule/start"
+                                       title="Move up"
+                                       i18n:attributes="title"
+                                       tal:attributes="href string:${view/view_url}?operation=move_up&amp;rule_id=${rule/id}">
+                                        <img tal:replace="structure context/arrowUp.png" />
+                                    </a>
+                                    <a tal:condition="not:repeat/rule/end"
+                                       title="Move down"
+                                       i18n:attributes="title"
+                                       tal:attributes="href string:${view/view_url}?operation=move_down&amp;rule_id=${rule/id}">
+                                        <img tal:replace="structure context/arrowDown.png" />
+                                    </a>
+                                </td>
+                                <td class="checker listingCheckbox">
+                                    <img tal:condition="rule/bubbles"
+                                         tal:attributes="src string:$portal_url/confirm_icon.png"
+                                         alt="Active"
+                                         width="16"
+                                         height="16"
+                                         i18n:attributes="alt label_contentrules_active;" />
+                                </td>
+                                <td class="checker listingCheckbox">
+                                    <img tal:condition="rule/enabled"
+                                         tal:attributes="src string:$portal_url/confirm_icon.png"
+                                         alt="Active"
+                                         width="16"
+                                         height="16"
+                                         i18n:attributes="alt label_contentrules_active;" />
+                                </td>
+                                <td class="checker listingCheckbox">
+                                    <img tal:condition="rule/global_enabled"
+                                         tal:attributes="src string:$portal_url/confirm_icon.png"
+                                         alt="Active"
+                                         width="16"
+                                         height="16"
+                                         i18n:attributes="alt label_contentrules_active;" />
+                                </td>
+                            </tr>
+                            </tal:rules>
+                        </tbody>
+                    </table>
+
+                    <div class="formControls">
+                        <input name="form.button.Enable"
+                               class="context"
+                               type="submit"
+                               value="Enable"
+                               i18n:attributes="value label_enable;" />
+                        <input name="form.button.Disable"
+                               class="context"
+                               type="submit"
+                               value="Disable"
+                               i18n:attributes="value label_disable;" />
+                        <input name="form.button.Bubble"
+                               class="standalone"
+                               type="submit"
+                               value="Apply to subfolders"
+                               i18n:attributes="value label_apply_to_subfolders;" />
+                        <input name="form.button.NoBubble"
+                               class="standalone"
+                               type="submit"
+                               value="Disable apply to subfolders"
+                               i18n:attributes="value label_disable_apply_to_subfolders;" />
+                        <input name="form.button.Delete"
+                               class="destructive"
+                               type="submit"
+                               value="Unassign"
+                               i18n:attributes="value label_unassign;" />
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</metal:body>
+</body>
+</html>

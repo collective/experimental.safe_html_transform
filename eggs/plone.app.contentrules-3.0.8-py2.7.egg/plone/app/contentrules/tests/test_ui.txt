@@ -1,0 +1,80 @@
+# This test case has been originally written with plone.act and later been
+# deactivated. The robot test setup mixed in p.a.testing into PTC which leads
+# to test isolation problems. Therefore the test setup has been removed from
+# the package. This test can be re-written and fixed in the future. Though,
+# all tests need to be moved to p.a.testing before. (timo)
+*** Settings ***
+
+Library  Selenium2Library  timeout=10  implicit_wait=0.5  run_on_failure=Capture Page Screenshot
+Library  plone.act.PloneLibrary
+Variables  plone/app/testing/interfaces.py
+Resource  plone/act/keywords.txt
+
+Suite Setup  Start browser
+Suite Teardown  Close All Browsers
+
+*** Test Cases ***
+
+Add content rule
+    Add content rule
+    Page should contain  There is not any additional condition checked on this rule
+    Page should contain  There is not any action performed by this rule
+
+Add content rule condition
+    Add content rule
+    Select From List  css=#contentrules-add-condition  plone.conditions.WorkflowState
+    Click Button  form.button.AddCondition
+    Wait Until Page Contains Element  css=div.pb-ajax div#content-core
+    Select From List  css=#form.wf_states  published
+    Click Button  form.actions.save
+    Page should contain  Workflow states are
+
+Add content rule action
+    Add content rule
+    Select From List  css=#contentrules-add-action  plone.actions.Logger
+    Click Button  form.button.AddAction
+    Wait Until Page Contains Element  css=div.pb-ajax div#content-core
+    Click Button  form.actions.save
+    Page should contain  Log message
+
+Apply content rule to root
+    Add content rule
+    Page should contain  This rule is not assigned to any location
+    Click Button  form.button.ApplyOnWholeSite
+    Page should contain  This rule is assigned to the following locations
+
+Test disable in rule management
+    Add content rule
+    Click Button  form.button.ApplyOnWholeSite
+    Goto contentrules
+    Click Button  css=[name="form.button.DisableRule"][data-value="rule-1"]
+
+Test delete in rule management
+    Add content rule
+    Click Button  form.button.ApplyOnWholeSite
+    Goto contentrules
+    Click Button  css=[name="form.button.DeleteRule"][data-value="rule-1"]
+
+
+*** Keywords ***
+
+Start browser
+    Open browser  http://localhost:55001/plone/
+
+Goto homepage
+    Go to  http://localhost:55001/plone/
+
+Goto contentrules
+    Go to  http://localhost:55001/plone/@@rules-controlpanel
+
+Log out
+    Go to  http://localhost:55001/plone/logout
+
+Add content rule
+    Log in as site owner
+    Goto contentrules
+    Click Button  Add content rule
+    Wait Until Page Contains Element  css=div.pb-ajax div#content-core
+    Input Text  form.title  test-rule1
+    Select From List  form.event  Object modified
+    Click Button  Save

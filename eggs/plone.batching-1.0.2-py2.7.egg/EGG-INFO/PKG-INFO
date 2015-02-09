@@ -1,0 +1,88 @@
+Metadata-Version: 1.1
+Name: plone.batching
+Version: 1.0.2
+Summary: Batching facilities used in Plone.
+Home-page: http://pypi.python.org/pypi/plone.batching
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL
+Description: Welcome to Plone batching's documentation!
+        ==========================================
+        
+        This package includes facilities for creating a batched sequence.
+        
+        It originated from the the PloneBatch module written for Plone which in
+        itself has been based on Zope2's ZTUtils.Batch.
+        
+        Contents:
+        
+        .. toctree::
+           :maxdepth: 2
+        
+           CHANGES
+           plone/batching/batching
+           USAGE
+        
+        .. automodule:: plone.batching.batch
+            :members:
+        
+        
+        Indices and tables
+        ==================
+        
+        * :ref:`genindex`
+        * :ref:`modindex`
+        * :ref:`search`
+        
+        
+        Changelog
+        =========
+        
+        1.0.2 (2014-04-13)
+        ------------------
+        
+        - Fix issue where a start >= end will always return last item.
+          https://dev.plone.org/ticket/13880\
+          [thepjot]
+        
+        - Fix multiple_pages if the length of the sequence is exactly the
+          page length.
+          [gaudenz]
+        
+        1.0.1 (2014-01-27)
+        ------------------
+        
+        - Fix issue with sequences when the reported length was different
+          than len() iteration would return the full unbatched sequence.
+          [alecm]
+        
+        
+        1.0 (2013-05-23)
+        ----------------
+        
+        - Use index instead of template attribute in BatchView to be able to customize
+          only the template.
+          [vincentfretin, thomasdesvenain]
+        
+        - Fixed wrong msgid for 'First item'.
+          [vincentfretin]
+        
+        
+        1.0b1 (2013-01-17)
+        ------------------
+        
+        - Nothing changed yet.
+        
+        
+        1.0a1 (2012-04-25)
+        ------------------
+        
+        - Factored out Plone batching implementation to seperate egg (PLIP #12235)
+          [tom_gross]
+        
+        
+Keywords: Plone
+Platform: UNKNOWN
+Classifier: Framework :: Plone :: 4.3
+Classifier: Framework :: Zope2
+Classifier: Programming Language :: Python :: 2.6

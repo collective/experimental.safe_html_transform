@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<cmfformcontroller xmlns:tal="http://xml.zope.org/namespaces/tal">
+  <action
+   tal:repeat="action context/listActions"
+   tal:attributes="object_id action/object_id;
+                   status action/status;
+                   context_type action/context_type;
+                   button action/button;
+		   action_type action/action_type;
+		   action_arg action/action_arg;"
+  />
+  <validator
+   tal:repeat="validator context/listValidators"
+   tal:attributes="object_id validator/object_id;
+                   context_type validator/context_type;
+		   button validator/button;
+		   validators python:','.join(validator['validators']);"
+  />
+</cmfformcontroller>

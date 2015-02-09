@@ -1,0 +1,77 @@
+<html metal:use-macro="context/main_template/macros/master">
+<head>
+
+<metal:slot fill-slot="base">
+<tal:span tal:replace="structure context/getBaseTag" />
+</metal:slot>
+
+</head>
+<body>
+
+<metal:slot metal:fill-slot="main" i18n:domain="cmf_calendar">
+<table class="Event" border="0" cellpadding="5" width="100%" cellspacing="3">
+ <tr>
+  <th width="10%" i18n:translate="">Event Name</th>
+  <td nowrap="nowrap" tal:content="options/title">Title</td>
+  <th width="10%" i18n:translate="">Contact Name</th>
+  <td nowrap="nowrap" tal:content="options/contact_name">contact_name</td>
+ </tr>
+ <tr>
+  <th width="10%" i18n:translate="">Location</th>
+  <td nowrap="nowrap" tal:content="options/location">location</td>
+  <th width="10%" i18n:translate="">Contact Email</th>
+  <td nowrap="nowrap" tal:condition="options/contact_email">
+   <a tal:attributes="href string:mailto:${options/contact_email}"
+      tal:content="options/contact_email"
+      href="mailto:contact_email">contact_email</a></td>
+ </tr>
+ <tr>
+  <th width="10%" i18n:translate="">Event type</th>
+  <td valign="top" nowrap="nowrap"><tal:loop
+      tal:repeat="event_type options/event_types"><tal:span
+       tal:content="event_type" i18n:translate="" /> </tal:loop></td>
+  <th width="10%" i18n:translate="">Contact Phone</th>
+  <td nowrap="nowrap" tal:content="options/contact_phone">contact_phone</td>
+ </tr>
+ <tr tal:condition="options/event_url">
+  <th width="10%" i18n:translate="">Event URL</th>
+  <td colspan="3" nowrap="nowrap"><a href="event_url"
+     tal:attributes="href options/event_url"
+     tal:content="options/event_url">event_url</a></td>
+ </tr>
+ <tr>
+  <td colspan="4"><hr /></td>
+ </tr>
+ <tr>
+  <th width="10%" i18n:translate="">Start Date</th>
+  <td tal:content="options/start_date">start</td>
+  <th width="10%" i18n:translate="">Stop Date</th>
+  <td tal:content="options/stop_date">end</td>
+ </tr>
+ <tr>
+  <th width="10%" i18n:translate="">Start Time</th>
+  <td tal:content="options/start_time">start</td>
+  <th width="10%" i18n:translate="">Stop Time</th>
+  <td tal:content="options/stop_time">end</td>
+ </tr>
+ <tr>
+  <td colspan="4"><hr /></td>
+ </tr>
+ <tr>
+  <th width="10%" i18n:translate="">Description</th>
+  <td colspan="3" valign="top" nowrap="nowrap"
+     tal:content="options/description">Description</td>
+ </tr>
+ <tr>
+  <td colspan="4">&nbsp;</td>
+ </tr>
+</table>
+Add to calendar
+<a href="absolute_url"
+tal:attributes="href string:${context/absolute_url}/event_ics_view">iCal</a>
+<a href="absolute_url"
+tal:attributes="href string:${context/absolute_url}/event_ics_view?format=vcal">vCal</a>
+</metal:slot>
+
+</body>
+</html>

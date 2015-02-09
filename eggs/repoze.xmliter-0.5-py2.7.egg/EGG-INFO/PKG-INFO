@@ -1,0 +1,114 @@
+Metadata-Version: 1.1
+Name: repoze.xmliter
+Version: 0.5
+Summary: Wrapper for ``lxml`` trees which serializes to string upon iteration.
+Home-page: http://www.repoze.org
+Author: Malthe Borch
+Author-email: repoze-dev@lists.repoze.org
+License: BSD-derived (http://www.repoze.org/LICENSE.txt)
+Description: Overview
+        ========
+        
+        This package provides a wrapper for ``lxml`` trees which serializes to
+        string on iteration, but otherwise makes the tree available in an
+        attribute.
+        
+        The primary for this is WSGI middleware which may avoid
+        needless XML parsing and serialization.
+        
+        Usage
+        -----
+        
+        It's recommend to use the `lazy` decorator on your application method. This
+        allows you to return an lxml tree object, which is then automatically turned
+        into an XMLSerializer.
+        
+          >>> from repoze.xmliter import lazy
+          
+          >>> @lazy
+          ... def application(environ, start_response)
+          ...     return some_lxml_tree
+        
+        You may provide a serializer function, which will be used when the
+        XMLSerializer is eventually iterated over (i.e. when the response is rendered):
+        
+          >>> @lazy(serializer=lxml.html.tostring)
+          ... def application(environ, start_response)
+          ...     return some_lxml_tree
+        
+        Middleware can use `isinstance` to test if the result is an XML
+        iterable:
+        
+          >>> from repoze.xmliter.serializer import XMLSerializer
+          >>> isinstance(result, XMLSerializer)
+        
+        In this case, the middleware can simply access the `tree` attribute of
+        the result.
+        
+        There are two convenience methods which can be used to parse a WSGI iterable
+        of strings and build an XMLSerializer object, but avoids re-building the
+        serializer if the input iterable is already an instance of XMLSerializer:
+        
+          >>> from repoze.xmliter.utils import getXMLSerializer
+          >>> result = getXMLSerializer(result)
+        
+        Or, if you are parsing HTML:
+        
+          >>> from repoze.xmliter.utils import getHTMLSerializer
+          >>> result = getHTMLSerializer(result)
+        
+        If `result` is not an XMLSerializer, it will be parsed using a feed parser,
+        turned into an lxml tree, and wrapped up in an XMLSerializer, which is
+        returned.
+        
+        
+        Changelog
+        ---------
+        
+        0.5 - 2012-01-25
+        ----------------
+        
+        * Add __len__ to serializer to help WSGI servers.
+          [Laurence]
+        
+        * Serializer should iter the entire string in one go.
+          [Laurence]
+        
+        0.4 - 2011-06-16
+        ----------------
+        
+        * Ensure trailing space is removed when replacing doctype with empty string.
+          [Laurence]
+        
+        0.3 - 2011-06-03
+        ----------------
+        
+        * Add doctype option to replace doctype on serialization.
+          [Laurence]
+        
+        0.2 - 2010-09-11
+        ----------------
+        
+        * Use document encoding by default. (This fixes test failure on Ubuntu 10.04.)
+          [Laurence]
+        
+        * Defer to xsl:output settings when serializing an XSLResultTree.
+          [Laurence]
+        
+        * Turn off pretty printing by default for HTML to avoid affecting rendering on
+          the browser.
+          [Laurence]
+        
+        0.1 - 2010-04-21 
+        ----------------
+        
+        * Initial release
+        
+Keywords: web middleware xml serialization
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Internet :: WWW/HTTP :: WSGI
+Classifier: Topic :: Internet :: WWW/HTTP :: WSGI :: Application

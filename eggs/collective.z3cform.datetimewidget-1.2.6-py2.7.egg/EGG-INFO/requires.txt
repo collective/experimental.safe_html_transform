@@ -1,0 +1,13 @@
+setuptools
+zope.i18n
+z3c.form
+zope.deprecation
+
+[test]
+z3c.form
+zope.browserpage
+zope.publisher
+zope.testing
+zope.traversing
+zc.buildout
+Zope2

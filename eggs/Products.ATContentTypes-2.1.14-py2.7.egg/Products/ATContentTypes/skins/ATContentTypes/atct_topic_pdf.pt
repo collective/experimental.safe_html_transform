@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="iso-8859-15"?>
+<document
+         xmlns:tal="http://xml.zope.org/namespaces/tal"
+         xmlns:metal="http://xml.zope.org/namespaces/metal"
+         xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+         filename="report.pdf"
+         tal:define="portal python:here.portal_url.getPortalObject();
+                     use_view_action here/portal_properties/site_properties/typesUseViewActionInListings;
+                     toLocalizedTime nocall:here/toLocalizedTime;">
+
+  <title tal:content="here/title | nothing">Default Topic</title>
+  <author tal:content="here/Creator | nothing">unknown</author>
+  <subject tal:content="here/Subject | string:Report">Report</subject>
+
+  <content>
+    <para style="PortalTitle" tal:content="structure portal/Title"/>
+    <para style="Text"/>
+    <para style="TopicTitle" tal:content="structure here/pretty_title_or_id"/>
+    <para style="Text"/>
+    <para style="Text" tal:content="structure here/Description"/>
+    <para style="Text"/>
+
+        <tal:topiccontents define="topicContents here/queryCatalog;
+                                   portal_url here/portal_url">
+        <tal:listing condition="topicContents">
+        <tal:default condition="not:here/getCustomView">
+            <table style="ATCTTable">
+            <tr><td> </td></tr>
+            <tal:brain repeat="item topicContents">
+                <tal:block metal:define-macro="list-item"
+                           tal:define="item_url item/getURL|item/absolute_url;
+                                       item_id item/getId|item/id;
+                                       item_title_or_id item/pretty_title_or_id;
+                                       item_description item/Description;
+                                       item_type item/portal_type;
+                                       item_type_title item/Type;
+                                       item_modified item/ModificationDate;
+                                       item_created item/CreationDate;
+                                       item_wf_state        item/review_state;
+                                       item_creators item/Creators|item/Creator;
+                                       item_creators python:test(same_type(item_creators,[]) or same_type(item_creators,()), item_creators, [item_creators]);
+                                       item_start item/start/ISO|item/StartDate|nothing;
+                                       item_end item/end/ISO|item/EndDate|nothing;">
+                <tr>
+                <td>
+
+                    <para style="Table">
+                        <a href="#"
+                           tal:condition="python:item_type != 'Link'"
+                           tal:attributes="href python:test(item_type in use_view_action, item_url+'/view', item_url+'/');"
+                           tal:content="item_title_or_id">
+                            Item Title
+                        </a>
+                        <a href="#"
+                        tal:condition="python:item_type == 'Link'"
+                        tal:attributes="href item/getRemoteUrl;"
+                        tal:content="item_title_or_id" />
+                        -
+                        <tal:cond tal:condition="python: item_type == 'Event'">
+                            (<span tal:replace="string:${item/location}">Oslo</span>, from
+                                <span tal:replace="python:toLocalizedTime(item_start,long_format=1)">from date</span> to
+                                <span tal:replace="python:toLocalizedTime(item_end,long_format=1)">to date</span>)
+                        </tal:cond>
+                        -
+                        <tal:creators tal:condition="item_creators">
+                            <span tal:omit-tag="python:1" i18n:translate="box_created_by">
+                                by
+                            </span>
+                            <span tal:replace="python: ', '.join(item_creators)"/>
+                        </tal:creators>
+                        <tal:modified condition="python: item_type != 'Event'">
+                            -
+                            <tal:mod i18n:translate="box_last_modified">
+                                last modified
+                            </tal:mod>
+                            <span tal:replace="python:toLocalizedTime(item_modified,long_format=1)">
+                                August 16, 2001 at 23:35:59
+                            </span>
+                        </tal:modified>
+    
+                        <metal:description define-slot="description_slot">
+                            <tal:comment replace="nothing">
+                                Place custom listing info for custom types here
+                            </tal:comment>
+                        </metal:description>
+                    </para>
+                    <para style="Table">
+                       <span tal:omit-tag="python:1" tal:content="item_description|nothing">
+                            description 
+                        </span>
+                    </para>
+                </td>
+                </tr>
+                </tal:block>
+            </tal:brain>
+            </table>
+        </tal:default>
+        <tal:custom condition="here/getCustomView"
+                    define="vocab python:here.listMetaDataFields(False)">
+            <table style="ATCTTable">
+                <tr>
+                    <td tal:repeat="field here/getCustomViewFields"
+                            tal:content="python:vocab.getValue(field, field)"/>
+                </tr>
+                <tal:brain tal:repeat="obj topicContents">
+                    <tr tal:define="oddrow repeat/obj/odd;">
+                        <tal:fields repeat="field here/getCustomViewFields"
+                                    define="url obj/getURL;
+                                            icon python:portal_url+'/'+'/'.join([x for x in obj.getIcon.split('/') if x]);
+                                            title_or_id obj/pretty_title_or_id">
+                        <tal:block define="value python: getattr(obj, field, None);
+                        dictish nocall:value/items|nothing;
+                        listish python:same_type(value,[]) or same_type(value,())">
+                            <td tal:condition="python: field != 'Title' and not (listish or dictish)">
+                                <para style="Table" tal:content="value"/>
+                            </td>
+                            <td tal:condition="python: field != 'Title' and listish">
+                                <para style="Table" tal:content="python: ', '.join(value)"/>
+                            </td>
+                            <td tal:condition="python: field != 'Title' and dictish">
+                                <para style="Table" tal:content="python: ', '.join(['%s: %s'%(a,b) for a,b in value.items()])"/>
+                            </td>
+                            <td tal:condition="python: field == 'Title'">
+                                <para style="Table">
+                                <a href="#" tal:condition="python: obj.portal_type not in ['Link', 'Image']"
+                                            tal:attributes="href url"
+                                            tal:content="title_or_id" />
+
+                                <a href="#" tal:condition="python: obj.portal_type == 'Image'"
+                                            tal:attributes="href string:${url}/view"
+                                            tal:content="title_or_id" />
+
+                                <a href="#"
+                                   tal:condition="python: obj.portal_type == 'Link'"
+                                   tal:attributes="href obj/getRemoteUrl;"
+                                   tal:content="title_or_id" />
+                                </para>
+                            </td>
+                        </tal:block>
+                        </tal:fields>
+                    </tr>
+                </tal:brain>
+            </table>
+        </tal:custom>
+        </tal:listing>
+        </tal:topiccontents>
+    </content>
+</document>
+

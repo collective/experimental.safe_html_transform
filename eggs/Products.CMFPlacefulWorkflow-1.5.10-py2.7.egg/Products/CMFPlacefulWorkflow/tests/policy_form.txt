@@ -1,0 +1,120 @@
+;-*-Doctest-*-
+=============================
+Placeful workflow policy form
+=============================
+
+The Placeful workflow policy form works in a real browser.
+
+Open a browser and log in as a user who can use the policy form.
+
+    >>> from Products.Five import testbrowser
+    >>> browser = testbrowser.Browser()
+    >>> browser.handleErrors = False
+    >>> browser.open(portal.absolute_url())
+    >>> browser.getLink('Log in').click()
+
+    >>> from Products.PloneTestCase import ptc
+    >>> browser.getControl('Login Name').value = ptc.portal_owner
+    >>> browser.getControl(
+    ...     'Password').value = ptc.default_password
+    >>> browser.getControl('Log in').click()
+
+Open the policy form for the front-page and for the folder.
+
+    >>> browser.getLink('Policy').click()
+    >>> browser.url
+    'http://nohost/plone/front-page/placeful_workflow_configuration'
+    >>> print browser.contents
+    <...
+    <h1>...Workflow policies' local configuration management...</h1>
+    ...
+
+    >>> browser.open(portal.absolute_url()+'/placeful_workflow_configuration')
+    >>> browser.url
+    'http://nohost/plone/placeful_workflow_configuration'
+    >>> print browser.contents
+    <...
+    <h1>...Workflow policies' local configuration management...</h1>
+    ...
+
+The policy form also works for pages that aren't the default page.
+
+    >>> self.login()
+    >>> page = folder[folder.invokeFactory(type_name='Document', id='foo')]
+    >>> browser.open(page.absolute_url())
+    >>> browser.getLink('Policy').click()
+    >>> browser.url
+    'http://nohost/plone/Members/test_user_1_/foo/placeful_workflow_configuration'
+    >>> print browser.contents
+    <...
+    <h1>...Workflow policies' local configuration management...</h1>
+    ...
+
+Without a local policy document 'foo', contained inside '/Members/test_user_1_' is in review state visible:
+
+    >>> browser.open(folder.absolute_url())
+    >>> browser.url
+    'http://nohost/plone/Members/test_user_1_'
+
+    >>> foo_link = browser.getLink('foo')
+    >>> 'state-visible' in foo_link.attrs['class']
+    True
+
+Now we will add a local policy on the user folder. Simple Publication for the folder, Intranet below it:
+
+    >>> browser.open(folder.absolute_url())
+    >>> browser.getLink('Policy').click()
+    >>> browser.url
+    'http://nohost/plone/Members/test_user_1_/placeful_workflow_configuration'
+    >>> browser.getLink("local configuration in the Folder").click()
+    >>> 'Update catalog role mappings' in browser.contents
+    True
+
+    >>> ctrl_in = browser.getControl(name='policy_in')
+    >>> ctrl_in.getControl(value='simple-publication').selected=True
+
+    >>> ctrl_below = browser.getControl(name='policy_below')
+    >>> ctrl_below.getControl(value='intranet').selected=True
+
+In a scenario where there are a considerable amount of sub-objects under a folder, we select **not to** 'Update catalog role mappings', as it could take a very long time:
+
+    >>> browser.getControl('Update catalog role mappings').selected=False
+
+And save the policies:
+
+    >>> browser.getControl('Save').click()
+    >>> 'Changed policies' in browser.contents
+    True
+
+We validate policy settings were saved:
+
+    >>> ctrl_in = browser.getControl(name='policy_in')
+    >>> ctrl_in.getControl(value='simple-publication').selected
+    True
+
+    >>> ctrl_below = browser.getControl(name='policy_below')
+    >>> ctrl_below.getControl(value='intranet').selected
+    True
+
+And mappings were not updated:
+
+    >>> browser.open(folder.absolute_url())
+    >>> foo_link = browser.getLink('foo')
+    >>> 'state-visible' in foo_link.attrs['class']
+    True
+
+If we are sure, or willing to wait, it is possible to update role mappings:
+
+    >>> browser.getLink('Policy').click()
+    >>> browser.getControl('Update catalog role mappings').selected=True
+    >>> browser.getControl('Save').click()
+    >>> 'Changed policies' in browser.contents
+    True
+
+Foo document review state must be 'Internal Draft' in the portlet:
+
+    >>> browser.open(folder.absolute_url())
+    >>> foo_link = browser.getLink('foo')
+    >>> 'state-internal' in foo_link.attrs['class']
+    True
+

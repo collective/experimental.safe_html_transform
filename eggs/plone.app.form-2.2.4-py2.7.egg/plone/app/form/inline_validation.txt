@@ -1,0 +1,97 @@
+=========================
+Formlib inline validation
+=========================
+
+This doctest demonstrates inline validation and editing for formlib forms.
+
+First, let's set up the tests:
+
+    >>> from Acquisition import Acquirer
+    >>> from zope.interface import alsoProvides
+    >>> from Testing.makerequest import makerequest
+
+    >>> def make_request(form={}):
+    ...     request = makerequest(Acquirer()).REQUEST
+    ...     request.form.update(form)
+    ...     return request
+
+Then, we will create a simple test form and a context for it to operate on.
+
+    >>> from zope.interface import Interface
+    >>> from zope import schema
+    >>> class IWibble(Interface):
+    ...     title = schema.TextLine(title=u"Title", required=True)
+    ...     text = schema.Text(title=u"Description")
+    ...     size = schema.Int(title=u"Size")
+    
+    >>> from plone.app.content.item import Item
+    >>> from zope.interface import implements
+    >>> class Wibble(Item):
+    ...     implements(IWibble)
+    ...     title = u""
+    ...     text = u""
+    ...     size = 0
+
+    
+    >>> from zope.formlib import form
+    >>> from plone.app.form import base
+    >>> from Products.Five import BrowserView
+    >>> class EditWibble(BrowserView, base.EditForm):
+    ...     form_fields = form.FormFields(IWibble)
+    ...     label = "Edit wibble"
+
+    >>> from zope.component import provideAdapter
+    >>> from zope.publisher.interfaces.browser import IBrowserRequest
+    >>> provideAdapter(adapts=(IWibble, IBrowserRequest),
+    ...                provides=Interface,
+    ...                factory=EditWibble,
+    ...                name=u"edit")
+
+Let's verify that this worked:
+
+    >>> from zope.component import getMultiAdapter
+    >>> context = Wibble('wibble')
+    >>> request = make_request()
+    >>> getMultiAdapter((context, request), name=u"edit")
+    <EditWibble object at ...>
+
+    >>> del context, request
+
+Inline validation
+-----------------
+
+Inline validation is invoked via the @@formlib_validate_field view.
+
+    >>> context = Wibble('wibble')
+    >>> request = make_request({'form.title': 'Title'})
+    >>> form = EditWibble(context, request)
+    >>> formlib_validate_input = getMultiAdapter((form, request,), name=u"formlib_validate_field")
+
+This is wired up with jQuery. When the user leaves a form control with inline
+validation enabled, it will be called with the following parameters:
+
+    >>> formlib_validate_input(fname=u'form.title')
+    '{"errmsg": ""}'
+
+In this case, there is no validation error. The resulting payload should tell
+the client-side handler to remove any error message that may be showing 
+currently.
+
+We can also invoke a validation error, for example if a required field is 
+missing:
+
+    >>> request = make_request({'form.title': ''})
+    >>> form = EditWibble(context, request)
+    >>> formlib_validate_input = getMultiAdapter((form, request,), name=u"formlib_validate_field")
+    >>> formlib_validate_input(fname=u'form.title')
+    '{"errmsg": "<span class=\\"error\\">Required input is missing.</span>"}'
+          
+And similarly, we will get an error if the field has an invalid value:
+
+    >>> request = make_request({'form.size': 'X'})
+    >>> form = EditWibble(context, request)
+    >>> formlib_validate_input = getMultiAdapter((form, request,), name=u"formlib_validate_field")
+    >>> formlib_validate_input(fname=u'form.size')
+    '{"errmsg": "<span class=\\"error\\">Invalid integer data</span>"}'
+
+    >>> del context, request

@@ -1,0 +1,67 @@
+Form Views
+--------------
+
+Set up user.
+
+    >>> uf = app.site.acl_users
+    >>> _ignored = uf._doAddUser('mgr', 'mgrpw', ['Manager'], [])
+    >>> from zope.site.hooks import setSite
+    >>> setSite(app.site)
+
+Create the browser object we'll be using.
+
+    # BBB for Zope 2.12
+    >>> try:
+    ...     from Testing.testbrowser import Browser
+    ... except ImportError:
+    ...     from Products.Five.testbrowser import Browser
+
+    >>> browser = Browser()
+    >>> browser.handleErrors = False
+    >>> browser.addHeader('Authorization', 'Basic mgr:mgrpw')
+
+Open the contents view with the various options selected.
+All sort options apart from position are reversible.
+
+    >>> browser.open('http://localhost/site/@@edit.html?form.b_start=25')
+    >>> 'name="form.b_start" type="hidden" value="25"' in browser.contents
+    True
+    >>> browser.open('http://localhost/site/@@edit.html?form.sort_key=Type')
+    >>> 'name="form.sort_key" type="hidden" value="Type"' in browser.contents
+    True
+    >>> '<a href="http://localhost/site/@@edit.html?form.sort_key=Type&amp;form.reverse=1">' \
+    ... in browser.contents
+    True
+    >>> browser.open('http://localhost/site/@@edit.html?form.sort_key=getId')
+    >>> 'name="form.sort_key" type="hidden" value="getId"' in browser.contents
+    True
+    >>> '<a href="http://localhost/site/@@edit.html?form.sort_key=getId&amp;form.reverse=1">' \
+    ... in browser.contents
+    True
+    >>> browser.open('http://localhost/site/@@edit.html?form.sort_key=modified')
+    >>> 'name="form.sort_key" type="hidden" value="modified"' in browser.contents
+    True
+    >>> '<a href="http://localhost/site/@@edit.html?form.sort_key=modified&amp;form.reverse=1">' \
+    ... in browser.contents
+    True
+    >>> browser.open('http://localhost/site/@@edit.html?form.sort_key=position')
+    >>> 'name="form.sort_key" type="hidden" value="position"' in browser.contents
+    True
+    >>> '<a href="http://localhost/site/@@edit.html?form.sort_key=position&amp;form.reverse=1">' \
+    ... in browser.contents
+    False
+
+
+
+    >>> browser.open('http://localhost/site/@@edit.html?form.sort_key=Type&form.reverse=1')
+    >>> 'name="form.reverse" type="hidden" value="1"' in browser.contents
+    True
+    >>> browser.open('http://localhost/site/@@edit.html?form.sort_key=getId&form.reverse=1')
+    >>> 'name="form.reverse" type="hidden" value="1"' in browser.contents
+    True
+    >>> browser.open('http://localhost/site/@@edit.html?form.sort_key=modified&form.reverse=1')
+    >>> 'name="form.reverse" type="hidden" value="1"' in browser.contents
+    True
+    >>> browser.open('http://localhost/site/@@edit.html?form.sort_key=position&form.reverse=1')
+    >>> 'name="form.reverse" type="hidden" value="1"' in browser.contents
+    True

@@ -1,0 +1,51 @@
+;-*-Doctest-*-
+===================================
+archetypes.schemaextender migration
+===================================
+
+This tests migration of items that have been extended with extra
+fields by archetypes.schemaextender.
+
+    >>> from Products.CMFCore.permissions import ModifyPortalContent
+    >>> from Products.PloneTestCase.setup import _createObjectByType
+    >>> self.portal.manage_permission(
+    ...     ModifyPortalContent, ['Manager', 'Owner'], acquire=0)
+
+    >>> foo_doc = _createObjectByType(
+    ...     'Document', self.portal, id='foo', title='Foo', extensive_text='Extra foo')
+    >>> foo_doc.portal_type, foo_doc.getId(), foo_doc.Title()
+    ('Document', 'foo', 'Foo')
+    >>> foo_doc.getField('extensive_text').get(foo_doc)
+    'Extra foo'
+
+    >>> bar_doc = _createObjectByType(
+    ...     'Document', self.portal, id='bar', title='Bar', extensive_text='Extra bar')
+    >>> bar_doc.portal_type, bar_doc.getId(), bar_doc.Title()
+    ('Document', 'bar', 'Bar')
+    >>> bar_doc.getField('extensive_text').get(bar_doc)
+    'Extra bar'
+
+    >>> from transaction import commit
+    >>> commit()
+
+    >>> from Products.contentmigration.archetypes import ATItemMigrator
+    >>> foo_migrator = ATItemMigrator(foo_doc)
+    >>> foo_migrator.dst_portal_type = 'Document'
+    >>> foo_migrator.dst_meta_type = 'ATDocument'
+    >>> foo_migrator.migrate()
+    >>> foo_new = self.portal.foo
+    >>> foo_new.portal_type, foo_new.getId(), foo_new.Title()
+    ('Document', 'foo', 'Foo')
+    >>> foo_new.getField('extensive_text').get(foo_new)
+    'Extra foo'
+
+    >>> from Products.contentmigration.archetypes import InplaceATItemMigrator
+    >>> bar_migrator = InplaceATItemMigrator(bar_doc)
+    >>> bar_migrator.dst_portal_type = 'Document'
+    >>> bar_migrator.dst_meta_type = 'ATDocument'
+    >>> bar_migrator.migrate()
+    >>> bar_new = self.portal.bar
+    >>> bar_new.portal_type, bar_new.getId(), bar_new.Title()
+    ('Document', 'bar', 'Bar')
+    >>> bar_new.getField('extensive_text').get(bar_new)
+    'Extra bar'

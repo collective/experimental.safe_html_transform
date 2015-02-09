@@ -1,0 +1,532 @@
+Through-the-web content type editing
+====================================
+
+This package, plone.app.dexterity, provides the UI for creating and editing
+Dexterity content types through the Plone control panel.
+
+To demonstrate this, we'll need a logged in test browser::
+
+  >>> from plone.app.testing import TEST_USER_ID, TEST_USER_NAME, TEST_USER_PASSWORD, setRoles
+  >>> portal = layer['portal']
+  >>> setRoles(portal, TEST_USER_ID, ['Manager'])
+  >>> import transaction; transaction.commit()
+  >>> from plone.testing.z2 import Browser
+  >>> browser = Browser(layer['app'])
+  >>> browser.handleErrors = False
+  >>> browser.addHeader('Authorization', 'Basic %s:%s' % (TEST_USER_NAME, TEST_USER_PASSWORD,))
+
+
+Dexterity Types Configlet
+-------------------------
+
+Once the 'Dexterity Content Configlet' product is installed, site managers
+can navigate to the configlet via the control panel::
+
+  >>> browser.open('http://nohost/plone')
+  >>> browser.getLink('Site Setup').click()
+  >>> browser.getLink('Dexterity Content Types').click()
+  >>> browser.url
+  'http://nohost/plone/@@dexterity-types'
+  >>> 'Dexterity content types' in browser.contents
+  True
+
+
+Adding a content type
+---------------------
+
+Let's add a 'Plonista' content type to keep track of members of the Plone
+community::
+
+  >>> browser.getControl('Add New Content Type').click()
+  >>> browser.getControl('Type Name').value = 'Plonista'
+  >>> browser.getControl('Short Name').value = 'plonista'
+  >>> browser.getControl('Description').value = 'Represents a Plonista.'
+  >>> browser.getControl('Add').click()
+  >>> browser.url
+  'http://nohost/plone/dexterity-types/plonista/@@fields'
+
+Now we should also have a 'plonista' FTI in portal_types::
+
+  >>> 'plonista' in portal.portal_types
+  True
+
+The new type should have the dublin core behavior assigned by default::
+
+  >>> plonista = portal.portal_types.plonista
+  >>> 'plone.app.dexterity.behaviors.metadata.IDublinCore' in plonista.behaviors
+  True
+  >>> 'document_icon' in plonista.getIcon()
+  True
+
+The listing needs to not break if a type description was stored encoded.
+
+  >>> plonista.description = '\xc3\xbc'
+  >>> transaction.commit()
+  >>> browser.open('http://nohost/plone/dexterity-types')
+  >>> '\xc3\xbc' in browser.contents
+  True
+
+
+Adding an instance of the new type
+----------------------------------
+
+Now a 'Plonista' can be created within the site::
+
+  >>> browser.open('http://nohost/plone')
+  >>> browser.getLink('Plonista').click()
+  >>> browser.getControl('Title').value = 'Martin Aspeli'
+  >>> browser.getControl('Save').click()
+  >>> browser.url
+  'http://nohost/plone/martin-aspeli/view'
+
+
+Editing a content type
+----------------------
+
+Editing schemata is handled by the plone.schemaeditor package and is tested
+there.  However, let's at least make sure that we can navigate to the
+schema for the 'plonista' type we just created::
+
+  >>> browser.open('http://nohost/plone/@@dexterity-types')
+  >>> browser.getLink('Plonista').click()
+  >>> browser.getLink('Fields').click()
+  >>> schemaeditor_url = browser.url
+  >>> schemaeditor_url
+  'http://nohost/plone/dexterity-types/plonista/@@fields'
+
+Demonstrate that all the registered field types can be added edited
+and saved.
+
+  >>> from zope import component
+  >>> from plone.i18n.normalizer.interfaces import IIDNormalizer
+  >>> from plone.schemaeditor import interfaces
+  >>> normalizer = component.getUtility(IIDNormalizer)
+  >>> schema = plonista.lookupSchema()
+  >>> for name, factory in sorted(component.getUtilitiesFor(
+  ...     interfaces.IFieldFactory)):
+  ...     browser.open(schemaeditor_url)
+  ...     browser.getControl('Add new field').click()
+  ...     browser.getControl('Title').value = name
+  ...     field_id = normalizer.normalize(name).replace('-', '_')
+  ...     browser.getControl('Short Name').value = field_id
+  ...     browser.getControl('Field type').getControl(
+  ...         value=getattr(factory.title, 'default', '') or factory.title
+  ...         ).selected = True
+  ...     browser.getControl('Add').click()
+  ...     assert browser.url == schemaeditor_url, (
+  ...         "Couldn't successfully add %r" % name)
+  ...     assert field_id in schema, '%r not in %r' % (
+  ...         field_id, schema)
+  ...     assert factory.fieldcls._type is None or isinstance(
+  ...         schema[field_id], factory.fieldcls
+  ...         ), '%r is not an instance of %r' % (
+  ...             schema[field_id], factory.fieldcls)
+  ...     browser.getLink(url=field_id).click()
+  ...     browser.getControl('Save').click()
+
+
+Editing the XML model directly
+------------------------------
+
+Much of what the XML model editor does is happening in JavaScript, but we can
+still test the Zope side.
+
+Get some tools.
+
+  >>> from cgi import escape
+  >>> from urllib import quote_plus
+
+We should be able to navigate to the modeleditor view by clicking a
+button on the field list form::
+
+  >>> browser.open('http://nohost/plone/dexterity-types/plonista/@@fields')
+  >>> browser.getControl('Edit XML Field Model').click()
+  >>> browser.url
+  'http://nohost/plone/dexterity-types/plonista/@@modeleditor'
+
+We should be telling the browser to load our keys resources::
+
+  >>> browser.contents
+  '...<script...src="http://nohost/plone/++resource++plone.resourceeditor/ace/ace.js"...'
+
+  >>> browser.contents
+  '...<script...src="http://nohost/plone/++resource++plone.app.dexterity.modeleditor.js"...'
+
+Both of those should be available::
+
+  browser.open('http://nohost/plone/++resource++plone.resourceeditor/ace/ace.js')
+  browser.open('http://nohost/plone/++resource++plone.app.dexterity.modeleditor.js')
+
+Return to our view and find the XML model source in a div, ready for the Ace editor::
+
+  >>> browser.open('http://nohost/plone/dexterity-types/plonista/@@modeleditor')
+  >>> '<div id="modelEditor">' in browser.contents
+  True
+
+  >>> '&lt;schema&gt;' in browser.contents
+  True
+
+  >>> model_source = portal.portal_types.plonista.model_source
+  >>> escaped_model_source = escape(model_source)
+  >>> escaped_model_source in browser.contents
+  True
+
+There should be an authenticator in the `save` form::
+
+  >>> authenticator = browser.getControl(name="_authenticator").value
+
+Save is via AJAX. Let's check the save view's functionality.
+
+First, prove this won't work without an authenticator
+
+  >>> browser.open('http://nohost/plone/dexterity-types/plonista/@@model-edit-save?source=something')
+  Traceback (most recent call last):
+  ...
+  Unauthorized: Unauthorized()
+
+Check rejection of bad XML "something"::
+
+  >>> browser.open('http://nohost/plone/dexterity-types/plonista/@@model-edit-save?source=something&_authenticator=%s' % authenticator)
+  >>> print browser.contents
+  {"message": "XMLSyntaxError: Start tag expected, '<' not found, line 1, column 1", "success": false}
+
+We should refuse source that doesn't have `model` for the root tag::
+
+  >>> bad_source = model_source.replace('model', 'mode')
+  >>> browser.open('http://nohost/plone/dexterity-types/plonista/@@model-edit-save?source=%s&_authenticator=%s' % (quote_plus(bad_source), authenticator))
+  >>> print browser.contents
+  {"message": "Error: root tag must be 'model'", "success": false}
+
+Likewise, only `schema` tags are allowed inside the model::
+
+  >>> bad_source = model_source.replace('schema>', 'scheme>')
+  >>> browser.open('http://nohost/plone/dexterity-types/plonista/@@model-edit-save?source=%s&_authenticator=%s' % (quote_plus(bad_source), authenticator))
+  >>> print browser.contents
+  {"message": "Error: all model elements must be 'schema'", "success": false}
+
+Should work with real XML
+
+  >>> browser.open('http://nohost/plone/dexterity-types/plonista/@@model-edit-save?source=%s&_authenticator=%s' % (quote_plus(model_source), authenticator))
+  >>> print browser.contents
+  {"message": "Saved", "success": true}
+
+That response should have a JSON content type::
+
+  >>> browser.headers['content-type']
+  'application/json'
+
+We should be providing a link back to the fields editor::
+
+  >>> browser.open('http://nohost/plone/dexterity-types/plonista/@@modeleditor')
+  >>> link = browser.getLink('Back to the schema editor')
+  >>> link.click()
+  >>> browser.url
+  'http://nohost/plone/dexterity-types/plonista/@@fields'
+
+
+Enabling a behavior
+-------------------
+
+For each content type, a number of behaviors may be enabled.  Let's disable a
+behavior for 'plonista' and make sure that the change is reflected on the
+FTI::
+
+  >>> browser.getLink('Behaviors').click()
+  >>> browser.url
+  'http://nohost/plone/dexterity-types/plonista/@@behaviors'
+
+  >>> browser.getControl(name='form.widgets.plone.app.dexterity.behaviors.metadata.IDublinCore:list').value = []
+  >>> browser.getControl('Save').click()
+  >>> portal.portal_types.plonista.behaviors
+  ['plone.app.content.interfaces.INameFromTitle']
+
+
+Viewing a non-editable schema
+-----------------------------
+
+If a type's schema is not stored as XML in its FTI's schema property, it cannot
+currently be edited through the web.  However, the fields of the schema can at
+least be listed.
+
+  >>> from zope.interface import Interface
+  >>> from zope import schema
+  >>> import plone.app.dexterity.tests
+  >>> class IFilesystemSchema(Interface):
+  ...     irc_nick = schema.TextLine(title=u'IRC Nickname')
+  >>> plone.app.dexterity.tests.IFilesystemSchema = IFilesystemSchema
+  >>> plonista.schema = 'plone.app.dexterity.tests.IFilesystemSchema'
+  >>> transaction.commit()
+  >>> browser.open('http://nohost/plone/dexterity-types/plonista/@@fields')
+  >>> 'crud-edit.form.buttons.delete' in browser.contents
+  False
+  >>> 'IRC Nickname' in browser.contents
+  True
+
+We should not be offering the 'Edit XML' button::
+
+  >>> 'Edit XML Field Model' in browser.contents
+  False
+
+
+Cloning a content type
+----------------------
+
+A content type can be cloned.
+
+  >>> browser.open('http://nohost/plone/dexterity-types')
+  >>> browser.getControl(name='crud-edit.plonista.widgets.select:list').value = ['0']
+  >>> browser.getControl('Clone').click()
+  >>> browser.url
+  'http://nohost/plone/dexterity-types/plonista/@@clone'
+  >>> browser.getControl('Type Name').value = 'Plonista2'
+  >>> browser.getControl('Short Name').value = 'plonista2'
+  >>> browser.getControl('Add').click()
+  >>> browser.url
+  'http://nohost/plone/dexterity-types'
+  >>> 'plonista2' in browser.contents
+  True
+  >>> 'plonista2' in portal.portal_types
+  True
+
+The new content type has its own factory.
+
+  >>> portal.portal_types.plonista2.factory
+  'plonista2'
+
+Validation to prevent duplicate content types
+---------------------------------------------
+
+A new content type cannot be created if its name is the same as an existing
+content type.
+
+  >>> browser.getControl('Add New Content Type').click()
+  >>> browser.getControl('Type Name').value = 'foobar'
+  >>> browser.getControl('Short Name').value = 'plonista'
+  >>> browser.getControl('Add').click()
+  >>> browser.url
+  'http://nohost/plone/dexterity-types/@@add-type'
+  >>> "There is already a content type named 'plonista'" in browser.contents
+  True
+
+To avoid confusion, the title must also be unique.
+
+  >>> browser.open('http://nohost/plone/dexterity-types')
+  >>> browser.getControl('Add New Content Type').click()
+  >>> browser.getControl('Type Name').value = 'Plonista'
+  >>> browser.getControl('Short Name').value = 'foobar'
+  >>> browser.getControl('Add').click()
+  >>> browser.url
+  'http://nohost/plone/dexterity-types/@@add-type'
+  >>> "There is already a content type named 'Plonista'" in browser.contents
+  True
+
+Similar checks are performed when cloning.
+
+  >>> browser.open('http://nohost/plone/dexterity-types')
+  >>> browser.getControl(name='crud-edit.plonista.widgets.select:list').value = ['0']
+  >>> browser.getControl('Clone').click()
+  >>> browser.getControl('Type Name').value = 'foobar'
+  >>> browser.getControl('Short Name').value = 'plonista'
+  >>> browser.getControl('Add').click()
+  >>> browser.url
+  'http://nohost/plone/dexterity-types/plonista/@@clone'
+  >>> "There is already a content type named 'plonista'" in browser.contents
+  True
+
+  >>> browser.open('http://nohost/plone/dexterity-types')
+  >>> browser.getControl(name='crud-edit.plonista.widgets.select:list').value = ['0']
+  >>> browser.getControl('Clone').click()
+  >>> browser.getControl('Type Name').value = 'Plonista'
+  >>> browser.getControl('Short Name').value = 'foobar'
+  >>> browser.getControl('Add').click()
+  >>> browser.url
+  'http://nohost/plone/dexterity-types/plonista/@@clone'
+  >>> "There is already a content type named 'Plonista'" in browser.contents
+  True
+
+
+Adding a container
+------------------
+
+We can create a content type that is a container for other content::
+
+  >>> browser.open('http://nohost/plone/@@dexterity-types')
+  >>> browser.getControl('Add New Content Type').click()
+  >>> browser.getControl('Type Name').value = 'Plonista Folder'
+  >>> browser.getControl('Short Name').value = 'plonista-folder'
+  >>> browser.getControl('Add').click()
+  >>> browser.url
+  'http://nohost/plone/dexterity-types/plonista-folder/@@fields'
+
+Now we should have a 'plonista-folder' FTI in portal_types, and it should be
+using the Container base class::
+
+  >>> 'plonista-folder' in portal.portal_types
+  True
+  >>> pf = getattr(portal.portal_types, 'plonista-folder')
+  >>> pf.klass
+  'plone.dexterity.content.Container'
+  >>> 'document_icon' in pf.getIcon()
+  True
+
+We can configure the plonista-folder to allow contained content types::
+
+  >>> browser.open('http://nohost/plone/dexterity-types/plonista-folder')
+  >>> browser.getControl('All content types').click()
+  >>> browser.getControl('Apply').click()
+
+If we add a plonista-folder, we can then add other content items inside it.
+
+  >>> browser.open('http://nohost/plone')
+  >>> browser.getLink('Plonista Folder').click()
+  >>> browser.getControl('Title').value = 'Plonista Folder 1'
+  >>> browser.getControl('Save').click()
+  >>> browser.url
+  'http://nohost/plone/plonista-folder-1/view'
+  >>> browser.getLink(url='Document').click()
+  >>> browser.getControl('Title').value = 'Introduction'
+  >>> browser.getControl('Save').click()
+  >>> browser.url
+  'http://nohost/plone/plonista-folder-1/introduction'
+
+We can control which content types are allowed to be added into the
+container::
+
+  >>> browser.open('http://nohost/plone/dexterity-types/plonista-folder')
+  >>> browser.getControl('Some content types').click()
+  >>> select = browser.getControl(name="form.widgets.allowed_content_types:list")
+  >>> select
+  <ListControl name='form.widgets.allowed_content_types:list' type='select'>
+
+  >>> select.getControl('Page').selected = True
+  >>> browser.getControl('Apply').click()
+  >>> print browser.contents
+  <BLANKLINE>
+  ...Data successfully updated...
+
+Now only the allowed types may be added::
+
+  >>> browser.open('http://nohost/plone')
+  >>> browser.getLink('Plonista Folder 1').click()
+
+  >>> browser.getLink(url='Folder')
+  Traceback (most recent call last):
+  ...
+  LinkNotFound...
+
+  >>> browser.getLink(url='Document').click()
+  >>> browser.getControl('Title').value = 'Foo Plonista Page'
+  >>> browser.getControl('Save').click()
+
+
+Removing a content type
+-----------------------
+
+We can also delete a content type via the configlet::
+
+  >>> browser.open('http://nohost/plone/@@dexterity-types')
+  >>> browser.getControl(name='crud-edit.plonista.widgets.select:list').value = ['0']
+  >>> browser.getControl('Delete').click()
+
+Now the FTI for the type should no longer be present in portal_types::
+
+  >>> 'plonista' in portal.portal_types
+  False
+
+We should still be able to view a container that contains an instance of the
+removed type::
+
+  >>> browser.open('http://nohost/plone/folder_contents')
+
+But actually trying to view the type will now cause an error, as expected::
+
+  >>> browser.open('http://nohost/plone/martin-aspeli/view')
+  Traceback (most recent call last):
+  ...
+  ComponentLookupError...
+
+
+Dexterity Types Export
+----------------------
+
+Try out the types export button. We should be able to select our types from
+their checkboxes, push the export types button, and get a download for a
+zip archive containing files ready to drop into our profile::
+
+    >>> browser.open('http://nohost/plone/dexterity-types')
+    >>> browser.getControl(name='crud-edit.plonista2.widgets.select:list').value = ['0']
+    >>> browser.getControl(name='crud-edit.plonista-folder.widgets.select:list').value = ['0']
+    >>> browser.getControl('Export Type Profiles').click()
+    >>> browser.url
+    'http://nohost/plone/dexterity-types/@@types-export?selected=plonista2%2Cplonista-folder'
+
+    >>> browser.headers['content-type']
+    'application/zip'
+
+    >>> browser.headers['content-disposition']
+    'attachment; filename=dexterity_export-....zip'
+
+    >>> import StringIO, zipfile
+    >>> fd = StringIO.StringIO(browser.contents)
+    >>> archive = zipfile.ZipFile(fd, mode='r')
+    >>> archive.namelist()
+    ['types.xml', 'types/plonista2.xml', 'types/plonista-folder.xml']
+
+    >>> types_xml = archive.read('types.xml')
+    >>> '<object name="plonista2" meta_type="Dexterity FTI"/>' in types_xml
+    True
+    >>> '<object name="plonista-folder" meta_type="Dexterity FTI"/>' in types_xml
+    True
+
+Try out the models export button. We should be able to select our types from
+their checkboxes, push the export models button, and get a download for a
+zip archive containing supermodel xml files::
+
+    >>> browser.open('http://nohost/plone/dexterity-types')
+    >>> browser.getControl(name='crud-edit.plonista2.widgets.select:list').value = ['0']
+    >>> browser.getControl(name='crud-edit.plonista-folder.widgets.select:list').value = ['0']
+    >>> browser.getControl('Export Schema Models').click()
+    >>> browser.url
+    'http://nohost/plone/dexterity-types/@@models-export?selected=plonista2%2Cplonista-folder'
+
+    >>> browser.headers['content-type']
+    'application/zip'
+
+    >>> browser.headers['content-disposition']
+    'attachment; filename=dexterity_models-....zip'
+
+    >>> import StringIO, zipfile
+    >>> fd = StringIO.StringIO(browser.contents)
+    >>> archive = zipfile.ZipFile(fd, mode='r')
+    >>> archive.namelist()
+    ['models/plonista2.xml', 'models/plonista-folder.xml']
+
+    >>> print archive.read('models/plonista2.xml')
+    <model...xmlns="http://namespaces.plone.org/supermodel/schema">
+      <schema>
+      ...
+      </schema>
+    </model>
+
+If there's only one item selected, we get a single XML file rather than a zip
+file::
+
+    >>> browser.open('http://nohost/plone/dexterity-types')
+    >>> browser.getControl(name='crud-edit.plonista2.widgets.select:list').value = ['0']
+    >>> browser.getControl('Export Schema Models').click()
+    >>> browser.url
+    'http://nohost/plone/dexterity-types/@@models-export?selected=plonista2'
+
+    >>> browser.headers['content-type']
+    'application/xml'
+
+    >>> browser.headers['content-disposition']
+    'attachment; filename=plonista2.xml'
+
+    >>> print browser.contents
+    <model...xmlns="http://namespaces.plone.org/supermodel/schema">
+      <schema>
+      ...
+      </schema>
+    </model>
+

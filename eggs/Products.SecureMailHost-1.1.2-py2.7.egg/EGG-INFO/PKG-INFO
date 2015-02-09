@@ -1,0 +1,15 @@
+Metadata-Version: 1.1
+Name: Products.SecureMailHost
+Version: 1.1.2
+Summary: SecureMailHost is a reimplementation of the standard Zope2 MailHost with some security and usability enhancements.
+Home-page: http://svn.plone.org/svn/collective/SecureMailHost/trunk
+Author: Christian Heimes
+Author-email: plone-developers@lists.sourceforge.net
+License: ZPL
+Download-URL: http://plone.org/products/securemailhost/releases
+Description:       
+Keywords: Zope Plone Secure Mail Host
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: Programming Language :: Python

@@ -1,0 +1,57 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="tinymce">
+
+    <adapter
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+        factory=".JSONDetails.JSONDetails"
+        />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IContentish"
+        provides=".interfaces.JSONDetails.IJSONDetails"
+        factory=".JSONDetails.JSONDetails"
+        />
+
+    <adapter
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+        provides=".interfaces.JSONFolderListing.IJSONFolderListing"
+        factory=".JSONFolderListing.JSONFolderListing"
+        />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IContentish"
+        provides=".interfaces.JSONFolderListing.IJSONFolderListing"
+        factory=".JSONFolderListing.JSONFolderListing"
+        />
+
+    <adapter
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+        provides=".interfaces.Upload.IUpload"
+        factory=".Upload.Upload"
+        />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IContentish"
+        provides=".interfaces.Upload.IUpload"
+        factory=".Upload.Upload"
+        />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IContentish"
+        provides=".interfaces.Save.ISave"
+        factory=".Save.Save"
+        />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IFolderish"
+        provides=".interfaces.JSONSearch.IJSONSearch"
+        factory=".JSONSearch.JSONSearch"
+        />
+
+    <!-- Caching adapter -->
+    <adapter factory=".caching.TinyMCEResourceLookup" />
+
+</configure>

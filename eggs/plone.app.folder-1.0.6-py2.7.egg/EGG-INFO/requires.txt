@@ -1,0 +1,3 @@
+Products.CMFPlone
+setuptools
+plone.folder

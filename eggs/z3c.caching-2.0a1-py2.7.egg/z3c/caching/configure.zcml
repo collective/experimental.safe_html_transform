@@ -1,0 +1,9 @@
+<configure xmlns="http://namespaces.zope.org/zope" i18n_domain="z3c.caching">
+    
+    <adapter factory=".registry.RulesetRegistry" />
+    <adapter factory=".lastmodified.viewDelegateLastModified" />
+
+    <subscriber handler=".purge.purgeOnModified" />
+    <subscriber handler=".purge.purgeOnMovedOrRemoved" />
+
+</configure>

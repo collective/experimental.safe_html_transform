@@ -1,0 +1,1277 @@
+======================================================
+Tokens and Joins: zc.relation Catalog Extended Example
+======================================================
+
+.. contents::
+   :local:
+
+Introduction and Set Up
+=======================
+
+This document assumes you have read the introductory README.txt and want
+to learn a bit more by example. In it, we will explore a more
+complicated set of relations that demonstrates most of the aspects of
+working with tokens.  In particular, we will look at joins, which will
+also give us a chance to look more in depth at query factories and
+search indexes, and introduce the idea of listeners. It will not explain
+the basics that the README already addressed.
+
+Imagine we are indexing security assertions in a system.  In this
+system, users may have roles within an organization.  Each organization
+may have multiple child organizations and may have a single parent
+organization.  A user with a role in a parent organization will have the
+same role in all transitively connected child relations.
+
+We have two kinds of relations, then.  One kind of relation will model
+the hierarchy of organizations.  We'll do it with an intrinsic relation
+of organizations to their children: that reflects the fact that parent
+organizations choose and are comprised of their children; children do
+not choose their parents.
+
+The other relation will model the (multiple) roles a (single) user has
+in a (single) organization.  This relation will be entirely extrinsic.
+
+We could create two catalogs, one for each type.  Or we could put them
+both in the same catalog.  Initially, we'll go with the single-catalog
+approach for our examples.  This single catalog, then, will be indexing
+a heterogeneous collection of relations.  
+
+Let's define the two relations with interfaces.  We'll include one
+accessor, getOrganization, largely to show how to handle methods.
+
+    >>> import zope.interface
+    >>> class IOrganization(zope.interface.Interface):
+    ...     title = zope.interface.Attribute('the title')
+    ...     parts = zope.interface.Attribute(
+    ...         'the organizations that make up this one')
+    ...
+    >>> class IRoles(zope.interface.Interface):
+    ...     def getOrganization():
+    ...         'return the organization in which this relation operates'
+    ...     principal_id = zope.interface.Attribute(
+    ...         'the pricipal id whose roles this relation lists')
+    ...     role_ids = zope.interface.Attribute(
+    ...         'the role ids that the principal explicitly has in the '
+    ...         'organization.  The principal may have other roles via '
+    ...         'roles in parent organizations.')
+    ...
+
+Now we can create some classes.  In the README example, the setup was a bit
+of a toy.  This time we will be just a bit more practical.  We'll also expect
+to be operating within the ZODB, with a root and transactions. [#ZODB]_
+
+Here's how we will dump and load our relations: use a "registry"
+object, similar to an intid utility. [#faux_intid]_  
+
+In this implementation of the "dump" method, we use the cache just to
+show you how you might use it.  It probably is overkill for this job,
+and maybe even a speed loss, but you can see the idea.
+
+    >>> def dump(obj, catalog, cache):
+    ...     reg = cache.get('registry')
+    ...     if reg is None:
+    ...         reg = cache['registry'] = catalog._p_jar.root()['registry']
+    ...     return reg.getId(obj)
+    ...
+    >>> def load(token, catalog, cache):
+    ...     reg = cache.get('registry')
+    ...     if reg is None:
+    ...         reg = cache['registry'] = catalog._p_jar.root()['registry']
+    ...     return reg.getObject(token)
+    ...
+
+Now we can create a relation catalog to hold these items.
+
+    >>> import zc.relation.catalog
+    >>> catalog = root['catalog'] = zc.relation.catalog.Catalog(dump, load)
+    >>> transaction.commit()
+
+Now we set up our indexes.  We'll start with just the organizations, and
+set up the catalog with them. This part will be similar to the example
+in README.txt, but will introduce more discussions of optimizations and
+tokens.  Then we'll add in the part about roles, and explore queries and
+token-based "joins".
+
+Organizations
+=============
+
+The organization will hold a set of organizations.  This is actually not
+inherently easy in the ZODB because this means that we need to compare
+or hash persistent objects, which does not work reliably over time and
+across machines out-of-the-box.  To side-step the issue for this example,
+and still do something a bit interesting and real-world, we'll use the
+registry tokens introduced above.  This will also give us a chance to
+talk a bit more about optimizations and tokens.  (If you would like
+to sanely and transparently hold a set of persistent objects, try the
+zc.set package XXX not yet.)
+
+    >>> import BTrees
+    >>> class Organization(persistent.Persistent):
+    ...     zope.interface.implements(IOrganization)
+    ...     def __init__(self, title):
+    ...         self.title = title
+    ...         self.parts = BTrees.family32.IF.TreeSet()
+    ...     # the next parts just make the tests prettier
+    ...     def __repr__(self):
+    ...         return '<Organization instance "' + self.title + '">'
+    ...     def __cmp__(self, other):
+    ...         # pukes if other doesn't have name
+    ...         return cmp(self.title, other.title)
+    ...
+
+OK, now we know how organizations will work.  Now we can add the `parts`
+index to the catalog.  This will do a few new things from how we added
+indexes in the README.
+
+    >>> catalog.addValueIndex(IOrganization['parts'], multiple=True,
+    ...                       name="part")
+
+So, what's different from the README examples?
+
+First, we are using an interface element to define the value to be indexed.
+It provides an interface to which objects will be adapted, a default name
+for the index, and information as to whether the attribute should be used
+directly or called.
+
+Second, we are not specifying a dump or load.  They are None.  This
+means that the indexed value can already be treated as a token.  This
+can allow a very significant optimization for reindexing if the indexed
+value is a large collection using the same BTree family as the
+index--which leads us to the next difference.
+
+Third, we are specifying that `multiple=True`.  This means that the value
+on a given relation that provides or can be adapted to IOrganization will
+have a collection of `parts`.  These will always be regarded as a set,
+whether the actual colection is a BTrees set or the keys of a BTree.
+
+Last, we are specifying a name to be used for queries.  I find that queries
+read more easily when the query keys are singular, so I often rename plurals.
+
+As in the README, We can add another simple transposing transitive query
+factory, switching between 'part' and `None`.
+
+    >>> import zc.relation.queryfactory
+    >>> factory1 = zc.relation.queryfactory.TransposingTransitive(
+    ...     'part', None)
+    >>> catalog.addDefaultQueryFactory(factory1)
+
+Let's add a couple of search indexes in too, of the hierarchy looking up...
+
+    >>> import zc.relation.searchindex
+    >>> catalog.addSearchIndex(
+    ...     zc.relation.searchindex.TransposingTransitiveMembership(
+    ...         'part', None))
+
+...and down.
+
+    >>> catalog.addSearchIndex(
+    ...     zc.relation.searchindex.TransposingTransitiveMembership(
+    ...         None, 'part'))
+
+PLEASE NOTE: the search index looking up is not a good idea practically.  The
+index is designed for looking down [#verifyObjectTransitive]_.
+
+Let's create and add a few organizations.
+
+We'll make a structure like this [#silliness]_::
+
+         Ynod Corp Mangement                 Zookd Corp Management
+          /      |      \                       /      |      \
+   Ynod Devs  Ynod SAs  Ynod Admins  Zookd Admins   Zookd SAs  Zookd Devs
+     /      \              \                 /                /         \
+ Y3L4 Proj  Bet Proj      Ynod Zookd Task Force      Zookd hOgnmd     Zookd Nbd
+
+Here's the Python.
+
+
+    >>> orgs = root['organizations'] = BTrees.family32.OO.BTree()
+    >>> for nm, parts in (
+    ...     ('Y3L4 Proj', ()),
+    ...     ('Bet Proj', ()),
+    ...     ('Ynod Zookd Task Force', ()),
+    ...     ('Zookd hOgnmd', ()),
+    ...     ('Zookd Nbd', ()),
+    ...     ('Ynod Devs', ('Y3L4 Proj', 'Bet Proj')),
+    ...     ('Ynod SAs', ()),
+    ...     ('Ynod Admins', ('Ynod Zookd Task Force',)),
+    ...     ('Zookd Admins', ('Ynod Zookd Task Force',)),
+    ...     ('Zookd SAs', ()),
+    ...     ('Zookd Devs', ('Zookd hOgnmd', 'Zookd Nbd')),
+    ...     ('Ynod Corp Management', ('Ynod Devs', 'Ynod SAs', 'Ynod Admins')),
+    ...     ('Zookd Corp Management', ('Zookd Devs', 'Zookd SAs',
+    ...                                'Zookd Admins'))):
+    ...     org = Organization(nm)
+    ...     for part in parts:
+    ...         ignore = org.parts.insert(registry.getId(orgs[part]))
+    ...     orgs[nm] = org
+    ...     catalog.index(org)
+    ...
+
+Now the catalog knows about the relatons.
+
+    >>> len(catalog)
+    13
+    >>> root['dummy'] = Organization('Foo')
+    >>> root['dummy'] in catalog
+    False
+    >>> orgs['Y3L4 Proj'] in catalog
+    True
+
+Also, now we can search.  To do this, we can use some of the token methods that
+the catalog provides.  The most commonly used is `tokenizeQuery`.  It takes a
+query with values that are not tokenized and converts them to values that are
+tokenized.
+
+    >>> Ynod_SAs_id = registry.getId(orgs['Ynod SAs'])
+    >>> catalog.tokenizeQuery({None: orgs['Ynod SAs']}) == {
+    ...     None: Ynod_SAs_id}
+    True
+    >>> Zookd_SAs_id = registry.getId(orgs['Zookd SAs'])
+    >>> Zookd_Devs_id = registry.getId(orgs['Zookd Devs'])
+    >>> catalog.tokenizeQuery(
+    ...     {None: zc.relation.catalog.any(
+    ...         orgs['Zookd SAs'], orgs['Zookd Devs'])}) == {
+    ...     None: zc.relation.catalog.any(Zookd_SAs_id, Zookd_Devs_id)}
+    True
+
+Of course, right now doing this with 'part' alone is kind of silly, since it
+does not change within the relation catalog (because we said that dump and
+load were `None`, as discussed above).
+
+    >>> catalog.tokenizeQuery({'part': Ynod_SAs_id}) == {
+    ...     'part': Ynod_SAs_id}
+    True
+    >>> catalog.tokenizeQuery(
+    ...     {'part': zc.relation.catalog.any(Zookd_SAs_id, Zookd_Devs_id)}
+    ...     ) == {'part': zc.relation.catalog.any(Zookd_SAs_id, Zookd_Devs_id)}
+    True
+    
+The `tokenizeQuery` method is so common that we're going to assign it to
+a variable in our example. Then we'll do a search or two.
+
+So...find the relations that Ynod Devs supervise.
+
+    >>> t = catalog.tokenizeQuery
+    >>> res = list(catalog.findRelationTokens(t({None: orgs['Ynod Devs']})))
+
+OK...we used `findRelationTokens`, as opposed to `findRelations`, so res
+is a couple of numbers now.  How do we convert them back? 
+`resolveRelationTokens` will do the trick.
+
+    >>> len(res)
+    3
+    >>> sorted(catalog.resolveRelationTokens(res))
+    ... # doctest: +NORMALIZE_WHITESPACE
+    [<Organization instance "Bet Proj">, <Organization instance "Y3L4 Proj">,
+     <Organization instance "Ynod Devs">]
+
+`resolveQuery` is the mirror image of `tokenizeQuery`: it converts
+tokenized queries to queries with "loaded" values.
+
+    >>> original = {'part': zc.relation.catalog.any(
+    ...                 Zookd_SAs_id, Zookd_Devs_id),
+    ...             None: orgs['Zookd Devs']}
+    >>> tokenized = catalog.tokenizeQuery(original)
+    >>> original == catalog.resolveQuery(tokenized)
+    True
+
+    >>> original = {None: zc.relation.catalog.any(
+    ...                 orgs['Zookd SAs'], orgs['Zookd Devs']),
+    ...             'part': Zookd_Devs_id}
+    >>> tokenized = catalog.tokenizeQuery(original)
+    >>> original == catalog.resolveQuery(tokenized)
+    True
+
+Likewise, `tokenizeRelations` is the mirror image of `resolveRelationTokens`.
+
+    >>> sorted(catalog.tokenizeRelations(
+    ...     [orgs["Bet Proj"], orgs["Y3L4 Proj"]])) == sorted(
+    ...     registry.getId(o) for o in
+    ...     [orgs["Bet Proj"], orgs["Y3L4 Proj"]])
+    True
+
+The other token-related methods are as follows
+[#show_remaining_token_methods]_:
+
+- `tokenizeValues`, which returns an iterable of tokens for the values
+  of the given index name;
+- `resolveValueTokens`, which returns an iterable of values for the tokens of
+  the given index name;
+- `tokenizeRelation`, which returns a token for the given relation; and
+- `resolveRelationToken`, which returns a relation for the given token.
+
+Why do we bother with these tokens, instead of hiding them away and
+making the API prettier?  By exposing them, we enable efficient joining,
+and efficient use in other contexts.  For instance, if you use the same
+intid utility to tokenize in other catalogs, our results can be merged
+with the results of other catalogs.  Similarly, you can use the results
+of queries to other catalogs--or even "joins" from earlier results of
+querying this catalog--as query values here.  We'll explore this in the
+next section.
+
+Roles
+=====
+
+We have set up the Organization relations.  Now let's set up the roles, and
+actually be able to answer the questions that we described at the beginning
+of the document.
+
+In our Roles object, roles and principals will simply be strings--ids, if
+this were a real system.  The organization will be a direct object reference.
+
+    >>> class Roles(persistent.Persistent):
+    ...     zope.interface.implements(IRoles)
+    ...     def __init__(self, principal_id, role_ids, organization):
+    ...         self.principal_id = principal_id
+    ...         self.role_ids = BTrees.family32.OI.TreeSet(role_ids)
+    ...         self._organization = organization
+    ...     def getOrganization(self):
+    ...         return self._organization
+    ...     # the rest is for prettier/easier tests
+    ...     def __repr__(self):
+    ...         return "<Roles instance (%s has %s in %s)>" % (
+    ...             self.principal_id, ', '.join(self.role_ids),
+    ...             self._organization.title)
+    ...     def __cmp__(self, other):
+    ...         return cmp(
+    ...             (self.principal_id, tuple(self.role_ids),
+    ...              self._organization.title),
+    ...             (other.principal_id, tuple(other.role_ids),
+    ...              other._organization.title))
+    ...
+
+Now let's add add the value indexes to the relation catalog.
+
+    >>> catalog.addValueIndex(IRoles['principal_id'], btree=BTrees.family32.OI)
+    >>> catalog.addValueIndex(IRoles['role_ids'], btree=BTrees.family32.OI,
+    ...                       multiple=True, name='role_id')
+    >>> catalog.addValueIndex(IRoles['getOrganization'], dump, load,
+    ...                       name='organization')
+
+Those are some slightly new variations of what we've seen in `addValueIndex`
+before, but all mixing and matching on the same ingredients.
+
+As a reminder, here is our organization structure::
+
+         Ynod Corp Mangement                 Zookd Corp Management
+          /      |      \                       /      |      \
+   Ynod Devs  Ynod SAs  Ynod Admins  Zookd Admins   Zookd SAs  Zookd Devs
+     /      \              \                 /                /         \
+ Y3L4 Proj  Bet Proj      Ynod Zookd Task Force      Zookd hOgnmd     Zookd Nbd
+
+Now let's create and add some roles.
+
+    >>> principal_ids = [
+    ...     'abe', 'bran', 'cathy', 'david', 'edgar', 'frank', 'gertrude',
+    ...     'harriet', 'ignas', 'jacob', 'karyn', 'lettie', 'molly', 'nancy',
+    ...     'ophelia', 'pat']
+    >>> role_ids = ['user manager', 'writer', 'reviewer', 'publisher']
+    >>> get_role = dict((v[0], v) for v in role_ids).__getitem__
+    >>> roles = root['roles'] = BTrees.family32.IO.BTree()
+    >>> next = 0
+    >>> for prin, org, role_ids in (
+    ...     ('abe', orgs['Zookd Corp Management'], 'uwrp'),
+    ...     ('bran', orgs['Ynod Corp Management'], 'uwrp'),
+    ...     ('cathy', orgs['Ynod Devs'], 'w'),
+    ...     ('cathy', orgs['Y3L4 Proj'], 'r'),
+    ...     ('david', orgs['Bet Proj'], 'wrp'),
+    ...     ('edgar', orgs['Ynod Devs'], 'up'),
+    ...     ('frank', orgs['Ynod SAs'], 'uwrp'),
+    ...     ('frank', orgs['Ynod Admins'], 'w'),
+    ...     ('gertrude', orgs['Ynod Zookd Task Force'], 'uwrp'),
+    ...     ('harriet', orgs['Ynod Zookd Task Force'], 'w'),
+    ...     ('harriet', orgs['Ynod Admins'], 'r'),
+    ...     ('ignas', orgs['Zookd Admins'], 'r'),
+    ...     ('ignas', orgs['Zookd Corp Management'], 'w'),
+    ...     ('karyn', orgs['Zookd Corp Management'], 'uwrp'),
+    ...     ('karyn', orgs['Ynod Corp Management'], 'uwrp'),
+    ...     ('lettie', orgs['Zookd Corp Management'], 'u'),
+    ...     ('lettie', orgs['Ynod Zookd Task Force'], 'w'),
+    ...     ('lettie', orgs['Zookd SAs'], 'w'),
+    ...     ('molly', orgs['Zookd SAs'], 'uwrp'),
+    ...     ('nancy', orgs['Zookd Devs'], 'wrp'),
+    ...     ('nancy', orgs['Zookd hOgnmd'], 'u'),
+    ...     ('ophelia', orgs['Zookd Corp Management'], 'w'),
+    ...     ('ophelia', orgs['Zookd Devs'], 'r'),
+    ...     ('ophelia', orgs['Zookd Nbd'], 'p'),
+    ...     ('pat', orgs['Zookd Nbd'], 'wrp')):
+    ...     assert prin in principal_ids
+    ...     role_ids = [get_role(l) for l in role_ids]
+    ...     role = roles[next] = Roles(prin, role_ids, org)
+    ...     role.key = next
+    ...     next += 1
+    ...     catalog.index(role)
+    ...
+
+Now we can begin to do searches [#real_value_tokens]_.
+
+What are all the role settings for ophelia?
+
+    >>> sorted(catalog.findRelations({'principal_id': 'ophelia'}))
+    ... # doctest: +NORMALIZE_WHITESPACE
+    [<Roles instance (ophelia has publisher in Zookd Nbd)>,
+     <Roles instance (ophelia has reviewer in Zookd Devs)>,
+     <Roles instance (ophelia has writer in Zookd Corp Management)>]
+
+That answer does not need to be transitive: we're done.
+
+Next question.  Where does ophelia have the 'writer' role?
+
+    >>> list(catalog.findValues(
+    ...     'organization', {'principal_id': 'ophelia', 
+    ...                        'role_id': 'writer'}))
+    [<Organization instance "Zookd Corp Management">]
+
+Well, that's correct intransitively.  Do we need a transitive queries
+factory?  No! This is a great chance to look at the token join we talked
+about in the previous section.  This should actually be a two-step
+operation: find all of the organizations in which ophelia has writer,
+and then find all of the transitive parts to that organization.
+
+    >>> sorted(catalog.findRelations({None: zc.relation.catalog.Any(
+    ...     catalog.findValueTokens('organization',
+    ...                             {'principal_id': 'ophelia', 
+    ...                              'role_id': 'writer'}))}))
+    ... # doctest: +NORMALIZE_WHITESPACE
+    [<Organization instance "Ynod Zookd Task Force">,
+     <Organization instance "Zookd Admins">,
+     <Organization instance "Zookd Corp Management">,
+     <Organization instance "Zookd Devs">,
+     <Organization instance "Zookd Nbd">,
+     <Organization instance "Zookd SAs">,
+     <Organization instance "Zookd hOgnmd">]
+
+That's more like it.
+
+Next question.  What users have roles in the 'Zookd Devs' organization?
+Intransitively, that's pretty easy.
+
+    >>> sorted(catalog.findValueTokens(
+    ...     'principal_id', t({'organization': orgs['Zookd Devs']})))
+    ['nancy', 'ophelia']
+
+Transitively, we should do another join.
+
+    >>> org_id = registry.getId(orgs['Zookd Devs'])
+    >>> sorted(catalog.findValueTokens(
+    ...     'principal_id', {
+    ...         'organization': zc.relation.catalog.any(
+    ...             org_id, *catalog.findRelationTokens({'part': org_id}))}))
+    ['abe', 'ignas', 'karyn', 'lettie', 'nancy', 'ophelia']
+
+That's a little awkward, but it does the trick.
+
+Last question, and the kind of question that started the entire example.
+ What roles does ophelia have in the "Zookd Nbd" organization?
+
+    >>> list(catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'ophelia'})))
+    ['publisher']
+
+Intransitively, that's correct.  But, transitively, ophelia also has
+reviewer and writer, and that's the answer we want to be able to get quickly.
+
+We could ask the question a different way, then, again leveraging a join.
+We'll set it up as a function, because we will want to use it a little later
+without repeating the code.
+
+    >>> def getRolesInOrganization(principal_id, org):
+    ...     org_id = registry.getId(org)
+    ...     return sorted(catalog.findValueTokens(
+    ...         'role_id', {
+    ...             'organization': zc.relation.catalog.any(
+    ...                 org_id,
+    ...                 *catalog.findRelationTokens({'part': org_id})),
+    ...             'principal_id': principal_id}))
+    ...
+    >>> getRolesInOrganization('ophelia', orgs['Zookd Nbd'])
+    ['publisher', 'reviewer', 'writer']
+
+As you can see, then, working with tokens makes interesting joins possible,
+as long as the tokens are the same across the two queries.
+
+We have examined tokens methods and token techniques like joins.  The example
+story we have told can let us get into a few more advanced topics, such as
+query factory joins and search indexes that can increase their read speed.
+
+Query Factory Joins
+===================
+
+We can build a query factory that makes the join automatic.  A query
+factory is a callable that takes two arguments: a query (the one that
+starts the search) and the catalog.  The factory either returns None,
+indicating that the query factory cannot be used for this query, or it
+returns another callable that takes a chain of relations.  The last
+token in the relation chain is the most recent.  The output of this
+inner callable is expected to be an iterable of
+BTrees.family32.OO.Bucket queries to search further from the given chain
+of relations.
+
+Here's a flawed approach to this problem.
+
+    >>> def flawed_factory(query, catalog):
+    ...     if (len(query) == 2 and
+    ...         'organization' in query and
+    ...         'principal_id' in query):
+    ...         def getQueries(relchain):
+    ...             if not relchain:
+    ...                 yield query
+    ...                 return
+    ...             current = catalog.getValueTokens(
+    ...                 'organization', relchain[-1])
+    ...             if current:
+    ...                 organizations = catalog.getRelationTokens(
+    ...                     {'part': zc.relation.catalog.Any(current)})
+    ...                 if organizations:
+    ...                     res = BTrees.family32.OO.Bucket(query)
+    ...                     res['organization'] = zc.relation.catalog.Any(
+    ...                         organizations)
+    ...                     yield res
+    ...         return getQueries
+    ...
+
+That works for our current example.
+
+    >>> sorted(catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'ophelia'}),
+    ...     queryFactory=flawed_factory))
+    ['publisher', 'reviewer', 'writer']
+
+However, it won't work for other similar queries.
+
+    >>> getRolesInOrganization('abe', orgs['Zookd Nbd'])
+    ['publisher', 'reviewer', 'user manager', 'writer']
+    >>> sorted(catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'abe'}),
+    ...     queryFactory=flawed_factory))
+    []
+
+oops.
+
+The flawed_factory is actually a useful pattern for more typical relation
+traversal.  It goes from relation to relation to relation, and ophelia has
+connected relations all the way to the top.  However, abe only has them at
+the top, so nothing is traversed.
+
+Instead, we can make a query factory that modifies the initial query.
+
+    >>> def factory2(query, catalog):
+    ...     if (len(query) == 2 and
+    ...         'organization' in query and
+    ...         'principal_id' in query):
+    ...         def getQueries(relchain):
+    ...             if not relchain:
+    ...                 res = BTrees.family32.OO.Bucket(query)
+    ...                 org_id = query['organization']
+    ...                 if org_id is not None:
+    ...                     res['organization'] = zc.relation.catalog.any(
+    ...                         org_id,
+    ...                         *catalog.findRelationTokens({'part': org_id}))
+    ...                 yield res
+    ...         return getQueries
+    ...
+
+    >>> sorted(catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'ophelia'}),
+    ...     queryFactory=factory2))
+    ['publisher', 'reviewer', 'writer']
+
+    >>> sorted(catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'abe'}),
+    ...     queryFactory=factory2))
+    ['publisher', 'reviewer', 'user manager', 'writer']
+
+A difference between this and the other approach is that it is essentially
+intransitive: this query factory modifies the initial query, and then does
+not give further queries.  The catalog currently always stops calling the
+query factory if the queries do not return any results, so an approach like
+the flawed_factory simply won't work for this kind of problem.
+
+We could add this query factory as another default.
+
+    >>> catalog.addDefaultQueryFactory(factory2)
+
+    >>> sorted(catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'ophelia'})))
+    ['publisher', 'reviewer', 'writer']
+
+    >>> sorted(catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'abe'})))
+    ['publisher', 'reviewer', 'user manager', 'writer']
+
+The previously installed query factory is still available.
+
+    >>> list(catalog.iterDefaultQueryFactories()) == [factory1, factory2]
+    True
+
+    >>> list(catalog.findRelations(
+    ...     {'part': registry.getId(orgs['Y3L4 Proj'])}))
+    ...     # doctest: +NORMALIZE_WHITESPACE
+    [<Organization instance "Ynod Devs">,
+     <Organization instance "Ynod Corp Management">]
+
+    >>> sorted(catalog.findRelations(
+    ...     {None: registry.getId(orgs['Ynod Corp Management'])}))
+    ...     # doctest: +NORMALIZE_WHITESPACE
+    [<Organization instance "Bet Proj">, <Organization instance "Y3L4 Proj">,
+     <Organization instance "Ynod Admins">,
+     <Organization instance "Ynod Corp Management">,
+     <Organization instance "Ynod Devs">, <Organization instance "Ynod SAs">,
+     <Organization instance "Ynod Zookd Task Force">]
+
+Search Index for Query Factory Joins
+====================================
+
+Now that we have written a query factory that encapsulates the join, we can
+use a search index that speeds it up.  We've only used transitive search
+indexes so far.  Now we will add an intransitive search index.
+
+The intransitive search index generally just needs the search value
+names it should be indexing, optionally the result name (defaulting to
+relations), and optionally the query factory to be used.
+
+We need to use two additional options because of the odd join trick we're
+doing.  We need to specify what organization and principal_id values need
+to be changed when an object is indexed, and we need to indicate that we
+should update when organization, principal_id, *or* parts changes.
+
+`getValueTokens` specifies the values that need to be indexed.  It gets
+the index, the name for the tokens desired, the token, the catalog that
+generated the token change (it may not be the same as the index's
+catalog, the source dictionary that contains a dictionary of the values
+that will be used for tokens if you do not override them, a dict of the
+added values for this token (keys are value names), a dict of the
+removed values for this token, and whether the token has been removed.
+The method can return None, which will leave the index to its default
+behavior that should work if no query factory is used; or an iterable of
+values.
+
+    >>> def getValueTokens(index, name, token, catalog, source,
+    ...                    additions, removals, removed):
+    ...     if name == 'organization':
+    ...         orgs = source.get('organization')
+    ...         if not removed or not orgs:
+    ...             orgs = index.catalog.getValueTokens(
+    ...                 'organization', token)
+    ...             if not orgs:
+    ...                 orgs = [token]
+    ...                 orgs.extend(removals.get('part', ()))
+    ...         orgs = set(orgs)
+    ...         orgs.update(index.catalog.findValueTokens(
+    ...             'part',
+    ...             {None: zc.relation.catalog.Any(
+    ...                 t for t in orgs if t is not None)}))
+    ...         return orgs
+    ...     elif name == 'principal_id':
+    ...         # we only want custom behavior if this is an organization
+    ...         if 'principal_id' in source or index.catalog.getValueTokens(
+    ...             'principal_id', token):
+    ...             return
+    ...         orgs = set((token,))
+    ...         orgs.update(index.catalog.findRelationTokens(
+    ...             {'part': token}))
+    ...         return set(index.catalog.findValueTokens(
+    ...             'principal_id', {
+    ...                 'organization': zc.relation.catalog.Any(orgs)}))
+    ...
+    >>> index = zc.relation.searchindex.Intransitive(
+    ...     ('organization', 'principal_id'), 'role_id', factory2,
+    ...     getValueTokens,
+    ...     ('organization', 'principal_id', 'part', 'role_id'),
+    ...     unlimitedDepth=True)
+    >>> catalog.addSearchIndex(index)
+
+    >>> res = catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'ophelia'}))
+    >>> list(res)
+    ['publisher', 'reviewer', 'writer']
+    >>> list(res)
+    ['publisher', 'reviewer', 'writer']
+
+    >>> res = catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'abe'}))
+    >>> list(res)
+    ['publisher', 'reviewer', 'user manager', 'writer']
+    >>> list(res)
+    ['publisher', 'reviewer', 'user manager', 'writer']
+
+[#verifyObjectIntransitive]_ Now we can change and remove relations--both organizations and roles--and
+have the index maintain correct state.  Given the current state of
+organizations--
+
+::
+
+         Ynod Corp Mangement                 Zookd Corp Management
+          /      |      \                       /      |      \
+   Ynod Devs  Ynod SAs  Ynod Admins  Zookd Admins   Zookd SAs  Zookd Devs
+     /      \              \                 /                /         \
+ Y3L4 Proj  Bet Proj      Ynod Zookd Task Force      Zookd hOgnmd     Zookd Nbd
+
+--first we will move Ynod Devs to beneath Zookd Devs, and back out.  This will
+briefly give abe full privileges to Y3L4 Proj., among others.
+
+    >>> list(catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Y3L4 Proj'],
+    ...                   'principal_id': 'abe'})))
+    []
+    >>> orgs['Zookd Devs'].parts.insert(registry.getId(orgs['Ynod Devs']))
+    1
+    >>> catalog.index(orgs['Zookd Devs'])
+    >>> res = catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Y3L4 Proj'],
+    ...                   'principal_id': 'abe'}))
+    >>> list(res)
+    ['publisher', 'reviewer', 'user manager', 'writer']
+    >>> list(res)
+    ['publisher', 'reviewer', 'user manager', 'writer']
+    >>> orgs['Zookd Devs'].parts.remove(registry.getId(orgs['Ynod Devs']))
+    >>> catalog.index(orgs['Zookd Devs'])
+    >>> list(catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Y3L4 Proj'],
+    ...                   'principal_id': 'abe'})))
+    []
+
+As another example, we will change the roles abe has, and see that it is
+propagated down to Zookd Nbd.
+
+    >>> rels = list(catalog.findRelations(t(
+    ...     {'principal_id': 'abe',
+    ...      'organization': orgs['Zookd Corp Management']})))
+    >>> len(rels)
+    1
+    >>> rels[0].role_ids.remove('reviewer')
+    >>> catalog.index(rels[0])
+
+    >>> res = catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'abe'}))
+    >>> list(res)
+    ['publisher', 'user manager', 'writer']
+    >>> list(res)
+    ['publisher', 'user manager', 'writer']
+
+Note that search index order matters.  In our case, our intransitive search
+index is relying on our transitive index, so the transitive index needs to
+come first.  You want transitive relation indexes before name.  Right now,
+you are in charge of this order: it will be difficult to come up with a
+reliable algorithm for guessing this.
+
+Listeners, Catalog Administration, and Joining Across Relation Catalogs
+=======================================================================
+
+We've done all of our examples so far with a single catalog that indexes
+both kinds of relations.  What if we want to have two catalogs with
+homogenous collections of relations?  That can feel cleaner, but it also
+introduces some new wrinkles.
+
+Let's use our current catalog for organizations, removing the extra
+information; and create a new one for roles.
+
+    >>> role_catalog = root['role_catalog'] = catalog.copy()
+    >>> transaction.commit()
+    >>> org_catalog = catalog
+    >>> del catalog
+
+We'll need a slightly different query factory and a slightly different
+search index `getValueTokens` function.  We'll write those, then modify the
+configuration of our two catalogs for the new world.
+
+The transitive factory we write here is for the role catalog.  It needs
+access to the organzation catalog.  We could do this a variety of
+ways--relying on a utility, or finding the catalog from context.  We will
+make the role_catalog have a .org_catalog attribute, and rely on that.
+
+    >>> role_catalog.org_catalog = org_catalog
+    >>> def factory3(query, catalog):
+    ...     if (len(query) == 2 and
+    ...         'organization' in query and
+    ...         'principal_id' in query):
+    ...         def getQueries(relchain):
+    ...             if not relchain:
+    ...                 res = BTrees.family32.OO.Bucket(query)
+    ...                 org_id = query['organization']
+    ...                 if org_id is not None:
+    ...                     res['organization'] = zc.relation.catalog.any(
+    ...                         org_id,
+    ...                         *catalog.org_catalog.findRelationTokens(
+    ...                             {'part': org_id}))
+    ...                 yield res
+    ...         return getQueries
+    ...
+
+    >>> def getValueTokens2(index, name, token, catalog, source,
+    ...                    additions, removals, removed):
+    ...     is_role_catalog = catalog is index.catalog # role_catalog
+    ...     if name == 'organization':
+    ...         if is_role_catalog:
+    ...             orgs = set(source.get('organization') or
+    ...                        index.catalog.getValueTokens(
+    ...                         'organization', token) or ())
+    ...         else:
+    ...             orgs = set((token,))
+    ...             orgs.update(removals.get('part', ()))
+    ...         orgs.update(index.catalog.org_catalog.findValueTokens(
+    ...             'part',
+    ...             {None: zc.relation.catalog.Any(
+    ...                 t for t in orgs if t is not None)}))
+    ...         return orgs
+    ...     elif name == 'principal_id':
+    ...         # we only want custom behavior if this is an organization
+    ...         if not is_role_catalog:
+    ...             orgs = set((token,))
+    ...             orgs.update(index.catalog.org_catalog.findRelationTokens(
+    ...                 {'part': token}))
+    ...             return set(index.catalog.findValueTokens(
+    ...                 'principal_id', {
+    ...                     'organization': zc.relation.catalog.Any(orgs)}))
+    ...         
+
+If you are following along in the code and comparing to the originals, you may
+see that this approach is a bit cleaner than the one when the relations were
+in the same catalog.
+
+Now we will fix up the the organization catalog [#compare_copy]_.
+
+    >>> org_catalog.removeValueIndex('organization')
+    >>> org_catalog.removeValueIndex('role_id')
+    >>> org_catalog.removeValueIndex('principal_id')
+    >>> org_catalog.removeDefaultQueryFactory(factory2)
+    >>> org_catalog.removeSearchIndex(index)
+    >>> org_catalog.clear()
+    >>> len(org_catalog)
+    0
+    >>> for v in orgs.values():
+    ...     org_catalog.index(v)
+
+This also shows using the `removeDefaultQueryFactory` and `removeSearchIndex`
+methods [#removeDefaultQueryFactoryExceptions]_.
+
+Now we will set up the role catalog [#copy_unchanged]_.
+
+    >>> role_catalog.removeValueIndex('part')
+    >>> for ix in list(role_catalog.iterSearchIndexes()):
+    ...     role_catalog.removeSearchIndex(ix)
+    ...
+    >>> role_catalog.removeDefaultQueryFactory(factory1)
+    >>> role_catalog.removeDefaultQueryFactory(factory2)
+    >>> role_catalog.addDefaultQueryFactory(factory3)
+    >>> root['index2'] = index2 = zc.relation.searchindex.Intransitive(
+    ...     ('organization', 'principal_id'), 'role_id', factory3,
+    ...     getValueTokens2,
+    ...     ('organization', 'principal_id', 'part', 'role_id'),
+    ...     unlimitedDepth=True)
+    >>> role_catalog.addSearchIndex(index2)
+
+The new role_catalog index needs to be updated from the org_catalog.
+We'll set that up using listeners, a new concept.
+
+    >>> org_catalog.addListener(index2)
+    >>> list(org_catalog.iterListeners()) == [index2]
+    True
+
+Now the role_catalog should be able to answer the same questions as the old
+single catalog approach.
+
+    >>> t = role_catalog.tokenizeQuery
+    >>> list(role_catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'abe'})))
+    ['publisher', 'user manager', 'writer']
+
+    >>> list(role_catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'ophelia'})))
+    ['publisher', 'reviewer', 'writer']
+
+We can also make changes to both catalogs and the search indexes are
+maintained.
+
+    >>> list(role_catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Y3L4 Proj'],
+    ...                   'principal_id': 'abe'})))
+    []
+    >>> orgs['Zookd Devs'].parts.insert(registry.getId(orgs['Ynod Devs']))
+    1
+    >>> org_catalog.index(orgs['Zookd Devs'])
+    >>> list(role_catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Y3L4 Proj'],
+    ...                   'principal_id': 'abe'})))
+    ['publisher', 'user manager', 'writer']
+    >>> orgs['Zookd Devs'].parts.remove(registry.getId(orgs['Ynod Devs']))
+    >>> org_catalog.index(orgs['Zookd Devs'])
+    >>> list(role_catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Y3L4 Proj'],
+    ...                   'principal_id': 'abe'})))
+    []
+
+    >>> rels = list(role_catalog.findRelations(t(
+    ...     {'principal_id': 'abe',
+    ...      'organization': orgs['Zookd Corp Management']})))
+    >>> len(rels)
+    1
+    >>> rels[0].role_ids.insert('reviewer')
+    1
+    >>> role_catalog.index(rels[0])
+
+    >>> res = role_catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd Nbd'],
+    ...                   'principal_id': 'abe'}))
+    >>> list(res)
+    ['publisher', 'reviewer', 'user manager', 'writer']
+
+Here we add a new organization.
+
+    >>> orgs['Zookd hOnc'] = org = Organization('Zookd hOnc')
+    >>> orgs['Zookd Devs'].parts.insert(registry.getId(org))
+    1
+    >>> org_catalog.index(orgs['Zookd hOnc'])
+    >>> org_catalog.index(orgs['Zookd Devs'])
+
+    >>> list(role_catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd hOnc'],
+    ...                   'principal_id': 'abe'})))
+    ['publisher', 'reviewer', 'user manager', 'writer']
+
+    >>> list(role_catalog.findValueTokens(
+    ...     'role_id', t({'organization': orgs['Zookd hOnc'],
+    ...                   'principal_id': 'ophelia'})))
+    ['reviewer', 'writer']
+
+Now we'll remove it.
+
+    >>> orgs['Zookd Devs'].parts.remove(registry.getId(org))
+    >>> org_catalog.index(orgs['Zookd Devs'])
+    >>> org_catalog.unindex(orgs['Zookd hOnc'])
+
+TODO make sure that intransitive copy looks the way we expect
+
+[#administrivia]_
+
+.. ......... ..
+.. Footnotes ..
+.. ......... ..
+
+.. [#ZODB] Here we will set up a ZODB instance for us to use.
+
+    >>> from ZODB.tests.util import DB
+    >>> db = DB()
+    >>> conn = db.open()
+    >>> root = conn.root()
+
+.. [#faux_intid] Here's a simple persistent keyreference.  Notice that it is
+    not persistent itself: this is important for conflict resolution to be
+    able to work (which we don't show here, but we're trying to lean more
+    towards real usage for this example).
+    
+    >>> class Reference(object): # see zope.app.keyreference
+    ...     def __init__(self, obj):
+    ...         self.object = obj
+    ...     def __cmp__(self, other):
+    ...         # this doesn't work during conflict resolution.  See
+    ...         # zope.app.keyreference.persistent, 3.5 release, for current
+    ...         # best practice.
+    ...         if not isinstance(other, Reference):
+    ...             raise ValueError('can only compare with Reference objects')
+    ...         if self.object._p_jar is None or other.object._p_jar is None:
+    ...             raise ValueError(
+    ...                 'can only compare when both objects have connections')
+    ...         return cmp(
+    ...             (self.object._p_jar.db().database_name,  self.object._p_oid),
+    ...             (other.object._p_jar.db().database_name, other.object._p_oid),
+    ...             )
+    ...
+
+    Here's a simple integer identifier tool.
+
+    >>> import persistent
+    >>> import BTrees
+    >>> class Registry(persistent.Persistent): # see zope.app.intid
+    ...     def __init__(self, family=BTrees.family32):
+    ...         self.family = family
+    ...         self.ids = self.family.IO.BTree()
+    ...         self.refs = self.family.OI.BTree()
+    ...     def getId(self, obj):
+    ...         if not isinstance(obj, persistent.Persistent):
+    ...             raise ValueError('not a persistent object', obj)
+    ...         if obj._p_jar is None:
+    ...             self._p_jar.add(obj)
+    ...         ref = Reference(obj)
+    ...         id = self.refs.get(ref)
+    ...         if id is None:
+    ...             # naive for conflict resolution; see zope.app.intid
+    ...             if self.ids:
+    ...                 id = self.ids.maxKey() + 1
+    ...             else:
+    ...                  id = self.family.minint
+    ...             self.ids[id] = ref
+    ...             self.refs[ref] = id
+    ...         return id
+    ...     def __contains__(self, obj):
+    ...         if (not isinstance(obj, persistent.Persistent) or
+    ...             obj._p_oid is None):
+    ...             return False
+    ...         return Reference(obj) in self.refs
+    ...     def getObject(self, id, default=None):
+    ...         res = self.ids.get(id, None)
+    ...         if res is None:
+    ...             return default
+    ...         else:
+    ...             return res.object
+    ...     def remove(self, r):
+    ...         if isinstance(r, (int, long)):
+    ...             self.refs.pop(self.ids.pop(r))
+    ...         elif (not isinstance(r, persistent.Persistent) or
+    ...               r._p_oid is None):
+    ...             raise LookupError(r)
+    ...         else:
+    ...             self.ids.pop(self.refs.pop(Reference(r)))
+    ...
+    >>> registry = root['registry'] = Registry()
+    
+    >>> import transaction
+    >>> transaction.commit()
+
+.. [#verifyObjectTransitive] The TransposingTransitiveMembership indexes
+    provide ISearchIndex.
+    
+    >>> from zope.interface.verify import verifyObject
+    >>> import zc.relation.interfaces
+    >>> index = list(catalog.iterSearchIndexes())[0]
+    >>> verifyObject(zc.relation.interfaces.ISearchIndex, index)
+    True
+
+.. [#silliness] In _2001: A Space Odyssey_, many people believe the name HAL
+    was chosen because it was ROT25 of IBM....  I cheat a bit sometimes and
+    use ROT1 because the result sounds better.
+
+.. [#show_remaining_token_methods] For what it's worth, here are some small
+    examples of the remaining token-related methods.
+
+    These two are the singular versions of `tokenizeRelations` and
+    `resolveRelationTokens`.
+
+    `tokenizeRelation` returns a token for the given relation.
+
+    >>> catalog.tokenizeRelation(orgs['Zookd Corp Management']) == (
+    ...     registry.getId(orgs['Zookd Corp Management']))
+    True
+
+    `resolveRelationToken` returns a relation for the given token.
+
+    >>> catalog.resolveRelationToken(registry.getId(
+    ...     orgs['Zookd Corp Management'])) is orgs['Zookd Corp Management']
+    True
+    
+    The "values" ones are a bit lame to show now, since the only value
+    we have right now is not tokenized but used straight up.  But here
+    goes, showing some fascinating no-ops.
+
+    `tokenizeValues`, returns an iterable of tokens for the values of
+    the given index name.
+
+    >>> list(catalog.tokenizeValues((1,2,3), 'part'))
+    [1, 2, 3]
+
+    `resolveValueTokens` returns an iterable of values for the tokens of
+    the given index name.
+
+    >>> list(catalog.resolveValueTokens((1,2,3), 'part'))
+    [1, 2, 3]
+
+.. [#real_value_tokens] We can also show the values token methods more
+    sanely now.
+
+    >>> original = sorted((orgs['Zookd Devs'], orgs['Ynod SAs']))
+    >>> tokens = list(catalog.tokenizeValues(original, 'organization'))
+    >>> original == sorted(catalog.resolveValueTokens(tokens, 'organization'))
+    True
+
+.. [#verifyObjectIntransitive] The Intransitive search index provides
+    ISearchIndex and IListener.
+    
+    >>> from zope.interface.verify import verifyObject
+    >>> import zc.relation.interfaces
+    >>> verifyObject(zc.relation.interfaces.ISearchIndex, index)
+    True
+    >>> verifyObject(zc.relation.interfaces.IListener, index)
+    True
+
+.. [#compare_copy] Before we modify them, let's look at the copy we made.
+    The copy should currently behave identically to the original.
+
+    >>> len(org_catalog)
+    38
+    >>> len(role_catalog)
+    38
+    >>> indexed = list(org_catalog)
+    >>> len(indexed)
+    38
+    >>> orgs['Zookd Devs'] in indexed
+    True
+    >>> for r in indexed:
+    ...     if r not in role_catalog:
+    ...         print 'bad'
+    ...         break
+    ... else:
+    ...     print 'good'
+    ...
+    good
+    >>> org_names = set(dir(org_catalog))
+    >>> role_names = set(dir(role_catalog))
+    >>> org_names - role_names
+    set([])
+    >>> role_names - org_names
+    set(['org_catalog'])
+
+    >>> def checkYnodDevsParts(catalog):
+    ...     res = sorted(catalog.findRelations(t({None: orgs['Ynod Devs']})))
+    ...     if res != [
+    ...         orgs["Bet Proj"], orgs["Y3L4 Proj"], orgs["Ynod Devs"]]:
+    ...         print "bad", res
+    ...
+    >>> checkYnodDevsParts(org_catalog)
+    >>> checkYnodDevsParts(role_catalog)
+
+    >>> def checkOpheliaRoles(catalog):
+    ...     res = sorted(catalog.findRelations({'principal_id': 'ophelia'}))
+    ...     if repr(res) != (
+    ...         "[<Roles instance (ophelia has publisher in Zookd Nbd)>, " +
+    ...         "<Roles instance (ophelia has reviewer in Zookd Devs)>, " +
+    ...         "<Roles instance (ophelia has writer in " +
+    ...         "Zookd Corp Management)>]"):
+    ...         print "bad", res
+    ...
+    >>> checkOpheliaRoles(org_catalog)
+    >>> checkOpheliaRoles(role_catalog)
+
+    >>> def checkOpheliaWriterOrganizations(catalog):
+    ...     res = sorted(catalog.findRelations({None: zc.relation.catalog.Any(
+    ...         catalog.findValueTokens(
+    ...             'organization', {'principal_id': 'ophelia', 
+    ...                              'role_id': 'writer'}))}))
+    ...     if repr(res) != (
+    ...         '[<Organization instance "Ynod Zookd Task Force">, ' +
+    ...         '<Organization instance "Zookd Admins">, ' +
+    ...         '<Organization instance "Zookd Corp Management">, ' +
+    ...         '<Organization instance "Zookd Devs">, ' +
+    ...         '<Organization instance "Zookd Nbd">, ' +
+    ...         '<Organization instance "Zookd SAs">, ' +
+    ...         '<Organization instance "Zookd hOgnmd">]'):
+    ...         print "bad", res
+    ...
+    >>> checkOpheliaWriterOrganizations(org_catalog)
+    >>> checkOpheliaWriterOrganizations(role_catalog)
+
+    >>> def checkPrincipalsWithRolesInZookdDevs(catalog):
+    ...     org_id = registry.getId(orgs['Zookd Devs'])
+    ...     res = sorted(catalog.findValueTokens(
+    ...         'principal_id',
+    ...         {'organization': zc.relation.catalog.any(
+    ...             org_id, *catalog.findRelationTokens({'part': org_id}))}))
+    ...     if res != ['abe', 'ignas', 'karyn', 'lettie', 'nancy', 'ophelia']:
+    ...         print "bad", res
+    ...
+    >>> checkPrincipalsWithRolesInZookdDevs(org_catalog)
+    >>> checkPrincipalsWithRolesInZookdDevs(role_catalog)
+
+    >>> def checkOpheliaRolesInZookdNbd(catalog):
+    ...     res = sorted(catalog.findValueTokens(
+    ...         'role_id', {
+    ...             'organization': registry.getId(orgs['Zookd Nbd']),
+    ...             'principal_id': 'ophelia'}))
+    ...     if res != ['publisher', 'reviewer', 'writer']:
+    ...         print "bad", res
+    ...
+    >>> checkOpheliaRolesInZookdNbd(org_catalog)
+    >>> checkOpheliaRolesInZookdNbd(role_catalog)
+
+    >>> def checkAbeRolesInZookdNbd(catalog):
+    ...     res = sorted(catalog.findValueTokens(
+    ...         'role_id', {
+    ...             'organization': registry.getId(orgs['Zookd Nbd']),
+    ...             'principal_id': 'abe'}))
+    ...     if res != ['publisher', 'user manager', 'writer']:
+    ...         print "bad", res
+    ...
+    >>> checkAbeRolesInZookdNbd(org_catalog)
+    >>> checkAbeRolesInZookdNbd(role_catalog)
+
+.. [#removeDefaultQueryFactoryExceptions] You get errors by removing query
+    factories that are not registered.
+
+    >>> org_catalog.removeDefaultQueryFactory(factory2) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    LookupError: ('factory not found', <function factory2 at ...>)
+
+    >>> org_catalog.removeDefaultQueryFactory(None) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    LookupError: ('factory not found', None)
+
+.. [#copy_unchanged] Changes to one copy should not affect the other.  That
+    means the role_catalog should still work as before.
+
+    >>> len(org_catalog)
+    13
+    >>> len(list(org_catalog))
+    13
+
+    >>> len(role_catalog)
+    38
+    >>> indexed = list(role_catalog)
+    >>> len(indexed)
+    38
+    >>> orgs['Zookd Devs'] in indexed
+    True
+    >>> orgs['Zookd Devs'] in role_catalog
+    True
+
+    >>> checkYnodDevsParts(role_catalog)
+    >>> checkOpheliaRoles(role_catalog)
+    >>> checkOpheliaWriterOrganizations(role_catalog)
+    >>> checkPrincipalsWithRolesInZookdDevs(role_catalog)
+    >>> checkOpheliaRolesInZookdNbd(role_catalog)
+    >>> checkAbeRolesInZookdNbd(role_catalog)
+    
+.. [#administrivia]
+
+    You can add listeners multiple times.
+
+    >>> org_catalog.addListener(index2)
+    >>> list(org_catalog.iterListeners()) == [index2, index2]
+    True
+
+    Now we will remove the listeners, to show we can.
+
+    >>> org_catalog.removeListener(index2)
+    >>> org_catalog.removeListener(index2)
+    >>> org_catalog.removeListener(index2)
+    ... # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    Traceback (most recent call last):
+    ...
+    LookupError: ('listener not found',
+                  <zc.relation.searchindex.Intransitive object at ...>)
+    >>> org_catalog.removeListener(None)
+    ... # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    Traceback (most recent call last):
+    ...
+    LookupError: ('listener not found', None)
+
+    Here's the same for removing a search index we don't have
+
+    >>> org_catalog.removeSearchIndex(index2)
+    ... # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    Traceback (most recent call last):
+    ...
+    LookupError: ('index not found',
+                  <zc.relation.searchindex.Intransitive object at ...>)

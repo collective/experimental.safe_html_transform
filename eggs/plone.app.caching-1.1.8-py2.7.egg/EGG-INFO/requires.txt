@@ -1,0 +1,25 @@
+setuptools
+python-dateutil
+plone.caching
+plone.cachepurging
+plone.app.registry >= 1.0b5
+zope.browserresource
+zope.interface
+zope.component
+zope.publisher
+zope.pagetemplate
+plone.memoize
+plone.protect
+plone.registry >= 1.0b4
+Products.CMFDynamicViewFTI
+Products.GenericSetup
+Products.CMFCore
+Products.statusmessages
+Zope2
+Acquisition
+plone.app.z3cform
+z3c.form
+z3c.zcmlhook
+
+[test]
+plone.app.testing

@@ -1,0 +1,32 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone">
+
+  <include package=".browser" />
+
+  <cmf:registerDirectory name="classic_templates"/>
+  <cmf:registerDirectory name="classic_styles"/>
+  <cmf:registerDirectory name="classic_ecmascript"/>
+
+  <five:registerPackage package="." />
+
+  <genericsetup:registerProfile
+      name="default"
+      title="Plone Classic Theme"
+      directory="profiles/default"
+      description='The old theme used in Plone 3 and earlier.'
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      />
+
+  <genericsetup:registerProfile
+      name="uninstall"
+      title="Plone Classic Theme Uninstall Profile"
+      directory="profiles/uninstall"
+      description='Uninstall profile for Plone Classic theme.'
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      />
+
+</configure>

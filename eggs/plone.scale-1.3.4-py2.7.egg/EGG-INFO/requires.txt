@@ -1,0 +1,15 @@
+setuptools
+
+[sphinx]
+zope.annotation
+zope.component
+zope.interface
+Persistence
+Sphinx
+repoze.sphinx.autointerface
+
+[storage]
+zope.annotation
+zope.component
+zope.interface
+Persistence

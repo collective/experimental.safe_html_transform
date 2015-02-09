@@ -1,0 +1,31 @@
+<tal:wicked_link>
+  <span tal:condition="view/howmany" tal:omit-tag="">
+    <span tal:condition="not:view/multiple" tal:omit-tag=''>
+      <span tal:define="link view/singlelink" tal:omit-tag=''>
+    <span tal:attributes="id string:${view/section}-${link/uid}">
+      <a class="link-wiki"
+         tal:attributes="href link/url" tal:content="view/chunk">
+          CHUNK
+      </a>
+    </span>
+      </span>
+    </span>
+    <span tal:condition="view/multiple" tal:omit-tag="">
+      <span tal:define="link view/singlelink" tal:omit-tag="">
+    <span metal:use-macro="here/wicked_link/macros/linkmenu">
+      the first link
+    </span>
+      </span>
+    </span>
+  </span>
+  <span tal:condition="not: view/howmany" tal:omit-tag=''>
+    <span tal:attributes="id string:${view/section}-${view/count}"
+      class="">
+      <a class="link-wiki-add"
+         title="Click to add a new page"
+     tal:attributes="href string:$here_url/@@wickedadd?Title=${view/chunk}&amp;section=${view/section}"
+     tal:define="here_url here/absolute_url">
+      <span tal:replace="view/chunk" >A CHUNK</span><sup>[+]</sup></a>
+    </span>
+  </span>
+</tal:wicked_link>

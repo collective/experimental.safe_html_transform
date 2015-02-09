@@ -1,0 +1,251 @@
+Metadata-Version: 1.1
+Name: Products.ExtendedPathIndex
+Version: 3.1
+Summary: Zope catalog index for paths
+Home-page: http://pypi.python.org/pypi/Products.ExtendedPathIndex
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: Introduction
+        ============
+        
+        This is an index that supports depth limiting, and the ability to build a
+        structure usable for navtrees and sitemaps. The actual navtree implementations
+        are not (and should not) be in this Product, this is the index implementation
+        only.
+        
+        Assumptions
+        ===========
+        
+        EPI makes an assumption about the catalog and index being in the
+        same container as all the content. This makes a lot of sense in a
+        Plone setting, but might not work as expected in other scenarios.
+        
+        A query like ``/plonesite/folder, level=0`` is transformed internally to
+        ``/folder, level=1``. This avoids touching the rather large plonesite set
+        which contains reference to all content in your site.
+        
+        Features
+        ========
+        
+        - Can construct a site map with a single catalog query
+        
+        - Can construct a navigation tree with a single catalog query
+        
+        Usage
+        =====
+        
+        ``catalog(path='some/path')``
+          search for all objects below some/path (recursive, equivalent to depth = -1)
+        
+        ``catalog(path=dict(query='some/path', depth=0))``
+          search for the object with the given path.
+        
+        ``catalog(path=dict(query='some/path', depth=2))``
+          search for all objects below some/path but only down to a depth of 2
+        
+        ``catalog(path=dict(query='some/path', navtree=True))``
+          search for all objects below some/path for rendering a navigation tree. This
+          includes all objects below some/path up to a depth of 1 and all parent
+          objects.
+        
+        ``catalog(path=dict(query='some/path', navtree=True, depth=0))``
+          search for all objects below some/path for rendering a breadcrumb trail.
+          This includes only the parent objects themselves.
+        
+        ``catalog(path=dict(query='some/path', navtree=True, navtree_start=1))``
+          search for all objects below some/path for rendering a partial
+          navigation tree. This includes all objects below the path but stops
+          1 level above the root.  The given path is included, even if it is at a
+          shorter path in the portal than the level parameter would allow.
+        
+        ``catalog(path=dict(query='some/path', navtree=True, depth=0, navtree_start=1))``
+          search for all objects below some/path for rendering a partial
+          breadcrumb trail. This includes all parents below the path but stops
+          1 level above the root.  The given path is included, even if it is at a
+          lower level in the portal than the start parameter would allow.
+        
+        ``catalog(path=dict(query='some/path', level=2))``
+          search for all objects whose path contains some/path at level 2. This 
+          includes paths like /foo/bar/some/path and /spam/eggs/some/path, plus all
+          children of those paths.
+        
+        ``catalog(path=dict(query='some/path', level=-1, depth=0))``
+          search for all objects whose path contains some/path at *any* level. This
+          includes paths like /spam/some/path as well as /foo/bar/baz/some/path, but
+          only those exact matches are included in the result because depth is set to
+          0.
+        
+        ``catalog(path=dict(query=(('foo/bar', 2), ('bar/baz'), 1), depth=0))``
+          search for multiple paths, each at different levels (foo/bar at level 2,
+          and bar/baz at level 1), and return exact matches only.
+        
+        Credits
+        =======
+        
+        - Zope Corporation for the initial PathIndex code
+        
+        - Helge Tesdal and Martijn Pieters from Jarn_ for the ExtendedPathIndex implementation
+        
+        - Alec Mitchell for the navtree and listing optimizations
+        
+        .. _Jarn: http://jarn.com
+        
+        
+        License
+        =======
+        
+        This software is released under the GPL license.
+        
+        
+        Changelog
+        =========
+        
+        3.1 (2013-01-01)
+        ----------------
+        
+        * The behavior is inconsistent, because as long as the input path length is
+          shorter or equal to the longest indexed path, there is no requirement that
+          the entire path is indexed already.
+          [bosim]
+        
+        3.0.1 - 2012-06-30
+        ------------------
+        
+        * Fixed depth limited searches, when the path index wasn't the first index
+          in the query plan. Thx to Peter Mathis for reporting the problem.
+          [hannosch]
+        
+        3.0 - 2012-04-26
+        ----------------
+        
+        * Fixed TypeError on insert when parent_path is not in the index_parents.
+          [maurits]
+        
+        * Better protection against corrupted internal data in ``_index_parents``.
+          [hannosch]
+        
+        * Slightly optimize reindexing an object by passing in information from the
+          index to the unindex method and avoiding another unindex scan.
+          [hannosch]
+        
+        * Avoid an extra unindex scan for determining length changes in index_object.
+          [hannosch]
+        
+        * Declared support for new ILimitedResultIndex interface and require at least
+          Zope 2.13.0a3.
+          [hannosch]
+        
+        * Merge in optimizations from ``experimental.catalogqueryplan``.
+          [hannosch]
+        
+        * PEP8 cleanup and minor optimizations in un/index code.
+          [hannosch]
+        
+        * Specify distribution dependencies.
+          [hannosch]
+        
+        2.9 - 2010-07-18
+        ----------------
+        
+        * Update license to GPL version 2 only.
+          [hannosch]
+        
+        2.8 - 2010-05-01
+        ----------------
+        
+        * No longer depend directly on test internals of PathIndex.
+          [hannosch]
+        
+        2.7 - 2009-11-13
+        ----------------
+        
+        * Added AccessControl import to tests to avoid cyclic import issue in
+          Zope 2.12.
+          [davisagli]
+        
+        2.6 - 2009-05-18
+        ----------------
+        
+        * Clarified license to be only GPL.
+          [hannosch]
+        
+        * Declare package dependencies and fixed deprecation warnings for use
+          of Globals.
+          [hannosch]
+        
+        2.5 - December 19, 2008
+        -----------------------
+        
+        * Cleaned out tests: removing ZTC cruft, turning them into proper unit tests
+          and removing tests that tested other non-index components.
+          [mj]
+        
+        * Fixed level handling for queries where a (path, level) tuple is passed in
+          instead of using the general level parameter.
+          [mj]
+        
+        * Refactored and documented the index codebase. Several bugs were discovered 
+          and solved in the process. Missing functionality was also added, all search
+          options should now work across all scenarios.
+          [mj]
+        
+        2.4.1 - September 28, 2008
+        --------------------------
+        
+        - Fix typo in setup.py which broke installation of the egg
+          [ree]
+        
+          
+        
+        2.4 - September 11, 2006
+        ------------------------
+        
+        - Relaxed a check for path only allowing strings so far. Now we except all
+          basestrings. This closes http://dev.plone.org/plone/ticket/5617.
+          [hannosch]
+        
+        - Converted log infrastructure to use Python's logging module instead zLOG.
+          [hannosch] 
+        
+        2.3 - December 18, 2005
+        -----------------------
+        
+        - Added some extra debug information when an improper path is cataloged.
+          [sidnei]
+        
+        2.2 - October 7, 2005
+        ---------------------
+        
+        - Add seperate index structures on the parent path and the full path of all
+          objects.  This significantly improves scaling for navtrees, breadcrumbs,
+          and listings.
+          [alecm]
+        
+        - Assume that EPI is used inside same container as content and use relative
+          search instead of absolute - basically transforming / plonesite search
+          to / search with startlevel set to 1 instead of 0.
+          [tesdal]
+        
+        2.1 - May 20, 2005
+        ------------------
+        
+        - Implement 'indexed_attrs' support for ExtendedPathIndex.
+        
+        - Prevent navigation tree queries from stopping prematurely if the
+          queried-for path does not actually exist in the index, but its parents do.
+        
+        1.0
+        ---
+        
+        - Path index capable of generating a navigation tree structure from
+          cataloged data.
+        
+Keywords: Zope catalog index
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python

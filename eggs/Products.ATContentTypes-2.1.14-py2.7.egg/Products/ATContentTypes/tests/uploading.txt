@@ -1,0 +1,82 @@
+Uploading the contents of a document
+====================================
+
+Test setup.
+
+    >>> import cStringIO
+
+    # BBB Zope 2.12
+    >>> try:
+    ...     from Testing.testbrowser import Browser
+    ... except ImportError:
+    ...     from Products.Five.testbrowser import Browser
+
+    >>> browser = Browser()
+    >>> browser.open('http://nohost/plone/login')
+
+Log in.
+
+    >>> from Products.PloneTestCase.setup import portal_owner, default_password
+    >>> browser.getControl('Login Name').value = portal_owner
+    >>> browser.getControl('Password').value = default_password
+    >>> browser.getControl('Log in').click()
+    
+Let's create a new document, ending up at its edit form.
+
+    >>> browser.open('http://nohost/plone')
+    >>> browser.getLink('Add new').click()
+    >>> 'Add new item' in browser.contents
+    True
+    >>> browser.getControl('Page').click()
+    >>> browser.getControl('Add').click()
+    >>> browser.url
+    'http://nohost/plone/portal_factory/Document/document.../edit'
+    
+Now upload a file.  The uploaded file should take precedence over the
+contents of the text field, if any.
+
+    >>> browser.getControl(name='title').value = 'test document'
+    >>> browser.getControl(name='text').value = 'This will be ignored.'
+    >>> browser.getControl(name='text_file').add_file(cStringIO.StringIO('file contents'), 'text/plain', 'test.txt')
+    >>> browser.getControl('Save').click()
+    >>> browser.url
+    'http://nohost/plone/test-document'
+    >>> 'file contents' in browser.contents
+    True
+    >>> 'This will be ignored.' in browser.contents
+    False
+
+Let's create a new collection, ending up at its edit form.
+
+    >>> browser.open('http://nohost/plone')
+    >>> browser.getLink('Add new').click()
+    >>> 'Add new item' in browser.contents
+    True
+    >>> browser.getControl('Collection', index=-1).click()
+    >>> browser.getControl('Add').click()
+    >>> browser.url
+    'http://nohost/plone/portal_factory/Topic/topic.../edit'
+    
+Now upload a file.  The uploaded file should take precedence over the
+contents of the text field, if any.
+
+    >>> browser.getControl(name='title').value = 'test collection'
+    >>> browser.getControl(name='text').value = 'This will be ignored.'
+    >>> browser.getControl(name='text_file').add_file(cStringIO.StringIO('file contents'), 'text/plain', 'test.txt')
+    >>> browser.getControl('Save').click()
+    >>> browser.url
+    'http://nohost/plone/test-collection/'
+    >>> 'file contents' in browser.contents
+    True
+    >>> 'This will be ignored.' in browser.contents
+    False
+
+Now try to empty value of the text field (#7324)
+
+    >>> browser.getLink('Edit').click()
+    >>> browser.url
+    'http://nohost/plone/test-collection/edit'
+    >>> browser.getControl(name='text').value = ''
+    >>> browser.getControl('Save').click()
+    >>> 'file contents' in browser.contents
+    False

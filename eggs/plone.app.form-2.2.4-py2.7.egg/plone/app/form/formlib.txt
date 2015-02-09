@@ -1,0 +1,38 @@
+Plone zope.formlib Integration
+==============================
+
+plone.app.form used to apply a patch to formlib to add 'locale' to the
+request, which seems to be no longer needed to have it work with Zope
+2.  These tests demonstrate that it still works:
+
+  >>> from zope import interface, schema
+  >>> from zope.formlib import form
+  >>> from zope.publisher.browser import TestRequest
+
+  >>> class IFoo(interface.Interface):
+  ...     var1 = schema.TextLine(title=u'var1')
+  ...     var2 = schema.Bool(title=u'var2')
+  >>> class Foo(object):
+  ...     interface.implements(IFoo)
+  ...     var1 = u''
+  ...     var2 = False
+  >>> class BarForm(form.EditForm):
+  ...     form_fields = form.FormFields(IFoo)
+
+  >>> request = TestRequest()
+  >>> foo = Foo()
+  >>> bar = BarForm(foo, request)
+  >>> bar.adapters = {}
+  >>> action = bar.actions[u'form.actions.apply']
+
+Now we see if we can use EditFormBase's apply action (we couldn't 
+before).
+
+  >>> bar = BarForm(foo, request)
+  >>> bar.adapters = {}
+  >>> action = bar.actions[u'form.actions.apply']
+  >>> action.success_handler(bar, None, {'var1': 'bbbb', 'var2': False})
+  >>> foo.var1
+  'bbbb'
+  >>> foo.var2
+  False

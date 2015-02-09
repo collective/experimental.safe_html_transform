@@ -1,0 +1,23 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:wicked="http://namespaces.openplans.org/wicked">
+
+  <include package="wicked.at" />
+
+  <wicked:decorate-at-field
+     fieldclass="Products.Archetypes.Field.TextField"
+     />
+
+  <class class="Products.Archetypes.Field.TextField">
+      <implements interface="wicked.at.interfaces.IAmATWickedField" />
+  </class>
+
+  <class class="Products.Archetypes.Referenceable.Referenceable">
+      <implements interface="wicked.interfaces.IAmWicked" />
+  </class>
+
+  <subscriber
+     factory="wicked.txtfilter.backlink_handler"
+     provides="wicked.fieldevent.IFieldValueSetter" />
+
+</configure>

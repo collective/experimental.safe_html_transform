@@ -1,0 +1,14 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone">
+
+  <genericsetup:registerProfile
+      name="PloneLanguageTool"
+      title="PloneLanguageTool"
+      directory="profiles/default"
+      description="Extension profile for default PloneLanguageTool setup."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      />
+
+</configure>

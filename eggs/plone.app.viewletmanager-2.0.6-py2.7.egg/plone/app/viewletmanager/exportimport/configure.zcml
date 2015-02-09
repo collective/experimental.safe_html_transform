@@ -1,0 +1,14 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    i18n_domain="plone"
+    >
+
+  <adapter
+      factory=".storage.ViewletSettingsStorageNodeAdapter"
+      provides="Products.GenericSetup.interfaces.IBody"
+      for="plone.app.viewletmanager.interfaces.IViewletSettingsStorage
+           Products.GenericSetup.interfaces.ISetupEnviron"
+      />
+
+</configure>

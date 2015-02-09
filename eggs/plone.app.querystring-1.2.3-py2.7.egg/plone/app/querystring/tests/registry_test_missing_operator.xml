@@ -1,0 +1,22 @@
+<registry>
+    <records interface="plone.app.querystring.interfaces.IQueryOperation"
+             prefix="plone.app.querystring.operation.date.lessThan">
+        <value key="title">before</value>
+        <value key="description">Please use YYYY/MM/DD.</value>
+        <value key="operation">plone.app.querystring.queryparser:_lessThan</value>
+        <value key="widget"></value>
+    </records>
+
+    <records interface="plone.app.querystring.interfaces.IQueryField"
+             prefix="plone.app.querystring.field.created">
+       <value key="title">Creation Date</value>
+       <value key="description">The time and date an item was created</value>
+       <value key="enabled">True</value>
+       <value key="sortable">False</value>
+       <value key="operations">
+           <element>plone.app.querystring.operation.date.lessThan</element>
+           <element>plone.app.querystring.operation.date.largerThan</element>
+       </value>
+       <value key="group">Dates</value>
+    </records>
+</registry>

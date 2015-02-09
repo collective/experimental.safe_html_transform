@@ -1,0 +1,14 @@
+setuptools
+plone.openid
+plone.portlets
+plone.app.portlets
+zope.component
+zope.i18nmessageid
+zope.interface
+Products.CMFCore
+Products.PlonePAS>=2.0.10dev
+Products.PluggableAuthService
+Zope2
+
+[test]
+Products.PloneTestCase

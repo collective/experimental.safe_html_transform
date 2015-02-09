@@ -1,0 +1,131 @@
+This test demonstrates, that the reference widget works also in cases where
+one of the targets is inaccessible to the editing user. This was previously
+*not* the case and this test failed.
+
+The setup consists of a source (context) and two documents (targets):
+
+  >>> self.setRoles(['Manager'])
+  >>> from Products.Archetypes.tests.utils import makeContent
+  >>> context = makeContent(self.folder, portal_type='RefBrowserDemo', id='ref')
+  >>> doc1 = makeContent(self.folder, portal_type='Document', id='doc1')
+  >>> doc2 = makeContent(self.portal, portal_type='Document', id='doc2')
+
+Notice that doc2 is outside the user folder, directly under the portal root.
+
+We make the source reference the first target:
+
+  >>> context.setMultiRef(doc1.UID())
+  >>> context.reindexObject()
+
+We want to test for doc1 and doc2 in the browser output later, so we turn off
+both portlet columns, since they will contain references to both at all times
+(i.e. the navigation portlet, recent items etc.)
+
+  >>> from zope.component import getMultiAdapter, getUtility
+  >>> from plone.portlets.interfaces import IPortletManager
+  >>> from plone.portlets.interfaces import IPortletAssignmentMapping
+
+  >>> left_column = getUtility(IPortletManager, name=u"plone.leftcolumn")
+  >>> left_assignable = getMultiAdapter((self.portal, left_column), IPortletAssignmentMapping)
+  >>> for name in left_assignable.keys():
+  ...     del left_assignable[name]
+
+  >>> right_column = getUtility(IPortletManager, name=u"plone.rightcolumn")
+  >>> right_assignable = getMultiAdapter((self.portal, right_column), IPortletAssignmentMapping)
+  >>> for name in right_assignable.keys():
+  ...     del right_assignable[name]
+
+Next, we create a user who will be our editor:
+
+  >>> membership = self.portal.portal_membership
+  >>> membership.addMember('fred', 'secret', [], [])
+  >>> fred = membership.getMemberById('fred')
+
+Fred logs in and visits the context and both targets. He has no access to either:
+
+  >>> try:
+  ...     from Testing.testbrowser import Browser
+  ... except ImportError:
+  ...     from Products.Five.testbrowser import Browser
+  >>> browser = Browser()
+  >>> browser.addHeader('Authorization', 'Basic %s:%s' % ('fred', 'secret'))
+  >>> browser.open(context.absolute_url())
+  >>> browser.url
+  'http://nohost/plone/acl_users/credentials_cookie_auth/require_login?...'
+
+  >>> browser.open(doc1.absolute_url())
+  >>> browser.url
+  'http://nohost/plone/acl_users/credentials_cookie_auth/require_login?...'
+
+  >>> browser.open(doc2.absolute_url())
+  >>> browser.url
+  'http://nohost/plone/acl_users/credentials_cookie_auth/require_login?...'
+
+We give him access to the source and doc1 but *not* doc2:
+
+  >>> self.folder.manage_setLocalRoles('fred', ('Authenticated', 'Reader', 'Member',))
+  >>> self.folder.reindexObjectSecurity()
+  >>> context.manage_setLocalRoles('fred', ('Authenticated', 'Reader', 'Member', 'Owner',))
+  >>> context.reindexObjectSecurity()
+
+We verify by revisiting:
+
+  >>> browser.open(context.absolute_url())
+  >>> browser.url
+  'http://nohost/plone/Members/test_user_1_/ref'
+
+  >>> browser.open(doc1.absolute_url())
+  >>> browser.url
+  'http://nohost/plone/Members/test_user_1_/doc1'
+
+  >>> browser.open(doc2.absolute_url())
+  >>> browser.url
+  'http://nohost/plone/acl_users/credentials_cookie_auth/require_login?...'
+
+Now Fred edits the source. Since it only refs doc1, all is well:
+
+  >>> browser.open(context.absolute_url() + "/edit")
+  >>> browser.url
+  'http://nohost/plone/Members/test_user_1_/ref/edit'
+
+  >>> browser.getControl(name="multiRef:list").value == [doc1.UID()]
+  True
+
+doc1 is present in the output, doc2 not (since it's not referenced)
+
+  >>> 'doc1' in browser.contents
+  True
+
+  >>> 'doc2' in browser.contents
+  False
+
+We now let the source reference *both* targets:
+
+  >>> context.setMultiRef((doc1.UID(), doc2.UID()))
+  >>> context.reindexObject()
+
+And re-edit:
+
+  >>> browser.open(context.absolute_url() + "/edit")
+
+Both targets are referenced by the widget:
+
+  >>> doc1.UID() in browser.getControl(name="multiRef:list").value
+  True
+
+  >>> doc2.UID() in browser.getControl(name="multiRef:list").value
+  True
+
+  >>> 'doc1' in browser.contents
+  True
+
+However, the title_or_id of doc2 is *not* displayed (it is considered sensitive)
+
+  >>> 'doc2' in browser.contents
+  False
+
+Instead we get the neutral string 'Undisclosed':
+
+  >>> 'Undisclosed' in browser.contents
+  True
+

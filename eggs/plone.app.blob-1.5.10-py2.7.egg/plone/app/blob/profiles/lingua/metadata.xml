@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<metadata>
+  <version>1</version>
+  <dependencies>
+    <dependency>profile-plone.app.blob:sample-type</dependency>
+    <dependency>profile-Products.LinguaPlone:LinguaPlone</dependency>
+  </dependencies>
+</metadata>

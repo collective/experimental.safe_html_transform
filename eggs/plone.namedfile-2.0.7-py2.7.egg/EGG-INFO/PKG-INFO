@@ -1,0 +1,674 @@
+Metadata-Version: 1.1
+Name: plone.namedfile
+Version: 2.0.7
+Summary: File types and fields for images, files and blob files with filenames
+Home-page: http://pypi.python.org/pypi/plone.namedfile
+Author: Laurence Rowe, Martin Aspeli
+Author-email: plone-developers@lists.sourceforge.net
+License: BSD
+Description: Introduction
+        ============
+        
+        This package contains fields and wrapper objects for storing:
+        
+          * A file with a filename
+          * An image with a filename
+         
+        Blob-based and non-blob-based types are provided. The blob-based types
+        require the ZODB3 package to be at version 3.8.1 or later,
+        and BLOBs to be configured in zope.conf.
+            
+        plone.supermodel handlers are registered if plone.supermodel is installed.
+        The [supermodel] extra will ensure this.
+          
+        See the usage.txt doctest for more details.
+        
+        Note: This packages is licensed under a BSD license. Contributors, please do
+        not add dependencies on GPL code.
+        
+        Changelog
+        =========
+        
+        2.0.7 (2014-10-20)
+        ------------------
+        
+        - Fixed inserting filename in Content-Disposition header.
+          [kroman0]
+        
+        
+        2.0.6 (2014-09-07)
+        ------------------
+        
+        - Internationalize field factory label.
+          [thomasdesvenain]
+        
+        - Backward compatibility of NamedFile with zope.app.file FileChunk.
+          Avoids NamedFile validation unexpected failures.
+          [thomasdesvenain]
+        
+        
+        2.0.5 (2014-02-19)
+        ------------------
+        
+        - Ensure zope.app.file.file module alias is created before its use in
+          file package.
+          [thomasdesvenain]
+        
+        
+        2.0.4 (2014-01-27)
+        ------------------
+        
+        - Backward compatibility of NamedFile with zope.app.file FileChunk.
+          Avoids NamedFile validation unexpected failures.
+          [thomasdesvenain]
+        
+        - Validate image field : check if content is actually an image using mimetype.
+          [thomasdesvenain]
+        
+        - Fix: get_contenttype works when empty string is given as contentType.
+          [thomasdesvenain]
+        
+        
+        2.0.3 (2013-12-07)
+        ------------------
+        
+        - Scaling Traverser now does not try to traverse two steps in one.
+          This is impossible in chameleon.
+          [do3cc]
+        
+        
+        2.0.2 (2013-05-23)
+        ------------------
+        
+        * Use plone.app.imaging's (>=1.0.8) quality setting if it exists.
+          https://dev.plone.org/ticket/13337
+          [khink]
+        
+        * fix invalidation on contexts that do not implement dublin core; Notably
+          portlet assignments. Fallback is bobo_modification_time. Maybe portlet
+          assignments should implement modified() instead?
+          [tmog]
+        
+        * Fixed handling of TTW Dexterity content type image field
+          data when image data is large and stored as
+          zope.app.file.file.FileChunk in ZODB instead of raw string data.
+          Issue appearated after Plone 4.3 migration [miohtama]
+        
+        
+        2.0.1 (2013-01-17)
+        ------------------
+        
+        * Add direction parameter support in scaling (was ignored in tag and scale
+          functions).
+          Now calling tag function with parameter direction='down' crops the image.
+          direction='thumbnail' by default so default behaviour remains the same.
+          [jriboux]
+        
+        2.0 (2012-08-29)
+        ----------------
+        
+        * Move file and image value implementations here instead of extending
+          the ones from zope.app.file and z3c.blobfile. This helps tame a mess
+          of dependencies.
+          [davisagli]
+        
+        * The blob-based file and image implementations are now always available.
+          (But they will only work if Zope is using a storage with blob support.)
+          [davisagli]
+        
+        * Add support for HEAD requests to @@images view
+          [anthonygerrard]
+        
+        * Add hook to override headers in subclasses of file download view
+          [anthonygerrard]
+        
+        * Don't set filename in header if filename contains non ascii chars.
+          [do3cc]
+        
+        * Adding Dexterity Image caused TypeError if jpeg file contained
+          corrupt metadata. Closes http://dev.plone.org/ticket/12753.
+          [patch by joka, applied by kleist]
+        
+        1.0.6 - 2011-10-18
+        ------------------
+        
+        * Fix test failure.
+          [davisagli]
+        
+        * Fix bug in producing tag for a scale on an item with a unicode title
+          [tomster]
+        
+        1.0.5 - 2011-09-24
+        ------------------
+        
+        * Make the ``download`` view respect custom read permissions for the field
+          being downloaded, rather than only checking the view permission for the
+          object as a whole.
+          [davisagli]
+        
+        1.0.4 - 2011-08-21
+        ------------------
+        
+        * Fix bug in producing tag for a scale on an item whose title has non-ASCII
+          characters.
+          [davisagli]
+        
+        * Make sure image scales of allowed attributes can be accessed on disallowed
+          containers.
+          [davisagli]
+        
+        * Add unit tests for safe_filename, since not exercised within this module.
+          (should be moved to plone.formwidget.namedfile?)
+          [lentinj]
+        
+        1.0.3 - 2011-05-20
+        ------------------
+        
+        * Relicense under BSD license.
+          See http://plone.org/foundation/materials/foundation-resolutions/plone-framework-components-relicensing-policy
+          [davisagli]
+        
+        1.0.2 - 2011-05-19
+        ------------------
+        
+        * Don't omit empty string attributes from ImageScale tag.
+          [elro]
+        
+        1.0.1 - 2011-05-19
+        ------------------
+        
+        * In the tag method of ImageScale to allow height/width/alt/title to be
+          omitted when they are supplied as a None argument.
+          [elro]
+        
+        * In marshalled file fields, encode the filename parameter of the
+          Content-Disposition header in accordance with RFC 2231. This ensures that
+          filenames with non-ASCII characters can be successfully demarshalled.
+          [davisagli]
+        
+        * Make the various file classes be strict about only accepting unicode
+          filenames.
+          [davisagli]
+        
+        1.0 - 2011-04-30
+        ----------------
+        
+        * Use unique urls for accessing the original scale.
+          [elro]
+        
+        * Avoid Content-Disposition for image scales.
+          [elro]
+        
+        1.0b8 - 2011-04-12
+        ------------------
+        
+        * Declare dependency on plone.rfc822 >= 1.0b2 (for IPrimaryField).
+          [davisagli]
+        
+        * Add a @@display-file view which doesn't set Content-Disposition, so we don't
+          force download of images, for example.
+          [lentinj]
+        
+        1.0b7 - 2011-03-22
+        ------------------
+        
+        * Support getting the original size as a scale.
+          [elro]
+        
+        * Add tag() method to scaling view.
+          [elro]
+        
+        * Scaling: quote values of extra tag attributes.
+          [elro]
+        
+        1.0b6 - 2011-02-11
+        ------------------
+        
+        * Add primary field support to @@download and @@images views.
+          [elro]
+        
+        * Add getAvailableSizes and getImageSize to the @@images view.
+          [elro]
+        
+        1.0b5 - 2010-04-19
+        ------------------
+        
+        * Add support for scaled images.  See usage.txt for details.
+          [davisagli]
+        
+        * Fix the field schemata so they can be used as the form schema when
+          adding the field using plone.schemaeditor.
+          [rossp]
+        
+        1.0b4 - 2009-11-17
+        ------------------
+        
+        * Avoid using the internal _current_filename() helper, which disappeared in
+          ZODB 3.9.
+          [optilude]
+        
+        * Add field factories for plone.schemaeditor (only installed if
+          plone.schemaeditor is available)
+          [davisagli]
+        
+        1.0b3 - 2009-10-08
+        ------------------
+        
+        * Add plone.rfc822 field marshaler (only installed if plone.rfc822 is
+          available)
+          [optilude]
+        
+        1.0b2 - 2009-09-17
+        ------------------
+        
+        * Add plone.supermodel import/export handlers (only installed if
+          plone.supermodel is available).
+          [optilude]
+        
+        1.0b1 - 2009-05-30
+        ------------------
+        
+        * Make z3c.blobfile (and blobs in general) a soft dependency. You'll need to
+          separately depend on z3c.blobfile (and probably pin it to versio 0.1.2) to
+          get the NamedBlobFile and NamedBlobImage fields. This means that
+          plone.namedfile can be used with ZODB versions that do not support BLOBs.
+          This policy will probably be revisited for a 2.0 release.
+          [optilude]
+        
+        1.0a1 - 2009-04-17
+        ------------------
+        
+        * Initial release
+        
+        
+        Usage
+        =====
+        
+        This demonstrates how to use the package.
+        
+        Test setup
+        ----------
+        
+        We must first load the package's ZCML.
+        
+            >>> configuration = """\
+            ... <configure
+            ...      xmlns="http://namespaces.zope.org/zope"
+            ...      i18n_domain="plone.namedfile.tests">
+            ...      
+            ...     <include package="plone.namedfile" />
+            ...     
+            ... </configure>
+            ... """
+        
+            >>> from StringIO import StringIO
+            >>> from zope.configuration import xmlconfig
+            >>> xmlconfig.xmlconfig(StringIO(configuration))
+        
+        Schema fields
+        -------------
+        
+        The following schema fields can be used to describe file data. We'll only
+        test the BLOB versions of the fields if z3c.blobfile is installed.
+        
+            >>> from zope.interface import Interface
+            >>> from plone.namedfile import field
+        
+            >>> class IFileContainer(Interface):
+            ...     simple = field.NamedFile(title=u"Named file")
+            ...     image = field.NamedImage(title=u"Named image file")
+            ...     blob = field.NamedBlobFile(title=u"Named blob file")
+            ...     blobimage = field.NamedBlobImage(title=u"Named blob image file")
+        
+        These store data with the following types. 
+        
+            >>> from zope.interface import implements
+            >>> from plone import namedfile
+        
+            >>> class FileContainer(object):
+            ...     implements(IFileContainer)
+            ...     __allow_access_to_unprotected_subobjects__ = 1
+            ...     def __init__(self):
+            ...         self.simple = namedfile.NamedFile()
+            ...         self.image = namedfile.NamedImage()
+            ...         self.blob = namedfile.NamedBlobFile()
+            ...         self.blobimage = namedfile.NamedBlobImage()
+        
+        File data and content type
+        --------------------------
+        
+        Let's now show how to get and set file data.
+        
+        The FileContainer class creates empty objects to start with.
+        
+            >>> container = FileContainer()
+        
+            >>> container.simple.data
+            ''
+            >>> container.simple.contentType
+            ''
+            >>> container.simple.filename is None
+            True
+        
+            >>> container.image.data
+            ''
+            >>> container.image.contentType
+            ''
+            >>> container.image.filename is None
+            True
+            
+            >>> container.blob.data
+            ''
+            >>> container.blob.contentType
+            ''
+            >>> container.blob.filename is None
+            True
+            >>> container.blobimage.data
+            ''
+            >>> container.blobimage.contentType
+            ''
+            >>> container.blobimage.filename is None
+            True
+            
+        Let's now set some actual data in these files. Notice how the constructor
+        will attempt to guess the filename from the file extension.
+        
+            >>> container.simple = namedfile.NamedFile('dummy test data', filename=u"test.txt")
+            >>> container.simple.data
+            'dummy test data'
+            >>> container.simple.contentType
+            'text/plain'
+            >>> container.simple.filename
+            u'test.txt'
+        
+            >>> container.blob = namedfile.NamedBlobFile('dummy test data', filename=u"test.txt")
+            >>> container.blob.data
+            'dummy test data'
+            >>> container.blob.contentType
+            'text/plain'
+            >>> container.blob.filename
+            u'test.txt'
+            
+        Let's also try to read a GIF, courtesy of the zope.app.file tests:
+        
+            >>> zptlogo = (
+            ...     'GIF89a\x10\x00\x10\x00\xd5\x00\x00\xff\xff\xff\xff\xff\xfe\xfc\xfd\xfd'
+            ...     '\xfa\xfb\xfc\xf7\xf9\xfa\xf5\xf8\xf9\xf3\xf6\xf8\xf2\xf5\xf7\xf0\xf4\xf6'
+            ...     '\xeb\xf1\xf3\xe5\xed\xef\xde\xe8\xeb\xdc\xe6\xea\xd9\xe4\xe8\xd7\xe2\xe6'
+            ...     '\xd2\xdf\xe3\xd0\xdd\xe3\xcd\xdc\xe1\xcb\xda\xdf\xc9\xd9\xdf\xc8\xd8\xdd'
+            ...     '\xc6\xd7\xdc\xc4\xd6\xdc\xc3\xd4\xda\xc2\xd3\xd9\xc1\xd3\xd9\xc0\xd2\xd9'
+            ...     '\xbd\xd1\xd8\xbd\xd0\xd7\xbc\xcf\xd7\xbb\xcf\xd6\xbb\xce\xd5\xb9\xcd\xd4'
+            ...     '\xb6\xcc\xd4\xb6\xcb\xd3\xb5\xcb\xd2\xb4\xca\xd1\xb2\xc8\xd0\xb1\xc7\xd0'
+            ...     '\xb0\xc7\xcf\xaf\xc6\xce\xae\xc4\xce\xad\xc4\xcd\xab\xc3\xcc\xa9\xc2\xcb'
+            ...     '\xa8\xc1\xca\xa6\xc0\xc9\xa4\xbe\xc8\xa2\xbd\xc7\xa0\xbb\xc5\x9e\xba\xc4'
+            ...     '\x9b\xbf\xcc\x98\xb6\xc1\x8d\xae\xbaFgs\x00\x00\x00\x00\x00\x00\x00\x00'
+            ...     '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            ...     '\x00,\x00\x00\x00\x00\x10\x00\x10\x00\x00\x06z@\x80pH,\x12k\xc8$\xd2f\x04'
+            ...     '\xd4\x84\x01\x01\xe1\xf0d\x16\x9f\x80A\x01\x91\xc0ZmL\xb0\xcd\x00V\xd4'
+            ...     '\xc4a\x87z\xed\xb0-\x1a\xb3\xb8\x95\xbdf8\x1e\x11\xca,MoC$\x15\x18{'
+            ...     '\x006}m\x13\x16\x1a\x1f\x83\x85}6\x17\x1b $\x83\x00\x86\x19\x1d!%)\x8c'
+            ...     '\x866#\'+.\x8ca`\x1c`(,/1\x94B5\x19\x1e"&*-024\xacNq\xba\xbb\xb8h\xbeb'
+            ...     '\x00A\x00;'
+            ...     )
+        
+            >>> container.image = namedfile.NamedImage(zptlogo, filename=u"zpt.gif")
+            >>> container.image.data == zptlogo
+            True
+            >>> container.image.contentType
+            'image/gif'
+            >>> container.image.filename
+            u'zpt.gif'
+        
+            >>> container.blobimage = namedfile.NamedBlobImage(zptlogo, filename=u"zpt.gif")
+            >>> container.blobimage.data == zptlogo
+            True
+            >>> container.blobimage.contentType
+            'image/gif'
+            >>> container.blobimage.filename
+            u'zpt.gif'
+        
+        Note that is possible for force the mimetype:
+        
+            >>> container.image = namedfile.NamedImage(zptlogo, contentType='image/foo', filename=u"zpt.gif")
+            >>> container.image.data == zptlogo
+            True
+            >>> container.image.contentType
+            'image/foo'
+            >>> container.image.filename
+            u'zpt.gif'
+        
+            >>> container.blobimage = namedfile.NamedBlobImage(zptlogo, contentType='image/foo', filename=u"zpt.gif")
+            >>> container.blobimage.data == zptlogo
+            True
+            >>> container.blobimage.contentType
+            'image/foo'
+            >>> container.blobimage.filename
+            u'zpt.gif'
+        
+        The filename must be set to a unicode string, not a bytestring:
+        
+            >>> container.image.filename = 'foo'
+            Traceback (most recent call last):
+            ...
+            WrongType: ('foo', <type 'unicode'>, 'filename')
+        
+        Download view
+        -------------
+        
+        This package also comes with a view that can be used to download files. This 
+        will set Content-Disposition to ensure the browser downloads the file rather 
+        than displaying it. To use it, link to ../context-object/@@download/fieldname,
+        where `fieldname` is the name of the attribute on the context-object where the
+        named file is stored.
+        
+        We will test this with a dummy request, faking traversal.
+        
+            >>> from plone.namedfile.browser import Download
+            >>> from zope.publisher.browser import TestRequest
+        
+            >>> request = TestRequest()
+            >>> download = Download(container, request).publishTraverse(request, 'simple')
+            >>> download()
+            'dummy test data'
+            >>> request.response.getHeader('Content-Length')
+            '15'
+            >>> request.response.getHeader('Content-Type')
+            'text/plain'
+            >>> request.response.getHeader('Content-Disposition')
+            "attachment; filename*=UTF-8''test.txt"
+        
+            >>> request = TestRequest()
+            >>> download = Download(container, request).publishTraverse(request, 'blob')
+            >>> data = download()
+            >>> isinstance(data, file)
+            True
+            >>> data.read()
+            'dummy test data'
+            >>> request.response.getHeader('Content-Length')
+            '15'
+            >>> request.response.getHeader('Content-Type')
+            'text/plain'
+            >>> request.response.getHeader('Content-Disposition')
+            "attachment; filename*=UTF-8''test.txt"
+        
+            >>> request = TestRequest()
+            >>> download = Download(container, request).publishTraverse(request, 'image')
+            >>> download() == zptlogo
+            True
+            
+            >>> request.response.getHeader('Content-Length')
+            '341'
+            >>> request.response.getHeader('Content-Type')
+            'image/foo'
+            >>> request.response.getHeader('Content-Disposition')
+            "attachment; filename*=UTF-8''zpt.gif"
+        
+            >>> request = TestRequest()
+            >>> download = Download(container, request).publishTraverse(request, 'blobimage')
+            >>> data = download()
+            >>> isinstance(data, file)
+            True
+            >>> data.read() == zptlogo
+            True
+            >>> request.response.getHeader('Content-Length')
+            '341'
+            >>> request.response.getHeader('Content-Type')
+            'image/foo'
+            >>> request.response.getHeader('Content-Disposition')
+            "attachment; filename*=UTF-8''zpt.gif"
+        
+        Display-file view
+        -----------------
+        
+        This package also comes with a view that can be used to display files in the
+        browser. To use it, link to ../context-object/@@display-file/fieldname, where 
+        `fieldname` is the name of the attribute on the context-object where the named
+        file is stored.
+        
+        We will test this with a dummy request, faking traversal.
+        
+            >>> from plone.namedfile.browser import DisplayFile
+            >>> from zope.publisher.browser import TestRequest
+        
+            >>> request = TestRequest()
+            >>> display_file = DisplayFile(container, request).publishTraverse(request, 'simple')
+            >>> display_file()
+            'dummy test data'
+            >>> request.response.getHeader('Content-Length')
+            '15'
+            >>> request.response.getHeader('Content-Type')
+            'text/plain'
+            >>> request.response.getHeader('Content-Disposition')
+        
+            >>> request = TestRequest()
+            >>> display_file = DisplayFile(container, request).publishTraverse(request, 'blob')
+            >>> data = display_file()
+            >>> isinstance(data, file)
+            True
+            >>> data.read()
+            'dummy test data'
+            >>> request.response.getHeader('Content-Length')
+            '15'
+            >>> request.response.getHeader('Content-Type')
+            'text/plain'
+            >>> request.response.getHeader('Content-Disposition')
+        
+            >>> request = TestRequest()
+            >>> display_file = DisplayFile(container, request).publishTraverse(request, 'image')
+            >>> display_file() == zptlogo
+            True
+            
+            >>> request.response.getHeader('Content-Length')
+            '341'
+            >>> request.response.getHeader('Content-Type')
+            'image/foo'
+            >>> request.response.getHeader('Content-Disposition')
+        
+            >>> request = TestRequest()
+            >>> display_file = DisplayFile(container, request).publishTraverse(request, 'blobimage')
+            >>> data = display_file()
+            >>> isinstance(data, file)
+            True
+            >>> data.read() == zptlogo
+            True
+            >>> request.response.getHeader('Content-Length')
+            '341'
+            >>> request.response.getHeader('Content-Type')
+            'image/foo'
+            >>> request.response.getHeader('Content-Disposition')
+        
+        Specifying the primary field
+        ----------------------------
+        
+        To use the @@download view without specifying the field in the URL, the
+        primary field information must be registered with an adapter. (Frameworks such
+        as plone.dexterity may already have done this for you.)
+        
+            >>> from plone.rfc822.interfaces import IPrimaryFieldInfo
+            >>> from zope.component import adapts
+        
+            >>> class FieldContainerPrimaryFieldInfo(object):
+            ...     implements(IPrimaryFieldInfo)
+            ...     adapts(IFileContainer)
+            ...     fieldname = 'simple'
+            ...     field = IFileContainer['simple']
+            ...     def __init__(self, context):
+            ...         self.value = context.simple
+        
+            >>> from zope.component import getSiteManager
+            >>> components = getSiteManager()
+            >>> components.registerAdapter(FieldContainerPrimaryFieldInfo)
+        
+        We will test this with a dummy request, faking traversal.
+        
+            >>> request = TestRequest()
+            >>> download = Download(container, request)
+            >>> download()
+            'dummy test data'
+            >>> request.response.getHeader('Content-Length')
+            '15'
+            >>> request.response.getHeader('Content-Type')
+            'text/plain'
+            >>> request.response.getHeader('Content-Disposition')
+            "attachment; filename*=UTF-8''test.txt"
+        
+        Image scales
+        ------------
+        
+        This package can handle the creation, storage, and retrieval of arbitrarily
+        sized scaled versions of images stored in NamedImage or NamedBlobImage fields.
+        
+        Image scales are accessed via an @@images view that is available for any item
+        providing ``plone.namedfile.interfaces.IImageScaleTraversable``.  There are
+        several ways that you may reference scales from page templates.
+        
+        1. for full control you may do the tag generation explicitly::
+        
+             <img tal:define="scales context/@@images;
+                              thumbnail python: scales.scale('image', width=64, height=64);"
+                  tal:condition="thumbnail"
+                  tal:attributes="src thumbnail/url;
+                                  width thumbnail/width;
+                                  height thumbnail/height" />
+        
+           This would create an up to 64 by 64 pixel scaled down version of the image
+           stored in the "image" field.  It also allows for passing in additional
+           parameters support by `plone.scale`_'s ``scaleImage`` function, e.g.
+           ``direction`` or ``quality``.
+        
+           .. _`plone.scale`: http://pypi.python.org/pypi/plone.scale
+        
+        2. for automatic tag generation with extra parameters you would use::
+        
+             <img tal:define="scale context/@@images"
+                  tal:replace="structure python: scale.scale('image',
+                               width=1200, height=800, direction='down').tag()" />
+        
+        3. It is possible to access scales via predefined named scale sizes, rather
+           than hardcoding the dimensions every time you access a scale.  The scale
+           sizes are found via calling a utility providing
+           ``plone.namedfile.interfaces.IAvailableSizes``, which should return a dict of
+           scale name => (width, height).  A scale called 'mini' could then be accessed
+           like this::
+        
+             <img tal:define="scale context/@@images"
+                  tal:replace="structure python: scale.scale('image',
+                               scale='mini').tag()" />
+        
+           This would use the predefined scale size "mini" to determine the desired
+           image dimensions, but still allow to pass in extra parameters.
+        
+        4. a convenience short-cut for option 3 can be used::
+        
+             <img tal:replace="structure context/@@images/image/mini" />
+        
+        5. and lastly, the short-cut can also be used to render the unscaled image::
+        
+             <img tal:replace="structure context/@@images/image" />
+        
+Keywords: plone named file image blob
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: License :: OSI Approved :: BSD License

@@ -1,0 +1,592 @@
+Metadata-Version: 1.1
+Name: plone.app.linkintegrity
+Version: 1.5.5
+Summary: Manage link integrity in Plone.
+Home-page: http://pypi.python.org/pypi/plone.app.linkintegrity
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: plone.app.linkintegrity
+        =======================
+        
+        Overview
+        --------
+        
+        This package tries to integrate `PLIP 125`_, link integrity checking,
+        into Plone.  It is making use of the zope3 event system in order to modify
+        Plone itself as little as possible.
+        
+          .. _`PLIP 125`: http://plone.org/products/plone/roadmap/125
+          .. |---| unicode:: U+2014  .. em dash
+        
+        Status
+        ------
+        
+        The code handles one of the two use cases of `PLIP 125`_, deleting an item.
+        Whenever an object that is referred to by another one via an `<a>` or `<img>`
+        tag is going to be deleted, Plone's regular flow of actions is "interrupted"
+        and a confirmation form is presented to the user.  If they then decide to
+        indeed delete the object, the original request will be replayed and this time
+        followed through, thereby breaching link integrity of the site.
+        
+        This process is implemented independently of how the object is deleted (as
+        long as `OFS.ObjectManager`'s `_delObject` is used ultimatively) and what
+        request is used to do it.  A more detailed |---| albeit slightly outdated
+        |---| explanation of how this works can be found in `NOTES.txt`.
+        
+        The second use case of `PLIP 125`_, which provides better handling of moved
+        items, is implemented by `plone.app.redirector`__.
+        
+          .. __: http://pypi.python.org/pypi/plone.app.redirector/
+        
+        Using plone.app.linkintegrity in a WSGI application using repoze.zope2
+        ----------------------------------------------------------------------
+        
+        If you are deploying Plone using repoze.zope2 in a WSGI pipeline, then
+        the stock LinkIntegrity won't work. To make it work, you need the following:
+        
+         - repoze.zope2 1.0.2 or later
+         - ZODB 3.8.2 or later
+        
+        These two will ensure that the "views on exceptions" functionality, which
+        plone.app.linkintegrity uses, is available.
+        
+        Next, make sure that the repoze.retry#retry middleware is used, and that
+        it will handle stock Retry exceptions. With repoze.retry 0.9.3 or later,
+        that is the default. With earlier versions, you can configure it explicitly.
+        For example::
+        
+            [app:zope2]
+            paste.app_factory = repoze.obob.publisher:make_obob
+            repoze.obob.get_root = repoze.zope2.z2bob:get_root
+            repoze.obob.initializer = repoze.zope2.z2bob:initialize
+            repoze.obob.helper_factory = repoze.zope2.z2bob:Zope2ObobHelper
+            zope.conf = /Users/optilude/Development/Plone/Code/Build/uber/plone3.x-repoze/parts/instance-debug/etc/zope.conf
+        
+            [filter:retry]
+            use = egg:repoze.retry#retry
+            retryable = ZODB.POSException:ConflictError ZPublisher.Publish:Retry
+        
+            [filter:errorlog]
+            use = egg:repoze.errorlog#errorlog
+            path = /__error_log__
+            keep = 50
+            ignore = 
+                paste.httpexceptions:HTTPUnauthorized
+                paste.httpexceptions:HTTPNotFound
+                paste.httpexceptions:HTTPFound
+            
+            [pipeline:main]
+            pipeline =
+                retry
+                egg:repoze.tm#tm
+                egg:repoze.vhm#vhm_xheaders
+                errorlog
+                zope2
+        
+            [server:main]
+            use = egg:Paste#http
+            host = 127.0.0.1
+            port = 8080
+            threadpool_workers = 1
+            threadpool_spawn_if_under = 1
+        
+        
+        Changelog
+        =========
+        
+        1.5.5 (2014-10-22)
+        ------------------
+        
+        - Keep reference integrity  also for URLs that are calling ``FSPythonScript``
+          (like ``...atfile/at_download/file``)
+          [keul]
+        
+        - Be sure that every absolute path is relative to portal root, not only ones that
+          starts with portal id. This will fix an issue of missing references when Plone is
+          behind virtual hosting
+          [keul]
+        
+        1.5.4 (2014-01-27)
+        ------------------
+        
+        - Added support for sub path after uid of resolveuid
+          [hoka]
+        
+        1.5.3 (2013-08-13)
+        ------------------
+        
+        - Set a maxsize when decompressing request data.
+          [davisagli]
+        
+        - Fixed dexterity referenceablebehavior integration.
+          [maurits]
+        
+        - Fix #13681, documents referencing each other will now also trigger a link
+          integrity warning.
+          [do3cc]
+        
+        
+        1.5.2 (2013-05-23)
+        ------------------
+        
+        - Exceptions now return the repr() and not the str() of the object. This way
+          we avoid, for File content types, loading the whole object data into memory.
+          This closes https://dev.plone.org/ticket/13519
+          [ericof]
+        
+        
+        1.5.1 (2013-03-05)
+        ------------------
+        
+        - unicode links should not raise errors. Fixes https://dev.plone.org/ticket/13468
+          [vangheem]
+        
+        - Dexterity: use zope.lifecycleevent instead of zope.app.container
+          interfaces for Plone 4.3 support.
+          [jone]
+        
+        - Avoid a bug during link integrity check when a source or target of the
+          reference has been already removed during the deletion process.
+          This can happen during large delete processes.
+          [thomasdesvenain]
+        - Monkey patch the Zope HTTPResponse status_code to include a mapping for
+          linkintegritynotificationexception, to return a 200 code.
+          [thepjot]
+        
+        1.5.0 (2013-01-17)
+        ------------------
+        - Fix a remove confirmation view bug.
+          Displays the portal type title rather than the portal type name.
+          This change also broke some tests that were checking for the name
+          rather than the title, but I just fixed those.
+          [jianaijun]
+        
+        - Added support for Dexterity content types.  Link integrity
+          support for Dexterity requires the plone.app.referenceablebehavior
+          behavior to be enabled so that the Dexterity item can be used
+          with Archetypes references.
+          [jpgimenez]
+        
+        
+        1.4.7 (2012-10-03)
+        ------------------
+        
+        - Fixes UnicodeDecodeError on extractLinks
+          This closes https://dev.plone.org/ticket/13168
+          [ericof]
+        
+        
+        1.4.6 (2012-07-02)
+        ------------------
+        
+        - No more zope.app dependencies.
+          [hannosch]
+        
+        - Remove hard dependency on Archetypes.
+          [davisagli]
+        
+        1.4.5 - 2012-02-24
+        ------------------
+        
+        - Fix an error in handling absolute links to objects within the portal,
+          which prevented references from being created based on those links.
+          This closes https://dev.plone.org/ticket/12402
+          [davisagli]
+        
+        - Stabilize the sort order of breach sources returned for the
+          confirmation view.
+          [davisagli]
+        
+        - Use the `get` method to retrieve the field value if the instance
+          does not provide an accessor method. This is the case for instance
+          for fields which have been added via schema extension.
+          [malthe]
+        
+        - Support resolveuid/UID references explicitely, by parsing and resolving
+          these ourselves instead of relying on a view or script (which doesn't work).
+          This fixes linkintegrity for sites with link-by-uid turned on.
+          This closes https://dev.plone.org/ticket/12104
+          [mj]
+        
+        1.4.4 - 2011-10-04
+        ------------------
+        
+        - Add integrity references for cloned content items.
+          This fixes http://dev.plone.org/plone/ticket/12254.
+          [gotcha]
+        
+        - Skip events subscribers during copy&paste of content items.
+          This fixes http://dev.plone.org/plone/ticket/12206.
+          [gotcha]
+        
+        - Provide Archetypes-only fallback if `plone.uuid` is not available,
+          restoring compatibility with Plone 4.0.x.
+          [witsch]
+        
+        
+        1.4.3 - 2011-09-14
+        ------------------
+        
+        - Fix integrity reference generation for content not accessible by the editor.
+          [witsch]
+        
+        - Fix handling of relative links instead of relying on Acquisition.
+          [witsch]
+        
+        
+        1.4.2 - 2011-07-04
+        ------------------
+        
+        - Objects that don't have a UUID cannot cause linkintegrity-breaches.
+          This fixes http://dev.plone.org/plone/ticket/11904.
+          [WouterVH]
+        
+        - Adjust tests to the changed URL used for the `folder_contents` view.
+          This refs http://dev.plone.org/plone/ticket/10122.
+          [gotcha]
+        
+        - Add new tests to prove `isLinked` can now be used safely.
+          This refs http://dev.plone.org/plone/ticket/7784.
+          [gotcha]
+        
+        
+        1.4.1 - 2011-05-12
+        ------------------
+        
+        - Fix decoding of colon-delimited list of confirmed oids in the request
+          when one of the oids contains a colon.
+          [davisagli]
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        
+        1.4.0 - 2011-01-03
+        ------------------
+        
+        - Use `plone.uuid` to look up content UUIDs.
+          [toutpt, davisagli]
+        
+        
+        1.3.3 - 2011-07-05
+        ------------------
+        
+        - Add new tests to prove `isLinked` can now be used safely.
+          This refs http://dev.plone.org/plone/ticket/7784.
+          [gotcha]
+        
+        
+        1.3.2 - 2011-05-12
+        ------------------
+        
+        - Fix decoding of colon-delimited list of confirmed oids in the request
+          when one of the oids contains a colon.
+          [davisagli]
+        
+        
+        1.3.1 - 2010-08-08
+        ------------------
+        
+        - Adjusted tests to no longer rely on sub-collections.
+          [hannosch]
+        
+        - Use the official ``aq_get`` API to acquire the request from a context.
+          [hannosch]
+        
+        
+        1.3.0 - 2010-07-18
+        ------------------
+        
+        - Update license to GPL version 2 only.
+          [hannosch]
+        
+        
+        1.3b2 - 2010-06-13
+        ------------------
+        
+        - Avoid using the deprecated five:implements directive.
+          [hannosch]
+        
+        
+        1.3b1 - 2010-06-03
+        ------------------
+        
+        - Fix findObject to also catch the ZTK NotFound exception which may be
+          raised by request.traverseName. Fixes
+          http://dev.plone.org/plone/ticket/10549
+          [davisagli]
+        
+        
+        1.3a5 - 2010-05-01
+        ------------------
+        
+        - Properly handle retry exception instead of getting the special-casing of
+          exception handling when publishing with debug=1
+          [davisagli]
+        
+        
+        1.3a4 - 2010-03-06
+        ------------------
+        
+        - Do not abort if a text field is `None`. In that case the HTML parser
+          raises a `TypeError` instead of an `HTMLParseError`.
+          [wichert]
+        
+        
+        1.3a3 - 2010-02-18
+        ------------------
+        
+        - Updated templates to match recent markup conventions.
+          References http://dev.plone.org/plone/ticket/9981
+          [spliter]
+        
+        - Convert test setup to `collective.testcaselayer`.
+          [witsch]
+        
+        - Updated tests to not rely on specific CSS classes or ids.
+          Refs http://dev.plone.org/plone/ticket/10231
+          [limi, witsch]
+        
+        
+        1.3a2 - 2009-12-02
+        ------------------
+        
+        - Fix issue with the final submission of the delete confirmation page in
+          Zope 2.12. This closes http://dev.plone.org/plone/ticket/9699.
+          [davisagli]
+        
+        
+        1.3a1 - 2009-11-17
+        ------------------
+        
+        - Access the subtopics page directly since the tab is now hidden by default.
+          [davisagli]
+        
+        - Partially disable the test regarding the undo log as the outcome differs
+          between Plone 3 and 4, probably due to changes in the test setup.
+          Refs http://dev.plone.org/plone/ticket/7784
+          [witsch]
+        
+        - Add test to verify undo log entries are not longer missing after removing
+          items via the "delete" action.  Refs http://dev.plone.org/plone/ticket/7784
+          [witsch]
+        
+        
+        1.2 - 2009-10-10
+        ----------------
+        
+        - Also catch `NotFound` exceptions when trying to resolve linked objects.
+          [optilude]
+        
+        
+        1.1 - 2009-08-31
+        ----------------
+        
+        - Make compatible with repoze.zope2. See README.txt for notes on how to
+          deploy.
+          [optilude]
+        
+        - Don't use id() to record confirmed items. It can change on request
+          boundaries. Use an encoded _p_oid instead.
+          [optilude]
+        
+        - Also regard traversal adapters when trying to resolve links into their
+          corresponding objects.
+          [witsch]
+        
+        - Fix some tests to make sure that text values are treated as text/html
+          in Zope 2.12, whose zope.contenttype is stricter when guessing the
+          mimetype.
+          [davisagli]
+        
+        - Don't install the exception hook in Zope 2.12 where it is no longer
+          needed and breaks exception handling.
+          [davisagli]
+        
+        
+        1.0.12 - 2009-06-03
+        -------------------
+        
+        - Compare UIDs instead of objects during cleanup of breach information in
+          order to avoid expensive hashing in "... in ..." expressions.  This
+          makes removing linked objects much faster.
+          [regebro]
+        
+        
+        1.0.11 - 2008-11-15
+        -------------------
+        
+        - Fix code to not silently swallow `ConflictErrors`.
+          [witsch]
+        
+        - Fix issue with dangling references to already removed objects.
+          Fixes http://dev.plone.org/plone/ticket/8349 and
+          http://dev.plone.org/plone/ticket/8390.
+          [witsch]
+        
+        
+        1.0.10 - 2008-07-07
+        -------------------
+        
+        - Fixed the recognizing of links to files (or any object) with a
+          space in the id.  Fixes http://dev.plone.org/plone/ticket/8167.
+          [maurits]
+        
+        - Updated tests to work with LinguaPlone by unmarking the creation
+          flag on new objects.
+          [maurits]
+        
+        
+        1.0.9 - 2008-05-08
+        ------------------
+        
+        - Use acquisition API to support the "philikon-aq" branch.
+          [witsch]
+        
+        - Fix a problem with updating link integrity references during a
+          request which trying to delete multiple other objects.
+          [witsch]
+        
+        
+        1.0.8 - 2008-04-21
+        ------------------
+        
+        - Added missing i18n markup to `confirmation.pt`, also fixing
+          http://dev.plone.org/plone/ticket/7995.
+          [witsch]
+        
+        
+        1.0.7 - 2008-03-27
+        ------------------
+        
+        - Fixed accidental removal of references not related to link integrity.
+          [dunny]
+        
+        
+        1.0.6 - 2008-03-08
+        ------------------
+        
+        - Added missing namespace declaration to avoid the warning about it.
+          [wiggy]
+        
+        
+        1.0.5 - 2008-02-13
+        ------------------
+        
+        - Added missing i18n markup to confirmation.pt. This closes
+          http://dev.plone.org/plone/ticket/7688.
+          [hannosch]
+        
+        
+        1.0.4 - 2008-01-03
+        ------------------
+        
+        - Handle `IObjectRemovedEvents` with no attached request object.
+          [witsch]
+        
+        - Updated tests to work with Plone 4.0.
+          [hannosch]
+        
+        - Referencing items are now listed in alphabetical order
+          [witsch]
+        
+        
+        1.0.3 - 2007-12-05
+        ------------------
+        
+        - Fixed setting up the test layer after GenericSetup update
+          [witsch]
+        
+        
+        1.0.2 - 2007-11-07
+        ------------------
+        
+        - Fixed parser error when handling malformed HTML
+          [witsch]
+        
+        - Fixed security issue due to using pickles (see CVE-2007-5741)
+          [witsch]
+        
+        
+        1.0.1 - 2007-09-10
+        ------------------
+        
+        - Added view for updating link integrity information for all site content
+          [witsch]
+        
+        - Made code in info.py more tolerant when encountering missing property
+          sheets.
+          [hannosch]
+        
+        
+        1.0 - 2007-08-16
+        ----------------
+        
+        - Minor bug fixes and enhancements
+          [witsch]
+        
+        
+        1.0rc1.1 - 2007-07-12
+        ---------------------
+        
+        - Bug and test fixes after upgrade to Zope 2.10.4
+          [witsch]
+        
+        
+        1.0rc1 - 2007-07-08
+        -------------------
+        
+        - Bugfixes & additional tests
+          [witsch]
+        
+        
+        1.0b3 - 2007-05-04
+        ------------------
+        
+        - No changes.
+        
+        1.0b2 - 2007-04-30
+        ------------------
+        
+        - Integration of Plone's "delete confirmation" page
+          [witsch]
+        
+        
+        1.0b1 - 2007-03-03
+        ------------------
+        
+        - Fix tests in regard to changed `folder_contents` and unicode issues
+          [witsch]
+        
+        - Updates to the monkey patch needed for five exceptions
+          [wiggy]
+        
+        
+        1.0a2 - 2007-02-07
+        ------------------
+        
+        - Bugfixes & other minor enhancements
+          [witsch]
+        
+        - Eggification and move into plone.app namespace
+          [optilude]
+        
+        - Proof of concept & initial version
+          [witsch]
+        
+        - Initial package structure.
+          [zopeskel]
+        
+Keywords: link integrity plone
+Platform: Any
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: Intended Audience :: Other Audience
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: GNU General Public License v2 (GPLv2)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Internet :: WWW/HTTP :: Site Management :: Link Checking

@@ -1,0 +1,323 @@
+Traversal
+=========
+
+plone.z3cform allows you to traverse to a widget using the ++widget++
+namespace adapter on a form wrapper view or standalone form view.
+
+Note that widgets may need to mix in Acquisition.Explicit to be truly
+traversable in Zope 2.10. In Zope 2.12, that is not required. However, you
+may get an error if you mix in Explicit in Zope 2.12 and the parent view
+(normally the form or the form layout wrapper) does not, as is likely to be
+the case. To be compatible with both Zope 2.10 and 2.12, you'll need to
+mix in Acquisition.Explicit, but make sure the widget does *not* provide the
+IAcquirer interface. One way to do that is by using implementsOnly(), e.g.::
+    
+    class MyWidget(Aquisition.Explicit):
+        implementsOnly(IMyWidget)
+        
+        ...
+
+If you are only targeting Zope 2.12 and later, you can avoid mixing in any
+kind of acquisition altogether.
+
+The ++widget++ namespace works both in the case of a layout wrapper view,
+and in the case of a form used directly (in Zope 2.12 or later).
+
+Traversal on a standalone form
+------------------------------
+
+First, we create a simple form and context.
+
+    >>> from zope.interface import alsoProvides
+    >>> from zope.publisher.browser import TestRequest
+    >>> from zope.annotation.interfaces import IAttributeAnnotatable
+    >>> from z3c.form.interfaces import IFormLayer
+
+    >>> from zope import interface, schema
+    >>> from z3c.form import form, field, button
+
+    >>> class MySchema(interface.Interface):
+    ...     age = schema.Int(title=u"Age")
+
+    >>> from z3c.form.interfaces import IFieldsForm
+    >>> from zope.interface import implements
+    >>> class MyForm(form.Form):
+    ...     implements(IFieldsForm)
+    ...     fields = field.Fields(MySchema)
+    ...     
+    ...     def update(self):
+    ...         print "Updating test form"
+    ...         super(MyForm, self).update()
+
+    >>> from zope.component import provideAdapter
+    >>> from zope.publisher.interfaces.browser import IBrowserRequest
+    >>> from zope.interface import Interface
+
+    >>> provideAdapter(adapts=(Interface, IBrowserRequest),
+    ...                provides=Interface,
+    ...                factory=MyForm,
+    ...                name=u"test-form")
+
+    >>> from Acquisition import Implicit
+    >>> class Bar(Implicit):
+    ...     __allow_access_to_unprotected_subobjects__ = 1
+    ...     implements(Interface,MySchema)
+    ...     age = 48
+
+And define a helper to make a request and traverse to ++widget++
+
+    >>> from zope.component import getMultiAdapter
+    >>> from zope.traversing.interfaces import ITraversable
+    >>> def get_traverser(context,form_name,traverser_name=u"widget",form={}):
+    ...     request = TestRequest(form=form)
+    ...     request.form.update(form)
+    ...     alsoProvides(request, IFormLayer)
+    ...     alsoProvides(request, IAttributeAnnotatable)
+    ...     form = getMultiAdapter((context, request), name=form_name)
+    ...     return getMultiAdapter((form, request), name=traverser_name)
+
+Now, let's emulate the publisher and look up the namespace traversal
+adapter. For example, let's say we'd traversed to
+../@@test-form/++widget++age. The publisher would then do:
+
+    >>> traverser = get_traverser(Bar(),u"test-form")
+    >>> age_widget = traverser.traverse('age', [])
+    Updating test form
+    >>> age_widget
+    <TextWidget 'form.widgets.age'>
+    >>> age_widget.value
+    u'48'
+
+Can also specify form.widgets.age and get the same result.
+
+    >>> traverser = get_traverser(Bar(),u"test-form")
+    >>> age_widget = traverser.traverse('age', [])
+    Updating test form
+    >>> age_widget
+    <TextWidget 'form.widgets.age'>
+    >>> age_widget.value
+    u'48'
+
+Please note that this point, the form has been updated, but not rendered.
+
+Traversing through lists of widgets
+----------------
+
+Create another schema that contains a list of ages, and a context that
+contains some values for it.
+
+    >>> from z3c.form import form
+    >>> class MyListSchema(interface.Interface):
+    ...     list_field = schema.List(__name__='list_field',title=u"Object Field",value_type=schema.Int(title=u"Age"))
+
+    >>> class MyListForm(form.Form):
+    ...     implements(IFieldsForm)
+    ...     fields = field.Fields(MyListSchema)
+    ...     
+    ...     def update(self):
+    ...         print "Updating test form"
+    ...         super(MyListForm, self).update()
+
+    >>> provideAdapter(adapts=(Interface, IBrowserRequest),
+    ...                provides=Interface,
+    ...                factory=MyListForm,
+    ...                name=u"test-list-form")
+
+    >>> class Bar(Implicit):
+    ...     __allow_access_to_unprotected_subobjects__ = 1
+    ...     implements(Interface, MyListSchema)
+    ...     list_field = [48,49,50]
+
+Make a request. We should be able to find the list_field
+
+    >>> traverser = get_traverser(Bar(),u"test-list-form")
+    >>> list_widget = traverser.traverse('list_field', [])
+    Updating test form
+    >>> list_widget
+    <MultiWidget 'form.widgets.list_field'>
+
+And traverse through to individual items.
+
+    >>> traverser = get_traverser(Bar(),u"test-list-form")
+    >>> age_widget = traverser.traverse('list_field.1', [])
+    Updating test form
+    >>> age_widget
+    <TextWidget 'form.widgets.list_field.1'>
+    >>> age_widget.value
+    u'49'
+
+    >>> traverser = get_traverser(Bar(),u"test-list-form")
+    >>> age_widget = traverser.traverse('list_field.2', [])
+    Updating test form
+    >>> age_widget
+    <TextWidget 'form.widgets.list_field.2'>
+    >>> age_widget.value
+    u'50'
+
+Out of range errors are LocationErrors
+
+    >>> traverser = get_traverser(Bar(),u"test-list-form")
+    >>> age_widget = traverser.traverse('list_field.9', [])
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in ?
+    LocationError: "'9' not in range"
+
+Non-integer values are also LocationErrors
+
+    >>> traverser = get_traverser(Bar(),u"test-list-form")
+    >>> age_widget = traverser.traverse('list_field.camel', [])
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in ?
+    LocationError: "'camel' not valid index"
+
+Traversing object types
+-----------------------
+
+Now create a schema that contains an object with a list of ages within it
+
+    >>> from z3c.form import form
+    >>> class MyParentSchema(interface.Interface):
+    ...     obj_field = schema.Object(__name__='obj_field',title=u"Object Field",schema=MyListSchema)
+
+    >>> class MyParentForm(form.Form):
+    ...     implements(IFieldsForm)
+    ...     fields = field.Fields(MyParentSchema)
+    ...     
+    ...     def update(self):
+    ...         print "Updating test form"
+    ...         super(MyParentForm, self).update()
+
+    >>> provideAdapter(adapts=(Interface, IBrowserRequest),
+    ...                provides=Interface,
+    ...                factory=MyParentForm,
+    ...                name=u"test-parent-form")
+
+    >>> class Baz(Implicit):
+    ...     __allow_access_to_unprotected_subobjects__ = 1
+    ...     implements(Interface, MyListSchema)
+    ...     list_field = [48,49,50]
+
+    >>> class Bar(Implicit):
+    ...     __allow_access_to_unprotected_subobjects__ = 1
+    ...     implements(Interface, MyParentSchema)
+    ...     obj_field = Baz()
+
+
+We can find this object widget
+
+    >>> traverser = get_traverser(Bar(),u"test-parent-form")
+    >>> obj_widget = traverser.traverse('obj_field', [])
+    Updating test form
+    >>> obj_widget
+    <ObjectWidget 'form.widgets.obj_field'>
+
+And traverse through to the form within
+
+    >>> traverser = get_traverser(Bar(),u"test-parent-form")
+    >>> list_widget = traverser.traverse('obj_field.widgets.list_field', [])
+    Updating test form
+    >>> list_widget
+    <MultiWidget 'form.widgets.obj_field.widgets.list_field'>
+
+    >>> traverser = get_traverser(Bar(),u"test-parent-form")
+    >>> age_widget = traverser.traverse('obj_field.widgets.list_field.0', [])
+    Updating test form
+    >>> age_widget
+    <TextWidget 'form.widgets.obj_field.widgets.list_field.0'>
+    >>> age_widget.value
+    u'48'
+
+Missing widgets are LocationErrors
+
+    >>> traverser = get_traverser(Bar(),u"test-parent-form")
+    >>> list_widget = traverser.traverse('obj_field.widgets.camel_field', [])
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in ?
+    LocationError: 'camel_field'
+
+Looking for anything other than 'widgets' is also an error
+
+    >>> traverser = get_traverser(Bar(),u"test-parent-form")
+    >>> list_widget = traverser.traverse('obj_field.wodgets', [])
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in ?
+    LocationError: 'wodgets'
+
+Traversal on a layout wrapper view
+-----------------------------------
+
+Again, we create a simple form and context.
+
+    >>> from zope.interface import alsoProvides
+    >>> from zope.publisher.browser import TestRequest
+    >>> from zope.annotation.interfaces import IAttributeAnnotatable
+    >>> from z3c.form.interfaces import IFormLayer
+
+    >>> def make_request(form={}):
+    ...     request = TestRequest()
+    ...     request.form.update(form)
+    ...     alsoProvides(request, IFormLayer)
+    ...     alsoProvides(request, IAttributeAnnotatable)
+    ...     return request
+
+    >>> from zope import interface, schema
+    >>> from z3c.form import form, field, button
+    >>> from plone.z3cform.layout import FormWrapper
+
+    >>> class MySchema(interface.Interface):
+    ...     age = schema.Int(title=u"Age")
+
+    >>> from z3c.form.interfaces import IFieldsForm
+    >>> from zope.interface import implements
+    >>> class MyForm(form.Form):
+    ...     implements(IFieldsForm)
+    ...     fields = field.Fields(MySchema)
+    ...     ignoreContext = True # don't use context to get widget data
+    ...     
+    ...     def update(self):
+    ...         print "Updating test form"
+    ...         super(MyForm, self).update()
+
+    >>> class MyFormWrapper(FormWrapper):
+    ...     form = MyForm
+    ...     label = u"Please enter your age"
+
+    >>> from zope.component import provideAdapter
+    >>> from zope.publisher.interfaces.browser import IBrowserRequest
+    >>> from zope.interface import Interface
+
+    >>> provideAdapter(adapts=(Interface, IBrowserRequest),
+    ...                provides=Interface,
+    ...                factory=MyFormWrapper,
+    ...                name=u"test-form")
+
+    >>> from Acquisition import Implicit
+    >>> class Bar(Implicit):
+    ...     __allow_access_to_unprotected_subobjects__ = 1
+    ...     implements(Interface)
+
+    >>> from zope.component import getMultiAdapter
+    >>> context = Bar()
+    >>> request = make_request()
+
+Now, let's emulate the publisher and look up the namespace traversal
+adapter. For example, let's say we'd traversed to
+../@@test-form/++widget++age. The publisher would then do:
+
+    >>> form = getMultiAdapter((context, request), name=u"test-form")
+
+    >>> from zope.traversing.interfaces import ITraversable
+    >>> traverser = getMultiAdapter((form, request), name=u"widget")
+    >>> traverser.traverse('age', [])
+    Updating test form
+    <TextWidget 'form.widgets.age'>
+
+Please note that this point, the form has been updated, but not rendered.
+
+When a form field does not exist a LocationError is raised.
+
+    >>> traverser = getMultiAdapter((form, request), name=u"widget")
+    >>> traverser.traverse('missing', [])
+    Traceback (most recent call last):
+    ...
+    LocationError: 'missing'

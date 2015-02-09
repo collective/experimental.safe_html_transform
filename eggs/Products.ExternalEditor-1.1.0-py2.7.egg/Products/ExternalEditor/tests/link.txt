@@ -1,0 +1,46 @@
+Tests for the External Editor link
+==================================
+
+  >>> from Acquisition import Implicit
+  >>> from AccessControl.SecurityManagement import getSecurityManager
+  >>> from Products.ExternalEditor.ExternalEditor import EditLink
+
+  >>> class File(Implicit):
+  ...    def __init__(self, id):
+  ...       self.id = id
+  ...    def getId(self):
+  ...       return self.id
+  ...    def manage_FTPget(self):
+  ...       return '%s content' % self.id
+
+
+  >>> ob = File('some-file').__of__(self.folder)
+
+A user that has no permission cannot see the link:
+
+  >>> self.logout()
+  >>> getSecurityManager().getUser().getUserName()
+  'Anonymous User'
+
+  >>> EditLink(self.folder, ob)
+  ''
+
+A user that has the permission can see the link:
+
+  >>> self.login()
+  >>> self.setRoles(('Manager',))
+  >>> getSecurityManager().getUser().getUserName()
+  'test_user_1_'
+
+  >>> EditLink(self.folder, ob)
+  '<a href="http://nohost/test_folder_1_/externalEdit_/some-file.zem" title="Edit using external editor"><img src="/misc_/ExternalEditor/edit_icon" align="middle" hspace="2" border="0" alt="External Editor" /></a>'
+
+Borrow Lock feature:
+
+  >>> EditLink(self.folder, ob, borrow_lock=1)
+  '<a href="http://nohost/test_folder_1_/externalEdit_/some-file.zem?borrow_lock=1" title="Edit using external editor"><img src="/misc_/ExternalEditor/edit_icon" align="middle" hspace="2" border="0" alt="External Editor" /></a>'
+
+Skip Data feature:
+
+  >>> EditLink(self.folder, ob, skip_data=1)
+  '<a href="http://nohost/test_folder_1_/externalEdit_/some-file.zem?skip_data=1" title="Edit using external editor"><img src="/misc_/ExternalEditor/edit_icon" align="middle" hspace="2" border="0" alt="External Editor" /></a>'

@@ -1,0 +1,6 @@
+setuptools
+zope.interface
+zope.component
+zope.formlib
+plone.app.form
+plone.app.jquerytools>=1.1b1

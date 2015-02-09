@@ -1,0 +1,6 @@
+
+      [console_scripts]
+      develop = mr.developer.develop:develop
+      [zc.buildout.extension]
+      default = mr.developer.extension:extension
+      

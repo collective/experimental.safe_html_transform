@@ -1,0 +1,26 @@
+mechanize>=0.2.0
+setuptools
+zope.interface
+zope.schema
+pytz
+
+[test]
+zope.browserpage
+zope.browserresource
+zope.component
+zope.container
+zope.principalregistry
+zope.ptresource
+zope.publisher
+zope.security
+zope.site
+zope.traversing
+zope.app.appsetup
+zope.app.publication
+zope.app.testing >= 3.8.1
+
+[zope-functional-testing]
+zope.app.testing
+
+[wsgi]
+wsgi_intercept

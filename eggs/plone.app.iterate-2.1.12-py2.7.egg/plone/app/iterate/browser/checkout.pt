@@ -1,0 +1,77 @@
+<html metal:use-macro="context/@@standard_macros/page" i18n:domain="plone">
+
+<div id="content" metal:fill-slot="body">
+
+    <form action="#"
+        method="post"
+        name="checkout"
+        tal:attributes="action string:${context/absolute_url}/@@content-checkout">
+
+    <h1 i18n:translate="title_checkout">
+        Check out <span i18n:name="object_title" tal:content="here/Title" />
+    </h1>
+
+    <p i18n:translate="description_checkout">
+        On check-out, a working copy of the content item will be created in the selected
+        container, and the original will be locked to prevent other users from
+        editing it.
+    </p>
+    
+    <fieldset>
+        
+        <legend i18n:translate="legend_details">Details</legend>
+
+            <div class="field">
+
+            <label for="checkout_folder" i18n:translate="label_checkout_folder">
+                Checkout Folder
+            </label>
+            <div class="formHelp" i18n:translate="help_checkout_folder">
+                Select the folder to checkout to.
+            </div>
+         
+            <div tal:repeat="item view/containers">
+                
+                <input 
+                    type="radio" 
+                    name="checkout_location" 
+                    tal:attributes="id string:checkout_location_${item/name};
+                                    value item/name"
+                    />
+                    
+                <label
+                    tal:attributes="for string:checkout_location_${item/name}"
+                    tal:content="item/locator/title"
+                    />
+           
+           </div>
+
+            </div>
+            
+        </fieldset>
+
+        <div class="formControls">
+
+            <input
+                class="context"
+                type="submit"
+                name="form.button.Checkout"
+                value="Check out"
+                i18n:attributes="value"
+                />
+
+            <input
+                class="standalone"
+                type="submit"
+                name="form.button.Cancel"
+                value="Cancel"
+                i18n:attributes="value label_cancel"
+                />
+                
+        </div>
+
+    </form>
+
+</div>
+
+</html>

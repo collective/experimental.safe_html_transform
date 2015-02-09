@@ -1,0 +1,37 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain='zope'>
+
+  <utility
+      name="__builtin__.str"
+      provides=".interfaces.IStorage"
+      factory=".storages.StringStorable"
+      />
+
+  <utility
+      name="__builtin__.unicode"
+      provides=".interfaces.IStorage"
+      factory=".storages.UnicodeStorable"
+      />
+
+  <utility
+      name="plone.namedfile.file.FileChunk"
+      provides=".interfaces.IStorage"
+      factory=".storages.FileChunkStorable"
+      />
+
+  <utility
+      name="__builtin__.file"
+      provides=".interfaces.IStorage"
+      factory=".storages.FileDescriptorStorable"
+      />
+
+  <utility
+      name="zope.publisher.browser.FileUpload"
+      provides=".interfaces.IStorage"
+      factory=".storages.FileUploadStorable"
+      />
+
+  <adapter factory=".copy.BlobFileCopyHook" />
+
+</configure>

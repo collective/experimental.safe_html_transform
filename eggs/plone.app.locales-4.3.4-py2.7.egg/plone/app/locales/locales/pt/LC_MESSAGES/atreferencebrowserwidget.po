@@ -1,0 +1,77 @@
+# Translation of atreferencebrowserwidget.pot to Portuguese
+# J M Cerqueira Esteves <jmce@artenumerica.com>, 2005-2007
+# Ricardo Alves <rsa@eurotux.com.com>, 2008-2009
+msgid ""
+msgstr ""
+"Project-Id-Version: ATReferenceBrowserWidget\n"
+"POT-Creation-Date: 2013-05-22 08:09+0000\n"
+"PO-Revision-Date: 2009-04-11 22:04+0100\n"
+"Last-Translator: Ricardo Alves <rsa@eurotux.com>\n"
+"Language-Team: Português <plone-i18n@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language-Code: pt\n"
+"Language-Name: Português\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: atreferencebrowserwidget\n"
+"X-Is-Fallback-For: pt-ao pt-cv pt-gw pt-mz pt-st pt-pt\n"
+
+#. Default: "Add..."
+#: archetypes/referencebrowserwidget/skins/referencebrowser/referencebrowser.pt:190
+msgid "label_add"
+msgstr "Adicionar..."
+
+#. Default: "(Directory: ${directory})"
+#: archetypes/referencebrowserwidget/skins/referencebrowser/referencebrowser.pt:50
+msgid "label_directory"
+msgstr "( Directório: ${directory})"
+
+#. Default: "Go"
+#: archetypes/referencebrowserwidget/browser/popup.pt:127
+msgid "label_go"
+msgstr "Ir"
+
+#. Default: "No reference set. Click the add button to select."
+#: archetypes/referencebrowserwidget/skins/referencebrowser/referencebrowser.pt:137
+msgid "label_no_reference_set"
+msgstr "Nenhuma referência definida. Carregue no botão 'Adicionar' para seleccionar."
+
+#. Default: "Clear reference"
+#: archetypes/referencebrowserwidget/skins/referencebrowser/referencebrowser.pt:196
+#, fuzzy
+msgid "label_remove_reference"
+msgstr "Remover referência"
+
+#. Default: "History"
+#: archetypes/referencebrowserwidget/browser/popup.pt:122
+msgid "referencebrowser_history"
+msgstr "História"
+
+#. Default: "No items found."
+#: archetypes/referencebrowserwidget/browser/popup.pt:161
+msgid "referencebrowser_no_items_found"
+msgstr "Nenhum item encontrado."
+
+#. Default: "Search index"
+#: archetypes/referencebrowserwidget/browser/popup.pt:58
+msgid "referencebrowser_search_index_label"
+msgstr "Índice para pesquisa"
+
+#. Default: "Search Site"
+#: archetypes/referencebrowserwidget/browser/popup.pt:82
+msgid "referencebrowser_search_site"
+msgstr ""
+
+#. Default: "Added"
+#: archetypes/referencebrowserwidget/browser/popup.pt:35
+#, fuzzy
+msgid "referencebrowser_text_added_reference"
+msgstr "Referência adicionada a:"
+
+#. Default: "Removed"
+#: archetypes/referencebrowserwidget/browser/popup.pt:43
+msgid "referencebrowser_text_removed_reference"
+msgstr ""
+

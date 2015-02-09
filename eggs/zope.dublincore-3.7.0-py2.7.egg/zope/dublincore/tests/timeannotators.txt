@@ -1,0 +1,80 @@
+===============
+Time annotators
+===============
+
+Time annotators store the creation resp. last modification time of an object.
+
+Set up
+======
+
+>>> class Content(object):
+...     created = None
+...     modified = None
+
+The annotations are stored on the ``IZopeDublinCore`` adapter. This dummy adapter
+reads and writes from/to the context object. 
+
+>>> import zope.component
+>>> import zope.dublincore.interfaces
+>>> class DummyDublinCore(object):
+...     def __init__(self, context):
+...         self.__dict__['context'] = context
+...
+...     def __getattr__(self, name):
+...         return getattr(self.context, name)
+...
+...     def __setattr__(self, name, value):
+...         setattr(self.context, name, value)
+
+>>> zope.component.provideAdapter(
+...     DummyDublinCore, (Content,), zope.dublincore.interfaces.IZopeDublinCore)
+
+Created annotator
+=================
+
+The created annotator sets creation and modification time to current time.
+
+>>> content = Content()
+
+It is registered for the ``ObjectCreatedEvent``:
+
+>>> import zope.dublincore.timeannotators
+>>> import zope.lifecycleevent.interfaces
+>>> zope.component.provideHandler(
+...     zope.dublincore.timeannotators.CreatedAnnotator,
+...     (zope.lifecycleevent.interfaces.IObjectCreatedEvent,))
+
+>>> import zope.event
+>>> import zope.lifecycleevent
+>>> zope.event.notify(zope.lifecycleevent.ObjectCreatedEvent(content))
+
+Both ``created`` and ``modified`` get set:
+
+>>> content.created
+datetime.datetime(<DATETIME>, tzinfo=<UTC>)
+>>> content.modified
+datetime.datetime(<DATETIME>, tzinfo=<UTC>)
+
+Modified annotator
+==================
+
+The modified annotator only sets the modification time to current time.
+
+>>> content = Content()
+
+It is registered for the ``ObjectModifiedEvent``:
+
+>>> zope.component.provideHandler(
+...     zope.dublincore.timeannotators.ModifiedAnnotator,
+...     (zope.lifecycleevent.interfaces.IObjectModifiedEvent,))
+>>> zope.event.notify(zope.lifecycleevent.ObjectModifiedEvent(content))
+
+Only ``modified`` gets set:
+
+>>> print content.created
+None
+>>> content.modified
+datetime.datetime(<DATETIME>, tzinfo=<UTC>)
+
+
+

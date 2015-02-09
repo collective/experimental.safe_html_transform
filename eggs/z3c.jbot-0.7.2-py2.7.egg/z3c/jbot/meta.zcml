@@ -1,0 +1,21 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta">
+
+    <meta:directives namespace="http://namespaces.zope.org/browser">
+
+      <meta:directive
+         name="templateOverrides"
+         schema=".metadirectives.ITemplateOverridesDirective"
+         handler=".metaconfigure.templateOverridesDirective"
+         />
+
+      <meta:directive
+         name="jbot"
+         schema=".metadirectives.ITemplateOverridesDirective"
+         handler=".metaconfigure.templateOverridesDirective"
+         />
+
+    </meta:directives>
+
+</configure>

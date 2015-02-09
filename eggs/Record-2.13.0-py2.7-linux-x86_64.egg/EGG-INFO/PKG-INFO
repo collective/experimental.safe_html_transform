@@ -1,0 +1,22 @@
+Metadata-Version: 1.0
+Name: Record
+Version: 2.13.0
+Summary: Special Record objects used in Zope2.
+Home-page: http://pypi.python.org/pypi/Record
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        Record provides special objects used in some Zope2 internals like ZRDB.
+        
+        Changelog
+        =========
+        
+        2.13.0 (2010-03-30)
+        -------------------
+        
+        - Released as separate package.
+        
+Platform: UNKNOWN

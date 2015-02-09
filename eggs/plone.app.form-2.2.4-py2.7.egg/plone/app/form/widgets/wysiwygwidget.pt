@@ -1,0 +1,29 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      tal:omit-tag="">
+<div lang="en"
+     xml:lang="en"
+     i18n:domain="plone">
+
+     <tal:editor define="context            nocall:options/form_context;
+                         here               nocall:context;
+                         portal_url         nocall:context/portal_url;
+                         inputname          view/name;
+                         inputvalue         options/value;
+                         here_url           context/absolute_url;
+                         member             context/portal_membership/getAuthenticatedMember;
+                         isAnon             context/@@plone_portal_state/anonymous;
+                         member_editor      python: not isAnon and member.getProperty('wysiwyg_editor').lower() or '';
+                         default_editor     python: context.portal_properties.site_properties.getProperty('default_editor', '').lower();
+                         editor             python: member_editor=='' and default_editor or member_editor;
+                         support_path       string:nocall:here/${editor}_wysiwyg_support|here/${editor}/wysiwyg_support|here/portal_skins/plone_wysiwyg/wysiwyg_support;
+                         support            python: path(support_path);">
+        <div metal:use-macro="support/macros/wysiwygEditorBox">
+            The WYSIWYG code
+        </div>
+    </tal:editor>
+
+</div>
+</html>

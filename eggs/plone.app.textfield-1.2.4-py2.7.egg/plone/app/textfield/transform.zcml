@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="plone.app.textfield">
+
+    <adapter
+        factory=".transform.PortalTransformsTransformer"
+        for="Products.CMFCore.interfaces.IContentish"
+        />
+
+    <adapter
+        factory=".transform.PortalTransformsTransformer"
+        for="Products.CMFCore.interfaces.ISiteRoot"
+        />
+
+</configure>

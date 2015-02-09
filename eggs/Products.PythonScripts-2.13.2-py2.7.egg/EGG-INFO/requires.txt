@@ -1,0 +1,8 @@
+setuptools
+AccessControl
+Acquisition
+DateTime
+DocumentTemplate
+RestrictedPython
+zExceptions
+Zope2 >= 2.13.0a1

@@ -1,0 +1,360 @@
+# Translation of cmfeditions.pot to Afrikaans
+msgid ""
+msgstr ""
+"Project-Id-Version: CMFEditions\n"
+"POT-Creation-Date: 2013-05-22 08:09+0000\n"
+"PO-Revision-Date: 2010-04-14 14:54+0200\n"
+"Last-Translator: Jan-Carel Brand <brand at syslab.com>\n"
+"Language-Team: Afrikaans <plone-i18n@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"Language-Code: af\n"
+"Language-Name: Afrikaans\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: cmfeditions\n"
+
+#: CMFEditions/skins/CMFEditions/revertversion.py:30
+msgid "${title} has been reverted to revision ${version}."
+msgstr "${title} is teruggestel na weergawe ${version}."
+
+#: CMFEditions/subscriber.py:52
+msgid "Edited (WebDAV)"
+msgstr "Gewysig (WebDAV)"
+
+#: CMFEditions/browser/diff.pt:62
+msgid "First revision"
+msgstr "Eerste weergawe"
+
+#: CMFEditions/skins/CMFEditions/update_version_before_edit.cpy:22
+#: CMFEditions/subscriber.py:59
+msgid "Initial revision"
+msgstr "Aanvanklike weergawe"
+
+#: CMFEditions/subscriber.py:49
+msgid "Initial revision (WebDAV)"
+msgstr "Aanvanklike weergawe (WebDAV)"
+
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:223
+msgid "Preview is not available."
+msgstr "Voorskou nie beskikbaar nie"
+
+#: CMFEditions/skins/CMFEditions/revertversion.py:36
+msgid "Reverted to revision ${version}"
+msgstr "Teruggestel na weergawe ${version}"
+
+#: CMFEditions/browser/diff.pt:72
+msgid "Second revision"
+msgstr "Tweede weergawe"
+
+#. Default: "Show differences"
+#: CMFEditions/browser/diff.pt:96
+msgid "Show differences"
+msgstr "Vertoon wysigings"
+
+#: CMFEditions/skins/CMFEditions/revertversion.py:41
+msgid "The most current revision of the file could not be saved before reverting because the file is too large."
+msgstr "Die mees op datum weergawe van die lêer kon nie voor die terugstelling gestoor word nie, aangesien die lêer te groot is."
+
+#: CMFEditions/browser/diff.pt:90
+msgid "There are no changes between the selected revisions."
+msgstr "Daar is nie enige veranderings tussen die gekose weergawes nie."
+
+#. Default: "This field has no inline difference view."
+#: CMFEditions/browser/diff.pt:117
+msgid "This field has no inline difference view."
+msgstr "Hierdie veld het geen inlyn-verskille-aansig nie."
+
+#: CMFEditions/skins/CMFEditions/update_version_on_edit.cpy:28
+msgid "Versioning for this file has been disabled because it is too large"
+msgstr "Hersiening is vir hierdie lêer afgeskakel, synde dit te groot is"
+
+#. Default: "Working Copy"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:58
+msgid "Working Copy"
+msgstr "Werkskopie"
+
+#. Default: "as code"
+#: CMFEditions/browser/diff.pt:104
+msgid "as code"
+msgstr "as bronkode"
+
+#. Default: "Save as new revision"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:186
+msgid "button_save_as_new_version"
+msgstr "Stoor as 'n nuwe hersiening"
+
+#. Default: "You can have different settings for each content type. Content can be automatically versioned, and you can also opt to create a version when you revert a revision."
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:31
+msgid "description_version_settings"
+msgstr "U kan verskillende instellings vir elke inhoudstipe hê. Inhoud kan outomaties weergawes ontvang, en u kan ook 'n weergawe skep wanneer u 'n hersiening terugstel."
+
+#. Default: "Select to make a version of the current content."
+#: CMFEditions/browser/edit.pt:49
+msgid "help_save_new_version"
+msgstr "Selekteer om 'n weergawe van die huidige inhoud te skep."
+
+#. Default: "Enter a comment that describes the changes you made."
+#: CMFEditions/browser/edit.pt:63
+msgid "help_version_comment"
+msgstr "Voeg 'n nota by om u veranderinge te beskryf"
+
+#. Default: "At any moment you can save the content you just edited as a new revision. Enter below a comment to identify the version and hit the \"Save as new revision\" button."
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:176
+msgid "help_versioncomment"
+msgstr "U kan op enige oomblik die gewysigde inhoud as 'n nuwe hersiening stoor. Verskaf hieronder 'n nota waarmee die weergawe herken kan word en kliek dan op die \"Stoor as 'n nuwe hersiening\" knoppie."
+
+#. Default: "inline"
+#: CMFEditions/browser/diff.pt:100
+msgid "inline"
+msgstr "inlyn"
+
+#. Default: "Click here to get the file"
+#: CMFEditions/skins/cmfeditions_views/version_file_view.pt:21
+msgid "label_click_to_get_file"
+msgstr "Kliek hier om die lêer te bekom"
+
+#. Default: "Compare to current revision"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:131
+msgid "label_compare_current"
+msgstr "Vergelyk met huidige weergawe"
+
+#. Default: "Compare to previous revision"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:139
+msgid "label_compare_previous"
+msgstr "Vergelyk met vorige weergawe"
+
+#. Default: "Compare to previous revision"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:88
+msgid "label_compare_to_previous_revision"
+msgstr "Vergelyk met vorige weergawe"
+
+#. Default: "Compare to revision ${version_id}"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:85
+msgid "label_compare_to_revision"
+msgstr "Vergelyk met hiersiening ${version_id}"
+
+#. Default: "Current"
+#: CMFEditions/browser/diff.pt:64
+msgid "label_current"
+msgstr "Huidig"
+
+#. Default: "(+) Added"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:8
+msgid "label_diff_added"
+msgstr "(+) Bygevoeg"
+
+#. Default: "Changed"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:10
+msgid "label_diff_changed"
+msgstr "Veranderd"
+
+#. Default: "(-) Deleted"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:9
+msgid "label_diff_deleted"
+msgstr "(-) Verwyderd"
+
+#. Default: "Legend"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:7
+msgid "label_diff_legend"
+msgstr "Legende"
+
+#. Default: "Tag Added"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:11
+msgid "label_diff_tag_added"
+msgstr "Etiket bygevoeg"
+
+#. Default: "Tag Deleted"
+#: CMFEditions/skins/CMFEditions/diff_legend.pt:12
+msgid "label_diff_tag_deleted"
+msgstr "Etiket verwyder"
+
+#. Default: "Versioning Enabled?"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:67
+msgid "label_enable_versioning"
+msgstr "Is hersiening geaktiveer?"
+
+#. Default: "File type"
+#: CMFEditions/skins/cmfeditions_views/version_file_view.pt:45
+msgid "label_file_type"
+msgstr "Lêertipe"
+
+#. Default: "${version} (${date})"
+#: CMFEditions/browser/diff.pt:68
+msgid "label_history_version"
+msgstr "${version} (${date})"
+
+#. Default: "Item Type"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:66
+msgid "label_item_type"
+msgstr "Tipe Item"
+
+#. Default: "modifications from revision ${version_id}"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:69
+msgid "label_modifications_from_revision"
+msgstr "Wysigings van weergawe ${version_id}"
+
+#. Default: "New version"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:173
+msgid "label_newversion"
+msgstr "Nuwe weergawe"
+
+#. Default: "No changes"
+#: CMFEditions/skins/CMFEditions/version_diff.pt:36
+msgid "label_no_changes"
+msgstr "(Geen veranderinge)"
+
+#. Default: "Preview of Revision ${version_id}"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:201
+msgid "label_preview_version"
+msgstr "Voorskou van weergawe ${version_id}"
+
+#. Default: "(jump down)"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:112
+msgid "label_preview_version_below"
+msgstr "(beweeg af)"
+
+#. Default: "(preview)"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:107
+msgid "label_preview_version_link"
+msgstr "(voorskou)"
+
+#. Default: "(previously reverted)"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:71
+msgid "label_previously_reverted"
+msgstr "(voorheen teruggestel)"
+
+#. Default: "Revert to this revision"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:153
+msgid "label_revert"
+msgstr "Stel terug na hierdie hersiening"
+
+#. Default: "Save as new version"
+#: CMFEditions/browser/edit.pt:46
+msgid "label_save_new_version"
+msgstr "Stoor as 'n nuwe hersiening"
+
+#. Default: "Show code differences"
+#: CMFEditions/skins/CMFEditions/version_diff.pt:48
+msgid "label_show_code_differences"
+msgstr "Vertoon bronkode verskille"
+
+#. Default: "show revisions"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:32
+msgid "label_show_version"
+msgstr "Vertoon hersienings"
+
+#. Default: "Show visual differences"
+#: CMFEditions/skins/CMFEditions/version_diff.pt:59
+msgid "label_show_visual_differences"
+msgstr "Vertoon visuele verskille"
+
+#. Default: "Versioning Settings"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:29
+msgid "label_title_vers_config"
+msgstr "Hersieningsinstellings"
+
+#. Default: "Update"
+#: CMFEditions/browser/diff.pt:84
+msgid "label_update"
+msgstr "Opdateer"
+
+#. Default: "Change note"
+#: CMFEditions/browser/edit.pt:61
+msgid "label_version_comment"
+msgstr "Veranderingsnota"
+
+#. Default: "Versionable content types"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:43
+msgid "label_versionable_content_types"
+msgstr "Hersienbare inhoudstipes"
+
+#. Default: "Show all types"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:48
+msgid "label_versioning_config_show_all"
+msgstr "Vertoon alle tipes"
+
+#. Default: "Show only searchable types"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:52
+msgid "label_versioning_config_show_friendly"
+msgstr "Vertoon slegs deursoekbare tipes"
+
+#. Default: "Policies"
+#: CMFEditions/skins/CMFEditions/versioning_config_form.pt:68
+msgid "label_versioning_policies"
+msgstr "Beleid"
+
+#. Default: "Recent Versions"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:10
+msgid "label_versions"
+msgstr "Onlangse weergawes"
+
+#. Default: "Revisions"
+#: CMFEditions/browser/diff.pt:61
+msgid "legend_revisions"
+msgstr "Weergawes"
+
+#. Default: "Actions"
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:46
+msgid "listingheader_actions"
+msgstr "Aksies"
+
+#. Default: "Comment"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:21
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:44
+msgid "listingheader_comment"
+msgstr "Kommentaar"
+
+#. Default: "Date and Time"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:20
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:42
+msgid "listingheader_date_and_time"
+msgstr "Datum en tyd"
+
+#. Default: "Revision"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:18
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:38
+msgid "listingheader_key"
+msgstr "Hersiening"
+
+#. Default: "Performed by"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:19
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:40
+msgid "listingheader_performed_by"
+msgstr "Uitgevoer deur"
+
+#. Default: "(No file has been uploaded yet)"
+#: CMFEditions/skins/cmfeditions_views/version_file_view.pt:29
+msgid "no_file_uploaded"
+msgstr "(Geen lêer is al opgelaai nie)"
+
+#. Default: "This object has no revision information."
+#: CMFEditions/browser/diff.pt:51
+msgid "no_history"
+msgstr "Hierdie objek het geen weergawe-inligting nie."
+
+#. Default: "Versions History"
+#: CMFEditions/skins/CMFEditions/versions_history.pt:13
+msgid "summary_versions_history"
+msgstr "Weergawe-geskiedenis"
+
+#. Default: "Changes from revision ${id2} to revision ${id1}"
+#: CMFEditions/skins/CMFEditions/version_diff.pt:32
+msgid "title_changes_between_revs"
+msgstr "Veranderinge tussen weergawes ${id2} en ${id1}"
+
+#. Default: "Changes since revision ${id2}"
+#: CMFEditions/skins/CMFEditions/version_diff.pt:30
+msgid "title_changes_since_rev"
+msgstr "Veranderinge sedert hersiening ${id2}"
+
+#: CMFEditions/browser/diff.py:37
+msgid "version ${version}"
+msgstr "weergawe ${version}"
+
+#. Default: "Revisions of \"${title}\""
+#: CMFEditions/skins/CMFEditions/versions_history_form.pt:24
+msgid "versions_of_title"
+msgstr "Hersienings van \"${title}\""
+

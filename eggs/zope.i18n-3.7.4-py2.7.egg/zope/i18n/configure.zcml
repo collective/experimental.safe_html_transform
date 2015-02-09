@@ -1,0 +1,10 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <utility
+      provides="zope.i18n.interfaces.INegotiator"
+      component="zope.i18n.negotiator.negotiator"
+      />
+
+  <include package=".locales" />
+
+</configure>

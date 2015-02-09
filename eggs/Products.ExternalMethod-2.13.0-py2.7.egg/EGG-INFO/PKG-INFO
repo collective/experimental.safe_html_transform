@@ -1,0 +1,23 @@
+Metadata-Version: 1.0
+Name: Products.ExternalMethod
+Version: 2.13.0
+Summary: This package provides support for external Python methods within a Zope 2 environment.
+Home-page: http://pypi.python.org/pypi/Products.ExternalMethod
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Overview
+        ========
+        
+        The External Method package provides support for external Python methods,
+        exposing them as callable objects within a Zope 2 environment.
+        
+        Changelog
+        =========
+        
+        2.13.0 (2010-07-10)
+        -------------------
+        
+        - Released as separate package.
+        
+Platform: UNKNOWN

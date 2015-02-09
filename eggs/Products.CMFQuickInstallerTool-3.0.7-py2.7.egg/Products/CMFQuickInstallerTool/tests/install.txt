@@ -1,0 +1,147 @@
+Tests for QuickInstaller installation
+=====================================
+
+First we set three convenience variables for later use:
+
+  >>> from zope.component import getSiteManager
+  >>> from Products.CMFQuickInstallerTool.interfaces import IQuickInstallerTool
+  >>> from Products.CMFCore.utils import getToolByName
+
+  >>> portal = layer['plone']
+  >>> portal
+  <PloneSite at /plone>
+
+  >>> qi = getattr(portal, 'portal_quickinstaller', None)
+  >>> qi
+  <QuickInstallerTool at /plone/portal_quickinstaller>
+
+And register the QI tool as a utility:
+
+  >>> sm = getSiteManager()
+  >>> sm.registerUtility(qi, IQuickInstallerTool)
+
+And create a fake add-on for us to install:
+
+  >>> import sys
+  >>> from Products.CMFQuickInstallerTool import interfaces
+  >>> sys.modules['Products.QITest'] = interfaces
+  >>> from Products.GenericSetup.registry import _profile_registry
+  >>> _profile_registry.registerProfile('default', 'Test',
+  ...     '', interfaces.__path__[0], 'QITest', 2)
+
+
+Install a product
+-----------------
+
+Before installing QITest as an example, let's make sure
+we have no InstalledProduct instance in the QI tool:
+
+  >>> 'QITest' in qi.objectIds()
+  False
+
+After checking that the product is not installed yet, we do install it:
+
+  >>> qi.installProducts(products=['QITest'])
+  '...Installed Products...QITest:ok:...'
+
+Now we have an InstalledProduct instance in the QI tool:
+
+  >>> 'QITest' in qi.objectIds()
+  True
+
+  >>> product = qi['QITest']
+  >>> product.isInstalled()
+  True
+
+
+Uninstall the product again
+---------------------------
+
+  >>> qi.uninstallProducts(products=['QITest'])
+
+And we no longer have an InstalledProduct instance in the QI tool:
+
+  >>> 'QITest' in qi.objectIds()
+  False
+  
+  >>> qi.isProductInstalled('QITest')
+  False
+
+  >>> setup = getToolByName(portal, 'portal_setup')
+  >>> logs = [i for i in setup.objectIds() if 'QITest' in i]
+  >>> for i in logs:
+  ...     setup._delObject(i)
+
+
+Install a product which has a GenericSetup dependency
+-----------------------------------------------------
+
+There was a bug where if you installed a product which depends on another
+product, and then uninstalled it, the dependency's entries would be
+removed. Let's make sure that doesn't happen!
+
+First we need to fake a product that depends on QITest:
+  >>> import sys
+  >>> from Products.CMFQuickInstallerTool import tests
+  >>> sys.modules['Products.QITest2'] = tests
+  >>> from Products.GenericSetup.registry import _profile_registry
+  >>> _profile_registry.registerProfile('default', 'Test',
+  ...     '', tests.__path__[0], 'QITest2', 2)
+
+Now we install our fake product:
+
+  >>> qi.installProducts(products=['QITest2'], omitSnapshots=True)
+  '...Installed Products...QITest2:ok:...'
+
+And confirm that QITest stuff was installed:
+
+  >>> qi['QITest'].isInstalled()
+  True
+
+And remove it:
+
+  >>> qi.uninstallProducts(products=['QITest2'])
+
+The QITest stuff should still be present:
+
+  >>> qi['QITest'].isInstalled()
+  True
+
+
+Install and Reinstall without deleting custom content
+-----------------------------------------------------
+
+Custom products can add content items (especially folders) to the root 
+of a plone site. We want to be sure NOT to delete these "non-tool"
+items. To emulate this we can install any product, add some content, 
+and then fudge the snapshot to make it seem like it was added by the 
+install of the product.
+  
+  >>> before = qi.snapshotPortal(portal)
+  
+Generic Setup does not like so many installs and needs to fix its timestamp
+for logging. For now lets artificially time it
+
+  >>> import time;time.sleep(1)
+  
+  >>> qi.installProducts(products=['QITest'])
+  '...Installed Products...QITest:ok:...'
+  
+Add a folder to the root - this should remain after uninstall
+  
+  >>> portal.manage_addFolder("test", title="Test")
+  >>> 'test' in portal.objectIds()
+  True
+  
+Fudge the snapshot
+  
+  >>> after = qi.snapshotPortal(portal)
+  >>> settings = qi.deriveSettingsFromSnapshots(before, after)
+  >>> p = qi['QITest']
+  >>> p.update(settings=settings)
+  
+Uninstall the product and confirm the content is still there
+  
+  >>> qi.uninstallProducts(products=['QITest'])
+  >>> 'test' in portal.objectIds()
+  True

@@ -1,0 +1,62 @@
+Tests for QuickInstaller Actions installation
+=============================================
+
+First we set three convenience variables for later use:
+
+  >>> portal = layer['portal']
+  >>> portal
+  <PloneSite at /plone>
+
+  >>> qi = getattr(portal, 'portal_quickinstaller', None)
+  >>> qi
+  <QuickInstallerTool at /plone/portal_quickinstaller>
+
+  >>> actions_tool = portal.portal_actions
+  >>> actions_tool
+  <ActionsTool at /plone/portal_actions>
+
+And register the QI tool as a utility:
+
+  >>> from zope.component import getSiteManager
+  >>> from Products.CMFQuickInstallerTool.interfaces import IQuickInstallerTool
+  >>> sm = getSiteManager()
+  >>> sm.registerUtility(qi, IQuickInstallerTool)
+
+Install a product through an extension profile
+----------------------------------------------
+
+  >>> result = qi.installProduct('CMFQuickInstallerTool',
+  ...     profile='Products.CMFQuickInstallerTool:test')
+
+Make sure the actions were added:
+
+  >>> 'test1' in [a.id for a in actions_tool.listActions()]
+  True
+
+  >>> 'test2' in [a.id for a in actions_tool.listActions()]
+  True
+
+Uninstall the product
+---------------------
+
+  >>> qi.uninstallProducts(products=['CMFQuickInstallerTool'])
+
+Verify that all added entries were removed again:
+
+  >>> 'test1' in [a.id for a in actions_tool.listActions()]
+  False
+
+  >>> 'test2' in [a.id for a in actions_tool.listActions()]
+  False
+
+  >>> 'test_category' in actions_tool.objectIds()
+  False
+
+TearDown
+--------
+
+Make sure the QI tool is still there:
+
+  >>> qi = getattr(portal, 'portal_quickinstaller', None)
+  >>> qi
+  <QuickInstallerTool at /plone/portal_quickinstaller>

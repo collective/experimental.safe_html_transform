@@ -1,0 +1,3 @@
+[console_scripts]
+zope-testrunner = zope.testing.testrunner:run
+

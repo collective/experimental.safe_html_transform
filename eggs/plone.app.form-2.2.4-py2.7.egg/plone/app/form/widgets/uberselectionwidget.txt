@@ -1,0 +1,149 @@
+UberSelectionWidget
+===================
+
+First we need to prepare some things. For this we need some imports.
+
+  >>> from zope.browser.interfaces import ITerms
+  >>> from zope.component import provideAdapter, adapts
+  >>> from zope.interface import Interface, implements
+  >>> from zope.schema import Choice, List
+  >>> from zope.schema.interfaces import IIterableSource
+  >>> from plone.app.vocabularies.catalog import SearchableTextSource
+  >>> from zope.publisher.interfaces.browser import IBrowserRequest
+  >>> from zope.schema.vocabulary import SimpleTerm
+
+The source itself.
+
+  >>> class SourceList(list):
+  ...     implements(IIterableSource)
+
+An adapter to ITerms.
+
+  >>> class ListTerms(object):
+  ...
+  ...     implements(ITerms)
+  ...
+  ...     def __init__(self, source, request):
+  ...         pass # We don't actually need the source or the request :)
+  ...
+  ...     def getTerm(self, value):
+  ...         title = unicode(value)
+  ...         try:
+  ...             token = title.encode('base64').strip()
+  ...         except binascii.Error:
+  ...             raise LookupError(token)
+  ...         return SimpleTerm(value, token=token, title=title)
+  ...
+  ...     def getValue(self, token):
+  ...         return token.decode('base64')
+
+  >>> provideAdapter(
+  ...     ListTerms,
+  ...     (SourceList, IBrowserRequest))
+
+An adapter to ISourceQueryView to make the source searchable.
+
+  >>> from zope.formlib.interfaces import ISourceQueryView
+
+  >>> class ListQueryView:
+  ...
+  ...     implements(ISourceQueryView)
+  ...     adapts(
+  ...         SourceList,
+  ...         IBrowserRequest,
+  ...         )
+  ...
+  ...     def __init__(self, source, request):
+  ...         self.source = source
+  ...         self.request = request
+  ...
+  ...     def render(self, name):
+  ...         return (
+  ...             '<input name="%s.string">\n'
+  ...             '<input type="submit" name="%s" value="Search">'
+  ...             % (name, name)
+  ...             )
+  ...
+  ...     def results(self, name):
+  ...         if name+".search" in self.request:
+  ...             search_string = self.request.get(name+'.query')
+  ...             if search_string is not None:
+  ...                 return [value
+  ...                         for value in self.source
+  ...                         if search_string in value
+  ...                         ]
+  ...         return None
+
+  >>> provideAdapter(ListQueryView)
+
+Then we can start to test the widget.
+
+  >>> from zope.publisher.browser import TestRequest
+  >>> from plone.app.form.widgets.uberselectionwidget import UberSelectionWidget, UberMultiSelectionWidget
+  >>> from xml.dom.minidom import parseString
+
+We need a request.
+
+  >>> request = TestRequest()
+
+A choice field with the source.
+
+  >>> selection = Choice(__name__='selection',
+  ...                title=u'Single select',
+  ...                source=SourceList(['spot', 'bowser', 'prince', 'duchess', 'lassie']))
+
+And the widget itself.
+
+  >>> widget = UberSelectionWidget(selection, request)
+
+Now we can render the widget and inspect it.
+
+  >>> dom = parseString(widget())
+  >>> inputs = dom.getElementsByTagName('input')
+  >>> inputs[0].getAttributeNode('name').value
+  u'field.selection.query'
+  >>> inputs[1].getAttributeNode('name').value
+  u'field.selection.search'
+  >>> dom.unlink()
+
+Now we want to make a query and see whether we get selectable results.
+
+  >>> request.form['field.selection.query'] = u'o'
+  >>> request.form['field.selection.search'] = u'Search'
+  >>> dom = parseString(widget())
+  >>> inputs = [x for x in dom.getElementsByTagName('input')
+  ...           if u'type="radio"' in x.toxml()]
+  >>> len(inputs)
+  2
+  >>> u'c3BvdA==' in inputs[0].toxml()
+  True
+  >>> u'spot' in inputs[0].nextSibling.nextSibling.toxml()
+  True
+  >>> u'Ym93c2Vy' in inputs[1].toxml()
+  True
+  >>> u'bowser' in inputs[1].nextSibling.nextSibling.toxml()
+  True
+  >>> dom.unlink()
+
+Test multiselection
+
+  >>> from zope.schema import List
+  >>> selection = List(__name__='selection',
+  ...                title=u'Multi select',
+  ...                value_type=Choice(
+  ...                       source = SourceList(['spot', 'bowser', 'prince', 'duchess', 'lassie']))
+  ...                       )
+
+And the widget itself.
+
+  >>> widget = UberMultiSelectionWidget(selection, request)
+  
+Widget value should always be list
+
+  >>> widget._value()
+  []
+  >>> widget._getRenderValue()
+  []
+
+Fine, so far everything works!
+

@@ -1,0 +1,99 @@
+Metadata-Version: 1.1
+Name: zope.error
+Version: 3.7.4
+Summary: An error reporting utility for Zope3
+Home-page: http://pypi.python.org/pypi/zope.error
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: This package provides an error reporting utility which is able to store errors.
+        
+        
+        =======
+        CHANGES
+        =======
+        
+        3.7.4 (2012-02-01)
+        ------------------
+        
+        - Added explicit tests for escaping introduced in 3.7.3.
+        
+        - Handing names of classes those string representation cannot
+          be determined as untrusted input thus escaping them in error reports.
+        
+        - Fixed tests on Python 2.4 and 2.5.
+        
+        3.7.3 (2012-01-17)
+        ------------------
+        
+        - Escape untrusted input before constructing HTML for error reporting.
+        
+        3.7.2 (2010-10-30)
+        ------------------
+        
+        - Set ``copy_to_zlog`` by default to 1/True.
+          Having it turned off is a small problem, because fatal (startup) errors
+          will not get logged anywhere.
+        
+        
+        3.7.1 (2010-09-25)
+        ------------------
+        
+        - Added test extra to declare test dependency on ``zope.testing``.
+        
+        
+        3.7.0 (2009-09-29)
+        ------------------
+        
+        - Cleaned up dependencies. Droped all testing dependencies as we only need
+          zope.testing now.
+        
+        - Fixed ImportError when zope.testing is not available for some reason.
+        
+        - Removed zcml slug and old zpkg-related files.
+        
+        - Removed word "version" from changelog entries.
+        
+        - Changed package's mailing list address to zope-dev at zope.org as
+          zope3-dev at zope.org is now retired. Also changed `cheeseshop` to
+          `pypi` in the package's homepage url.
+        
+        - Added dependency on ZODB3 as we use Persistent.
+        
+        - Used a mock request for testing. Dropped the dependency on zope.publisher
+          which was really only a testing dependency.
+        
+        - Reduced the dependency on zope.container to one on zope.location by no
+          longer using the Contained mix-in class.
+        
+        3.6.0 (2009-01-31)
+        ------------------
+        
+        - Use zope.container instead of zope.app.container
+        
+        - Move error log bootstrapping logic (which was untested) to
+          ``zope.app.appsetup``, to which we added a test.
+        
+        3.5.1 (2007-09-27)
+        ------------------
+        
+        - rebumped to replace faulty egg
+        
+        3.5.0
+        -----
+        
+        - Initial documented release
+        
+        - Moved core components from ``zope.app.error`` to this package.
+        
+Keywords: zope3 error
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3

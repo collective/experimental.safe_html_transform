@@ -1,0 +1,38 @@
+msgid "Found ${count} ${type}."
+msgstr ""
+
+msgid "Next ${count} members"
+msgstr ""
+
+msgid "Next member"
+msgstr ""
+
+msgid "Previous ${count} members"
+msgstr ""
+
+msgid "Previous member"
+msgstr ""
+
+msgid "Criteria"
+msgstr ""
+
+msgid "Download"
+msgstr ""
+
+msgid "Local Roles"
+msgstr ""
+
+msgid "Metadata"
+msgstr ""
+
+msgid "Subtopics"
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "Retract"
+msgstr ""
+
+msgid "Submit"
+msgstr ""

@@ -1,0 +1,163 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <utility
+      provides=".interfaces.IIDNormalizer"
+      component=".idnormalizer"
+      permission="zope.Public" />
+
+  <utility
+      provides=".interfaces.IFileNameNormalizer"
+      component=".filenamenormalizer"
+      permission="zope.Public" />
+
+  <utility
+      provides=".interfaces.IURLNormalizer"
+      component=".urlnormalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="de"
+      provides=".interfaces.IFileNameNormalizer"
+      component=".de.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="de"
+      provides=".interfaces.IURLNormalizer"
+      component=".de.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="el"
+      provides=".interfaces.IFileNameNormalizer"
+      component=".el.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="el"
+      provides=".interfaces.IURLNormalizer"
+      component=".el.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="fr"
+      provides=".interfaces.IFileNameNormalizer"
+      component=".fr.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="fr"
+      provides=".interfaces.IURLNormalizer"
+      component=".fr.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="ja"
+      provides=".interfaces.IFileNameNormalizer"
+      component=".ja.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="ja"
+      provides=".interfaces.IURLNormalizer"
+      component=".ja.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="pl"
+      provides=".interfaces.IFileNameNormalizer"
+      component=".pl.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="pl"
+      provides=".interfaces.IURLNormalizer"
+      component=".pl.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="pt"
+      provides=".interfaces.IFileNameNormalizer"
+      component=".pt.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="pt"
+      provides=".interfaces.IURLNormalizer"
+      component=".pt.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="ru"
+      provides=".interfaces.IFileNameNormalizer"
+      component=".ru.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="ru"
+      provides=".interfaces.IURLNormalizer"
+      component=".ru.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="tr"
+      provides=".interfaces.IFileNameNormalizer"
+      component=".tr.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="tr"
+      provides=".interfaces.IURLNormalizer"
+      component=".tr.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="bg"
+      provides=".interfaces.IFileNameNormalizer"
+      component=".bg.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="bg"
+      provides=".interfaces.IURLNormalizer"
+      component=".bg.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="uk"
+      provides=".interfaces.IFileNameNormalizer"
+      component=".uk.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="uk"
+      provides=".interfaces.IURLNormalizer"
+      component=".uk.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="es"
+      provides=".interfaces.IFileNameNormalizer"
+      component=".es.normalizer"
+      permission="zope.Public" />
+
+  <utility
+      name="es"
+      provides=".interfaces.IURLNormalizer"
+      component=".es.normalizer"
+      permission="zope.Public" />
+
+  <adapter
+      for="zope.publisher.interfaces.http.IHTTPRequest"
+      provides=".interfaces.IUserPreferredFileNameNormalizer"
+      factory=".adapters.UserPreferredFileNameNormalizer"
+      />
+
+  <adapter
+      for="zope.publisher.interfaces.http.IHTTPRequest"
+      provides=".interfaces.IUserPreferredURLNormalizer"
+      factory=".adapters.UserPreferredURLNormalizer"
+      />
+
+</configure>

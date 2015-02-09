@@ -1,0 +1,101 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      tal:omit-tag="">
+<fieldset lang="en"
+          xml:lang="en"
+          i18n:domain="plone"
+          tal:define="readonly options/field/readonly|python:True;
+                      addonly options/field/addonly|python:False;
+                      removeonly options/field/removeonly|python:False;">
+
+  <legend>
+    <label for="fieldname"
+           tal:content="view/label"
+           i18n:translate="">choose</label>
+  </legend>
+
+  <p class="discreet" tal:content="view/hint"></p>
+
+  <fieldset class="currentSelection"
+            tal:attributes="style python:len(options['value']) == 0 and 'display: none' or None">
+    <legend i18n:translate="label_currentselection">Current selection</legend>
+    <div tal:repeat="term options/value">
+      <input type="checkbox"
+             checked="checked"
+             tal:attributes="name string:${options/name}:list;
+                             value term/token;
+                             type python:(readonly or addonly) and 'hidden' or 'checkbox';" />
+      <span tal:content="term/title" 
+            tal:attributes="title term/description | nothing"/>
+      <span class="discreet" 
+            tal:condition="term/description | nothing"
+            tal:content="term/description" />
+    </div>
+  </fieldset>
+
+  <div style="margin-bottom: 0.5em"
+       tal:condition="python: addonly or not (readonly or removeonly)">
+      <input type="text"
+             value=""
+             tal:define="name string:${options/name}.query" 
+             tal:attributes="name name;
+                             id options/name;
+                             value request/?name | default" />
+
+      <input type="submit"
+             class="searchButton"
+             value="Search"
+             i18n:attributes="value label_search;"
+             tal:attributes="name string:${options/name}.search" />
+  </div>
+
+  <fieldset class="searchResults"
+            tal:condition="options/results | nothing">
+    <legend i18n:translate="label_searchresults">Search results</legend>
+    <div tal:repeat="term options/results">
+      <input type="checkbox"
+             tal:attributes="name string:${options/name}:list;
+                             value term/token" />
+      <input type="submit"
+             value="Parent"
+             class="context"
+             tal:define="parent_token term/parent_token | nothing"
+             tal:condition="python: parent_token is not None"
+             i18n:attributes="value label_parent;"
+             tal:attributes="name string:${options/name}.browse.${parent_token}" />
+      <span tal:attributes="title term/description | nothing"
+                tal:content="term/title">title</span>
+
+      <span class="discreet" 
+            tal:condition="term/description | nothing"
+            tal:content="term/description" />
+
+      <input type="submit"
+             value="Browse"
+             class="context"
+             tal:condition="term/browse_token|nothing"
+             i18n:attributes="value label_browse;"
+             tal:attributes="name string:${options/name}.browse.${term/browse_token}" />
+    </div>
+    <p tal:condition="options/results_truncated"
+         i18n:translate="">
+      There are more search results, narrow your search.
+    </p>
+  </fieldset>
+
+  <div class="formControls"
+       tal:condition="not:readonly">
+    <input type="hidden" value="y"
+           tal:attributes="name string:${options/name}.displayed" />
+
+    <input type="submit"
+           class="standalone"
+           value="Update"
+           i18n:attributes="value label_update;"
+           tal:attributes="name string:${options/name}.update" />
+  </div>
+
+</fieldset>
+</html>

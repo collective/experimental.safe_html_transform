@@ -1,0 +1,38 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:monkey="http://namespaces.plone.org/monkey"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    i18n_domain="plone.z3cform">
+
+  <include file="templates.zcml" />
+
+  <include package="z3c.form" file="meta.zcml" />
+  <include package="z3c.form" />
+
+  <i18n:registerTranslations directory="locales"/>
+
+  <!-- Override the FileUploadDataConverter from z3c.form.
+       We register it for the class so that it is more specific than the one
+       registered in z3c.form. This avoids the need for a messy
+       overrides.zcml.
+     -->
+  <adapter
+      for="zope.schema.Bytes z3c.form.interfaces.IFileWidget"
+      factory=".converter.FileUploadDataConverter"
+      />
+
+  <!-- Backported from z3c.from trunk -->
+  <include package=".textlines" file="textlines.zcml"
+    zcml:condition="not-installed z3c.form.browser.textlines"/>
+
+  <!-- These are not backported, but represent useful policy -->
+  <adapter factory=".textlines.textlines.TextLinesSetConverter" />
+  <adapter factory=".textlines.textlines.TextLinesFrozenSetConverter" />
+
+  <!-- ++widget++ namespace -->
+  <adapter factory=".traversal.FormWidgetTraversal" name="widget" />
+  <adapter factory=".traversal.WrapperWidgetTraversal" name="widget" />
+
+</configure>

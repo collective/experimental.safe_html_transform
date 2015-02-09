@@ -1,0 +1,105 @@
+CheckBoxWidget
+==============
+
+    >>> from plone.app.form.widgets import CheckBoxWidget
+    >>> from zope.publisher.browser import TestRequest
+    >>> request = TestRequest()
+    >>> from zope.schema import Bool
+    >>> from xml.dom.minidom import parseString
+
+Let's test a non required boolean field first.
+
+    >>> field = Bool(__name__='deletePortrait',
+    ...              title=u'Delete portrait',
+    ...              required=False)
+
+Render the widget and make sure the checkbox is in front of the label.
+
+    >>> widget = CheckBoxWidget(field, request)
+    >>> dom = parseString('<div>%s</div>' % widget())
+    >>> inputs = dom.getElementsByTagName('input')
+    >>> inputs[0].getAttributeNode('name').value
+    u'field.deletePortrait.used'
+    >>> inputs[0].getAttributeNode('class').value
+    u'hiddenType'
+    >>> inputs[0].getAttributeNode('value').value
+    u''
+    >>> inputs[1].getAttributeNode('name').value
+    u'field.deletePortrait'
+    >>> inputs[1].getAttributeNode('class').value
+    u'checkboxType'
+    >>> inputs[1].getAttributeNode('value').value
+    u'on'
+    >>> inputs[1].getAttributeNode('checked') is None
+    True
+    >>> label = inputs[1].nextSibling.nextSibling
+    >>> label.nodeName
+    u'label'
+    >>> label.getAttributeNode('for').value
+    u'field.deletePortrait'
+    >>> label.firstChild.data
+    u'Delete portrait'
+    >>> dom.unlink()
+
+Make sure that there is no error for a non-required boolean field
+
+    >>> request.form['field.deletePortrait.used'] = u''
+    >>> widget.getInputValue()
+    False
+    >>> widget.error()
+    ''
+    >>> request.form['field.deletePortrait'] = 'on'
+    >>> widget.getInputValue()
+    True
+
+Test the rendering of a required field. Note that we need to explicitly
+set the missing_value to False for the field fail validation
+
+    >>> field = Bool(__name__='acceptTerms',
+    ...              title=u'Accept Terms',
+    ...              required=True, missing_value=False)
+    >>> widget = CheckBoxWidget(field, request)
+    >>> dom = parseString('<div>%s</div>' % widget())
+    >>> inputs = dom.getElementsByTagName('input')
+    >>> inputs[0].getAttributeNode('name').value
+    u'field.acceptTerms.used'
+    >>> inputs[0].getAttributeNode('class').value
+    u'hiddenType'
+    >>> inputs[0].getAttributeNode('value').value
+    u''
+    >>> inputs[1].getAttributeNode('name').value
+    u'field.acceptTerms'
+    >>> inputs[1].getAttributeNode('class').value
+    u'checkboxType'
+    >>> inputs[1].getAttributeNode('value').value
+    u'on'
+    >>> inputs[1].getAttributeNode('checked') is None
+    True
+    >>> label = inputs[1].nextSibling.nextSibling
+    >>> label.nodeName
+    u'label'
+    >>> label.getAttributeNode('for').value
+    u'field.acceptTerms'
+    >>> label.firstChild.data
+    u'Accept Terms '
+    >>> spans = dom.getElementsByTagName('span')
+    >>> spans[0].getAttributeNode('class').value
+    u'required'
+    >>> spans[0].getAttributeNode('title').value
+    u'Required'
+    >>> spans[0].firstChild.data
+    u'\xa0'
+    >>> dom.unlink()
+
+Test for a error when the checbkox is not ticked for a required field.
+
+    >>> request.form['field.acceptTerms.used'] = u''
+    >>> widget.getInputValue()
+    Traceback (most recent call last):
+    WidgetInputError: ('acceptTerms', '', RequiredMissing('acceptTerms'))
+
+Tick the box and make sure we don't get an error anymore
+
+    >>> request.form['field.acceptTerms'] = 'on'
+    >>> widget.getInputValue()
+    True

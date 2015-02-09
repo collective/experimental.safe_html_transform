@@ -1,0 +1,8 @@
+setuptools
+Products.CMFCore
+Products.GenericSetup
+Products.MimetypesRegistry
+Products.PortalTransforms
+
+[test]
+Products.PloneTestCase

@@ -1,0 +1,104 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      i18n:domain="plone.z3cform"
+      tal:omit-tag="">
+
+  <head></head>
+
+  <body>
+
+    <div class="form" metal:define-macro="form">
+
+      <metal:title-slot define-slot="title">
+        <h3 tal:condition="view/label | nothing">
+            <span tal:replace="view/label">Form title</span>:</h3>
+      </metal:title-slot>
+
+      <metal:description-slot define-slot="description">
+        <div class="description"
+             tal:condition="view/description | nothing"
+             tal:content="structure view/description">Form description</div>
+      </metal:description-slot>
+
+      <metal:define define-macro="titlelessform">
+        <div class="portalMessage"
+             tal:condition="view/status" tal:content="view/status">
+        </div>
+
+        <form action="." method="post"
+              tal:attributes="action view/action; enctype view/enctype">
+
+          <metal:block define-slot="formtop" />
+
+          <metal:fields-slot define-slot="fields">
+            <metal:define define-macro="fields">
+
+              <tal:widgets repeat="widget view/widgets/values">
+                <div class="row"
+                     tal:define="hidden python:widget.mode == 'hidden'"
+                     tal:omit-tag="hidden">
+
+                  <metal:field-slot define-slot="field">
+                    <metal:field define-macro="field">
+                      <div class="field"
+                           tal:define="error widget/error;
+                                       hidden python:widget.mode == 'hidden';"
+                           tal:attributes="class python:'field' + (error and ' error' or '')">
+                        <label for=""
+                               tal:attributes="for widget/id"
+                               tal:condition="not:hidden">
+                          <span i18n:translate=""
+                                tal:content="widget/label">label</span>
+                        </label>
+
+                        <span class="fieldRequired" title="Required"
+                              tal:condition="python:widget.required and not hidden"
+                              i18n:translate="label_required"
+                              i18n:attributes="title title_required;">
+                          (Required)
+                        </span>
+
+                        <div class="formHelp"
+                             tal:define="description widget/field/description"
+                             i18n:translate=""
+                             tal:content="description"
+                             tal:condition="python:description and not hidden"
+                             >field description</div>
+
+                        <div tal:condition="error"
+                             tal:content="structure error/render">
+                          Error
+                        </div>
+
+                        <div class="widget">
+                          <input type="text" tal:replace="structure widget/render" />
+                        </div>
+                      </div>
+                    </metal:field>
+                  </metal:field-slot>
+
+                </div>
+              </tal:widgets>
+
+            </metal:define>
+          </metal:fields-slot>
+
+          <metal:actions-slot define-slot="actions">
+            <metal:define define-macro="actions">
+              <div class="action" tal:repeat="action view/actions/values|nothing">
+                <input type="submit" tal:replace="structure action/render" />
+              </div>
+            </metal:define>
+          </metal:actions-slot>
+
+          <metal:block define-slot="formbottom" />
+
+        </form>
+      </metal:define>
+      </div>
+
+
+  </body>
+</html>

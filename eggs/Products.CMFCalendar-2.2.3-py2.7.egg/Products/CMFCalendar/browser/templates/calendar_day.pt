@@ -1,0 +1,46 @@
+<html metal:use-macro="context/@@standard_macros/page">
+<head>
+
+<metal:slot fill-slot="style_slot">
+<tal:span tal:replace="structure context/getBaseTag" />
+</metal:slot>
+
+</head>
+<body>
+
+<metal:slot metal:fill-slot="body">
+<div class="dayViewBox" metal:define-macro="dayViewBox">
+<table class="dayView" cellpadding="0" cellspacing="0" border="0">
+ <tr>
+  <th>
+   <a href="#" 
+      tal:attributes="href view/previousDayURL">&laquo;</a>
+  </th>
+  <th colspan="3" nowrap="nowrap" 
+      tal:content="view/formattedDate">Date Heading</th>
+  <th>
+   <a href="#" 
+      tal:attributes="href view/nextDayURL">&raquo;</a>
+  </th>
+ </tr>
+ <tal:loop tal:repeat="item_info view/listItemInfos">
+ <tr>
+  <td class="heading" colspan="5" nowrap="nowrap">
+   <a href="#" tal:attributes="href item_info/url"
+      tal:content="item_info/title">event title</a>
+  </td>
+ </tr>
+ <tr>
+  <td class="startDate" colspan="2" nowrap="nowrap"
+     tal:content="item_info/start">Event Start</td>
+  <td nowrap="nowrap"> -- </td>
+  <td class="endDate" colspan="2" nowrap="nowrap"
+     tal:content="item_info/stop">Event End</td>
+ </tr>
+ </tal:loop>
+</table>
+</div>
+</metal:slot>
+
+</body>
+</html>

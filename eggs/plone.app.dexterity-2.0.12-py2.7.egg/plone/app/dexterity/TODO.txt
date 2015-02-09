@@ -1,0 +1,24 @@
+issues:
+[ ] should make sure model isn't serialized multiple times
+  - queue changes in session?
+[ ] need a decoupled way to tweak things like form titles
+
+general:
+[ ] docs
+- tests
+ [ ] doctests for basic walkthrough
+[ ] i18n infrastructure (use message factory from plone.dexterity?)
+
+schema editor:
+- functionality:
+ [ ] rename type
+ [ ] handle widget selection
+ [ ] fieldsets -- including integration with behaviors (weighting?)
+ [ ] editing dexterity metadata like permissions
+
+design issues:
+- UI design for managing multiple fieldsets / schemata
+- figure out what to do about vocabularies
+
+examples / dogfooding / things to test:
+- handling of pre-existing content

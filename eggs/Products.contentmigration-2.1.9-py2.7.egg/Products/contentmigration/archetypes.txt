@@ -1,0 +1,110 @@
+;-*-Doctest-*-
+================================
+Archetype to Archetype Migration
+================================
+
+These are migrators for migrating from one archetypes object to
+another making use of the schemata for field migration::
+
+    >>> from Products.CMFCore.permissions import ModifyPortalContent
+    >>> from Products.PloneTestCase.setup import _createObjectByType
+    >>> from zope.interface import alsoProvides
+    >>> from Products.contentmigration.tests.utils import MarkerInterface
+    >>> from Products.contentmigration.tests.utils import add_redirects
+    >>> from Products.contentmigration.tests.utils import get_redirects
+    >>> self.portal.manage_permission(
+    ...     ModifyPortalContent, ['Manager', 'Owner'], acquire=0)
+
+    >>> foo_doc = _createObjectByType(
+    ...     'Document', self.portal, id='foo', title='Foo')
+    >>> alsoProvides(foo_doc, MarkerInterface)
+    >>> foo_doc.portal_type, foo_doc.getId(), foo_doc.Title()
+    ('Document', 'foo', 'Foo')
+    >>> add_redirects(['/plone/lol'], foo_doc)
+
+    >>> bar_doc = _createObjectByType(
+    ...     'Document', self.portal, id='bar', title='Bar')
+    >>> alsoProvides(bar_doc, MarkerInterface)
+    >>> bar_doc.portal_type, bar_doc.getId(), bar_doc.Title()
+    ('Document', 'bar', 'Bar')
+    >>> add_redirects(['/plone/allo', '/plone/kikoo'], bar_doc)
+
+    >>> from transaction import commit
+    >>> commit()
+
+    >>> from Products.contentmigration.archetypes import ATItemMigrator
+    >>> foo_migrator = ATItemMigrator(foo_doc)
+    >>> foo_migrator.dst_portal_type = 'News Item'
+    >>> foo_migrator.dst_meta_type = 'ATNewsItem'
+    >>> foo_migrator.migrate()
+    >>> foo_news = self.portal.foo
+    >>> foo_news.portal_type, foo_news.getId(), foo_news.Title()
+    ('News Item', 'foo', 'Foo')
+    >>> MarkerInterface.providedBy(foo_news)
+    True
+    >>> get_redirects(foo_news)
+    ['/plone/lol']
+
+    >>> from Products.contentmigration.archetypes import InplaceATItemMigrator
+    >>> bar_migrator = InplaceATItemMigrator(bar_doc)
+    >>> bar_migrator.dst_portal_type = 'News Item'
+    >>> bar_migrator.dst_meta_type = 'ATNewsItem'
+    >>> bar_migrator.migrate()
+    >>> bar_news = self.portal.bar
+    >>> bar_news.portal_type, bar_news.getId(), bar_news.Title()
+    ('News Item', 'bar', 'Bar')
+    >>> MarkerInterface.providedBy(bar_news)
+    True
+    >>> get_redirects(bar_news)
+    ['/plone/allo', '/plone/kikoo']
+
+Folderish contents::
+
+    >>> foo_folder = _createObjectByType(
+    ...     'Folder', self.portal, id='fold1', title='Fold1')
+    >>> foo_folder.portal_type, foo_folder.getId(), foo_folder.Title()
+    ('Folder', 'fold1', 'Fold1')
+    >>> foo_folder.portal_type
+    'Folder'
+    >>> add_redirects(['/plone/bike', '/plone/head'], foo_folder)
+
+Add a simple object inside the folder::
+
+    >>> foo_folder.invokeFactory('Document', id='doc1', Title='Document 1')
+    'doc1'
+
+    >>> from transaction import commit
+    >>> commit()
+
+    >>> from Products.contentmigration.archetypes import ATFolderMigrator
+    >>> ff_migrator = ATFolderMigrator(foo_folder)
+    >>> 
+    >>> ff_migrator.dst_portal_type = 'Folder'
+    >>> ff_migrator.dst_meta_type = 'ATFolder'
+    >>> ff_migrator.migrate()
+    >>> foo_folder = self.portal.fold1
+    >>> foo_folder.Title()
+    'Fold1'
+    >>> get_redirects(foo_folder)
+    ['/plone/bike', '/plone/head']
+
+    >>> from Products.contentmigration.archetypes import InplaceATFolderMigrator
+    >>> ff_migrator = InplaceATFolderMigrator(foo_folder)
+    >>> 
+    >>> ff_migrator.dst_portal_type = 'Folder'
+    >>> ff_migrator.dst_meta_type = 'ATFolder'
+    >>> ff_migrator.migrate()
+    >>> foo_folder = self.portal.fold1
+    >>> foo_folder.Title()
+    'Fold1'
+    >>> get_redirects(foo_folder)
+    ['/plone/bike', '/plone/head']
+
+    >>> from transaction import commit
+    >>> commit()
+
+Check that the patch has been removed::
+
+    >>> from Products.CMFCore.CMFCatalogAware import WorkflowAware
+    >>> '_old_notifyWorkflowCreated' in WorkflowAware.__dict__.keys()
+    False

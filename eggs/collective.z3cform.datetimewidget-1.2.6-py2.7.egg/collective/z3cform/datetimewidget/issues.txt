@@ -1,0 +1,214 @@
+=================
+Fixed Bugs (test)
+=================
+
+All necessary components are set up in the testclass to make sure that
+we test the real configuration. Let's test the Widget:
+
+  >>> import datetime
+  >>> import z3c.form
+  >>> import zope.schema
+
+
+ISSUE 1
+-------
+
+ * status: SOLVED
+ * reported by: Fabian Reinhard | seantis gmbh
+ * assigned to: Rok Garbas | garbas.si
+
+ After some testing I have seen that some validations are missing, therefore
+ I get an error when adding values like '99' into the year field:
+ "ValueError: year=99 is before 1900; the datetime strftime() methods require
+ year >= 1900"
+
+  >>> import zope.interface
+  >>> class ITest(zope.interface.Interface):
+  ...     date = zope.schema.Date(title=u'Date',required=False)
+  ...     datetime = zope.schema.Datetime(title=u'Datetime', required=False)
+
+  >>> from z3c.form import form, field, button, interfaces
+  >>> class TestForm(form.EditForm):
+  ...     fields = field.Fields(ITest)
+
+  >>> from collective.z3cform.datetimewidget.tests import TestRequest
+  >>> request = TestRequest(form={
+  ...                 'form.widgets.date-day': u'14',
+  ...                 'form.widgets.date-month': u'2',
+  ...                 'form.widgets.date-year': u'99',
+  ...                 'form.widgets.datetime-day': u'1',
+  ...                 'form.widgets.datetime-month': u'10',
+  ...                 'form.widgets.datetime-year': u'99',
+  ...                 'form.widgets.datetime-hour': u'6',
+  ...                 'form.widgets.datetime-min': u'35',
+  ...                 'form.buttons.apply': u'Apply'})
+  >>> test_form = TestForm(self.root, request)
+
+  >>> from zope.browserpage import viewpagetemplatefile
+  >>> from z3c.form import tests
+  >>> import os
+  >>> test_form.template = viewpagetemplatefile.BoundPageTemplate(
+  ...         viewpagetemplatefile.ViewPageTemplateFile(
+  ...             'simple_edit.pt', os.path.dirname(tests.__file__)), test_form)
+
+  >>> from zope.interface import alsoProvides
+  >>> alsoProvides(self.root, ITest)
+
+  >>> test_form.mode = interfaces.DISPLAY_MODE
+  >>> test_form.update()
+  >>> print test_form.render() #doctest:
+  <...
+  <div class="row">
+     <label for="form-widgets-date">Date</label>
+     <span id="form-widgets-date"
+           class="date-widget date-field">Sat Feb 14 00:00:00 0099</span>
+  </div>
+  ...<input... id="form-buttons-apply" ...
+
+
+ISSUE 2
+-------
+
+ * status: SOLVED
+ * reported by: David Beitey | davidjb
+ * assigned to: David Beitey | davidjb
+
+ An issue is present when a user submits an incomplete date, causing the
+ JavaScript generating the jQuery widget to have a syntax error with the
+ default JS Date() as some of the values are empty. This leads to the widget
+ not getting displayed after either entering no values on a required field
+ or entering an incomplete date and/or datetime.
+
+  >>> field = zope.schema.Datetime()
+  >>> widget = self.setupWidget(field)
+  >>> widget.ampm = True
+  >>> widget.update()
+  >>> widget.extract() is z3c.form.interfaces.NOVALUE
+  True
+
+  Create our fake request with missing values to check our handling.
+
+  >>> widget.request = self.testrequest(
+  ...     form={'bar-day': '',
+  ...           'bar-month': '1',
+  ...           'bar-year': '',
+  ...           'bar-hour': '01',
+  ...           'bar-min': '00',
+  ...           'bar-ampm': 'PM',
+  ...           'bar-empty-marker': '1',
+  ...           }
+  ...     )
+  >>> widget.update()
+  >>> widget.value
+  ('', '1', '', '13', '00')
+
+  Generate our JS and check the results.
+
+  >>> jquerytools_dateinput_js = widget.show_jquerytools_dateinput_js()
+
+  Make sure our JS date syntax error isn't present with this incomplete date.
+
+  >>> 'value: new Date(, 1, )' not in jquerytools_dateinput_js
+  True
+
+  >>> 'value: new Date("/1/")' not in jquerytools_dateinput_js
+  True
+
+  We default to specifying no value at all on our widget
+  (thus defaulting to today's date).
+
+  >>> 'value: new Date(' not in jquerytools_dateinput_js
+  True
+
+  But make sure we still show a default value if we have a complete date.
+
+  >>> widget.request = self.testrequest(
+  ...     form={'bar-day': '31',
+  ...           'bar-month': '12',
+  ...           'bar-year': '2011',
+  ...           'bar-hour': '01',
+  ...           'bar-min': '00',
+  ...           'bar-ampm': 'PM',
+  ...           'bar-empty-marker': '1',
+  ...           }
+  ...     )
+  >>> widget.update()
+  >>> widget.value
+  ('2011', '12', '31', '13', '00')
+
+  Note that our date should get included like this as a string to avoid
+  date offset issues as Javascript expects Date objects defined as
+  Date(2011, 12, 31) to have the starting month index as 0 (so range of 0
+  to 11).  Providing the date as a string avoids maniuplating the date to suit.
+
+  >>> 'value: new Date("2011/12/31")' in widget.show_jquerytools_dateinput_js()
+  True
+
+ISSUE 2 (github)
+----------------
+
+ * status: SOLVED
+ * reported by: Róman Joost | romanofski
+ * assigned to: Róman Joost | romanofski
+
+ The datetime widgets default month is January. The widgets default
+ value is influenced by this default value and may cause a traceback.
+
+  >>> field = zope.schema.Datetime()
+  >>> widget = self.setupWidget(field)
+  >>> widget.ampm = True
+  >>> widget.update()
+  >>> widget.request = self.testrequest(
+  ...     form={'bar-day': '',
+  ...           'bar-month': '1',
+  ...           'bar-year': '',
+  ...           'bar-hour': '00',
+  ...           'bar-min': '00',
+  ...           'bar-ampm': 'PM',
+  ...           'bar-empty-marker': '1',
+  ...           }
+  ...     )
+  >>> widget.update()
+  >>> widget.formatted_value
+  ''
+
+  The required field will not validate the widget value:
+
+  >>> from z3c.form import validator
+  >>> from z3c.form import interfaces
+  >>> field.required
+  True
+  >>> simple = validator.SimpleFieldValidator(
+  ...       None, None, None, field, widget)
+  >>> value = interfaces.IDataConverter(widget).toFieldValue(widget.extract())
+  >>> simple.validate(value)
+  Traceback (most recent call last):
+  RequiredMissing
+
+  The date widget will have the same issue:
+
+  >>> field = zope.schema.Date()
+  >>> widget = self.setupWidget(field)
+  >>> widget.ampm = True
+  >>> widget.update()
+  >>> widget.request = self.testrequest(
+  ...     form={'bar-day': '',
+  ...           'bar-month': '1',
+  ...           'bar-year': '',
+  ...           'bar-empty-marker': '1',
+  ...           }
+  ...     )
+  >>> widget.update()
+  >>> widget.formatted_value
+  ''
+
+  The required field will not validate the widget value:
+
+  >>> field.required
+  True
+  >>> simple = validator.SimpleFieldValidator(
+  ...       None, None, None, field, widget)
+  >>> value = interfaces.IDataConverter(widget).toFieldValue(widget.extract())
+  >>> simple.validate(value)
+  Traceback (most recent call last):
+  RequiredMissing

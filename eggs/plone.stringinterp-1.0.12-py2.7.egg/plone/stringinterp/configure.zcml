@@ -1,0 +1,316 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+    <browser:page
+        for="*"
+        name="stringinterp_info"
+        class=".browser.SubstitutionInfo"
+        allowed_interface=".interfaces.IStringSubstitutionInfo"
+        permission="zope.Public"
+    />
+
+
+    <adapter
+        for="zope.interface.Interface"
+        provides="plone.stringinterp.interfaces.IStringInterpolator"
+        factory=".dollarReplace.Interpolator"
+    />
+
+
+   <adapter
+       for="*"
+       provides="plone.stringinterp.interfaces.IStringSubstitution"
+       factory=".adapters.UrlSubstitution"
+       name="absolute_url"
+       />
+   <adapter
+       for="*"
+       provides="plone.stringinterp.interfaces.IStringSubstitution"
+       factory=".adapters.UrlSubstitution"
+       name="url"
+       />
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ParentUrlSubstitution"
+        name="parent_url"
+       />
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ParentIdSubstitution"
+        name="parent_id"
+    />
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.IdSubstitution"
+        name="id"
+    />
+   <adapter
+       for="Products.CMFCore.interfaces.IMinimalDublinCore"
+       provides="plone.stringinterp.interfaces.IStringSubstitution"
+       factory=".adapters.TitleSubstitution"
+       name="title"
+       />
+   <adapter
+       for="*"
+       provides="plone.stringinterp.interfaces.IStringSubstitution"
+       factory=".adapters.ParentTitleSubstitution"
+       name="parent_title"
+       />
+    <adapter
+        for="Products.CMFCore.interfaces.IMinimalDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.DescriptionSubstitution"
+        name="description"
+        />
+    <adapter
+        for="Products.CMFCore.interfaces.IMinimalDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.TypeSubstitution"
+        name="type"
+        />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IWorkflowAware"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ReviewStateSubstitution"
+        name="review_state"
+        />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IWorkflowAware"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ReviewStateTitleSubstitution"
+        name="review_state_title"
+        />
+
+    <adapter
+        for="Products.CMFCore.interfaces.ICatalogableDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.CreatedSubstitution"
+        name="created"
+        />
+
+    <adapter
+        for="Products.CMFCore.interfaces.ICatalogableDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.EffectiveSubstitution"
+        name="effective"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.ICatalogableDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ExpiresSubstitution"
+        name="expires"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.ICatalogableDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ModifiedSubstitution"
+        name="modified"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.CreatorSubstitution"
+        name="creator"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.CreatorFullNameSubstitution"
+        name="creator_fullname"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.CreatorEmailSubstitution"
+        name="creator_email"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.CreatorsSubstitution"
+        name="creators"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.CreatorsEmailsSubstitution"
+        name="creators_emails"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ContributorsSubstitution"
+        name="contributors"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ContributorsEmailsSubstitution"
+        name="contributors_emails"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.SubjectSubstitution"
+        name="subject"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.SubjectSubstitution"
+        name="keywords"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.FormatSubstitution"
+        name="format"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.LanguageSubstitution"
+        name="language"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.RightsSubstitution"
+        name="rights"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IDublinCore"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.IdentifierSubstitution"
+        name="identifier"
+    />
+
+    <adapter
+        for="AccessControl.interfaces.IRoleManager"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.OwnerEmailSubstitution"
+        name="owner_emails"
+    />
+
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ReviewerEmailSubstitution"
+        name="reviewer_emails"
+    />
+
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ReaderEmailSubstitution"
+        name="reader_emails"
+    />
+
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.EditorEmailSubstitution"
+        name="editor_emails"
+    />
+
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ContributorEmailSubstitution"
+        name="contributor_emails"
+    />
+
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.ManagerEmailSubstitution"
+        name="manager_emails"
+    />
+
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.MemberEmailSubstitution"
+        name="member_emails"
+    />
+
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.UserEmailSubstitution"
+        name="user_email"
+    />
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.UserFullNameSubstitution"
+        name="user_fullname"
+    />
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.UserIdSubstitution"
+        name="user_id"
+    />
+
+    <adapter
+        for="Products.CMFCore.interfaces.IContentish"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.LastChangeCommentSubstitution"
+        name="change_comment"
+    />
+    <adapter
+        for="Products.CMFCore.interfaces.IContentish"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.LastChangeTitleSubstitution"
+        name="change_title"
+    />
+    <adapter
+        for="Products.CMFCore.interfaces.IContentish"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.LastChangeTypeSubstitution"
+        name="change_type"
+    />
+    <adapter
+        for="Products.CMFCore.interfaces.IContentish"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.LastChangeActorIdSubstitution"
+        name="change_authorid"
+    />
+
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.PortalTitleSubstitution"
+        name="portal_title"
+    />
+
+    <adapter
+        for="*"
+        provides="plone.stringinterp.interfaces.IStringSubstitution"
+        factory=".adapters.PortalURLSubstitution"
+        name="portal_url"
+    />
+
+</configure>

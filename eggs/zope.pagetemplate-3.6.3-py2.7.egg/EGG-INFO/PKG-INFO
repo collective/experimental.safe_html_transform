@@ -1,0 +1,236 @@
+Metadata-Version: 1.1
+Name: zope.pagetemplate
+Version: 3.6.3
+Summary: Zope Page Templates
+Home-page: http://pypi.python.org/pypi/zope.pagetemplate
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Page Templates provide an elegant templating mechanism that achieves a
+        clean separation of presentation and application logic while allowing
+        for designers to work with templates in their visual editing tools
+        (FrontPage, Dreamweaver, GoLive, etc.).
+        
+        
+        Detailed Documentation
+        ----------------------
+        
+        =====================================
+        ZPT (Zope Page-Template) Architecture
+        =====================================
+        
+        There are a number of major components that make up the page-template
+        architecture: 
+        
+        - The TAL *compiler* and *interpreter*.  This is responsible for
+          compiling source files and for executing compiled templates.  See
+          the `zope.tal` package for more information.
+        
+        - An *expression engine* is responsible for compiling expressions and
+          for creating expression execution contexts.  It is common for
+          applications to override expression engines to provide custom
+          expression support or to change the way expressions are implemented.
+          The `zope.app.pagetemplate` package uses this to implement trusted
+          and untrusted evaluation; a different engine is used for each, with
+          different implementations of the same type of expressions.
+        
+          Expression contexts support execution of expressions and provide
+          APIs for setting up variable scopes and setting variables.  The
+          expression contexts are passed to the TAL interpreter at execution
+          time.
+          
+          The most commonly used expression implementation is that found in
+          `zope.tales`.
+        
+        - Page templates tie everything together. They assemble an expression
+          engine with the TAL interpreter and orchestrate management of source
+          and compiled template data.  See `zope.pagetemplate.interfaces`.
+        
+          
+        
+        
+        ==============
+        Page Templates
+        ==============
+        
+        Introduction
+        ------------
+        
+        Page Templates provide an elegant templating mechanism that achieves a
+        clean separation of presentation and application logic while allowing
+        for designers to work with templates in their visual editing tools
+        (FrontPage, Dreamweaver, GoLive, etc.).
+        
+        This document focuses on usage of Page Templates outside of a Zope
+        context, it does *not* explain how to write page templates as there
+        are several resources on the web which do so.
+        
+        Simple Usage
+        ------------
+        
+        Using Page Templates outside of Zope3 is very easy and straight
+        forward.  A quick example::
+        
+          >>> from zope.pagetemplate.pagetemplatefile import PageTemplateFile
+          >>> my_pt = PageTemplateFile('hello_world.pt')
+          >>> my_pt()
+          u'<html><body>Hello World</body></html>'
+        
+        Subclassing PageTemplates
+        -------------------------
+        
+        Lets say we want to alter page templates such that keyword arguments
+        appear as top level items in the namespace.  We can subclass
+        `PageTemplate` and alter the default behavior of `pt_getContext()` to
+        add them in::
+        
+          from zope.pagetemplate.pagetemplate import PageTemplate
+        
+          class mypt(PageTemplate):
+              def pt_getContext(self, args=(), options={}, **kw):
+                 rval = PageTemplate.pt_getContext(self, args=args)
+                 options.update(rval)
+                 return options
+        
+          class foo:
+              def getContents(self): return 'hi'
+        
+        So now we can bind objects in a more arbitrary fashion, like the
+        following::
+        
+          template = """
+          <html>
+          <body>
+          <b tal:replace="das_object/getContents">Good Stuff Here</b>
+          </body>
+          </html>
+          """
+        
+          pt = mypt()
+          pt.write(template)
+          pt(das_object=foo())
+        
+        See `interfaces.py`.
+        
+        
+        =======
+        CHANGES
+        =======
+        
+        3.6.3 (2011-09-21)
+        ------------------
+        
+        - Fixed test assertions to be compatible with zope.tal 3.6.
+        
+        3.6.2 (2011-09-21)
+        ------------------
+        
+        - Change interface for engine and program such that the return type of
+          the ``cook`` method is a tuple ``(program, macros)``. This follows
+          the interface for the TAL parser's ``getCode`` method.
+        
+          This fixes a legacy compatibility issue where code would expect an
+          ``_v_macros`` volatile attribute which was missing.
+        
+        3.6.1 (2011-08-23)
+        ------------------
+        
+        - Fixed issue with missing default value for ``strictinsert``.
+        
+        3.6.0 (2011-08-20)
+        ------------------
+        
+        - Replaced StringIO stream class with a faster list-based implementation.
+        
+        - Abstract out the template engine and program interfaces and allow
+          implementation replacement via a utility registration.
+        
+        - Removed ancient copyright from test files (LP: #607228)
+        
+        3.5.2 (2010-07-08)
+        ------------------
+        
+        - Fixed PTRuntimeError exception messages to be consistent across Python
+          versions, and compatibile with the output under Python 2.4.  (More
+          readable than the previous output under Python 2.6 as well.)
+        
+        3.5.1 (2010-04-30)
+        ------------------
+        
+        - Removed use of 'zope.testing.doctestunit' in favor of stdlib's doctest.
+        
+        - Added dependency on "zope.security [untrustedpython]" because the 'engine'
+          module uses it.
+        
+        3.5.0 (2009-05-25)
+        ------------------
+        
+        - Added test coverage reporting support.
+        
+        - Moved 'engine' module and related test scaffolding here from
+          ``zope.app.pagetemplate`` package.
+        
+        3.4.2 (2009-03-17)
+        ------------------
+        
+        - Remove old zpkg-related DEPENDENCIES.cfg file.
+        
+        - Change package's mailing list address to zope-dev at zope.org, as
+          zope3-dev at zope.org is now retired.
+        
+        - Change `cheeseshop` to `pypi` in the packages' homepage url.
+        
+        3.4.1 (2009-01-27)
+        ------------------
+        
+        - Fix test due to recent changes in zope.tal.
+        
+        
+        3.4.0 (2007-10-02)
+        ------------------
+        
+        - Initial release independent of the Zope 3 tree.
+        
+        
+        3.2.0 (2006-01-05)
+        ------------------
+        
+        - Corresponds to the version of the zope.pagetemplate package shipped
+          as part of the Zope 3.2.0 release.
+        
+        - ZPTPage macro expansion:  changed label text to match the corresponding
+          label in Zope 2 and activated the name spaces for macro expansion
+          in 'read'.  See http://www.zope.org/Collectors/Zope3-dev/199
+        
+        - Coding style cleanups.
+        
+        
+        3.1.0 (2005-10-03)
+        ------------------
+        
+        - Corresponds to the version of the zope.pagetemplate package shipped
+          as part of the Zope 3.1.0 release.
+        
+        - Fixed apidoc and Cookie, which were using wrong descriptor class
+          (changed to 'property').  See http://www.zope.org/Collectors/Zope3-dev/387
+        
+        - Documentation / style / testing cleanups.
+        
+        
+        3.0.0 (2004-11-07)
+        ------------------
+        
+        - Corresponds to the version of the zope.pagetemplate package shipped
+          as part of the Zope X3.0.0 release.
+        
+Keywords: zope3 page template
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3

@@ -1,0 +1,24 @@
+setuptools
+zope.schema
+zope.interface
+zope.component
+ZODB3 >= 3.8.1
+
+[widget]
+z3c.form
+
+[tests]
+plone.app.testing
+plone.supermodel [test]
+
+[portaltransforms]
+Products.PortalTransforms
+
+[supermodel]
+plone.supermodel
+
+[editor]
+plone.schemaeditor
+
+[marshaler]
+plone.rfc822

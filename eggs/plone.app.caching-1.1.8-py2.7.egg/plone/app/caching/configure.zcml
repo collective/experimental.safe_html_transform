@@ -1,0 +1,69 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone.app.caching">
+
+    <include package="z3c.zcmlhook" file="meta.zcml" />
+
+    <include package="plone.caching" />
+    <include package="plone.cachepurging" />
+    <include package="plone.app.registry" />
+    <include package="plone.memoize" />
+    <include package="plone.protect" />
+
+    <include package=".browser" />
+    <include package=".operations" />
+
+    <genericsetup:registerProfile
+        name="default"
+        title="HTTP caching support"
+        directory="profiles/default"
+        description="Installs plone.app.caching"
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
+
+    <genericsetup:importStep
+        name="plone.app.caching"
+        title="Plone caching - additional installation steps"
+        description="Imperative configuration for plone.app.caching"
+        handler=".setuphandlers.importVarious"
+        />
+
+    <zcml:customAction
+        handler=".setuphandlers.enableExplicitMode"
+        order="1000000"
+        />
+
+    <!-- Default caching configuration -->
+    <include file="caching.zcml" />
+
+    <!-- Lookup for content item views and page template resources -->
+    <adapter
+        for="zope.publisher.interfaces.browser.IBrowserView *"
+        factory=".lookup.ContentItemLookup"
+        />
+    <adapter
+        for="zope.pagetemplate.interfaces.IPageTemplate *"
+        factory=".lookup.ContentItemLookup"
+        />
+
+    <!-- Add GZip compression: plone.transformchain order 10000 -->
+    <adapter factory=".gzip.GZipTransform" name="plone.app.caching.gzip" />
+
+    <!-- Purging -->
+    <subscriber handler=".purge.purgeOnModified" />
+    <subscriber handler=".purge.purgeOnMovedOrRemoved" />
+
+    <!-- ILastModified adapters -->
+    <adapter factory=".lastmodified.PageTemplateDelegateLastModified" />
+    <adapter factory=".lastmodified.FSPageTemplateDelegateLastModified" />
+    <adapter factory=".lastmodified.OFSFileLastModified" />
+    <adapter factory=".lastmodified.ImageScaleLastModified" />
+    <adapter factory=".lastmodified.FSObjectLastModified" />
+    <adapter factory=".lastmodified.CatalogableDublinCoreLastModified" />
+    <adapter factory=".lastmodified.DCTimesLastModified" />
+    <adapter factory=".lastmodified.ResourceLastModified" />
+    <adapter factory=".lastmodified.CookedFileLastModified" />
+
+</configure>

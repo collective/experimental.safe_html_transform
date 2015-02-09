@@ -1,0 +1,17 @@
+README.txt
+setup.cfg
+setup.py
+docs/HISTORY.txt
+five/__init__.py
+five.globalrequest.egg-info/PKG-INFO
+five.globalrequest.egg-info/SOURCES.txt
+five.globalrequest.egg-info/dependency_links.txt
+five.globalrequest.egg-info/entry_points.txt
+five.globalrequest.egg-info/namespace_packages.txt
+five.globalrequest.egg-info/not-zip-safe
+five.globalrequest.egg-info/requires.txt
+five.globalrequest.egg-info/top_level.txt
+five/globalrequest/__init__.py
+five/globalrequest/configure.zcml
+five/globalrequest/hooks.py
+five/globalrequest/tests.py

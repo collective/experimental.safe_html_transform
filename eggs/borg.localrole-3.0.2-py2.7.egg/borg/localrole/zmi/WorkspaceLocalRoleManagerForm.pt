@@ -1,0 +1,33 @@
+<h1 tal:replace="structure here/manage_page_header">Header</h1>
+
+<h2 tal:define="form_title string:Add Workspace Local Role Manager"
+      tal:replace="structure here/manage_form_title">Form Title</h2>
+
+  <p class="form-help">
+  Install a Workspace local role manager. This plugin will enable
+  workspaces to provide the correct local rules for users assigned
+  to that workspace.
+  </p>
+
+<form action="manage_addWorkspaceLocalRoleManager" method="POST">
+  <table>
+    <tr>
+      <td class="form-label">Id</td>
+      <td><input type="text" name="id"/></td>
+    </tr>
+    <tr>
+      <td class="form-label">Title</td>
+      <td><input type="text" name="Title"/></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <div class="form-element">
+          <input type="submit" value="Add local role manager"/>
+        </div>
+      </td>
+    </tr>
+  </table>
+</form>
+
+<h1 tal:replace="structure here/manage_page_footer">Footer</h1>
+

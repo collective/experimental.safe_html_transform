@@ -1,0 +1,42 @@
+<html metal:use-macro="context/@@controlpanel_macros/macros/master"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      lang="en"
+      i18n:domain="aws.zope2zcmldoc">
+
+  <metal:main-slot fill-slot="body">
+    <p class="location-bar">
+      <strong i18n:translate="">Namespaces</strong>
+      <metal:to-english-macro
+         use-macro="context/@@controlpanel_macros/macros/to_english" />
+    </p>
+    <ul>
+      <tal:loop repeat="ns view/namespaces">
+        <li>
+          <a href="#"
+             tal:attributes="href ns/view_url"
+             tal:content="ns/namespace_url">
+            http://namespaces.zope.org/some_ns
+          </a>
+        </li>
+      </tal:loop>
+    </ul>
+    <hr />
+    <h4 i18n:translate="">Important notes:</h4>
+    <ul>
+      <li i18n:translate="important_note_1">
+        With Zope 2.12 and earlier versions, we do not and can not provide the
+        documentation of directives of the <strong>'zcml'</strong> namespace
+        (http://namespaces.zope.org/zcml). It's built-in nature does not provide
+        the required reflectivity.
+      </li>
+      <li i18n:translate="important_note_2">
+        Potential errors or typos in directive descriptions are not 'issues' of
+        'aws.zope2zcmldoc' component, as we display the docs that are provided by
+        these directives definitions. Please report these issues to the author of
+        the component that provides the ZCML directive.
+      </li>
+    </ul>
+  </metal:main-slot>
+</html>

@@ -1,0 +1,43 @@
+# Translation of PlacelessTranslationService.pot to Greek
+# Nikos Papagrigoriou <nikos@papagrigoriou.gr>, 2005
+msgid ""
+msgstr ""
+"Project-Id-Version: pts-el\n"
+"POT-Creation-Date: 2003-10-04 12:51+0300\n"
+"PO-Revision-Date: 2013-08-13 18:35+0100\n"
+"Last-Translator: Nikos Papagrigoriou <nikos@papagrigoriou.gr>\n"
+"Language-Team: Plone i18n <plone-i18n@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language-code: el\n"
+"Language-name: Ελληνικά\n"
+"Preferred-encodings: ascii latin1 utf-8\n"
+"X-Generator: Poedit 1.5.7\n"
+
+msgid "Gettext message catalog"
+msgstr "Κατάλογος μηνυμάτων gettext"
+
+msgid "Reload this catalog"
+msgstr "Ξαναφόρτωση αυτού του καταλόγου"
+
+msgid ""
+"This catalog cannot be reloaded because the corresponding file does not exist"
+msgstr ""
+"Αυτός ο κατάλογος δεν μπορεί να φορτωθεί επειδή το σχετικό αρχείο δεν υπάρχει"
+
+msgid "Test ${title}"
+msgstr "Έλεγχος ${title}"
+
+msgid "Test results:"
+msgstr "Έλεγχος αποτελεσμάτων:"
+
+msgid "Translation not found"
+msgstr "Η μετάφραση δεν βρέθηκε"
+
+msgid "New test:"
+msgstr "Νέος έλεγχος:"
+
+msgid "Translate this phrase"
+msgstr "Μετάφραση αυτής της φράσης"

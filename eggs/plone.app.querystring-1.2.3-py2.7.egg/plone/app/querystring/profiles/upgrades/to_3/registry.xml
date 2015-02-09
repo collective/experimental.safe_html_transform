@@ -1,0 +1,27 @@
+<registry xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+          i18n:domain="plone">
+
+<!-- Operation Definitions -->
+    <records interface="plone.app.querystring.interfaces.IQueryOperation"
+             prefix="plone.app.querystring.operation.string.showInactive">
+        <value key="title" i18n:translate="">Show Inactive</value>
+        <value key="description" i18n:translate="">The user roles which are allowed to see inactive content</value>
+        <value key="operation">plone.app.querystring.queryparser._showInactive</value>
+        <value key="widget">MultipleSelectionWidget</value>
+    </records>
+
+<!-- Field Definitions -->
+    <records interface="plone.app.querystring.interfaces.IQueryField"
+             prefix="plone.app.querystring.field.show_inactive">
+        <value key="title" i18n:translate="">Show Inactive</value>
+        <value key="description" i18n:translate="">Select which roles have the permission to view inactive objects</value>
+        <value key="enabled">True</value>
+        <value key="sortable">False</value>
+        <value key="operations">
+            <element>plone.app.querystring.operation.string.showInactive</element>
+        </value>
+        <value key="vocabulary">plone.app.vocabularies.Roles</value>
+        <value key="group" i18n:translate="">Metadata</value>
+    </records>
+
+</registry>

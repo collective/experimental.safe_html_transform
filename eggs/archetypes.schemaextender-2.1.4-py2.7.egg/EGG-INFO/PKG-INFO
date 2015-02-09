@@ -1,0 +1,457 @@
+Metadata-Version: 1.1
+Name: archetypes.schemaextender
+Version: 2.1.4
+Summary: Dynamically extend Archetypes schemas with named adapters.
+Home-page: http://pypi.python.org/pypi/archetypes.schemaextender
+Author: Florian Schulze
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL
+Description: Introduction
+        ============
+        
+        This package allows you to modify an Archetypes schema, using simple
+        adapters. This can be used to add new fields, reorder fields and fieldsets
+        or make other changes.
+        
+        The most common use of schema extension is to allow add-on products to
+        enhance standard Plone content types, for example by adding an option
+        that can be set to toggle special behaviour.
+        
+        schemaextender hooks into the Archetypes framework by registering
+        an ISchema adapter for BaseContent and BaseFolder, making it responsible
+        for providing the schema for all types derived from those classes. This
+        includes all standard Plone content types. Since only one ISchema adapter
+        can be active schemaextender provides its own mechanism to modify schemas
+        using named adapters. Named adapters are allowing to register more than one
+        schemaextender per adapted interface.
+        
+        There are three types of adapters available:
+        
+        * ISchemaExtender: using this adapter you can add new fields to a schema.
+        
+        * IOrderableSchemaExtender: this adapters makes it possible to both add
+          new fields and reorder fields. This is more costly than just adding new
+          fields.
+        
+        * IBrowserLayerAwareExtender: this adapters are making use of
+          plone.browserlayer, so that the extender is only available if a layer is
+          registered.
+        
+        * ISchemaModifier: this is a low-level hook that allows direct manipulation
+          of the schema. This can be very dangerous and should never be used if one
+          does not know exactly what she/he is doing!
+        
+        
+        The adapter types are documented in the ''interfaces.py'' file in
+        archetypes.schemaextender.
+        
+        
+        Simple example
+        ==============
+        
+        As an example we will add a simple boolean field to the standard
+        Plone document type. First we need to create a field class::
+        
+             from Products.Archetypes.public import BooleanField
+             from archetypes.schemaextender.field import ExtensionField
+        
+             class MyBooleanField(ExtensionField, BooleanField):
+                 """A trivial field."""
+        
+        schemaextender can not use the standard Archetypes fields directly
+        since those rely on the class generation logic generating accessors
+        and mutator methods. By using the ExtensionField mix-in class we can
+        still use them. Make sure the ExtensionField mix-in comes first, so it
+        properly overwrites the standard methods.
+        
+        Next we have to create an adapter that will add this field::
+        
+            from zope.component import adapts
+            from zope.interface import implements
+            from archetypes.schemaextender.interfaces import ISchemaExtender
+            from Products.Archetypes.public import BooleanWidget
+            from Products.ATContentTypes.interface import IATDocument
+        
+            class PageExtender(object):
+                adapts(IATDocument)
+                implements(ISchemaExtender)
+        
+        
+                fields = [
+                    MyBooleanField("super_power",
+                    widget = BooleanWidget(
+                        label="This page has super powers")),
+                        ]
+        
+                def __init__(self, context):
+                    self.context = context
+        
+                def getFields(self):
+                    return self.fields
+        
+        Try to store the fields on the class, that way they aren't created each
+        time the getFields method gets called. Generally you should make sure
+        getFields does as few things as possible, because it's called very often.
+        
+        The final step is registering this adapter with the Zope component
+        architecture. Since we already declared the interface we provide and
+        which type of object we adapt this can be done very quickly in
+        configure.zcml (assuming you put the code above in a file extender.py)::
+        
+            <configure xmlns="http://namespaces.zope.org/zope"
+                       xmlns:five="http://namespaces.zope.org/five">
+        
+                <include package="archetypes.schemaextender" />
+                <adapter factory=".extender.PageExtender" />
+            </configure>
+        
+        Custom fields
+        =============
+        
+        If you want you can make more complicated field types as well. The only
+        requirement is that you need to have ExtensionField as the first parent
+        class for your field type. As an example here is a field that toggles a
+        marker interface on an object::
+        
+            from zope.interface import Interface
+            from zope.interface import alsoProvides
+            from zope.interface import noLongerProvides
+            from Products.Archetypes.public import BooleanField
+            from archetypes.schemaextender.field import ExtensionField
+        
+            def addMarkerInterface(obj, *ifaces):
+                for iface in ifaces:
+                    if not iface.providedBy(obj):
+                        alsoProvides(obj, iface)
+        
+        
+            def removeMarkerInterface(obj, *ifaces):
+                for iface in ifaces:
+                    if iface.providedBy(obj):
+                        noLongerProvides(obj, iface)
+        
+        
+            class ISuperPower(Interface):
+                """Marker interface for classes that can do amazing things."""
+        
+        
+            class InterfaceMarkerField(ExtensionField, BooleanField):
+                def get(self, instance, **kwargs):
+                    return ISuperPower.providedBy(instance)
+        
+                def getRaw(self, instance, **kwargs):
+                    return ISuperPower.providedBy(instance)
+        
+                def set(self, instance, value, **kwargs):
+                    if value:
+                        addMarkerInterface(instance, ISuperPower)
+                    else:
+                        removeMarkerInterface(instance, ISuperPower)
+        
+        Layer-aware example
+        ===================
+        
+        By using ``archetypes.schemaextender.IBrowserLayerAwareExtender`` the
+        extender is only applied if a specific browser layer is installed on the site.
+        
+        .. note ::
+        
+                You should always use IBrowserLayerAwareExtender on configurations
+                where there can be multiple Plone sites on a single Zope application server.
+                Otherwise extenders are applied on every site, unconditionally.
+        
+        Below is an example of ``extender.py`` which adds new field on *Dates* edit tab::
+        
+                """
+        
+                    Retrofit re-review dates to Archetypes schema.
+        
+                """
+        
+                __docformat__ = "epytext"
+        
+                from zope.component import adapts
+                from zope.interface import implements
+        
+                from Products.Archetypes.public import BooleanWidget
+                from Products.ATContentTypes.interface import IATDocument
+                from Products.Archetypes import public as atapi
+                from Products.Archetypes.interfaces import IBaseContent
+        
+                from archetypes.schemaextender.field import ExtensionField
+                from archetypes.schemaextender.interfaces import (
+                  ISchemaExtender, IOrderableSchemaExtender, IBrowserLayerAwareExtender)
+        
+                # Your add-on browserlayer
+                from your.package.interfaces import IAddOnInstalled
+        
+                class ExtensionDateField(ExtensionField, atapi.DateTimeField):
+                    """ Retrofitted date field """
+        
+        
+                class RevisitExtender(object):
+                    """ Include revisit date on all objects.
+        
+                    An example extended which will create a new field on Dates
+                    tab between effective date and expiration date.
+                    """
+        
+                    # This extender will apply to all Archetypes based content
+                    adapts(IBaseContent)
+        
+                    # We use both orderable and browser layer aware sensitive properties
+                    implements(IOrderableSchemaExtender, IBrowserLayerAwareExtender)
+        
+                    # Don't do schema extending unless our add-on product is installed on Plone site
+                    layer = IAddOnInstalled
+        
+                    fields = [
+                        ExtensionDateField("revisitDate",
+                            schemata="dates",
+                            widget = atapi.CalendarWidget(
+                                label="Review Date",
+                                description=(u"When this date is reached, the content "
+                                             u"will be visible in the review task list"),
+                                show_hm=False,
+                            ),
+                        )
+                    ]
+        
+                    def __init__(self, context):
+                        self.context = context
+        
+                    def getOrder(self, schematas):
+                        """ Manipulate the order in which fields appear.
+        
+                        @param schematas: Dictonary of schemata name -> field lists
+        
+                        @return: Dictionary of reordered field lists per schemata.
+                        """
+                        schematas["dates"] = ['effectiveDate', 'revisitDate', 'expirationDate',
+                                              'creation_date', 'modification_date']
+        
+                        return schematas
+        
+                    def getFields(self):
+                        """
+                        @return: List of new fields we contribute to content.
+                        """
+                        return self.fields
+        
+        Note: since the above example has two interfaces in its ``implements``
+        line, you will get an error when your Zope instance starts up::
+        
+                TypeError: Missing 'provides' attribute
+        
+        This means we need to be more explicit in our zcml configuration and
+        specify which of the two interfaces is provided by our adapter::
+        
+                <adapter factory=".extender.RevisitExtender"
+                    provides="archetypes.schemaextender.interfaces.ISchemaExtender" />
+        
+        Changelog
+        =========
+        
+        2.1.4 (2014-09-08)
+        ------------------
+        
+        - archetypes.schemaextender assumes presence of getRaw method which
+          ComputedField does not provide
+          https://dev.plone.org/ticket/11315
+          [anthonygerrard]
+        
+        2.1.3 (2014-02-26)
+        ------------------
+        
+        - Fix tests [kiorky]
+        
+        2.1.2 (2013-01-13)
+        ------------------
+        
+        - PEP8 changes, documentation updates.
+          [maurits]
+        
+        2.1.1 - 2011-07-04
+        ------------------
+        
+        * Acquire request object via local site hook if object is not
+          acquisition-wrapped (in ``cachingInstanceSchemaFactory``). This
+          fixes caching issues with objects rendered using DTML. Note that
+          this is likely a bug in the ``DocumentTemplate`` code. Ideally, the
+          issue should be resolved there.
+          [malthe]
+        
+        2.1 - 2011-01-03
+        ----------------
+        
+        * Use plone.uuid to look up content UUIDs.
+          [toutpt, davisagli]
+        
+        * Added example of how to use ordered extenders and browser layer aware
+          extenders.
+          [miohtama]
+        
+        2.0.3 - 2010-07-07
+        ------------------
+        
+        * Added back the ``caching.zcml`` file, but have it load ``configure.zcml``.
+          This makes it easier to write Plone 3 / 4 compatible code.
+          [hannosch]
+        
+        * Factored out the condition to disable the cache during tests into a module
+          global variable called ``CACHE_ENABLED``.
+          [hannosch]
+        
+        2.0.2 - 2010-06-13
+        ------------------
+        
+        * Changed the schema cache again, to use the id() only as a fallback when there
+          is not yet an UID assigned. The id() is unstable with Acquisition wrappers
+          and ZODB level ghosting of objects. We provide an explicit API for disabling
+          the cache instead.
+          [hannosch]
+        
+        * Avoid deprecation warnings under Zope 2.13.
+          [hannosch]
+        
+        * Change the schema cache key to avoid an issue during content migration when
+          there might be two objects that have the same UID but different schemata.
+          Now concatenating the Python id() with the UID (id() alone isn't good enough,
+          as two objects with non-overlapping lifetimes may have the same id() value).
+          Fixes http://dev.plone.org/plone/ticket/10637.
+          [davisagli]
+        
+        2.0.1 - 2010-05-23
+        ------------------
+        
+        * Disable the schema cache during test runs.
+          [hannosch]
+        
+        2.0 - 2010-05-23
+        ----------------
+        
+        * Removed the ``caching.zcml`` and enabled caching by default. You can use
+          a different caching implementation by using an ``overrides.zcml`` file.
+          [hannosch]
+        
+        * Added ``z3c.autoinclude`` entry point to mark this as a Plone plugin.
+          [hannosch]
+        
+        1.6 - 2010-03-22
+        ----------------
+        
+        * Fix index accessor to support setting custom accessor methods.
+          [witsch]
+        
+        1.5 - 2009-11-18
+        ----------------
+        
+        * Fixed test failure in usage.txt.
+          [hannosch]
+        
+        * Standardized package metadata layout.
+          [hannosch]
+        
+        1.4 - 2009-11-05
+        ----------------
+        
+        * Fix schema copying to also include properties and layers.
+          [maerteijn]
+        
+        1.3 - 2009-10-20
+        ----------------
+        
+        * Refactored the TranslatableExtensionField getMutator to directly reuse the
+          generatedMutatorWrapper from LinguaPlone itself. This avoids duplicating the
+          logic and lets schemaextender fields use the special reference field
+          handling introduced in LinguaPlone. This change introduces a version
+          requirement for LinguaPlone of at least 3.0b6.
+          [hannosch]
+        
+        1.2 - 2009-10-10
+        ----------------
+        
+        * Add `ISchema` adapter using simple caching on the request in order to
+          avoid redundant calculation of the (extended) schema.  The adapter is
+          not enabled by default and can be activated by loading `caching.zcml`.
+          [witsch]
+        
+        * Avoid using the overridden `+` operator when copying the original schema
+          as this will needlessly validate all fields again.
+          [witsch]
+        
+        * Added missing changelog entry.
+          [hannosch, woutervh]
+        
+        1.1 - 2009-06-03
+        ----------------
+        
+        * Added support for LinguaPlone language independent fields, by seamlessly
+          using a new TranslatableExtensionField when LP is installed.
+          [hannosch]
+        
+        * Added a proper interface to the IExtensionField.
+          [hannosch]
+        
+        * Adjusted tests for Plone 3.3.
+          [hannosch]
+        
+        * Minor adjustment in documentation: a) don't adapt the class in the example,
+          b) explain why named adapters are used.
+          [jensens]
+        
+        * Schema modifiers now also browserlayer-aware.
+          [jessesnyder]
+        
+        1.0 - 2008-07-17
+        ----------------
+        
+        * No changes since 1.0rc1.
+        
+        1.0rc1 - 2008-04-07
+        -------------------
+        
+        * Added optional plone.browserlayer support. Extenders implementing
+          IBrowserLayerAwareExtender need to have a layer attribute. Those extenders
+          are taken into account only if the specified layer is active.
+          [jensens]
+        
+        1.0b1 - 2007-12-07
+        ------------------
+        
+        * Schema modifiers implementing ISchemaModifier are now responsible for
+          copying fields they modify. See README and the doc strings.
+          [fschulze]
+        
+        * Added a simple benchmark and made some optimizations by avoiding a lot
+          of field copying.
+          [fschulze, wiggy]
+        
+        * Use a marker interface instead of overrides.zcml - this means you don't
+          need to muck with overrides in dependent products.
+          [optilude]
+        
+        * Added code to allow addition of new schemata. We need an ordered
+          dictionary to not bork the order of the schemata.
+          [jensens]
+        
+        * Add a small benchmark utility.
+          [wichert]
+        
+        * Replace the high-level test with unit-tests and extend the test coverage.
+          [wichert]
+        
+        * Rewrite the README to be more human readable.
+          [wichert]
+        
+        
+        1.0a1 - 2007-10-15
+        ------------------
+        
+        * First public release.
+        
+Keywords: Archetypes Schema extend
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Framework :: Zope2
+Classifier: Programming Language :: Python

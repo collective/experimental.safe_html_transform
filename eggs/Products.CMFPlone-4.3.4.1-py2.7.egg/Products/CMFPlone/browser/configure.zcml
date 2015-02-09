@@ -1,0 +1,97 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           xmlns:five="http://namespaces.zope.org/five">
+
+  <include file="admin.zcml" />
+
+  <class class="Products.CMFPlone.Portal.PloneSite">
+    <implements interface="plone.app.layout.navigation.interfaces.INavigationRoot" />
+  </class>
+
+  <class class=".navtree.NavtreeQueryBuilder">
+      <allow interface="plone.app.layout.navigation.interfaces.INavigationQueryBuilder" />
+  </class>
+
+  <browser:page
+      for="*"
+      name="breadcrumbs_view"
+      class=".navigation.PhysicalNavigationBreadcrumbs"
+      permission="zope.Public"
+      allowed_attributes="breadcrumbs"
+      />
+
+  <browser:page
+      for="plone.app.layout.navigation.interfaces.INavigationRoot"
+      name="breadcrumbs_view"
+      class=".navigation.RootPhysicalNavigationBreadcrumbs"
+      permission="zope.Public"
+      allowed_attributes="breadcrumbs"
+      />
+
+  <browser:page
+      for="*"
+      name="plone_javascript_variables.js"
+      class=".jsvariables.JSVariables"
+      permission="zope.Public"
+      />
+
+  <browser:page
+      for="*"
+      name="navtree_builder_view"
+      class=".navigation.CatalogNavigationTree"
+      permission="zope.Public"
+      allowed_attributes="navigationTree"
+      />
+
+  <browser:page
+      for="*"
+      name="sitemap_builder_view"
+      class=".navigation.CatalogSiteMap"
+      permission="zope.Public"
+      allowed_attributes="siteMap"
+      />
+
+  <browser:page
+      for="*"
+      name="portal_tabs_view"
+      class=".navigation.CatalogNavigationTabs"
+      permission="zope.Public"
+      allowed_attributes="topLevelTabs"
+      />
+
+  <browser:page
+      for="*"
+      name="plone"
+      class=".ploneview.Plone"
+      permission="zope.Public"
+      allowed_interface=".interfaces.IPlone"
+      />
+
+  <browser:page
+      for="*"
+      name="sitemap"
+      class=".sitemap.SitemapView"
+      template="templates/sitemap.pt"
+      permission="zope.Public"
+      allowed_interface=".interfaces.ISitemapView"
+      />
+
+   <adapter for="*
+                .interfaces.INavigationTree"
+            factory=".navtree.DefaultNavtreeStrategy"
+            provides="plone.app.layout.navigation.interfaces.INavtreeStrategy" />
+
+   <adapter for="*
+                .interfaces.ISiteMap"
+            factory=".navtree.SitemapNavtreeStrategy"
+            provides="plone.app.layout.navigation.interfaces.INavtreeStrategy" />
+
+  <!-- Useful for cross domain iframe proxying -->
+  <browser:resource
+      file="blank.html"
+      name="blank.html"
+      />
+
+  <include package=".syndication" />
+
+</configure>

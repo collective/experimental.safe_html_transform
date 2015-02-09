@@ -1,0 +1,22 @@
+
+.. include:: ../../../../../README.txt
+
+Contents
+========
+
+.. toctree::
+   :maxdepth: 2
+
+   widgets
+   converters
+   issues
+
+.. include:: ../../../../../HISTORY.txt
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+

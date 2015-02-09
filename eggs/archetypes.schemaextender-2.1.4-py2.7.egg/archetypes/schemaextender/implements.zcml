@@ -1,0 +1,13 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+    <!-- Let any Archetypes content type be extensible -->
+    <class class="Products.Archetypes.BaseContent.BaseContent">
+        <implements interface=".interfaces.IExtensible" />
+    </class>
+
+    <class class="Products.Archetypes.BaseFolder.BaseFolder">
+        <implements interface=".interfaces.IExtensible" />
+    </class>
+
+</configure>

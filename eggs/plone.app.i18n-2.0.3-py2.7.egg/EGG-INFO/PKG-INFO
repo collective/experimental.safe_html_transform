@@ -1,0 +1,198 @@
+Metadata-Version: 1.1
+Name: plone.app.i18n
+Version: 2.0.3
+Summary: Plone specific i18n extensions.
+Home-page: http://pypi.python.org/pypi/plone.app.i18n
+Author: Plone Foundation
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL version 2
+Description: Overview
+        ========
+        
+        Plone specific i18n extensions.
+        
+        Changelog
+        =========
+        
+        2.0.3 (2014-10-22)
+        ------------------
+        
+        - Fix url to switchLanguage to include the view
+          [Gagaro]
+        
+        - Ported to plone.app.testing
+          [tomgross]
+        
+        
+        2.0.2 (2013-01-13)
+        ------------------
+        
+        
+        2.0.1 - 2011-06-26
+        ------------------
+        
+        - Use template parameter in language selector's viewlet zcml declaration. Make
+          it easier to customize in add-ons.
+          [toutpt]
+        
+        2.0 - 2010-07-18
+        ----------------
+        
+        - Update license to GPL version 2 only.
+          [hannosch]
+        
+        2.0b1 - 2010-04-10
+        ------------------
+        
+        - Updated language selector markup to match the one in LinguaPlone.
+          [hannosch]
+        
+        - Avoid extra empty span inside the language selector.
+          [hannosch]
+        
+        - Move the language selector viewlet to the portal header viewlet manager.
+          [davisagli]
+        
+        1.0.8 - 2010-01-24
+        ------------------
+        
+        - Optimize the language selector available check. We really don't need to get
+          the entire list of all available languages, if we don't show the selector.
+          [hannosch]
+        
+        1.0.7 - 2009-07-28
+        ------------------
+        
+        - Changed the language selector viewlet, so in case 'native' is not
+          present (combined languages), use the name. This closes
+          http://dev.plone.org/plone/ticket/9318
+          [igbun]
+        
+        1.0.6 - 2009-03-07
+        ------------------
+        
+        - Sort languages as shown in the user interface by order in portal_languages
+          supported_langs variable. This allows to sort languages through GenericSetup.
+          [buechler, nouri]
+        
+        - Reformat history.
+          [hannosch]
+        
+        1.0.5 - August 18, 2008
+        -----------------------
+        
+        - Changed the language selector viewlet to use the native name instead of
+          always showing the English name. This closes
+          http://dev.plone.org/plone/ticket/7103.
+          [hannosch]
+        
+        - Allow tests to force display of selector viewlet by setting
+          always_show_selector = True on the portal_languages tool.
+          [stefan]
+        
+        1.0.4 - April 19, 2008
+        ----------------------
+        
+        - Make the language selector deal with languages for which no flag is
+          defined. Ported over from LinguaPlone.
+          [wichert]
+        
+        
+        1.0.3 - January 31, 2008
+        ------------------------
+        
+        - Fixed bug: all available languages in the languageselector box were
+          always marked as selected, at least when using language cookies. In
+          practice this meant the last language was always shown in the box and
+          this language was actually never used and could not be set.
+          [maurits]
+        
+        - Added more tests. 100% test coverage now.
+          [hannosch]
+        
+        - Added more tests for language and countries utilities. Fixed some
+          call-by-reference bugs with lists found while writing those.
+          [hannosch]
+        
+        
+        1.0.2 - January 9, 2008
+        -----------------------
+        
+        - Undo the damage from r17682 which removed the language code from the
+          return value of LanguageSelector.languages. This broke the language
+          selectors, which is mostly noticeable by LinguaPlone no longer working.
+          [wichert]
+        
+        
+        1.0.1 - December 24, 2007
+        -------------------------
+        
+        - Fixed the languages method of the selector to include the native
+          language code.
+          [wichert, hannosch]
+        
+        - Fixed stupid bug in using super().
+          [hannosch]
+        
+        
+        1.0 - August 13, 2007
+        ---------------------
+        
+        - No changes.
+          [hannosch]
+        
+        
+        1.0rc1 - July 9, 2007
+        ---------------------
+        
+        - Removed some left over tool init stuff. The local utilities are not used
+          as tools anymore.
+          [hannosch]
+        
+        - Only show the language selector viewlet when cookie language negotiation
+          is enabled.
+          [hannosch]
+        
+        
+        1.0b3 - May 1, 2007
+        -------------------
+        
+        - Added id to language selector markup. Moved language selector to the
+          right side in the breadcrumbs line.
+          [fschulze]
+        
+        - Fixed spelling error.
+          [wichert]
+        
+        - Use getToolByName instead of getUtility again. Updated language chooser
+          viewlet to be more defensive, when there's no language tool available.
+          This closes http://dev.plone.org/plone/ticket/6559.
+          [hannosch]
+        
+        
+        1.0b2 - March 23, 2007
+        ----------------------
+        
+        - Replaced getToolByName with getUtility.
+          [hannosch]
+        
+        
+        1.0b1 - March 5, 2007
+        ---------------------
+        
+        - Initial implementation.
+          [hannosch]
+        
+        - Initial package structure.
+          [zopeskel]
+        
+Keywords: plone i18n
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Plone :: 5.0
+Classifier: Framework :: Zope2
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.7

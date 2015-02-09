@@ -1,0 +1,43 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:five="http://namespaces.zope.org/five">
+
+  <include zcml:condition="installed Products.LinguaPlone" 
+           package="Products.LinguaPlone" />
+
+  <include file="browser.zcml"/>
+
+  <include package=".exportimport" />
+  <include package="plone.i18n.normalizer" />
+
+  <include package="archetypes.referencebrowserwidget" />
+
+  <five:deprecatedManageAddDelete
+      class=".content.document.ATDocument" />
+  <five:deprecatedManageAddDelete
+      class=".content.event.ATEvent" />
+  <five:deprecatedManageAddDelete
+      class=".content.file.ATFile" />
+  <five:deprecatedManageAddDelete
+      class=".content.folder.ATFolder" />
+  <five:deprecatedManageAddDelete
+      class=".content.folder.ATBTreeFolder" />
+  <five:deprecatedManageAddDelete
+      class=".content.image.ATImage" />
+  <five:deprecatedManageAddDelete
+      class=".content.link.ATLink" />
+  <five:deprecatedManageAddDelete
+      class=".content.newsitem.ATNewsItem" />
+  <five:deprecatedManageAddDelete
+      class=".content.topic.ATTopic" />
+  <five:deprecatedManageAddDelete
+      class=".criteria.base.ATBaseCriterion" />
+
+  <adapter
+    factory="Products.Archetypes.uuid.referenceableUUID"
+    provides="plone.uuid.interfaces.IUUID"
+    for=".criteria.path.ATPathCriterion"
+    />
+
+</configure>

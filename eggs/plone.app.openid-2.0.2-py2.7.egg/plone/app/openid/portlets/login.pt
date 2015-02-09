@@ -1,0 +1,50 @@
+<tal:block i18n:domain="plone">
+
+  <dl class="portlet portletOpenIdLogin">
+    <dt class="portletHeader">
+      <span class="portletTopLeft"></span>
+      <a href="#"
+         class="tile"
+         tal:attributes="href view/login_form"
+         i18n:translate="box_sign_in">OpenID Login</a>
+      <span class="portletTopRight"></span>
+    </dt>
+
+    <dd class="portletItem odd"
+        tal:define="ac_identity string:__ac_identity_url;">
+      <form tal:attributes="action view/login_form"
+            method="post"
+            class="openidLoginForm">
+
+        <input type="hidden" name="form.submitted" value="1" />
+        <input type="hidden" name="came_from" value=""
+               tal:attributes="value context/@@plone_context_state/current_base_url" />
+
+        <div class="field">
+          <label for="" i18n:translate="label_identity_url"
+                 tal:attributes="for ac_identity">OpenID URL</label>
+          <br/>
+
+          <input type="text"
+                  size="13"
+                  name="__ac_identity_url"
+                  style=""
+                  tal:attributes="name ac_identity;
+                                  id ac_identity;
+                                  style string:background: url(${here/portal_url}/openid-icon.gif) no-repeat;; padding-left: 16px;"
+           />
+         </div>
+
+         <div class="formControls">
+           <input class="context"
+                  type="submit"
+                  name="openid_submit"
+                  value="Log in"
+                  i18n:attributes="value label_openid_log_in;"
+                  />
+
+          </div>
+       </form>
+    </dd>
+  </dl>
+</tal:block>

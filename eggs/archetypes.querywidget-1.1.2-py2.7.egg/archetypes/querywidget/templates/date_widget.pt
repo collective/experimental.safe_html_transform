@@ -1,0 +1,23 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      i18n:domain="plone">
+
+    <body>
+         <metal:widget define-macro="widget"
+         	tal:define="fieldName fieldName|string:query;
+         				      value value|nothing">
+
+         <div class="querywidget dateWidget">
+            <input autocomplete="off"
+            	   type="string"
+            	   class="queryvalue"
+            	   tal:attributes="name python:str(fieldName)+'.v:records';
+            	   				   value value"
+            	   />
+          </div>
+          </metal:widget>
+
+    </body>
+</html>

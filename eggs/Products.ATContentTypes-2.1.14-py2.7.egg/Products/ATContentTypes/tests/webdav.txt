@@ -1,0 +1,611 @@
+-*- coding: utf-8 -*-
+
+============
+WebDAV tests
+============
+
+ATContentTypes supports WebDAV and FTP uploads with small differences
+from ordinary AT based content types.
+
+First, we are going to setup an environment so we can test that stuff
+is acquired or not acquired at the right times.
+
+  >>> import os
+  >>> from Products.Archetypes.tests.attestcase import user_name
+  >>> from Products.Archetypes.tests.attestcase import user_password
+  >>> from Products.Archetypes.tests.atsitetestcase import portal_name
+  >>> from Products.ATContentTypes.tests.atcttestcase import test_home
+
+  Input directory with test files
+  >>> input_dir = os.path.join(test_home, 'input')
+
+  CMF and Plone sites may have different default titles so we set one
+  >>> self.setRoles(['Manager'])
+  >>> self.portal.setTitle('Portal Title')
+  >>> self.setRoles(['Member'])
+
+  Use the member's home folder as play ground for the tests
+  >>> folder = self.folder
+  >>> fpath = '/'.join(folder.getPhysicalPath())
+
+  Plone's default error message template is too verbose and far too long
+  >>> portal.default_error_message = None
+
+WebDAV PUT
+==========
+
+ATContentTypes registers several file extensions and mimetypes in the content
+type registry. WebDAV and FTP uploads should create the rigt content types.
+
+Document
+--------
+
+  >>> input = open(os.path.join(input_dir, 'test-document.txt'))
+
+  Create object by content type
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-document HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... Content-Type: text/html; charset="utf-8"
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> document = self.folder['test-document']
+  >>> input.seek(0)
+
+  >>> print document.getPortalTypeName()
+  Document
+
+  >>> print document.Title()
+  test document
+
+  >>> print document.getText()
+  <em>test document body text</em>
+  <BLANKLINE>
+
+  >>> print document.Description()
+  test document description
+
+  >>> print document.getContentType()
+  text/html
+
+  >>> print document.Subject()
+  ('test keyword 1', 'test keyword 2')
+
+  >>> print document.Contributors()
+  ('John Dow', 'Example User')
+
+  >>> print document.Creators()
+  ('test_user_1_',)
+
+  >>> print document.effective_date.ISO()
+  2005-01-01...00:00:00...
+
+  >>> print document.expiration_date.ISO()
+  2005-02-01...00:00:00...
+
+  >>> print document.Language()
+  de
+
+  >>> print document.Rights()
+  GPL
+
+  >>> print document.getLayout()
+  document_view
+
+  >>> del document
+
+  Create object by file extension
+
+  >>> print http(r"""
+  ... PUT /%s/test-document2.txt HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... %s""" % (fpath, user_name, user_password, "a test"))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> document = self.folder['test-document2.txt']
+  >>> input.seek(0)
+
+  >>> print document.getPortalTypeName()
+  Document
+
+  >>> print document.Title()
+  test-document2.txt
+
+  >>> print document.getText()
+  <p>a test</p>
+
+  >>> del document
+  >>> input.close()
+
+Event
+-----
+
+  >>> input = open(os.path.join(input_dir, 'test-event.txt'), 'rb')
+
+  Create an object by extension
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-event.event HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  XXX: .event should be removed?
+
+  >>> event = self.folder['test-event.event']
+
+  >>> print event.getPortalTypeName()
+  Event
+
+  >>> print event.Title()
+  test event
+
+  >>> del event
+  >>> input.close()
+
+File
+----
+
+  >>> input = open(os.path.join(input_dir, 'test.zip'), 'rb')
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-file HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... Content-Type: application/zip
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> file = self.folder['test-file']
+
+  >>> print file.getPortalTypeName()
+  File
+
+  manage_afterPUT sets the Title according to the file name
+
+  >>> print file.Title()
+  test-file
+
+  >>> input.seek(0)
+  >>> len(str(file.getFile())), len(input.read())
+  (145, 145)
+  >>> input.seek(0)
+  >>> file.getFile().data == input.read()
+  True
+
+  >>> print file.getContentType()
+  application/zip
+
+  >>> del file
+
+File, by Extension
+------------------
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-file.zip HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> file = self.folder['test-file.zip']
+
+  >>> print file.getPortalTypeName()
+  File
+
+  >>> print file.Title()
+  test-file.zip
+
+  >>> print file.getContentType()
+  application/zip
+
+  >>> del file
+  >>> input.close()
+
+OpenOffice 1.0 Text Document, no Content-Type, Extension
+--------------------------------------------------------
+
+  >>> input = open(os.path.join(input_dir, 'test.sxw'), 'rb')
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-file1.sxw HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> file = self.folder['test-file1.sxw']
+
+  >>> print file.getPortalTypeName()
+  File
+
+  manage_afterPUT sets the Title according to the file name
+
+  >>> print file.Title()
+  test-file1.sxw
+
+  >>> input.seek(0)
+  >>> len(str(file.getFile())), len(input.read())
+  (9241, 9241)
+
+  >>> input.seek(0)
+  >>> file.getFile().data == input.read()
+  True
+
+  >>> print file.getContentType()
+  application/vnd.sun.xml.writer
+
+  >>> del file
+  >>> input.close()
+
+OpenOffice 1.0 Text Document, no Content-Type, No Extension
+--------------------------------------------------------
+
+  >>> input = open(os.path.join(input_dir, 'test.sxw'), 'rb')
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-file2 HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> file = self.folder['test-file2']
+
+  >>> print file.getPortalTypeName()
+  File
+
+  manage_afterPUT sets the Title according to the file name
+
+  >>> print file.Title()
+  test-file2
+
+  >>> input.seek(0)
+  >>> len(str(file.getFile())), len(input.read())
+  (9241, 9241)
+
+  >>> input.seek(0)
+  >>> file.getFile().data == input.read()
+  True
+
+  XXX Broken. MimetypesRegistry detects the file as 'text/xml'.
+
+  # >>> print file.getContentType()
+  # application/vnd.sun.xml.writer
+
+  >>> del file
+  >>> input.close()
+
+OpenOffice 1.0 Text Document, w/ Content-Type, No Extension
+--------------------------------------------------------
+
+  >>> input = open(os.path.join(input_dir, 'test.sxw'), 'rb')
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-file3 HTTP/1.1
+  ... Content-Type: application/vnd.sun.xml.writer
+  ... Authorization: Basic %s:%s
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> file = self.folder['test-file3']
+
+  >>> print file.getPortalTypeName()
+  File
+
+  manage_afterPUT sets the Title according to the file name
+
+  >>> print file.Title()
+  test-file3
+
+  >>> input.seek(0)
+  >>> len(str(file.getFile())), len(input.read())
+  (9241, 9241)
+
+  >>> input.seek(0)
+  >>> file.getFile().data == input.read()
+  True
+
+  >>> print file.getContentType()
+  application/vnd.sun.xml.writer
+
+  >>> del file
+  >>> input.close()
+
+Image
+-----
+
+  >>> input = open(os.path.join(input_dir, 'test.gif'), 'rb')
+
+  Create an object by content type
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-image HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... Content-Type: image/gif
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> image = self.folder['test-image']
+
+  >>> print image.getPortalTypeName()
+  Image
+
+  manage_afterPUT sets the Title according to the file name
+
+  >>> print image.Title()
+  test-image
+
+  >>> input.seek(0)
+  >>> len(str(image.getImage().data)), len(input.read())
+  (105, 105)
+  >>> input.seek(0)
+  >>> image.getImage().data == input.read()
+  True
+
+  >>> print image.getContentType()
+  image/gif
+
+  >>> del image
+
+Image, by Extension
+-------------------
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-image.gif HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> image = self.folder['test-image.gif']
+
+  >>> print image.getPortalTypeName()
+  Image
+
+  >>> print image.Title()
+  test-image.gif
+
+  >>> print image.getContentType()
+  image/gif
+
+  >>> del image
+
+  Now test the name mangeling. White spaces are replaces by a dash.
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test%%20my%%20image.gif HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  XXX: Note that name mangeling for WebDAV PUTs are not supported at the
+  moment!
+
+  >>> image = self.folder['test my image.gif']
+
+  >>> print image.getPortalTypeName()
+  Image
+
+  >>> print image.Title()
+  test my image.gif
+
+  >>> print image.getContentType()
+  image/gif
+
+  >>> del image
+  >>> input.close()
+
+Link
+----
+
+  >>> input = open(os.path.join(input_dir, 'test-link.txt'), 'rb')
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-link.link HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  XXX: .link should be removed?
+
+  >>> link = self.folder['test-link.link']
+
+  >>> print link.getPortalTypeName()
+  Link
+
+  >>> print link.Title()
+  test link
+
+  >>> del link
+  >>> input.close()
+
+News Item
+---------
+
+  >>> input = open(os.path.join(input_dir, 'test-news-item.txt'), 'rb')
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-newsitem.news HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  XXX: .news should be removed?
+
+  >>> news = self.folder['test-newsitem.news']
+
+  >>> print news.getPortalTypeName()
+  News Item
+
+  >>> print news.Title()
+  test news item
+
+  >>> del news
+  >>> input.close()
+
+HTML Page - verify that title is extracted
+-------------------------------------------
+
+  >>> input = open(os.path.join(input_dir, 'test-html-title.html'), 'rb')
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-html-title.html HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... Depth: 0
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> htdoc = self.folder['test-html-title.html']
+  >>> print htdoc.Title()
+  HTML Title
+  >>> print htdoc.Format()
+  text/html
+
+XHTML Page - verify that title and body are extracted
+------------------------------------------------------
+
+  >>> input = open(os.path.join(input_dir, 'test-xhtml-title.html'), 'rb')
+
+  >>> input.seek(0)
+  >>> print http(r"""
+  ... PUT /%s/test-xhtml-title.html HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... Depth: 0
+  ...
+  ... %s""" % (fpath, user_name, user_password, input.read()))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> htdoc = self.folder['test-xhtml-title.html']
+  >>> print htdoc.Title()
+  HTML Title
+  >>> print htdoc.Format()
+  text/html
+
+  >>> print htdoc.CookedBody()
+  <BLANKLINE>
+  <h1>A body</h1>
+  <BLANKLINE>
+
+WebDAV MKCOL
+============
+
+Need manager roles here:
+
+  >>> self.setRoles(['Manager'])
+
+Folder
+------
+
+  >>> print http(r"""
+  ... MKCOL /%s/test-folder-name HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... """ % (fpath, user_name, user_password))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> self.folder['test-folder-name'].Title()
+  'test-folder-name'
+
+BTreeFolder
+-----------
+
+Need to make a BTreeFolder manually, and then do a MKCOL inside it:
+
+  >>> _ = self.folder.invokeFactory('Large Plone Folder', 'test-btree')
+
+  >>> print http(r"""
+  ... MKCOL /%s/test-btree/test-btreefolder-name HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... """ % (fpath, user_name, user_password))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> self.folder['test-btree']['test-btreefolder-name'].Title()
+  'test-btreefolder-name'
+
+PUT Mangling
+------------
+
+Now for the real thing, doing a PUT request, back to Member role:
+
+  >>> self.setRoles(['Member'])
+
+  >>> print http(r"""
+  ... PUT /%s/Foto%%20do%%20Parana.jpg HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... """ % (fpath, user_name, user_password))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> 'Foto do Parana.jpg' in self.folder
+  True
+
+  >>> image = self.folder['Foto do Parana.jpg']
+
+  >>> print image.getPortalTypeName()
+  Image
+
+  >>> print image.Title()
+  Foto do Parana.jpg
+
+  >>> self.setRoles(['Manager'])
+
+MKCOL Mangling
+--------------
+
+  >>> print http(r"""
+  ... MKCOL /%s/Fotos%%20de%%20Jurere HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ...
+  ... """ % (fpath, user_name, user_password))
+  HTTP/1.1 201 Created
+  ...
+
+  >>> 'Fotos de Jurere' in self.folder
+  True
+
+  >>> print self.folder['Fotos de Jurere'].Title()
+  Fotos de Jurere

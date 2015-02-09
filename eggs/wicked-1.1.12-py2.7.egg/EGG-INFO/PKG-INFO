@@ -1,0 +1,97 @@
+Metadata-Version: 1.1
+Name: wicked
+Version: 1.1.12
+Summary: wicked is a compact syntax for doing wiki-like content linking and creation in zope and plone
+Home-page: http://pypi.python.org/pypi/wicked
+Author: whit
+Author-email: wicked@lists.openplans.org
+License: GPL
+Description: wicked
+        ======
+        
+        Overview
+        --------
+        
+        wicked is a compact syntax for doing wiki-like content linking and creation.
+        
+        Changelog
+        =========
+        
+        1.1.12 (2014-10-13)
+        -------------------
+        
+        - Invalidate cache when object has been moved or copied.
+          [domruf]
+        
+        
+        1.1.11 (2014-04-15)
+        -------------------
+        
+        - Fix tests to work with auto csrf protection.
+          [vangheem]
+        
+        
+        1.1.10 (2012-12-15)
+        -------------------
+        
+        - Fix minor white space test failures in combination with chameleon.
+          [maurits]
+        
+        1.1.9 (2010-09-09)
+        ------------------
+        
+        - Avoid the undeclared libxml2/lxml test dependency with a simplistic regex.
+          [elro]
+        
+        1.1.8 (2010-07-02)
+        ------------------
+        
+        - Avoid using the deprecated five:implements directive.
+          [hannosch]
+        
+        - Avoid any usage of zope.app packages.
+          [hannosch]
+        
+        - Updated package metadata.
+          [hannosch]
+        
+        1.1.8alpha1 (2009-11-18)
+        ------------------------
+        
+        - Don't register WickedFilter for IATContent. All necessary
+          registratons are done for more specific Interfaces per content type
+          in wicked.plone.registration. Having an WickedFilter registered for
+          a content type (interface), but not the other required components
+          like ICacheManager, leads to ComponentLookupErrors.
+          Fixes http://dev.plone.org/plone/ticket/9597
+          [csenger]
+        
+        - Adjusted wicked.at.seeker.AdvQueryMatchingSeeker to no longer use
+          AdvancedQuery. Fixes http://dev.plone.org/plone/ticket/9398
+          [esteele]
+        
+        - Adjusted test setup to make sure that wicked.atcontent is registered as
+          a package before App.FactoryDispatcher's _product_packages gets
+          memoized by Plone 4's monkey patch optimization.
+          [davisagli]
+        
+        1.1.7 - 2009-06-20
+        ------------------
+        
+        - When creating a new content object (to which the wiki link already exists)
+          add the backlink to the new object, not to the context which can be
+          the object that contains the link in case @@wickedadd is used.
+          Fixes http://dev.plone.org/plone/ticket/8731
+          [csenger]
+        
+        1.1.6
+        -----
+        
+        - super-massive black hole. Developed by Whit Morriss and contributors.
+          Details are unknown until 1.1.6 svn unreleased
+        
+Keywords: wiki anti-wiki zope2 plone
+Platform: UNKNOWN
+Classifier: Framework :: Zope2
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python

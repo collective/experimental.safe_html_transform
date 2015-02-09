@@ -1,0 +1,14 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup">
+
+  <genericsetup:upgradeStep
+    source="unknown"
+    destination="1"
+    title="Install formwidget-autocomplete javascript"
+    description=""
+    profile="plone.formwidget.autocomplete:default"
+    handler=".to1.install_formwidget_autocomplete"
+    />
+
+</configure>

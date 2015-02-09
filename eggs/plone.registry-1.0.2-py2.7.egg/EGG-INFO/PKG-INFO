@@ -1,0 +1,1648 @@
+Metadata-Version: 1.1
+Name: plone.registry
+Version: 1.0.2
+Summary: A debconf-like (or about:config-like) registry for storing application settings
+Home-page: http://pypi.python.org/pypi/plone.registry
+Author: Martin Aspeli, Wichert Akkerman, Hanno Schlichting
+Author-email: plone-developers@lists.sourceforge.net
+License: GPL
+Description: ============
+        Introduction
+        ============
+        
+        This package provides debconf-like (or about:config-like) settings registries
+        for Zope applications. A ``registry``, with a dict-like API, is used to get and
+        set values stored in ``records``. Each record contains the actual value, as
+        well as a ``field`` that describes the record in more detail. At a minimum, the
+        field contains information about the type of value allowed, as well as a short
+        title describing the record's purpose.
+        
+        See the following doctests for more details:
+        
+        * ``registry.rst``, which demonstrates how registries and records work
+        * ``events.rst``, which shows the events that are fired from the registry
+        * ``field.rst``, which describes the behaviour of persistent fields
+        
+        ================
+        Using registries
+        ================
+        
+        You can create a new registry simply by instantiating the Registry class. The
+        class and its data structures are persistent, so you can store them in the
+        ZODB. You may want to provide the registry object as local utility for easy
+        access as well, though we won't do that here.
+        
+            >>> from plone.registry import Registry
+            >>> registry = Registry()
+        
+        The registry starts out empty. To access the registry's records, you can use
+        the `records` property. This exposes a dict API where keys are strings and
+        values are objects providing `IRecords`.
+        
+            >>> len(registry.records)
+            0
+        
+        Simple records
+        ==============
+        
+        Let's now create a record. A record must have a name. This should be a dotted
+        name, and contain ASCII characters only. By convention, it should be all
+        lowercase and start with the name of the package that defines the record.
+        
+        It is also possible to create a  number of records based on a single schema
+        interface - see below - but for now, we will focus on simple records.
+        
+        Before we can create the record, we must create the field that describes it.
+        Fields are based on the venerable zope.schema package, but plone.registry
+        only supports certain fields, and disallows use of a few properties even
+        of those. As a rule of thumb, so long as a field stores a Python primitive,
+        it is supported; the same goes for attributes of fields.
+        
+        Thus:
+        
+         * Fields like `Object`, `InterfaceField` and so on are not supported
+         * A custom `constraint` method is not supported.
+         * The `order` attribute will always be set to -1
+         * For Choice fields, only named vocabularies are supported: you cannot
+           reference a particular source or source binder
+         * The key_type and value_type properties of Dict, List, Tuple, Set and
+           Frozenset may only contain persistent fields.
+        
+        See field.text for more details.
+        
+        Creating a record
+        -----------------
+        
+        The supported field types are found in the module plone.registry.field. These
+        are named the same as the equivalent field in zope.schema, and have the same
+        constructors. You must use one of these fields when creating records directly.
+        
+            >>> from plone.registry import field
+            >>> age_field = field.Int(title=u"Age", min=0, default=18)
+        
+            >>> from plone.registry import Record
+            >>> age_record = Record(age_field)
+        
+        Note that in this case, we did not supply a value. The value will therefore
+        be the field default.
+        
+            >>> age_record.value
+            18
+        
+        We can set a different value, either in the `Record` constructor or via the
+        `value` attribute:
+        
+            >>> age_record.value = 2
+            >>> age_record.value
+            2
+        
+        Note that the value is validated against the field:
+        
+            >>> age_record.value = -1
+            Traceback (most recent call last):
+            ...
+            TooSmall: (-1, 0)
+        
+            >>> age_record.value
+            2
+        
+        We can now add the field to the registry. This is done via the `record`
+        dictionary.
+        
+            >>> 'plone.registry.tests.age' in registry
+            False
+            >>> registry.records['plone.registry.tests.age'] = age_record
+        
+        At this point, the record will gain __name__ and __parent__ attributes.
+        
+            >>> age_record.__name__
+            'plone.registry.tests.age'
+        
+            >>> age_record.__parent__ is registry
+            True
+        
+        Creating a record with an initial value
+        ---------------------------------------
+        
+        We can create records more succinctly by creating the field, setting the value
+        and assigning it to the registry in one go, like this:
+        
+            >>> registry.records['plone.registry.tests.cms'] = \
+            ...     Record(field.TextLine(title=u"CMS of choice"), u"Plone")
+        
+        The record can now be obtained. Note that it has a nice __repr__ to help
+        debugging.
+        
+            >>> registry.records['plone.registry.tests.cms']
+            <Record plone.registry.tests.cms>
+        
+        Accessing and manipulating record values
+        ----------------------------------------
+        
+        Once a record has been created and added to the registry, you can access
+        its value through dict-like operations on the registry itself.
+        
+            >>> 'plone.registry.tests.cms' in registry
+            True
+        
+            >>> registry['plone.registry.tests.cms']
+            u'Plone'
+        
+            >>> registry['plone.registry.tests.cms'] = u"Plone 3.x"
+        
+        Again, values are validated:
+        
+            >>> registry['plone.registry.tests.cms'] = 'Joomla'
+            Traceback (most recent call last):
+            ...
+            WrongType: ('Joomla', <type 'unicode'>...)
+        
+        There is also a get() method:
+        
+            >>> registry.get('plone.registry.tests.cms')
+            u'Plone 3.x'
+            >>> registry.get('non-existent-key') is None
+            True
+        
+        Deleting records
+        ----------------
+        
+        Records may be deleted from the `records` property:
+        
+            >>> del registry.records['plone.registry.tests.cms']
+            >>> 'plone.registry.tests.cms' in registry.records
+            False
+            >>> 'plone.registry.tests.cms' in registry
+            False
+        
+        Creating records from interfaces
+        ================================
+        
+        As an application developer, it is often desirable to define settings as
+        traditional interfaces with zope.schema fields. plone.registry includes
+        support for creating a set of records from a single interface.
+        
+        To test this, we have created an interface, `IMailSettings`, with two fields,
+        `sender` and `smtp_host`.
+        
+            >>> from plone.registry.tests import IMailSettings
+        
+        Note that this contains standard fields.
+        
+            >>> IMailSettings['sender']
+            <zope.schema._bootstrapfields.TextLine object at ...>
+        
+            >>> IMailSettings['smtp_host']
+            <zope.schema._field.URI object at ...>
+        
+        We can create records from this interface like this:
+        
+            >>> registry.registerInterface(IMailSettings)
+        
+        One record for each field in the interface has now been created. Their names
+        are the full dotted names to those fields:
+        
+            >>> sender_record = registry.records['plone.registry.tests.IMailSettings.sender']
+            >>> smtp_host_record = registry.records['plone.registry.tests.IMailSettings.smtp_host']
+        
+        The fields used in the records will be the equivalent persistent versions of
+        the fields from the original interface.
+        
+            >>> sender_record.field
+            <plone.registry.field.TextLine object at ...>
+        
+            >>> smtp_host_record.field
+            <plone.registry.field.URI object at ...>
+        
+        This feat is accomplished internally by adapting the field to the
+        IPersistentField interface. There is a default adapter factory that works for
+        all fields defined in plone.registry.field. You can of course define your own
+        adapter if you have a custom field type, but bear in mind the golden rules of
+        any persistent field:
+        
+          * The field must store only primitives or other persistent fields
+          * It must not reference a function, class, interface or other method that
+            could break if a package is uninstalled.
+        
+        If we have a field for which there is no IPersistentField adapter, we will
+        get an error:
+        
+            >>> from plone.registry.tests import IMailPreferences
+            >>> IMailPreferences['settings']
+            <zope.schema._field.Object object at ...>
+        
+            >>> registry.registerInterface(IMailPreferences)
+            Traceback (most recent call last):
+            ...
+            TypeError: There is no persistent field equivalent for the field `settings` of type `Object`.
+        
+        Whoops! We can, however, tell registerInterface() to ignore one or more
+        fields.
+        
+            >>> registry.registerInterface(IMailPreferences, omit=('settings',))
+        
+        Once an interface's records have been registered, we can get and set their
+        values as normal:
+        
+            >>> registry['plone.registry.tests.IMailSettings.sender']
+            u'root@localhost'
+        
+            >>> registry['plone.registry.tests.IMailSettings.sender'] = u"webmaster@localhost"
+            >>> registry['plone.registry.tests.IMailSettings.sender']
+            u'webmaster@localhost'
+        
+        If we sub-sequently re-register the same interface, the value will be retained
+        if possible:
+        
+            >>> registry.registerInterface(IMailSettings)
+            >>> registry['plone.registry.tests.IMailSettings.sender']
+            u'webmaster@localhost'
+        
+        However, if the value is no longer valid, we will revert to the default. To
+        test that, let's sneakily modify the field for a while.
+        
+            >>> old_field = IMailSettings['sender']
+            >>> IMailSettings._InterfaceClass__attrs['sender'] = field.Int(title=u"Definitely not a string", default=2)
+            >>> if hasattr(IMailSettings, '_v_attrs'):
+            ...     del IMailSettings._v_attrs['sender']
+            >>> registry.registerInterface(IMailSettings)
+            >>> registry['plone.registry.tests.IMailSettings.sender']
+            2
+        
+        But let's put it back the way it was.
+        
+            >>> IMailSettings._InterfaceClass__attrs['sender'] = old_field
+            >>> if hasattr(IMailSettings, '_v_attrs'):
+            ...     del IMailSettings._v_attrs['sender']
+            >>> registry.registerInterface(IMailSettings)
+            >>> registry['plone.registry.tests.IMailSettings.sender']
+            u'root@localhost'
+        
+        Sometimes, you may want to use an interface as a template for multiple
+        instances of a set of fields, rather than defining them all by hand. This is
+        especially useful when you want to allow third-party packages to provide
+        information. To accomplish this, we can provide a prefix with the
+        `registerInterface` call. This will take precedence over the __identifier__
+        that is usually used.
+        
+            >>> registry.registerInterface(IMailSettings, prefix="plone.registry.tests.alternativesettings")
+        
+        These values are now available in the same way as the original settings:
+        
+            >>> sender_record = registry.records['plone.registry.tests.alternativesettings.sender']
+            >>> smtp_host_record = registry.records['plone.registry.tests.alternativesettings.smtp_host']
+            >>> registry['plone.registry.tests.alternativesettings.sender'] = u'alt@example.org'
+        
+        Accessing the original interface
+        --------------------------------
+        
+        Now that we have these records, we can look up the original interface. This
+        does not break the golden rules: internally, we only store the name of the
+        interface, and resolve it at runtime.
+        
+        Records that know about interfaces are marked with `IInterfaceAwareRecord` and
+        have two additional properties: `interface` and `fieldName`.
+        
+            >>> from plone.registry.interfaces import IInterfaceAwareRecord
+            >>> IInterfaceAwareRecord.providedBy(age_record)
+            False
+            >>> IInterfaceAwareRecord.providedBy(sender_record)
+            True
+        
+            >>> sender_record.interfaceName
+            'plone.registry.tests.IMailSettings'
+        
+            >>> sender_record.interface is IMailSettings
+            True
+        
+        Using the records proxy
+        -----------------------
+        
+        Once the records for an interface has been created, it is possible to obtain
+        a proxy object that provides the given interface, but reads and writes its
+        values to the registry. This is useful, for example, to create a form using
+        `zope.formlib` or `z3c.form` that is configured with widgets based on the
+        interface, or simply as a more convenient API when working with multiple,
+        related settings.
+        
+            >>> proxy = registry.forInterface(IMailSettings)
+            >>> proxy
+            <RecordsProxy for plone.registry.tests.IMailSettings>
+        
+        If you use your registry values in code
+        which might be encountered on normal HTML rendering
+        paths (e.g. in a viewlet) you need to be aware that records
+        might not exist or they are invalid. `forInterface()`
+        will raise KeyError on this kind of situations::
+        
+           try:
+               proxy = registry.forInterface(IMailSettings)
+           except KeyError:
+               # Gracefully handled cases
+               # when GenericSetup installer has not been run or rerun
+               # e.g. by returning or using some default values
+               pass
+        
+        The proxy is not a persistent object on its own.
+        
+            >>> from persistent.interfaces import IPersistent
+            >>> IPersistent.providedBy(proxy)
+            False
+        
+        It does, however, provide the requisite interface.
+        
+            >>> IMailSettings.providedBy(proxy)
+            True
+        
+        You can distinguish between the proxy and a 'norma' object by checking for the
+        IRecordsProxy marker interface:
+        
+            >>> from plone.registry.interfaces import IRecordsProxy
+            >>> IRecordsProxy.providedBy(proxy)
+            True
+        
+        When we set a value, it is stored in the registry:
+        
+            >>> proxy.smtp_host = 'http://mail.server.com'
+            >>> registry['plone.registry.tests.IMailSettings.smtp_host']
+            'http://mail.server.com'
+        
+            >>> registry['plone.registry.tests.IMailSettings.smtp_host'] = 'smtp://mail.server.com'
+            >>> proxy.smtp_host
+            'smtp://mail.server.com'
+        
+        Values not in the interface will raise an AttributeError:
+        
+            >>> proxy.age
+            Traceback (most recent call last):
+            ...
+            AttributeError: age
+        
+        Note that by default, the forInterface() method will check that the necessary
+        records have been registered. For example, we cannot use any old interface:
+        
+            >>> registry.forInterface(IInterfaceAwareRecord)
+            Traceback (most recent call last):
+            ...
+            KeyError: 'Interface `plone.registry.interfaces.IInterfaceAwareRecord` defines a field `interface`, for which there is no record.'
+        
+        By default, we also cannot use an interface for which only some records exist:
+        
+            >>> registry.forInterface(IMailPreferences)
+            Traceback (most recent call last):
+            ...
+            KeyError: 'Interface `plone.registry.tests.IMailPreferences` defines a field `settings`, for which there is no record.'
+        
+        It is possible to disable this check, however. This will be a bit more
+        efficient:
+        
+            >>> registry.forInterface(IMailPreferences, check=False)
+            <RecordsProxy for plone.registry.tests.IMailPreferences>
+        
+        A better way, however, is to explicitly declare that some fields are omitted:
+        
+            >>> pref_proxy = registry.forInterface(IMailPreferences, omit=('settings',))
+        
+        In this case, the omitted fields will default to their 'missing' value:
+        
+            >>> pref_proxy.settings ==  IMailPreferences['settings'].missing_value
+            True
+        
+        However, trying to set the value will result in a AttributeError:
+        
+            >>> pref_proxy.settings = None
+            Traceback (most recent call last):
+            ...
+            AttributeError: settings
+        
+        To access another instance of the field, supply the prefix:
+        
+            >>> alt_proxy = registry.forInterface(IMailSettings,
+            ...     prefix="plone.registry.tests.alternativesettings")
+            >>> alt_proxy.sender
+            u'alt@example.org'
+        
+        Collections of records proxies
+        ------------------------------
+        
+        A collection of record sets may be accessed using `collectionOfInterface`:
+        
+            >>> collection = registry.collectionOfInterface(IMailSettings)
+        
+        You can create a new record set:
+        
+            >>> proxy = collection.setdefault('example')
+            >>> proxy.sender = u'collection@example.org'
+            >>> proxy.smtp_host = 'smtp://mail.example.org'
+        
+        Record sets are stored based under the prefix:
+        
+            >>> prefix = IMailSettings.__identifier__
+            >>> registry.records.values(prefix+'/', prefix+'0')
+            [<Record plone.registry.tests.IMailSettings/example.sender>,
+             <Record plone.registry.tests.IMailSettings/example.smtp_host>]
+            >>> registry['plone.registry.tests.IMailSettings/example.sender']
+            u'collection@example.org'
+        
+        Records may be set from an existing object:
+        
+            >>> class MailSettings:
+            ...     sender = u'someone@example.com'
+            ...     smtp_host = 'smtp://mail.example.com'
+            >>> collection['example_com'] = MailSettings()
+            >>> registry.records.values(prefix+'/', prefix+'0')
+            [<Record plone.registry.tests.IMailSettings/example.sender>,
+             <Record plone.registry.tests.IMailSettings/example.smtp_host>,
+             <Record plone.registry.tests.IMailSettings/example_com.sender>,
+             <Record plone.registry.tests.IMailSettings/example_com.smtp_host>]
+        
+        The collection may be iterated over:
+        
+            >>> for name in collection: print name
+            example
+            example_com
+        
+        And may be deleted:
+        
+            >>> del collection['example_com']
+            >>> registry.records.values(prefix+'/', prefix+'0')
+            [<Record plone.registry.tests.IMailSettings/example.sender>,
+             <Record plone.registry.tests.IMailSettings/example.smtp_host>]
+        
+        Using field references
+        ======================
+        
+        It is possible for one record to refer to another record's field. This can be
+        used to provide a simple "override" mechanism, for example, where one record
+        defines the field and a default value, whilst another provides an override
+        validated against the same field.
+        
+        Let us first create the base record and set its value:
+        
+            >>> timeout_field = field.Int(title=u"Timeout", min=0)
+            >>> registry.records['plone.registry.tests.timeout'] = Record(timeout_field, 10)
+        
+            >>> timeout_record = registry.records['plone.registry.tests.timeout']
+            >>> timeout_record.value
+            10
+        
+        Next, we create a field reference for this record:
+        
+            >>> from plone.registry import FieldRef
+            >>> timeout_override_field = FieldRef(timeout_record.__name__, timeout_record.field)
+        
+        We can use this to create a new record:
+        
+            >>> registry.records['plone.registry.tests.timeout.override'] = Record(timeout_override_field, 20)
+            >>> timeout_override_record = registry.records['plone.registry.tests.timeout.override']
+        
+        The two values are separate:
+        
+            >>> timeout_record.value
+            10
+            >>> timeout_override_record.value
+            20
+        
+            >>> registry['plone.registry.tests.timeout']
+            10
+            >>> registry['plone.registry.tests.timeout.override']
+            20
+        
+        Validation uses the underlying field:
+        
+            >>> registry['plone.registry.tests.timeout.override'] = -1
+            Traceback (most recent call last):
+            ...
+            TooSmall: (-1, 0)
+        
+        The reference field exposes the standard field properties, e.g.:
+        
+            >>> timeout_override_record.field.title
+            u'Timeout'
+            >>> timeout_override_record.field.min
+            0
+        
+        To look up the underlying record name, we can use the ``recordName`` property:
+        
+            >>> timeout_override_record.field.recordName
+            'plone.registry.tests.timeout'
+        
+        
+        ===============
+        Registry events
+        ===============
+        
+        The registry fires certain events. These are:
+        
+         * `plone.registry.interfaces.IRecordAddedEvent`, when a record has been
+            added to the registry.
+        
+         * `plone.registry.interfaces.IRecordRemovedEvent`, when a record has been
+            removed from the registry.
+        
+         * `plone.registry.interfaces.IRecordModifiedEvent`, when a record's value is
+            modified.
+        
+        To test these events, we will create, modify and remove a few records:
+        
+            >>> from plone.registry import Registry, Record, field
+            >>> registry = Registry()
+        
+        Adding a new record to the registry should fire IRecordAddedEvents:
+        
+            >>> registry.records['plone.registry.tests.age'] = \
+            ...     Record(field.Int(title=u"Age", min=0, default=18))
+        
+            >>> registry.records['plone.registry.tests.cms'] = \
+            ...     Record(field.TextLine(title=u"Preferred CMS"), value=u"Plone")
+        
+        When creating records from an interface, one event is fired for each field
+        in the interface.
+        
+            >>> from plone.registry.tests import IMailSettings
+            >>> registry.registerInterface(IMailSettings)
+        
+        Deleting a record should fire an IRecordRemovedEvent:
+        
+            >>> del registry.records['plone.registry.tests.cms']
+        
+        Changing a record should fire an IRecordModifiedEvent:
+        
+            >>> registry['plone.registry.tests.age'] = 25
+            >>> registry.records['plone.registry.tests.age'].value = 24
+        
+        Let's take a look at the events that were just fired:
+        
+            >>> from plone.registry.interfaces import IRecordEvent
+            >>> from zope.component.eventtesting import getEvents
+            >>> getEvents(IRecordEvent)
+            [<RecordAddedEvent for plone.registry.tests.age>,
+             <RecordAddedEvent for plone.registry.tests.cms>,
+             <RecordAddedEvent for plone.registry.tests.IMailSettings.sender>,
+             <RecordAddedEvent for plone.registry.tests.IMailSettings.smtp_host>,
+             <RecordRemovedEvent for plone.registry.tests.cms>,
+             <RecordModifiedEvent for plone.registry.tests.age>,
+             <RecordModifiedEvent for plone.registry.tests.age>]
+        
+        For the modified events, we can also check the value before and after the
+        change.
+        
+            >>> from plone.registry.interfaces import IRecordModifiedEvent
+            >>> [(repr(e), e.oldValue, e.newValue,) for e in getEvents(IRecordModifiedEvent)]
+            [('<RecordModifiedEvent for plone.registry.tests.age>', 18, 25),
+             ('<RecordModifiedEvent for plone.registry.tests.age>', 25, 24)]
+        
+        IObjectEvent-style redispatchers
+        ================================
+        
+        There is a special event handler which takes care of re-dispatching registry
+        events based on the schema interface prescribed by the record.
+        
+        Let's re-set the event testing framework and register the re-dispatching event
+        subscriber. Normally, this would happen automatically by including this
+        package's ZCML.
+        
+            >>> from zope.component.eventtesting import clearEvents
+            >>> from zope.component import provideHandler
+            >>> from plone.registry.events import redispatchInterfaceAwareRecordEvents
+            >>> clearEvents()
+            >>> provideHandler(redispatchInterfaceAwareRecordEvents)
+        
+        We'll then register a schema interface.
+        
+            >>> from plone.registry.tests import IMailSettings
+            >>> registry.registerInterface(IMailSettings)
+        
+        We could now register an event handler to print any record event occurring on
+        an IMailSettings record. More specialised event handlers for e.g.
+        IRecordModifiedEvent or IRecordRemovedEvent are of course also possible.
+        Note that it is not possible to re-dispatch IRecordAddedEvents, so these are
+        never caught.
+        
+            >>> from zope.component import adapter
+            >>> @adapter(IMailSettings, IRecordEvent)
+            ... def print_mail_settings_events(proxy, event):
+            ...     print "Got", event, "for", proxy
+            >>> provideHandler(print_mail_settings_events)
+        
+        Let's now modify one of the records for this interface. The event handler
+        should react immediately.
+        
+            >>> registry['plone.registry.tests.IMailSettings.sender'] = u"Some sender"
+            Got <RecordModifiedEvent for plone.registry.tests.IMailSettings.sender> for <RecordsProxy for plone.registry.tests.IMailSettings>
+        
+        Let's also modify a non-interface-aware record, for comparison's sake. Here,
+        there is nothing printed.
+        
+            >>> registry['plone.registry.tests.age'] = 3
+        
+        We can try a record-removed event as well:
+        
+            >>> del registry.records['plone.registry.tests.IMailSettings.sender']
+            Got <RecordRemovedEvent for plone.registry.tests.IMailSettings.sender> for <RecordsProxy for plone.registry.tests.IMailSettings>
+        
+        The basic events that have been dispatched are:
+        
+            >>> getEvents(IRecordEvent)
+            [<RecordAddedEvent for plone.registry.tests.IMailSettings.sender>,
+             <RecordAddedEvent for plone.registry.tests.IMailSettings.smtp_host>,
+             <RecordModifiedEvent for plone.registry.tests.IMailSettings.sender>,
+             <RecordModifiedEvent for plone.registry.tests.age>,
+             <RecordRemovedEvent for plone.registry.tests.IMailSettings.sender>]
+        
+        
+        =================
+        Persistent fields
+        =================
+        
+        The persistent fields that are found in plone.registry.field are siblings of
+        the ones found in zope.schema, with persistence mixed in. To avoid potentially
+        breaking the registry with persistent references to symbols that may go away,
+        we purposefully limit the number of fields supported. We also disallow some
+        properties, and add some additional checks on others.
+        
+        The standard fields
+        ====================
+        
+        We will show each supported field in turn. For all fields, note that:
+        
+         * the `order` property will return -1 no matter what
+         * setting the `constraint` property is diallowed
+         * the `key_type` and `value_type` properties, where applicable, must be set
+           to a persistent field.
+         * for `Choice` fields, only named vocabularies and vocabularies based on
+           simple values are supported: sources and IVocabulary objects are not.
+        
+            >>> from plone.registry import field
+            >>> from zope import schema
+            >>> from persistent import Persistent
+        
+        Bytes
+        -----
+        
+        The bytes field describes a string of bytes.
+        
+            >>> f = field.Bytes(title=u"Test", min_length=0, max_length=10)
+            >>> isinstance(f, schema.Bytes)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Bytes(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint('ABC')
+            True
+        
+        BytesLine
+        ---------
+        
+        The bytes field describes a string of bytes, disallowing newlines.
+        
+            >>> f = field.BytesLine(title=u"Test", min_length=0, max_length=10)
+            >>> isinstance(f, schema.BytesLine)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.BytesLine(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint('AB\nC')
+            False
+        
+        ASCII
+        -----
+        
+        The ASCII field describes a string containing only ASCII characters.
+        
+            >>> f = field.ASCII(title=u"Test", min_length=0, max_length=10)
+            >>> isinstance(f, schema.ASCII)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.ASCII(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint('ab\nc')
+            True
+        
+        ASCIILine
+        ---------
+        
+        The ASCII line field describes a string containing only ASCII characters and
+        disallowing newlines.
+        
+            >>> f = field.ASCIILine(title=u"Test", min_length=0, max_length=10)
+            >>> isinstance(f, schema.ASCIILine)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.ASCIILine(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint('ab\nc')
+            False
+        
+        Text
+        ----
+        
+        The text field describes a unicode string.
+        
+            >>> f = field.Text(title=u"Test", min_length=0, max_length=10)
+            >>> isinstance(f, schema.Text)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Text(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(u'ab\nc')
+            True
+        
+        TextLine
+        --------
+        
+        The text line field describes a unicode string, disallowing newlines
+        
+            >>> f = field.TextLine(title=u"Test", min_length=0, max_length=10)
+            >>> isinstance(f, schema.TextLine)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.TextLine(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(u'ab\nc')
+            False
+        
+        Bool
+        ----
+        
+        The bool field describes a boolean.
+        
+            >>> f = field.Bool(title=u"Test")
+            >>> isinstance(f, schema.Bool)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Bool(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(False)
+            True
+        
+        Int
+        ---
+        
+        The int field describes an integer or long.
+        
+            >>> f = field.Int(title=u"Test", min=-123, max=1234)
+            >>> isinstance(f, schema.Int)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Int(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(123)
+            True
+        
+        Float
+        -----
+        
+        The float field describes a float.
+        
+            >>> f = field.Float(title=u"Test", min=-123.0, max=1234.0)
+            >>> isinstance(f, schema.Float)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Float(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(123)
+            True
+        
+        Decimal
+        -------
+        
+        The decimal field describes a decimal.
+        
+            >>> import decimal
+            >>> f = field.Decimal(title=u"Test", min=decimal.Decimal('-123.0'), max=decimal.Decimal('1234.0'))
+            >>> isinstance(f, schema.Decimal)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Decimal(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(123)
+            True
+        
+        Password
+        --------
+        
+        The password field describes a unicode string used for a password.
+        
+            >>> f = field.Password(title=u"Test", min_length=0, max_length=10)
+            >>> isinstance(f, schema.Password)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Password(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(u'ab\nc')
+            False
+        
+        SourceText
+        ----------
+        
+        The source  text field describes a unicode string with source code.
+        
+            >>> f = field.SourceText(title=u"Test", min_length=0, max_length=10)
+            >>> isinstance(f, schema.SourceText)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.SourceText(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(u'ab\nc')
+            True
+        
+        URI
+        ---
+        
+        The URI field describes a URI string.
+        
+            >>> f = field.URI(title=u"Test", min_length=0, max_length=10)
+            >>> isinstance(f, schema.URI)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.URI(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(u'abc')
+            True
+        
+        Id
+        --
+        
+        The id field describes a URI string or a dotted name.
+        
+            >>> f = field.Id(title=u"Test", min_length=0, max_length=10)
+            >>> isinstance(f, schema.Id)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Id(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(u'abc')
+            True
+        
+        DottedName
+        ----------
+        
+        The dotted name field describes a dotted name.
+        
+            >>> f = field.DottedName(title=u"Test", min_length=0, max_length=10)
+            >>> isinstance(f, schema.DottedName)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.DottedName(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(u'abc')
+            True
+        
+        Datetime
+        --------
+        
+        The date/time field describes a Python datetime object.
+        
+            >>> f = field.Datetime(title=u"Test")
+            >>> isinstance(f, schema.Datetime)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Datetime(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> import datetime
+            >>> f.constraint(datetime.datetime.now())
+            True
+        
+        Date
+        ----
+        
+        The date field describes a Python date object.
+        
+            >>> f = field.Date(title=u"Test")
+            >>> isinstance(f, schema.Date)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Date(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> import datetime
+            >>> f.constraint(datetime.date.today())
+            True
+        
+        Timedelta
+        ---------
+        
+        The time-delta field describes a Python timedelta object.
+        
+            >>> f = field.Timedelta(title=u"Test")
+            >>> isinstance(f, schema.Timedelta)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Timedelta(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> import datetime
+            >>> f.constraint(datetime.timedelta(1))
+            True
+        
+        Tuple
+        -----
+        
+        The tuple field describes a tuple.
+        
+            >>> f = field.Tuple(title=u"Test", min_length=0, max_length=10,
+            ...     value_type=field.TextLine(title=u"Value"))
+            >>> isinstance(f, schema.Tuple)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Tuple(title=u"Test", min_length=0, max_length=10,
+            ...     value_type=schema.TextLine(title=u"Value"))
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `value_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> f.value_type = schema.TextLine(title=u"Value")
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `value_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> field.Tuple(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint((1,2))
+            True
+        
+        List
+        ----
+        
+        The list field describes a tuple.
+        
+            >>> f = field.List(title=u"Test", min_length=0, max_length=10,
+            ...     value_type=field.TextLine(title=u"Value"))
+            >>> isinstance(f, schema.List)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.List(title=u"Test", min_length=0, max_length=10,
+            ...     value_type=schema.TextLine(title=u"Value"))
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `value_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> f.value_type = schema.TextLine(title=u"Value")
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `value_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> field.List(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint([1,2])
+            True
+        
+        Set
+        ---
+        
+        The set field describes a set.
+        
+            >>> f = field.Set(title=u"Test", min_length=0, max_length=10,
+            ...     value_type=field.TextLine(title=u"Value"))
+            >>> isinstance(f, schema.Set)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Set(title=u"Test", min_length=0, max_length=10,
+            ...     value_type=schema.TextLine(title=u"Value"))
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `value_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> f.value_type = schema.TextLine(title=u"Value")
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `value_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> field.Set(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(set([1,2]))
+            True
+        
+        Frozenset
+        ---------
+        
+        The set field describes a frozenset.
+        
+            >>> f = field.FrozenSet(title=u"Test", min_length=0, max_length=10,
+            ...     value_type=field.TextLine(title=u"Value"))
+            >>> isinstance(f, schema.FrozenSet)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.FrozenSet(title=u"Test", min_length=0, max_length=10,
+            ...     value_type=schema.TextLine(title=u"Value"))
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `value_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> f.value_type = schema.TextLine(title=u"Value")
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `value_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> field.FrozenSet(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(frozenset([1,2]))
+            True
+        
+        Dict
+        ----
+        
+        The set field describes a dict.
+        
+            >>> f = field.Dict(title=u"Test", min_length=0, max_length=10,
+            ...     key_type=field.ASCII(title=u"Key"),
+            ...     value_type=field.TextLine(title=u"Value"))
+            >>> isinstance(f, schema.Dict)
+            True
+        
+            >>> f.order
+            -1
+        
+            >>> field.Dict(title=u"Test", min_length=0, max_length=10,
+            ...     key_type=schema.ASCII(title=u"Key"),
+            ...     value_type=field.TextLine(title=u"Value"))
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `key_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> f.key_type = schema.ASCII(title=u"Key")
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `key_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> field.Dict(title=u"Test", min_length=0, max_length=10,
+            ...     key_type=field.ASCII(title=u"Key"),
+            ...     value_type=schema.TextLine(title=u"Value"))
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `value_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> f.value_type = schema.TextLine(title=u"Value")
+            Traceback (most recent call last):
+            ...
+            ValueError: The property `value_type` may only contain objects providing `plone.registry.interfaces.IPersistentField`.
+        
+            >>> field.Dict(title=u"Test", constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint(dict())
+            True
+        
+        Choice
+        ------
+        
+        A choice field represents a selection from a vocabulary. For persistent
+        fields, the vocabulary cannot be a `source` or any kind of object: it must
+        either be a list of primitives, or a named vocabulary.
+        
+            >>> f = field.Choice(title=u"Test", values=[1,2,3])
+            >>> isinstance(f, schema.Choice)
+            True
+        
+            >>> f.order
+            -1
+        
+        With a list of values given, the `vocabulary` property returns a vocabulary
+        constructed from the values on the fly, and `vocabularyName` is None.
+        
+            >>> f.vocabulary
+            <zope.schema.vocabulary.SimpleVocabulary object at ...>
+        
+            >>> f.vocabularyName is None
+            True
+        
+        We will, however, get an error if we use anything other than primitives:
+        
+            >>> f = field.Choice(title=u"Test", values=[object(), object()])
+            Traceback (most recent call last):
+            ...
+            ValueError: Vocabulary values may only contain primitive values.
+        
+        If a vocabulary name given, it is stored in `vocabularyName`, and the
+        `vocabulary` property returns None.
+        
+            >>> f = field.Choice(title=u"Test", vocabulary='my.vocab')
+            >>> f.vocabulary is None
+            True
+        
+            >>> f.vocabularyName
+            'my.vocab'
+        
+        Other combinations are now allowed, such as specifying no vocabulary:
+        
+            >>> field.Choice(title=u"Test")
+            Traceback (most recent call last):
+            ...
+            AssertionError: You must specify either values or vocabulary.
+        
+        Or specifying both types:
+        
+            >>> field.Choice(title=u"Test", values=[1,2,3], vocabulary='my.vocab')
+            Traceback (most recent call last):
+            ...
+            AssertionError: You cannot specify both values and vocabulary.
+        
+        Or specifying an object source:
+        
+            >>> from zope.schema.vocabulary import SimpleVocabulary
+            >>> dummy_vocabulary = SimpleVocabulary.fromValues([1,2,3])
+            >>> field.Choice(title=u"Test", source=dummy_vocabulary)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields do not support sources, only named vocabularies or vocabularies based on simple value sets.
+        
+        Or specifying an object vocabulary:
+        
+            >>> field.Choice(title=u"Test", vocabulary=dummy_vocabulary)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields only support named vocabularies or vocabularies based on simple value sets.
+        
+        As with other fields, you also cannot set a constraint:
+        
+            >>> field.Choice(title=u"Test", values=[1,2,3], constraint=lambda x: True)
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint = lambda x: False
+            Traceback (most recent call last):
+            ...
+            ValueError: Persistent fields does not support setting the `constraint` property
+        
+            >>> f.constraint('ABC')
+            True
+        
+        IPersistentField adapters
+        =========================
+        
+        It is possible to adapt any non-persistent field to its related
+        IPersistentField using the adapter factories in plone.registry.fieldfactory.
+        These are set up in configure.zcml and explicitly registered in the test
+        setup in tests.py. Custom adapters are of course also possible.
+        
+            >>> from plone.registry.interfaces import IPersistentField
+        
+            >>> f = schema.TextLine(title=u"Test")
+            >>> IPersistentField.providedBy(f)
+            False
+        
+            >>> p = IPersistentField(f)
+            >>> IPersistentField.providedBy(p)
+            True
+        
+            >>> isinstance(p, field.TextLine)
+            True
+        
+        Unsupported field types will not be adaptable by default.
+        
+            >>> f = schema.Object(title=u"Object", schema=IPersistentField)
+            >>> IPersistentField(f, None) is None
+            True
+        
+            >>> f = schema.InterfaceField(title=u"Interface")
+            >>> IPersistentField(f, None) is None
+            True
+        
+        After adaptation, the rules of persistent fields apply: The `order` attribute
+        is perpetually -1, custom constraints are not allowed, and key and value type
+        will be adapted to persistent fields as well. If any of these constraints
+        cannot be met, the adaptation will fail.
+        
+        For constraints, the non-persistent value is simply ignored and the default
+        method from the class will be used.
+        
+            >>> f = schema.TextLine(title=u"Test", constraint=lambda x: False)
+            >>> f.constraint
+            <function <lambda> at ...>
+        
+            >>> p = IPersistentField(f)
+            >>> p.constraint
+            <bound method TextLine.constraint of <plone.registry.field.TextLine object at ...>>
+        
+        The order property is similarly ignored:
+        
+            >>> f.order > 0
+            True
+        
+            >>> p.order
+            -1
+        
+        Key/value types will be adapted if possible.
+        
+            >>> f = schema.Dict(title=u"Test",
+            ...     key_type=schema.Id(title=u"Id"),
+            ...     value_type=schema.TextLine(title=u"Value"))
+            >>> p = IPersistentField(f)
+            >>> p.key_type
+            <plone.registry.field.Id object at ...>
+        
+            >>> p.value_type
+            <plone.registry.field.TextLine object at ...>
+        
+        However, if they cannot be adapted, there will be an error.
+        
+            >>> f = schema.Dict(title=u"Test",
+            ...     key_type=schema.Id(title=u"Id"),
+            ...     value_type=schema.Object(title=u"Value", schema=IPersistentField))
+            >>> p = IPersistentField(f)
+            Traceback (most recent call last):
+            ...
+            TypeError: ('Could not adapt', <zope.schema._field.Dict object at ...>, <InterfaceClass plone.registry.interfaces.IPersistentField>)
+        
+            >>> f = schema.Dict(title=u"Test",
+            ...     key_type=schema.InterfaceField(title=u"Id"),
+            ...     value_type=schema.TextLine(title=u"Value"))
+            >>> p = IPersistentField(f)
+            Traceback (most recent call last):
+            ...
+            TypeError: ('Could not adapt', <zope.schema._field.Dict object at ...>, <InterfaceClass plone.registry.interfaces.IPersistentField>)
+        
+        There is additional validation for choice fields that warrant a custom
+        adapter. These ensure that vocabularies are either stored as a list of
+        simple values, or as named vocabularies.
+        
+            >>> f = schema.Choice(title=u"Test", values=[1,2,3])
+            >>> p = IPersistentField(f)
+            >>> p.vocabulary
+            <zope.schema.vocabulary.SimpleVocabulary object at ...>
+            >>> p._values
+            [1, 2, 3]
+            >>> p.vocabularyName is None
+            True
+        
+            >>> f = schema.Choice(title=u"Test", vocabulary='my.vocab')
+            >>> p = IPersistentField(f)
+            >>> p.vocabulary is None
+            True
+            >>> p._values is None
+            True
+            >>> p.vocabularyName
+            'my.vocab'
+        
+        Complex vocabularies or sources are not allowed:
+        
+            >>> from zope.schema.vocabulary import SimpleVocabulary
+            >>> dummy_vocabulary = SimpleVocabulary.fromItems([('a', 1), ('b', 2)])
+            >>> f = schema.Choice(title=u"Test", source=dummy_vocabulary)
+            >>> p = IPersistentField(f)
+            Traceback (most recent call last):
+            ...
+            TypeError: ('Could not adapt', <zope.schema._field.Choice object at ...>, <InterfaceClass plone.registry.interfaces.IPersistentField>)
+        
+        
+            >>> f = schema.Choice(title=u"Test", vocabulary=dummy_vocabulary)
+            >>> p = IPersistentField(f)
+            Traceback (most recent call last):
+            ...
+            TypeError: ('Could not adapt', <zope.schema._field.Choice object at ...>, <InterfaceClass plone.registry.interfaces.IPersistentField>)
+        
+        Changelog
+        =========
+        
+        1.0.2 (2014-09-11)
+        ------------------
+        
+        - Choice field construction compatible with a simple vocabulary of
+          string-based choices, which are converted to values on construction.
+          This provides compatibility for plone.registry/plone.app.registry
+          integration with plone.supermodel >= 1.2.5.
+          [seanupton]
+        
+        
+        1.0.1 (2013-01-13)
+        ------------------
+        
+        1.0 - 2011-05-13
+        ----------------
+        
+        - Release 1.0 Final
+          [esteele]
+        
+        - Add MANIFEST.in.
+          [WouterVH]
+        
+        
+        1.0b5 - 2011-04-06
+        ------------------
+        
+        - Make RecordsProxy type customizable through ``factory`` argument to
+          ``forInterface`` and ``collectionOfInterface``.
+          [elro]
+        
+        - Add ``collectionOfInterface`` support to registry.
+          [elro]
+        
+        - Fixed bug where prefix was ignored by registry.forInterface.
+          [elro]
+        
+        - Add optional min, max arguments for keys/values/items of _Records.
+          [elro]
+        
+        
+        1.0b4 - 2011-02-04
+        ------------------
+        
+        - Added support for field references, via the ``FieldRef`` class. See
+          ``registry.txt`` for details.
+          [optilude]
+        
+        - Change the internal persistent structure around to make it more efficient.
+          The API remains the same. Old registries will be migrated when first
+          accessed. Warning: This may lead to a "write-on-read" situation for the
+          first request in which the registry is being used.
+          [optilude]
+        
+        
+        1.0b3 - 2011-01-03
+        ------------------
+        
+         - Added prefix option to forInterface (as it was added to registerInterface)
+           [garbas]
+        
+        
+        1.0b2 - 2010-04-21
+        ------------------
+        
+        - Added support for Decimal fields
+          [optilude]
+        
+        - Add a prefix option to registerInterface to allow an interface to be used as
+          a template for a series of values, rather than single use.
+          [MatthewWilkes]
+        
+        
+        1.0b1 - 2009-08-02
+        ------------------
+        
+        - Fix a bug in bind() for Choice fields.
+          [optilude]
+        
+        
+        1.0a2 - 2009-07-12
+        ------------------
+        
+        - Changed API methods and arguments to mixedCase to be more consistent with
+          the rest of Zope. This is a non-backwards-compatible change. Our profuse
+          apologies, but it's now or never. :-/
+        
+          If you find that you get import errors or unknown keyword arguments in your
+          code, please change names from foo_bar too fooBar, e.g. for_interface()
+          becomes forInterface().
+          [optilude]
+        
+        
+        1.0a1 - 2009-04-17
+        ------------------
+        
+        - Initial release
+        
+        
+Keywords: configuration registry
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

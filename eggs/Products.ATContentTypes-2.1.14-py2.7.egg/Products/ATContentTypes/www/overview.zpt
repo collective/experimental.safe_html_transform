@@ -1,0 +1,42 @@
+<tal:header tal:replace="structure here/manage_page_header|nothing">Header</tal:header>
+<tal:message tal:define="manage_tabs_message options/manage_tabs_message | request/manage_tabs_message | nothing"
+    tal:replace="structure here/manage_tabs">Tabs</tal:message>
+<tal:body>
+
+  <h3>Overview</h3>
+
+  <p>This is your friendly ATContentTypes tool. It is a frontend to several
+  important functions like
+  </p>
+
+  <dl>
+    <dt>Image scales</dt>
+    <dd>to recreate image scales</dd>
+    <dt>Properties</dt>
+    <dd>to set certain properties for album view and more</dd>
+  </dl>
+  
+  <h3>Properties</h3>
+  
+  <dl>
+    <dt><code>image_types</code></dt>
+    <dd>A list of portal type names to be treated as image. The types must be
+        AT based, have an image field named <code>image</code> and implemented
+        the <code>IImageContent</code> interface with the api methods
+        <code>getImage()</code>, <code>setImage()</code> and
+        <code>tag(scale=None)</code>.
+    </dd>
+    <dt><code>folder_types</code></dt>
+    <dd>A list of portal types to be treated as subalbums in the photo
+        album view.
+    </dd>
+    <dt><code>album_batch_size</code></dt>
+    <dd>The default batch size for the photo album view.</dd>
+    <dt><code>album_image_scale</code></dt>
+    <dd>The default image scale name for the photo ablum view.</dd>
+    <dt><code>single_image_scale</code></dt>
+    <dd>The default image scale name used when showing a single image.</dd>
+  </dl>
+
+</tal:body>
+<tal:footer tal:replace="structure here/manage_page_footer|nothing">footer</tal:footer>

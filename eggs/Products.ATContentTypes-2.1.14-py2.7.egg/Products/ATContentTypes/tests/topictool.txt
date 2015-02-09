@@ -1,0 +1,67 @@
+Topic Tool Management
+=====================
+
+Test setup.
+
+    >>> import cStringIO
+
+    # BBB Zope 2.12
+    >>> try:
+    ...     from Testing.testbrowser import Browser
+    ... except ImportError:
+    ...     from Products.Five.testbrowser import Browser
+
+    >>> browser = Browser()
+    >>> browser.open('http://nohost/plone/login')
+
+Log in.
+
+    >>> from Products.PloneTestCase.setup import portal_owner, default_password
+    >>> browser.getControl('Login Name').value = portal_owner
+    >>> browser.getControl('Password').value = default_password
+    >>> browser.getControl('Log in').click()
+
+Go to Index Management Page
+
+    >>> browser.open('http://nohost/plone/portal_atct/atct_manageTopicIndex')
+    >>> 'Indices' in browser.contents
+    True
+
+save the first index control
+
+    >>> pre_save_first_index = browser.getControl(name='index.index:records', index=0)
+
+uncheck first checkbox and save form
+
+    >>> chkboxes = browser.getControl(name='index.enabled:records')
+    >>> chkboxes.controls[0].selected = False
+    >>> browser.getControl('Save').click()
+
+Now check the new first index to be different than the old one
+
+    >>> post_save_first_index = browser.getControl(name='index.index:records', index=0)
+    >>> post_save_first_index.value != pre_save_first_index.value
+    True
+
+Go to Metadata Management Page
+
+    >>> browser.open('http://nohost/plone/portal_atct/atct_manageTopicMetadata')
+    >>> 'Metadata' in browser.contents
+    True
+
+save the first metadata control
+
+    >>> pre_save_first_metadata = browser.getControl(name='metadata.index:records', index=0)
+
+uncheck first checkbox and save form
+
+    >>> chkboxes = browser.getControl(name='metadata.enabled:records')
+    >>> chkboxes.controls[0].selected = False
+    >>> browser.getControl('Save').click()
+
+Now check the new first metadata to be different than the old one
+
+    >>> post_save_first_metadata = browser.getControl(name='metadata.index:records', index=0)
+    >>> post_save_first_metadata.value != pre_save_first_metadata.value
+    True
+

@@ -1,0 +1,22 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <include package="five.formlib"/>
+
+  <include package=".skin"/>
+
+  <include package=".browser"/>
+
+  <include package=".formlib"/>
+
+  <include package=".upgrade"/>
+
+  <include file="content.zcml"/>
+
+  <include file="exportimport.zcml"/>
+
+  <include file="profiles.zcml"/>
+
+  <include file="directories.zcml"/>
+
+</configure>

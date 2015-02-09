@@ -1,0 +1,10 @@
+setuptools
+z3c.caching [zcml]
+plone.registry
+zope.interface
+zope.component
+zope.i18nmessageid
+zope.schema
+plone.transformchain
+five.globalrequest
+Zope2 >= 2.12.4

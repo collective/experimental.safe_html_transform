@@ -1,0 +1,358 @@
+Metadata-Version: 1.1
+Name: zope.location
+Version: 3.9.1
+Summary: Zope Location
+Home-page: http://pypi.python.org/pypi/zope.location/
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: Zope Location
+        =============
+        
+        Overview
+        ========
+        
+        In Zope3, location are special objects that has a structural location.
+        
+        
+        Detailed Documentation
+        ======================
+        
+        ========
+        Location
+        ========
+        
+        Location Base Class
+        -------------------
+        
+        The `Location` base class is a stupid mix-in that defines `__parent__` and
+        `__name__` attributes.
+        
+        Usage within an Object field:
+        
+          >>> from zope.interface import implements, Interface
+          >>> from zope.schema import Object
+          >>> from zope.schema.fieldproperty import FieldProperty
+          >>> from zope.location.interfaces import ILocation
+          >>> from zope.location.location import Location
+          
+          >>> class IA(Interface):
+          ...     location = Object(schema=ILocation, required=False, default=None)
+          >>> class A(object):
+          ...     implements(IA)
+          ...     location = FieldProperty(IA['location'])
+          
+          >>> a = A()
+          >>> a.location = Location()
+          
+          >>> loc = Location(); loc.__name__ = u'foo'
+          >>> a.location = loc
+          
+          >>> loc = Location(); loc.__name__ = None
+          >>> a.location = loc
+          
+          >>> loc = Location(); loc.__name__ = 'foo'
+          >>> a.location = loc
+          Traceback (most recent call last):
+          ...
+          WrongContainedType: ([WrongType('foo', <type 'unicode'>, '__name__')], 'location')
+        
+        
+        The `inside` Function
+        ---------------------
+        
+        The `inside` function tells if l1 is inside l2.  L1 is inside l2 if l2 is an
+        ancestor of l1.
+        
+          >>> o1 = Location()
+          >>> o2 = Location(); o2.__parent__ = o1
+          >>> o3 = Location(); o3.__parent__ = o2
+          >>> o4 = Location(); o4.__parent__ = o3
+          
+          >>> from zope.location.location import inside
+        
+          >>> inside(o1, o1)
+          True
+        
+          >>> inside(o2, o1)
+          True
+        
+          >>> inside(o3, o1)
+          True
+        
+          >>> inside(o4, o1)
+          True
+          
+          >>> inside(o1, o4)
+          False
+          
+          >>> inside(o1, None)
+          False
+        
+        
+        LocationProxy
+        -------------
+        
+        The LocationProxy is a non-picklable proxy that can be put around
+        objects that don't implement `ILocation`.
+        
+          >>> from zope.location.location import LocationProxy
+          >>> l = [1, 2, 3]
+          >>> ILocation.providedBy(l)
+          False
+          >>> p = LocationProxy(l, "Dad", "p")
+          >>> p
+          [1, 2, 3]
+          >>> ILocation.providedBy(p)
+          True
+          >>> p.__parent__
+          'Dad'
+          >>> p.__name__
+          'p'
+          
+          >>> import pickle
+          >>> p2 = pickle.dumps(p)
+          Traceback (most recent call last):
+          ...
+          TypeError: Not picklable
+        
+        Proxies should get their doc strings from the object they proxy:
+        
+          >>> p.__doc__ == l.__doc__
+          True
+        
+        If we get a "located class" somehow, its doc string well be available
+        through proxy as well:
+        
+          >>> class LocalClass(object):
+          ...     """This is class that can be located"""
+        
+          >>> p = LocationProxy(LocalClass)
+          >>> p.__doc__ == LocalClass.__doc__
+          True
+        
+        LocationInterator
+        -----------------
+        
+        This function allows us to iterate over object and all its parents.
+        
+          >>> from zope.location.location import LocationIterator
+        
+          >>> o1 = Location()
+          >>> o2 = Location()
+          >>> o3 = Location()
+          >>> o3.__parent__ = o2
+          >>> o2.__parent__ = o1
+        
+          >>> iter = LocationIterator(o3)
+          >>> iter.next() is o3
+          True
+          >>> iter.next() is o2
+          True
+          >>> iter.next() is o1
+          True
+          >>> iter.next()
+          Traceback (most recent call last):
+          ...
+          StopIteration
+        
+        
+        The `located` function
+        ----------------------
+        
+        `located` locates an object in another and returns it:
+        
+          >>> from zope.location.location import located
+          >>> a = Location()
+          >>> parent = Location()
+          >>> a_located = located(a, parent, 'a')
+          >>> a_located is a
+          True
+          >>> a_located.__parent__ is parent
+          True
+          >>> a_located.__name__
+          'a'
+        
+        If we locate the object again, nothing special happens:
+        
+          >>> a_located_2 = located(a_located, parent, 'a')
+          >>> a_located_2 is a_located
+          True
+        
+        If the object does not provide ILocation an adapter can be provided:
+        
+          >>> import zope.interface
+          >>> import zope.component
+          >>> sm = zope.component.getGlobalSiteManager()
+          >>> sm.registerAdapter(LocationProxy, required=(zope.interface.Interface,))
+          
+          >>> l = [1, 2, 3]
+          >>> parent = Location()
+          >>> l_located = located(l, parent, 'l')
+          >>> l_located.__parent__ is parent
+          True
+          >>> l_located.__name__
+          'l'
+          >>> l_located is l
+          False
+          >>> type(l_located)
+          <class 'zope.location.location.LocationProxy'>
+          >>> l_located_2 = located(l_located, parent, 'l')
+          >>> l_located_2 is l_located
+          True
+        
+        When changing the name, we still do not get a different proxied object:
+        
+          >>> l_located_3 = located(l_located, parent, 'new-name')
+          >>> l_located_3 is l_located_2
+          True
+        
+          >>> sm.unregisterAdapter(LocationProxy, required=(zope.interface.Interface,))
+          True
+        
+        
+        =======
+        CHANGES
+        =======
+        
+        3.9.1 (2011-08-22)
+        ------------------
+        
+        - Added zcml extra as well as a test for configure.zcml.
+        
+        
+        3.9.0 (2009-12-29)
+        ------------------
+        
+        - Moved LocationCopyHook related tests to zope.copy and remove a test
+          dependency on that package.
+        
+        3.8.2 (2009-12-23)
+        ------------------
+        
+        - Fixed a typo in the configure.zcml.
+        
+        3.8.1 (2009-12-23)
+        ------------------
+        
+        - Removed dependency on zope.copy: the LocationCopyHook adapter is registered
+          only if zope.copy is available.
+        
+        - Use the standard Python doctest module instead of zope.testing.doctest, which
+          has been deprecated.
+        
+        3.8.0 (2009-12-22)
+        ------------------
+        
+        - Adjusted to testing output caused by new zope.schema.
+        
+        3.7.1 (2009-11-18)
+        ------------------
+        
+        - Moved the IPossibleSite and ISite interfaces to zope.component as they are
+          dealing with zope.component's concept of a site, but not with location.
+        
+        3.7.0 (2009-09-29)
+        ------------------
+        
+        - Added getParent() to ILocationInfo and moved the actual implementation here
+          from zope.traversal.api, analogous to getParents().
+        
+        - Actually removed deprecated PathPersistent class from
+          zope.location.pickling.
+        
+        - Moved ITraverser back to zope.traversing where it belongs conceptually. The
+          interface had been moved to zope.location to invert the package
+          interdependency but is no longer used here.
+        
+        3.6.0 (2009-08-27)
+        ------------------
+        
+        - New feature release: deprecated locationCopy, CopyPersistent and
+          PathPersistent from zope.location.pickling. These changes were already part
+          of the 3.5.3 release, which was erroneously numbered as a bugfix relese.
+        
+        - Removed dependency on zope.deferredimport, directly import deprecated modules
+          without using it.
+        
+        3.5.5 (2009-08-15)
+        ------------------
+        
+        - Add zope.deferredimport as a dependency as it's used directly by
+          zope.location.pickling.
+        
+        3.5.4 (2009-05-17)
+        ------------------
+        
+        - Add ``IContained`` interface to ``zope.location.interfaces`` module.
+          This interface was moved from ``zope.container`` (after
+          ``zope.container`` 3.8.2); consumers of ``IContained`` may now
+          depend on zope.location rather than zope.container to reduce
+          dependency cycles.
+        
+        3.5.3 (2009-02-09)
+        ------------------
+        
+        - Use new zope.copy package for implementing location copying. Thus
+          there's changes in the ``zope.locaton.pickling`` module:
+          
+           * The ``locationCopy`` and ``CopyPersistent`` was removed in prefer
+             to their equivalents in zope.copy. Deprecated backward-compatibility
+             imports provided.
+           
+           * The module now provides a ``zope.copy.interfaces.ICopyHook`` adapter
+             for ``ILocation`` objects that replaces the old CopyPersistent
+             functionality of checking for the need to clone objects based on
+             their location.
+        
+        3.5.2 (2009-02-04)
+        ------------------
+        
+        - Split RootPhysicallyLocatable adapter back from LocationPhysicallyLocatable,
+          because the IRoot object may not always provide ILocation and the code
+          for the root object is also simplier. It's basically a copy of the
+          RootPhysicallyLocatable adapter from zope.traversing version 3.5.0 and
+          below with ``getParents`` method added (returns an empty list).
+        
+        3.5.1 (2009-02-02)
+        ------------------
+        
+        - Improve test coverage.
+        
+        - The new ``getParents`` method was extracted from ``zope.traversing``
+          and added to ILocationInfo interface in the previous release. Custom
+          ILocationInfo implementations should make sure they have this method
+          as well. That method is already used in ``zope.traversing.api.getParents``
+          function.
+        
+        - Make ``getName`` of LocationPhysicallyLocatable always return empty
+          string for the IRoot object, like RootPhysicallyLocatable from
+          ``zope.traversing`` did. So, now LocationPhysicallyLocatable is
+          fully compatible with RootPhysicallyLocatable, making the latter one
+          obsolete.
+        
+        - Change package mailing list address to zope-dev at zope.org instead
+          of retired zope3-dev at zope.org.
+        
+        3.5.0 (2009-01-31)
+        ------------------
+        
+        - Reverse the dependency between zope.location and zope.traversing. This
+          also causes the dependency to various other packages go away.
+        
+        3.4.0 (2007-10-02)
+        ------------------
+        
+        - Initial release independent of the main Zope tree.
+        
+Keywords: zope location structural
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3

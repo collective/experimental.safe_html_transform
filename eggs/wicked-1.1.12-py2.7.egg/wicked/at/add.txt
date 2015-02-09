@@ -1,0 +1,66 @@
+========================
+ Wicked Browser Service
+========================
+
+*with a smile*
+
+This set of views based around a single class handle the thing that
+makes wicked tick: adding content.
+
+Let's set up a fixture::
+
+    >>> from zope.interface import alsoProvides as mark
+    >>> from wicked.interfaces import IAmWicked
+    >>> from Products.Five.tests.testing import manage_addFiveTraversableFolder
+    >>> from zope.annotation.interfaces import IAttributeAnnotatable 
+    >>> from zope.publisher.interfaces.browser import IDefaultBrowserLayer
+
+This is a test to check the basic setup(addmenu is TBA ;) )::
+
+    >>> id = self.folder.invokeFactory('Folder', 'testfo')
+    >>> testfo = self.folder.testfo
+    >>> view=testfo.restrictedTraverse('@@wickedaddmenu')
+    >>> view()
+    1
+
+Now let's test the adding feature. This is roughly the same as the
+pythonscript, but now the creation of a wiki page will set an entry
+in the cache of the original document::
+
+    >>> id = testfo.invokeFactory('Document', id='first-doc', title='First doc')
+    >>> self.folder.REQUEST.set('Title', 'Second doc')
+    >>> self.folder.REQUEST.set('section', 'text')
+    >>> view=testfo['first-doc'].restrictedTraverse('@@wickedadd')
+    >>> 'second-doc' in self.folder.contentIds()
+    False
+    >>> retadd = view()
+    >>> 'second-doc' in testfo.contentIds()
+    True
+    >>> testfo['second-doc'].portal_type
+    'Document'
+    >>> testfo.REQUEST.RESPONSE.getStatus()
+    302
+
+Let's try this through the publisher:
+
+    >>> from Testing.ZopeTestCase import user_name
+    >>> from Testing.ZopeTestCase import user_password
+
+    >>> self.login(user_name)
+
+    >>> def getAuth():
+    ...     try:
+    ...         from plone.protect import authenticator
+    ...         return authenticator.createToken()
+    ...     except:
+    ...         return ''
+    >>> print http(r'''
+    ... GET /plone/Members/test_user_1_/testfo/first-doc/@@wickedadd?Title=%s&section=text&_authenticator=%s HTTP/1.1
+    ... Authorization: Basic %s:%s
+    ... ''' % ('Spam', getAuth(), user_name, user_password))
+    HTTP/1.1 302 Moved Temporarily...
+
+    >>> 'spam' in testfo.contentIds()
+    True
+    >>> testfo['spam'].portal_type
+    'Document'

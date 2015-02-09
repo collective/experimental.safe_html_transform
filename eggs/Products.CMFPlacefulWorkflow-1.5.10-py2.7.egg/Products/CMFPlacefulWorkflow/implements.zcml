@@ -1,0 +1,11 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <class class=".PlacefulWorkflowTool.PlacefulWorkflowTool">
+    <implements interface=".interfaces.IPlacefulWorkflowTool" />
+  </class>
+
+  <class class=".DefaultWorkflowPolicy.DefaultWorkflowPolicyDefinition">
+    <implements interface=".interfaces.IWorkflowPolicyDefinition" />
+  </class>
+
+</configure>

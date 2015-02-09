@@ -1,0 +1,98 @@
+Converting skins to views:
+
+  [x] batch_widget:
+
+      batch_widgets.pt -> templates/batch_widgets.pt
+      getBatchItemInfos.py -> BatchViewBase.listItemInfos
+      getBatchNavigation.py -> BatchViewBase.navigation_previous
+                               BatchViewBase.navigation_next
+
+  [x] form_widget:
+
+      form_widgets.pt -> templates/form_widgets.pt
+
+  [x] IFolderish @@view.html:
+
+      index_html.py -> FolderView
+      index_html_template.pt -> folder.pt
+
+  [x] IFolderish @@edit.html:
+
+      folder_contents.py -> FolderContentsView
+      folder_contents_template.pt -> templates/folder_contents.pt
+      validateItemIds.py -> FolderContentsView.validateItemIds
+      validateClipboardData.py -> FolderContentsView.validateClipboardData
+      folder_cut_control.py -> FolderContentsView.cut_control
+      folder_copy_control.py -> FolderContentsView.copy_control
+      folder_paste_control.py -> FolderContentsView.paste_control
+      folder_delete_control.py -> FolderContentsView.delete_control
+      folder_sort_control.py -> FolderContentsView.sort_control
+      folder_up_control.py -> FolderContentsView.up_control
+      folder_down_control.py -> FolderContentsView.down_control
+      folder_top_control.py -> FolderContentsView.top_control
+      folder_bottom_control.py -> FolderContentsView.bottom_control
+      filterCookie.py -> FolderContentsView.set_filter_control
+                         FolderContentsView.clear_filter_control
+      clearCookie.py -> FolderContentsView.clear_filter_control
+
+  [x] IMutableMinimalDublinCore @@properties.html:
+
+      folder_edit_form.py -> MinimalMetadataEditView
+      folder_edit_template.pt -> formlib based
+      folder_edit_control.py -> formlib based
+
+  [x] IMutableDublinCore @@properties.html:
+
+      metadata_edit_form.py -> MetadataEditView
+      metadata_edit_template.pt -> formlib based
+      metadata_edit_control.py -> formlib based
+
+  [x] IDocument @@view.html:
+
+      document_view.py, newsitem_view.py -> DocumentView
+      document_view_template.pt -> document.pt
+
+  [x] IMutableDocument @@edit.html:
+
+      document_edit_form.py -> DocumentEditView
+      document_edit_template.pt -> formlib based
+      validateHTML.py -> formlib based
+      validateTextFile.py -> formlib based
+      document_edit_control.py -> formlib based
+
+  [x] IMutableNewsItem @@edit.html:
+
+      newsitem_edit_form.py -> NewsItemEditView
+      newsitem_edit_template.pt -> formlib based
+      validateHTML.py -> formlib based
+      validateTextFile.py -> formlib based
+      newsitem_edit_control.py -> formlib based
+
+  [x] ILink @@view.html:
+
+      link_view.py, favorite_view.py -> LinkView
+      link_view_template.pt -> templates/link.pt
+
+  [x] IMutableLink @@edit.html:
+
+      link_edit_form.py -> LinkEditView
+      link_edit_template.pt -> formlib based
+      link_edit_control.py -> formlib based
+
+  [ ] IFile @@view.html:
+
+      file_view.py -> FileView
+      file_view_template.pt -> templates/file.pt
+
+  [x] IMutableFile @@edit.html:
+
+      file_edit_form.py, image_edit_form.py -> FileEditView
+      file_edit_template.pt, image_edit_template.pt -> formlib based
+      file_edit_control.py, image_edit_control.py -> formlib based
+
+  [ ] IImage @@view.html:
+
+      image_view.py -> ImageView
+      image_view_template.pt -> templates/image.pt
+
+  [ ] complete this todo list

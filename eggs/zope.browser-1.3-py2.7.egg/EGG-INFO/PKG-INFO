@@ -1,0 +1,143 @@
+Metadata-Version: 1.1
+Name: zope.browser
+Version: 1.3
+Summary: Shared Zope Toolkit browser components
+Home-page: http://pypi.python.org/pypi/zope.browser
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Description: zope.browser
+        ============
+        
+        This package provides shared browser components for the Zope Toolkit.
+        
+        
+        .. contents::
+        
+        IView
+        -----
+        
+        Views adapt both a context and a request.
+        
+        There is not much we can test except that ``IView`` is importable
+        and an interface:
+        
+          >>> from zope.interface import Interface
+          >>> from zope.browser.interfaces import IView
+          >>> Interface.providedBy(IView)
+          True
+        
+        IBrowserView
+        -------------
+        
+        Browser views are views specialized for requests from a browser (e.g.,
+        as distinct from WebDAV, FTP, XML-RPC, etc.).
+        
+        There is not much we can test except that ``IBrowserView`` is importable
+        and an interface derived from ``IView``:
+        
+          >>> from zope.interface import Interface
+          >>> from zope.browser.interfaces import IBrowserView
+          >>> Interface.providedBy(IBrowserView)
+          True
+          >>> IBrowserView.extends(IView)
+          True
+        
+        IAdding
+        -------
+        
+        Adding views manage how newly-created items get added to containers.
+        
+        There is not much we can test except that ``IAdding`` is importable
+        and an interface derived from ``IBrowserView``:
+        
+          >>> from zope.interface import Interface
+          >>> from zope.browser.interfaces import IAdding
+          >>> Interface.providedBy(IBrowserView)
+          True
+          >>> IAdding.extends(IBrowserView)
+          True
+        
+        ITerms
+        ------
+        
+        The ``ITerms`` interface is used as a base for ``ISource`` widget
+        implementations.  This interfaces get used by ``zope.app.form`` and was
+        initially defined in ``zope.app.form.browser.interfaces``, which made it
+        impossible to use for other packages like ``z3c.form`` wihtout depending on
+        ``zope.app.form``.
+        
+        Moving such base components / interfaces to ``zope.browser`` makes it
+        possible to share them without undesirable dependencies.
+        
+        There is not much we can test except that ITerms is importable
+        and an interface:
+        
+          >>> from zope.interface import Interface
+          >>> from zope.browser.interfaces import ITerms
+          >>> Interface.providedBy(ITerms)
+          True
+        
+        ISystemErrorView
+        ----------------
+        
+        Views providing this interface can classify their contexts as system
+        errors. These errors can be handled in a special way (e. g. more
+        detailed logging).
+        
+        There is not much we can test except that ISystemErrorView is importable
+        and an interface:
+        
+          >>> from zope.interface import Interface
+          >>> from zope.browser.interfaces import ISystemErrorView
+          >>> Interface.providedBy(ISystemErrorView)
+          True
+        
+        
+        Changelog
+        =========
+        
+        1.3 (2010-04-30)
+        ----------------
+        
+        - Removed test extra and zope.testing dependency.
+        
+        1.2 (2009-05-18)
+        ----------------
+        
+        - Moved ``ISystemErrorView`` interface here from
+          ``zope.app.exception`` to break undesirable dependencies.
+        
+        - Fixed home page and author's e-mail address.
+        
+        - Added doctests to long_description.
+        
+        1.1 (2009-05-13)
+        ----------------
+        
+        - Moved ``IAdding`` interface here from ``zope.app.container.interfaces``
+          to break undesirable dependencies.
+        
+        1.0 (2009-05-13)
+        ----------------
+        
+        - Moved ``IView`` and ``IBrowserView`` interfaces here from
+          ``zope.publisher.interfaces`` to break undesirable dependencies.
+        
+        0.5.0 (2008-12-11)
+        ------------------
+        
+        - Moved ``ITerms`` interface here from ``zope.app.form.browser.interfaces``
+          to break undesirable dependencies.
+        
+Keywords: zope browser component
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3

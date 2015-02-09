@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<registry>
+
+  <records interface="plone.app.querystring.interfaces.IQueryField"
+           prefix="plone.app.querystring.field.string">
+      <value key="title">Strings</value>
+      <value key="enabled">True</value>
+      <value key="sortable">True</value>
+      <value key="operations">
+          <element>plone.app.querystring.operation.selection.is</element>
+      </value>
+      <value key="vocabulary">archetypes.querywidget.string_vocab</value>
+  </records>
+
+  <records interface="plone.app.querystring.interfaces.IQueryField"
+           prefix="plone.app.querystring.field.integer">
+      <value key="title">Integer</value>
+      <value key="enabled">True</value>
+      <value key="sortable">True</value>
+      <value key="operations">
+          <element>plone.app.querystring.operation.selection.is</element>
+      </value>
+      <value key="vocabulary">archetypes.querywidget.int_vocab</value>
+  </records>
+
+  </registry>

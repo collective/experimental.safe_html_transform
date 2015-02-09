@@ -1,0 +1,13 @@
+CHANGES.txt
+README.txt
+bootstrap.py
+buildout.cfg
+setup.cfg
+setup.py
+src/initgroups/__init__.py
+src/initgroups/_initgroups.c
+src/initgroups.egg-info/PKG-INFO
+src/initgroups.egg-info/SOURCES.txt
+src/initgroups.egg-info/dependency_links.txt
+src/initgroups.egg-info/not-zip-safe
+src/initgroups.egg-info/top_level.txt

@@ -1,0 +1,46 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    i18n_domain="plone.app.blob">
+
+  <five:registerPackage package="." initialize=".initialize" />
+  <five:deprecatedManageAddDelete class=".content.ATBlob" />
+
+  <include file="profiles.zcml" />
+
+  <include package="archetypes.schemaextender" />
+  <include package="plone.app.imaging" />
+
+  <include package=".adapters" />
+  <include package=".browser" />
+
+  <class class="OFS.Image.File">
+    <implements interface=".interfaces.IOFSFile" />
+  </class>
+
+  <class class="ZPublisher.HTTPRequest.FileUpload">
+    <implements interface=".interfaces.IFileUpload" />
+  </class>
+
+  <adapter
+    name="plone.app.blob.subtypes.blob"
+    for="plone.app.blob.interfaces.IATBlobBlob"
+    factory=".subtypes.blob.SchemaExtender" />
+
+  <adapter
+    name="plone.app.blob.subtypes.file"
+    for="plone.app.blob.interfaces.IATBlobFile"
+    factory=".subtypes.file.SchemaExtender" />
+
+  <adapter
+    name="plone.app.blob.subtypes.image"
+    for="plone.app.blob.interfaces.IATBlobImage"
+    factory=".subtypes.image.SchemaExtender" />
+
+  <adapter
+    factory=".scale.BlobImageScaleHandler" />
+
+  <adapter
+    factory=".scale.BlobImageScaleFactory" />
+
+</configure>

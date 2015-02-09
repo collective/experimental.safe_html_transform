@@ -1,0 +1,5 @@
+msgid "True"
+msgstr "Verdadeiro"
+
+msgid "False"
+msgstr "Falso"

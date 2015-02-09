@@ -1,0 +1,11 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="plone.folder">
+
+    <adapter factory=".default.DefaultOrdering" />
+    <adapter factory=".unordered.UnorderedOrdering"
+             name="unordered" />
+    <adapter factory=".partial.PartialOrdering"
+             name="partial" />
+
+</configure>

@@ -1,0 +1,24 @@
+CMFPW is only used by Plone people for now, then we will drop the pure CMF
+compatibility for class and configlets.
+
+Priority 1:
+
+  Improve roadmap in plone.org
+
+  Create a profile for GenericSetup
+
+
+Priority 2:
+
+  Transform configlets template in AT Schema forms if possible
+
+  For configlets: ba aware af the fact that a type can be in several workflows
+
+
+
+Priority 3:
+
+  Unit test have a good coverage of usecase but we can always improve them
+
+  We have UI, then we must have functionnal tests
+

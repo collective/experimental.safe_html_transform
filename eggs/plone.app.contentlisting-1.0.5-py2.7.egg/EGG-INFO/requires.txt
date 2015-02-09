@@ -1,0 +1,5 @@
+setuptools
+plone.uuid
+
+[test]
+plone.app.testing

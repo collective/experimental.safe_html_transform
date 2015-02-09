@@ -1,0 +1,47 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+	   xmlns:five="http://namespaces.zope.org/five">
+
+  <include package="zope.annotation" />
+  <include package="wicked.fieldevent" />
+  <include file="vocabularies.zcml" />
+
+  <!-- example of wicked as an unordered field event subscriber -->
+  <!-- include file="basic-example.zcml" / -->
+
+  <!-- example of how to hook up txtfilter system for wicked
+       providers -->
+  <!-- include file="txtfilter-example.zcml" / -->
+
+  <adapter
+     factory="wicked.cache.ContentCacheManager"
+     permission="zope2.Public"
+     />
+
+   <!-- for backlinking / content creation -->
+   <adapter
+      factory=".txtfilter.WickedFilter"
+      provides="wicked.interfaces.IWickedFilter"
+      for="wicked.interfaces.IAmWickedField
+	   wicked.interfaces.IAmWicked
+	   wicked.interfaces.IWickedEvent"
+      />
+
+   <adapter
+      factory=".txtfilter.WickedFilter"
+      provides="wicked.interfaces.IWickedFilter"
+      for="wicked.interfaces.IAmWickedField
+	   wicked.interfaces.IAmWicked
+	   wicked.fieldevent.interfaces.IFieldStorageEvent"
+      />
+
+   <!-- redispatch needed for wicked content creation events -->
+   <subscriber
+      handler="wicked.link.redispatch"
+      />
+
+   <!-- handles backlinking  -->
+   <!-- subscriber
+      factory="wicked.txtfilter.backlink_handler"
+      provides="wicked.fieldevent.IFieldValueSetter" / -->
+
+</configure>

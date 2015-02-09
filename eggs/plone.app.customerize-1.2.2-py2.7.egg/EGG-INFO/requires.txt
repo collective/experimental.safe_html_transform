@@ -1,0 +1,16 @@
+setuptools
+five.customerize
+plone.browserlayer
+plone.portlets
+zope.component
+zope.interface
+zope.publisher
+zope.viewlet
+Products.CMFCore
+Acquisition
+Zope2
+
+[test]
+plone.app.layout
+zope.testing
+Products.PloneTestCase

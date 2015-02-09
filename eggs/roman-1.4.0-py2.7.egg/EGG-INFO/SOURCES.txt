@@ -1,0 +1,10 @@
+bootstrap.py
+buildout.cfg
+setup.cfg
+setup.py
+src/roman.py
+src/roman.egg-info/PKG-INFO
+src/roman.egg-info/SOURCES.txt
+src/roman.egg-info/dependency_links.txt
+src/roman.egg-info/top_level.txt
+src/roman.egg-info/zip-safe

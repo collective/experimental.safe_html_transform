@@ -1,0 +1,17 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone.formwidget.autocomplete">
+
+    <include package="Products.CMFCore" />
+
+    <!-- Demo -->
+    <browser:page
+        for="*"
+        name="test-selection-widget"
+        class="plone.formwidget.autocomplete.demo.TestView"
+        permission="cmf.ModifyPortalContent"
+        />
+    <adapter factory="plone.formwidget.autocomplete.demo.TestAdapter" />
+
+</configure>
