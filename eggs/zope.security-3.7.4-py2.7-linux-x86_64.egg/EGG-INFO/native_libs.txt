@@ -1,2 +1,0 @@
-zope/security/_zope_security_checker.so
-zope/security/_proxy.so

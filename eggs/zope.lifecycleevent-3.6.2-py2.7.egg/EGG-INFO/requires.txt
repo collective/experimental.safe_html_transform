@@ -1,8 +1,0 @@
-setuptools
-zope.interface
-zope.component
-zope.event
-
-[test]
-zope.component [test]
-zope.container

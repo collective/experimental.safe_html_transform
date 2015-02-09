@@ -1,2 +1,0 @@
-#
-#sanity test

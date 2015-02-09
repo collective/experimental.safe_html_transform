@@ -1,1 +1,0 @@
-This is an <span tal:replace="string:example" /> page template.

@@ -1,6 +1,0 @@
-
-      [zope2.initialize]
-      Products.DCWorkflow = Products.DCWorkflow:initialize
-      [distutils.commands]
-      ftest = zope.testing.testrunner.eggsupport:ftest
-      

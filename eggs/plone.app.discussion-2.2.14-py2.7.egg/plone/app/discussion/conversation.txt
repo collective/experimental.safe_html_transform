@@ -1,9 +1,0 @@
-============
-Conversation
-============
-
-.. autointerface:: plone.app.discussion.interfaces.IConversation
-   :members:
-
-.. autointerface:: plone.app.discussion.interfaces.IReplies
-   :members:

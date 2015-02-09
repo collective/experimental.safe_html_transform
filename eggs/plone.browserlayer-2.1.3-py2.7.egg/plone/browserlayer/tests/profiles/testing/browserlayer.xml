@@ -1,4 +1,0 @@
-<layers>
-    <layer name="plone.browserlayer.tests"
-           interface="plone.browserlayer.tests.interfaces.IMyProductLayer" />
-</layers>

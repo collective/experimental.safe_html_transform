@@ -1,1 +1,0 @@
-"""DocFinderTab test package"""

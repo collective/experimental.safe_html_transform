@@ -1,4 +1,0 @@
-<rules xmlns="http://namespaces.plone.org/diazo">
-    <drop content="/html/head/comment()" />
-    <replace theme="/html/head" content="/html/head" />
-</rules>

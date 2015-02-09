@@ -1,1 +1,0 @@
-"""QuickInstaller tests package."""

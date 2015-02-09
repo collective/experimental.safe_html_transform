@@ -1,5 +1,0 @@
-setuptools
-ZODB3
-zope.container
-zope.interface
-zope.location

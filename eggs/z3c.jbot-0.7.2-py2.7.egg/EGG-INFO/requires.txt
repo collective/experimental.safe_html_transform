@@ -1,6 +1,0 @@
-setuptools
-zope.pagetemplate
-zope.component
-zope.configuration
-zope.security
-zope.publisher

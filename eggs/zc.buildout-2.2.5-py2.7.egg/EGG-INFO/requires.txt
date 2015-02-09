@@ -1,5 +1,0 @@
-setuptools>=3.3
-
-[test]
-zope.testing
-manuel

@@ -1,7 +1,0 @@
-========================================
-Using lxml ElementTree in Marshall
-========================================
-
-The information model in Marshall structures the Archetypes model as
-follows:
-

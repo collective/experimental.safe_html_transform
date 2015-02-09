@@ -1,7 +1,0 @@
-setuptools
-plone.scale [storage]
-z3c.caching
-
-[test]
-collective.testcaselayer
-Products.ATContentTypes

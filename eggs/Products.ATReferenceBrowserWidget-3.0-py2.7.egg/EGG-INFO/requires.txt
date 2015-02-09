@@ -1,3 +1,0 @@
-setuptools
-archetypes.referencebrowserwidget
-zope.deprecation

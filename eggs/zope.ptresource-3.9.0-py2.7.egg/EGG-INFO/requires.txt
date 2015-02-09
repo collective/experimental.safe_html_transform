@@ -1,9 +1,0 @@
-setuptools
-zope.browserresource
-zope.interface
-zope.pagetemplate
-zope.publisher
-zope.security[untrustedpython]
-
-[test]
-zope.testing

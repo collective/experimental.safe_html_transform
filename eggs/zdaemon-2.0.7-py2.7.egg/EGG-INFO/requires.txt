@@ -1,5 +1,0 @@
-ZConfig
-
-[test]
-zope.testing
-mock

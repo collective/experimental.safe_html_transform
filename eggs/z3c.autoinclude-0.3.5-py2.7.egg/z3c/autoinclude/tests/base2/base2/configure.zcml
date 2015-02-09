@@ -1,4 +1,0 @@
-<configure xmlns="http://namespaces.zope.org/zope">
-  <include package="z3c.autoinclude" file="meta.zcml" />
-  <includePlugins package="." />
-</configure>

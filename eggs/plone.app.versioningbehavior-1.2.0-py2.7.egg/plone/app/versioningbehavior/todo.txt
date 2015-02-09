@@ -1,6 +1,0 @@
-
-TODO
-====
-
-[ ] Write some tests for the behavior and the event handlers
-

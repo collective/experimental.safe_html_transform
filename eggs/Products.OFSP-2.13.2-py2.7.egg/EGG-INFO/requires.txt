@@ -1,4 +1,0 @@
-setuptools
-AccessControl
-Persistence
-Zope2 >= 2.13.0a1

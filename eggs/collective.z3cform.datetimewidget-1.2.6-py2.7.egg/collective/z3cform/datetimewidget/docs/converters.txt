@@ -1,4 +1,0 @@
-Converters
-==========
-
-.. include:: ../converter.txt

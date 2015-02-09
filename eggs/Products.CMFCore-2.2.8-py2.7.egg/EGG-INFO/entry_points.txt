@@ -1,6 +1,0 @@
-
-      [zope2.initialize]
-      Products.CMFCore = Products.CMFCore:initialize
-      [distutils.commands]
-      ftest = zope.testing.testrunner.eggsupport:ftest
-      

@@ -1,7 +1,0 @@
-setuptools
-plone.app.querystring>=1.2.2
-plone.app.jquery>=1.7.2
-plone.app.jquerytools
-
-[tests]
-plone.app.testing

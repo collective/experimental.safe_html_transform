@@ -1,8 +1,0 @@
-#!/bin/sh
-
-exec ${varnish-runner:daemon} \
-    -f "${varnish-runner:config}" \
-    -P "${varnish-runner:pid}" \
-    -a ${varnish-runner:bind} \
-    -s file,"${varnish-runner:storage}",${varnish-runner:cache-size} \
-    "$@"

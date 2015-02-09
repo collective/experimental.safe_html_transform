@@ -1,8 +1,0 @@
-rwproperty.py
-rwproperty.txt
-setup.cfg
-setup.py
-rwproperty.egg-info/PKG-INFO
-rwproperty.egg-info/SOURCES.txt
-rwproperty.egg-info/dependency_links.txt
-rwproperty.egg-info/top_level.txt

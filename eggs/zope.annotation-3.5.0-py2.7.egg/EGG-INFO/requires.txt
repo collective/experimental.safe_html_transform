@@ -1,9 +1,0 @@
-setuptools
-zope.interface
-zope.component
-zope.location
-zope.proxy
-ZODB3
-
-[test]
-zope.testing

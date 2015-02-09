@@ -1,7 +1,0 @@
-six
-setuptools
-lxml
-robotframework>=2.8rc1
-unittest2
-
-[test]

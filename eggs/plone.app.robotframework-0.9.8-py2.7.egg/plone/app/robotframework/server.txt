@@ -1,5 +1,0 @@
-*** Settings ***
-
-Documentation  *DEPRECATED* Use resource ``server.robot`` instead.
-
-Resource  plone/app/robotframework/server.robot

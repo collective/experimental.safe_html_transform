@@ -1,4 +1,0 @@
-<configure xmlns="http://namespaces.zope.org/zope">
-  <include package="testdirective" file="meta.zcml" />
-  <test test_string="base2.plug has been loaded" />
-</configure>

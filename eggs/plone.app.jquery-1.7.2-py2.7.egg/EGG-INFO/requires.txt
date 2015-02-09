@@ -1,6 +1,0 @@
-setuptools
-Products.CMFCore
-Products.GenericSetup
-
-[test]
-plone.app.testing

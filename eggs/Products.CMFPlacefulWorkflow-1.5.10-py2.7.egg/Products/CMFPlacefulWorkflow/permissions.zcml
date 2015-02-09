@@ -1,7 +1,0 @@
-<configure xmlns="http://namespaces.zope.org/zope"
-    i18n_domain="cmfplacefulworkflow">
-
-  <permission id="CMFPlacefulWorkflow.ManageWorkflowPolicies"
-              title="CMFPlacefulWorkflow: Manage workflow policies" />
-
-</configure>

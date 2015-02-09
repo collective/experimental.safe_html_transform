@@ -1,5 +1,0 @@
-setuptools
-
-[test]
-Products.PloneTestCase
-collective.testcaselayer

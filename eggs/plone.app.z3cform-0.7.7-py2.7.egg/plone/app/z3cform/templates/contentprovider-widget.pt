@@ -1,2 +1,0 @@
-<tal:provider define="contentprovider context"
-              replace="structure contentprovider/render" />

@@ -1,2 +1,0 @@
-Products/ZCTextIndex/stopper.so
-Products/ZCTextIndex/okascore.so

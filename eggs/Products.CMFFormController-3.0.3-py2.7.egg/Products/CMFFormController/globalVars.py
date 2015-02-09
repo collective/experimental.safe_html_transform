@@ -1,2 +1,0 @@
-ANY_CONTEXT = None
-ANY_BUTTON = None
