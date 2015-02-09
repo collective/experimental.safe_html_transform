@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<layers>
+  <layer
+    name="experimental.safe_html_transform"
+    interface="experimental.safe_html_transform.interfaces.IExperimentalSafeHtmlTransformLayer"
+  />
+</layers>

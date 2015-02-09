@@ -1,0 +1,27 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    i18n_domain="experimental.safe_html_transform">
+
+    <includeDependencies package="." />
+
+    <include package=".browser" />
+
+    <genericsetup:registerProfile
+        name="default"
+        title="experimental.safe_html_transform"
+        directory="profiles/default"
+        description="Installs the experimental.safe_html_transform add-on."
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
+
+    <genericsetup:importStep
+        name="experimental.safe_html_transform-postInstall"
+        title="experimental.safe_html_transform post_install import step"
+        description="Post install import step from experimental.safe_html_transform"
+        handler=".setuphandlers.post_install">
+    </genericsetup:importStep>
+
+</configure>
