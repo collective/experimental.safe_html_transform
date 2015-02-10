@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <registry>
  <records interface="experimental.safe_html_tansform.interfaces.												IExperimenatalSafe_Html_TransformSettings" />
+ <records interface="Products.CMFPlone.interfaces.IFilterSchema"
+           prefix="plone" />
 </registry>
  

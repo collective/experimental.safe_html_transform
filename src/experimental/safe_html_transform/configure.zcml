@@ -9,8 +9,6 @@
 
     <include package=".browser" />
 
-    <include package="plone.app.registry" />
- 
     <genericsetup:registerProfile
         name="default"
         title="experimental.safe_html_transform"

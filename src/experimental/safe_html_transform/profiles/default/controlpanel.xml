@@ -4,7 +4,6 @@
     xmlns:i18n="http://xml.zope.org/namespaces/i18n"
     i18n:domain="experimental.safe_html_transform"
     purge="False">
- 
     <configlet
         title="safe_html_transform"
         action_id="safe_html_transform"
@@ -16,5 +15,4 @@
         i18n:attributes="title">
         <permission>Manage portal</permission>
     </configlet>
- 
 </object>
