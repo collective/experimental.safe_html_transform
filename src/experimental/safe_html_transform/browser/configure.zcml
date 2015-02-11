@@ -19,11 +19,11 @@
 
     <adapter factory=".controlpanel.FilterControlPanelAdapter" />
 
-     <!-- Filter Control Panel -->
+    <!-- Filter Control Panel -->
     <browser:page
-      name="filter-controlpanel"
-      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
-      class=".filter.FilterControlPanel"
+      name="controlpanel"
+      for=".controlpanel.IPloneSiteRoot"
+      class=".controlpanel.FilterControlPanel"
       permission="plone.app.controlpanel.Filtering"
       />
 
