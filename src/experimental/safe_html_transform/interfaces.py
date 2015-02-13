@@ -9,4 +9,3 @@ _ = MessageFactory('experimental.safe_html_transform')
 
 class IExperimentalSafeHtmlTransformLayer(IDefaultBrowserLayer):
     """Marker interface that defines a browser layer."""
-
