@@ -17,8 +17,6 @@
         directory="static"
         />
 
-    <adapter factory=".controlpanel.FilterControlPanelAdapter" />
-
     <!-- Filter Control Panel -->
     <browser:page
       name="filter-controlpanel"

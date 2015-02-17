@@ -18,3 +18,9 @@ def unregister_transform(context, transform):
     transform_tool = getUtility(IPortalTransformsTool)
     if hasattr(transform_tool, transform):
         transform_tool.unregisterTransform(transform)
+
+
+def register_transform(context, transform):
+    transform_tool = getUtility(IPortalTransformsTool)
+    transform = transform()
+    transform_tool.registerTransform(transform)
