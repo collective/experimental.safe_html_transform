@@ -3,11 +3,11 @@ from plone.app.registry.browser import controlpanel
 # from Products.CMFPlone.interfaces import IFilterSchema
 from Products.CMFCore.interfaces import ISiteRoot
 from plone.app.layout.navigation.interfaces import INavigationRoot
-from plone.registry.interfaces import IRegistry
+# from plone.registry.interfaces import IRegistry
 from zope.interface import Interface
-from zope.component import adapts
+# from zope.component import adapts
 from zope import schema
-from zope.component import getUtility
+# from zope.component import getUtility
 from zope.interface import implements
 
 
