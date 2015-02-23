@@ -17,6 +17,14 @@
         provides="Products.GenericSetup.interfaces.EXTENSION"
         />
 
+    <genericsetup:registerProfile
+      name="uninstall"
+      title="experimental.safe_html_transform uninstall"
+      directory="profiles/uninstall"
+      description="Uninstalls the experimental.safe_html_transform package"
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      />
+
     
     <genericsetup:importStep
         name="experimental.safe_html_transform-postInstall"

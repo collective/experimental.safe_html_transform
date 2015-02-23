@@ -12,15 +12,10 @@ def post_install(context):
     if isNotCurrentProfile(context):
         return
     # Do something during the installation of this package
+    unregister_transform(context, 'safe_html')
 
 
 def unregister_transform(context, transform):
     transform_tool = getUtility(IPortalTransformsTool)
     if hasattr(transform_tool, transform):
         transform_tool.unregisterTransform(transform)
-
-
-def register_transform(context, transform):
-    transform_tool = getUtility(IPortalTransformsTool)
-    transform = transform()
-    transform_tool.registerTransform(transform)
