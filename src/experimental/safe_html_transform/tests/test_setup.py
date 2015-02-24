@@ -31,3 +31,13 @@ class TestInstall(unittest.TestCase):
         from experimental.safe_html_transform.interfaces import IExperimentalSafeHtmlTransformLayer
         from plone.browserlayer import utils
         self.assertIn(IExperimentalSafeHtmlTransformLayer, utils.registered_layers())
+
+    def test_portal_title(self):
+        """Test the title of the package is experimental_safe_html_transform"""
+        portal = self.layer['portal']
+        self.assertTrue('experimental.safe_html_transform', portal.getProperty('title'))
+
+    def test_portal_description(self):
+        """Test the description of the package """
+        portal = self.layer['portal']
+        self.assertTrue("Installs the experimental.safe_html_transform add-on.", portal.getProperty('description'))
