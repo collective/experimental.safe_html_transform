@@ -1,13 +1,9 @@
 from Products.CMFPlone import PloneMessageFactory as _
 from plone.app.registry.browser import controlpanel
-# from Products.CMFPlone.interfaces import IFilterSchema
 from Products.CMFCore.interfaces import ISiteRoot
 from plone.app.layout.navigation.interfaces import INavigationRoot
-# from plone.registry.interfaces import IRegistry
 from zope.interface import Interface
-# from zope.component import adapts
 from zope import schema
-# from zope.component import getUtility
 from zope.interface import implements
 
 
@@ -70,16 +66,6 @@ class IFilterAttributesSchema(Interface):
         value_type=schema.TextLine(),
         required=False)
 
-#    stripped_combinations = schema.List(
-#        title=_(u'Stripped combinations'),
-#        description=_(u"These attributes are stripped from those tags when "
-#                      "saving."),
-#        default=[],
-#        #default=u'dir lang valign halign border frame rules cellspacing
-#        # cellpadding bgcolor'.split()
-#        value_type=schema.Object(ITagAttrPair, title=u"combination"),
-#        required=False)
-
 
 class IFilterEditorSchema(Interface):
 
@@ -105,23 +91,6 @@ class IFilterSchema(IFilterTagsSchema, IFilterAttributesSchema,
     """
 
 
-# filtertagset = FormFieldsets(IFilterTagsSchema)
-# filtertagset.id = 'filtertags'
-# filtertagset.label = _(u'label_filtertags', default=u'Tags')
-#
-# filterattributes = FormFieldsets(IFilterAttributesSchema)
-# filterattributes.id = 'filterattributes'
-# filterattributes.label = _(u'label_filterattributes', default=u'Attributes')
-#
-# filtereditor = FormFieldsets(IFilterEditorSchema)
-# filtereditor.id = 'filtereditor'
-# filtereditor.label = _(u'filterstyles', default=u'Styles')
-#
-# tagattr_widget = CustomWidgetFactory(ObjectWidget, TagAttrPair)
-# combination_widget = CustomWidgetFactory(ListSequenceWidget,
-#                                         subwidget=tagattr_widget)
-
-
 class FilterControlPanelForm(controlpanel.RegistryEditForm):
 
     id = "FilterControlPanel"
@@ -137,13 +106,6 @@ class FilterControlPanelForm(controlpanel.RegistryEditForm):
     form_name = _("HTML Filter settings")
     schema = IFilterSchema
     schema_prefix = "plone"
-
-#    form_fields = FormFieldsets(filtertagset, filterattributes, filtereditor)
-#    form_fields['stripped_combinations'].custom_widget = combination_widget
-
-    # form_fields = FormFieldsets(searchset)
-    # form_fields['types_not_searched'].custom_widget = MCBThreeColumnWidget
-    # form_fields['types_not_searched'].custom_widget.cssClass='label'
 
     def updateFields(self):
         super(FilterControlPanelForm, self).updateFields()
