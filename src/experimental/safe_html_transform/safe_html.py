@@ -3,10 +3,10 @@ import re
 from Products.PortalTransforms.interfaces import ITransform
 from zope.interface import implements
 from Products.PortalTransforms.utils import log
-# from lxml import etree
+from lxml import etree
 from lxml.html.clean import Cleaner
-from lxml.html import fragment_fromstring
-from lxml.etree import tostring
+from lxml.html import fragments_fromstring
+from lxml.etree import tostring, Element
 # from lxml.html.clean import _css_javascript_re, _css_import_re, _find_external_links
 
 # add some tags to nasty.
@@ -2456,6 +2456,52 @@ class HTMLParser(Cleaner):
             remove_tags.update(('embed', 'layer', 'object', 'param'))
 
 
+def fragment_fromstring(html, create_parent=False, parser=None, base_url=None, **kw):
+    """Parses a single HTML element; it is an error if there is more than
+    one element, or if anything but whitespace precedes or follows the
+    element.
+    If create_parent is true (or is a tag name) then a parent node
+    will be created to encapsulate the HTML in a single element. In
+    this case, leading or trailing text is allowed.
+    """
+    if not isinstance(html, _strings):
+        raise TypeError('string required')
+    accept_leading_text = bool(create_parent)
+    elements = fragments_fromstring(html, parser=parser,
+                                        no_leading_text=not accept_leading_text,
+                                        base_url=base_url, **kw)
+    if create_parent:
+        if not isinstance(create_parent, _strings):
+            create_parent = 'div'
+        new_root = Element(create_parent)
+        if elements:
+            if isinstance(elements[0], _strings):
+                new_root.text = elements[0]
+                del elements[0]
+            new_root.extend(elements)
+        return new_root
+    if not elements:
+        raise etree.ParserError('No elements found')
+    temp = []
+    temp2 = []
+    if len(elements) > 1:
+        for i in range(len(elements)):
+            temp.append(elements[i])
+        for i in range(len(temp)):
+            result = temp[i]
+            if result.tail and result.tail.strip():
+                raise etree.ParserError('Element followed by text: %r' % result.tail)
+            result.tail = None
+            temp2.append(result)
+    else:
+        result = elements[0]
+        if result.tail and result.tail.strip():
+            raise etree.ParserError('Element followed by text: %r' % result.tail)
+        result.tail = None
+        temp2.append(result)
+    return temp2
+
+
 class SafeHTML:
     """Simple transform which uses lxml to
     clean potentially bad tags.
@@ -2580,13 +2626,17 @@ class SafeHTML:
             html = "<html>%s</html>" % orig
             NASTY_TAGS = frozenset(['style', 'script', 'object', 'applet', 'meta', 'embed'])  # noqa
             cleaner = HTMLParser(kill_tags=NASTY_TAGS, page_structure=False, safe_attrs_only=False)
-            safe_html = tostring(fragment_fromstring(cleaner.clean_html(html)))
+            safe_html = fragment_fromstring(cleaner.clean_html(html))
+            safe_html2 = ""
+            for i in range(len(safe_html)):
+                safe_html1 = tostring(safe_html[i])
+                safe_html2 = safe_html2 + safe_html1
 
-            if safe_html:
+            if safe_html2:
                 # replace the html node
                 p = re.compile(r'<.?html?.>')
-                safe_html = p.sub('', safe_html)
-                data.setData(safe_html)
+                safe_html2 = p.sub('', safe_html2)
+                data.setData(safe_html2)
 
         return data._data
 
