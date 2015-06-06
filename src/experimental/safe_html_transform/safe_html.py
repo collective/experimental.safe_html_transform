@@ -2624,6 +2624,7 @@ class SafeHTML:
 
         else:
             html = "<html>%s</html>" % orig
+            # html = replace_tag(html)
             NASTY_TAGS = frozenset(['style', 'script', 'object', 'applet', 'meta', 'embed'])  # noqa
             cleaner = HTMLParser(kill_tags=NASTY_TAGS, page_structure=False, safe_attrs_only=False)
             safe_html = fragment_fromstring(cleaner.clean_html(html))
@@ -2636,7 +2637,12 @@ class SafeHTML:
                 # replace the html node
                 p = re.compile(r'<.?html?.>')
                 safe_html2 = p.sub('', safe_html2)
-                data.setData(safe_html2)
+            safe_html2 = safe_html2.replace("h3","p")
+            safe_html2 = safe_html2.replace("h4","p")
+            safe_html2 = safe_html2.replace("h5","p")
+            safe_html2 = safe_html2.replace("h6","p")
+            safe_html2 = safe_html2.replace("div","p")
+            data.setData(safe_html2)
 
         return data._data
 
