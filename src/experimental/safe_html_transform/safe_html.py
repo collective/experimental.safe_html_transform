@@ -6,8 +6,7 @@ from Products.PortalTransforms.utils import log
 from lxml import etree
 from lxml.html.clean import Cleaner
 from lxml.html import fragments_fromstring
-from lxml.etree import tostring, Element
-# from lxml.html.clean import _css_javascript_re, _css_import_re, _find_external_links
+from lxml.etree import tostring
 
 # add some tags to nasty.
 NASTY_TAGS = frozenset(['style', 'script', 'object', 'applet', 'meta', 'embed'])  # noqa
@@ -2463,25 +2462,12 @@ def fragment_fromstring(html, create_parent=False, parser=None, base_url=None, *
     elements = fragments_fromstring(html, parser=parser,
                                         no_leading_text=not accept_leading_text,
                                         base_url=base_url, **kw)
-    if create_parent:
-        if not isinstance(create_parent, _strings):
-            create_parent = 'div'
-        new_root = Element(create_parent)
-        if elements:
-            if isinstance(elements[0], _strings):
-                new_root.text = elements[0]
-                del elements[0]
-            new_root.extend(elements)
-        return new_root
     if not elements:
         raise etree.ParserError('No elements found')
-    temp = []
     temp2 = []
     if len(elements) > 1:
         for i in range(len(elements)):
-            temp.append(elements[i])
-        for i in range(len(temp)):
-            result = temp[i]
+            result = elements[i]
             if result.tail and result.tail.strip():
                 raise etree.ParserError('Element followed by text: %r' % result.tail)
             result.tail = None
