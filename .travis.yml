@@ -4,7 +4,7 @@ python:
 install:
   - mkdir -p buildout-cache/{eggs,downloads}
   - python bootstrap-buildout.py --setuptools-version=8.3 -c travis.cfg
-  - bin/buildout -Nc travis.cfg
+  - bin/buildout --plone.recipe.plone=4.3.6 -Nc travis.cfg
 script:
   - bin/code-analysis
   - bin/test
