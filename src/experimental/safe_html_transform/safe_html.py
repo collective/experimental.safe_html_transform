@@ -2457,13 +2457,6 @@ class HTMLParser(Cleaner):
 
 
 def fragment_fromstring(html, create_parent=False, parser=None, base_url=None, **kw):
-    """Parses a single HTML element; it is an error if there is more than
-    one element, or if anything but whitespace precedes or follows the
-    element.
-    If create_parent is true (or is a tag name) then a parent node
-    will be created to encapsulate the HTML in a single element. In
-    this case, leading or trailing text is allowed.
-    """
     if not isinstance(html, _strings):
         raise TypeError('string required')
     accept_leading_text = bool(create_parent)
