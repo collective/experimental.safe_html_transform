@@ -2455,30 +2455,39 @@ class HTMLParser(Cleaner):
             remove_tags.update(('embed', 'layer', 'object', 'param'))
 
 
-def fragment_fromstring(html, create_parent=False, parser=None, base_url=None, **kw):
+def fragment_fromstring(html, parser=None, base_url=None, **kw):
     if not isinstance(html, _strings):
         raise TypeError('string required')
-    accept_leading_text = bool(create_parent)
     elements = fragments_fromstring(html, parser=parser,
-                                        no_leading_text=not accept_leading_text,
+                                        no_leading_text=True,
                                         base_url=base_url, **kw)
     if not elements:
         raise etree.ParserError('No elements found')
-    temp2 = []
+    # an array containing elements that have been fragmented. Elements
+    # will be stored in that array of there are more than one fragmented
+    # element.
+    ele_array = []
     if len(elements) > 1:
+        """
+        if the number of elements is greater than 1 then we have to
+        deal with each element by traverse the array and append
+        each array in the ele_array which will be returned later.
+        """
         for i in range(len(elements)):
             result = elements[i]
             if result.tail and result.tail.strip():
                 raise etree.ParserError('Element followed by text: %r' % result.tail)
             result.tail = None
-            temp2.append(result)
+            ele_array.append(result)
     else:
+        # if there is only one element then append that element to the
+        # array and return the array
         result = elements[0]
         if result.tail and result.tail.strip():
             raise etree.ParserError('Element followed by text: %r' % result.tail)
         result.tail = None
-        temp2.append(result)
-    return temp2
+        ele_array.append(result)
+    return ele_array
 
 
 class SafeHTML:
@@ -2602,8 +2611,8 @@ class SafeHTML:
             data.setData(safe_html)
 
         else:
+            # append html tag to create a dummy parent for the tree
             html = "<html>%s</html>" % orig
-            # html = replace_tag(html)
             NASTY_TAGS = frozenset(['style', 'script', 'object', 'applet', 'meta', 'embed'])  # noqa
             cleaner = HTMLParser(kill_tags=NASTY_TAGS, page_structure=False, safe_attrs_only=False)
             safe_html = fragment_fromstring(cleaner.clean_html(html))
