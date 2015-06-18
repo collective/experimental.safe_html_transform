@@ -1,8 +1,6 @@
-import logging
 import re
 from Products.PortalTransforms.interfaces import ITransform
 from zope.interface import implements
-from Products.PortalTransforms.utils import log
 from lxml import etree
 from lxml.html.clean import Cleaner
 from lxml.html import fragments_fromstring
@@ -2585,18 +2583,6 @@ class SafeHTML:
         raise AttributeError(attr)
 
     def convert(self, orig, data, **kwargs):
-        # note if we need an upgrade.
-        if 'disable_transform' not in self.config:
-            log(logging.ERROR, 'PortalTransforms safe_html transform needs '
-                'to be updated. Please re-install the PortalTransforms '
-                'product to fix.')
-
-        # if we have a config that we don't want to delete
-        # we need a disable option
-        if self.config.get('disable_transform'):
-            data.setData(orig)
-            return data
-
         if orig == "" or orig == "<html></html>" or orig == "<html />" or orig == "<html/>":
             safe_html = str("")
             data.setData(safe_html)
