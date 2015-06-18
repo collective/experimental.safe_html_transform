@@ -38,6 +38,6 @@ class TestInstall(unittest.TestCase):
         self.assertTrue('experimental.safe_html_transform', portal.getProperty('title'))
 
     def test_portal_description(self):
-        """Test the description of the package """
+        """Test the description of the package"""
         portal = self.layer['portal']
         self.assertTrue("Installs the experimental.safe_html_transform add-on.", portal.getProperty('description'))
