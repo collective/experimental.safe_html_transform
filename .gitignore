@@ -9,6 +9,7 @@
 bin/
 buildout-cache/
 develop-eggs/
+eggs/
 parts/
 src/*
 !src/experimental
