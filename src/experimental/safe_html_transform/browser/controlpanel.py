@@ -1,4 +1,4 @@
-from Products.CMFPlone import PloneMessageFactory as _
+from experimental.safe_html_transform.interfaces import _, ISafeHtmlTransformLayer
 from plone.app.registry.browser import controlpanel
 from Products.CMFCore.interfaces import ISiteRoot
 from plone.app.layout.navigation.interfaces import INavigationRoot
@@ -7,12 +7,11 @@ from zope import schema
 from zope.interface import implements
 
 
-class IPloneSiteRoot(ISiteRoot, INavigationRoot):
+class ISafeHtmlSiteRoot(ISiteRoot, INavigationRoot):
     """
     Marker interface for the object which serves as the root of a
     Plone site.
     """
-
 
 class ITagAttrPair(Interface):
     tags = schema.TextLine(title=u"tags")
@@ -27,7 +26,7 @@ class TagAttrPair:
         self.attributes = attributes
 
 
-class IFilterTagsSchema(Interface):
+class ISafeHtmlFilterTagsSchema(Interface):
     nasty_tags = schema.List(
         title=_(u'Nasty tags'),
         description=_(u"These tags, and their content are completely blocked "
@@ -56,7 +55,7 @@ class IFilterTagsSchema(Interface):
     )
 
 
-class IFilterAttributesSchema(Interface):
+class ISafeHtmlFilterAttributesSchema(Interface):
     stripped_attributes = schema.List(
         title=_(u'Stripped attributes'),
         description=_(u"These attributes are stripped from any tag when "
@@ -67,7 +66,7 @@ class IFilterAttributesSchema(Interface):
         required=False)
 
 
-class IFilterEditorSchema(Interface):
+class ISafeHtmlFilterEditorSchema(Interface):
 
     style_whitelist = schema.List(
         title=_(u'Permitted styles'),
@@ -85,13 +84,13 @@ class IFilterEditorSchema(Interface):
         required=False)
 
 
-class IFilterSchema(IFilterTagsSchema, IFilterAttributesSchema,
-                    IFilterEditorSchema):
+class ISafeHtmlFilterSchema(ISafeHtmlFilterTagsSchema, ISafeHtmlFilterAttributesSchema,
+                    ISafeHtmlFilterEditorSchema):
     """Combined schema for the adapter lookup.
     """
 
 
-class FilterControlPanelForm(controlpanel.RegistryEditForm):
+class SafeHtmlFilterControlPanelForm(controlpanel.RegistryEditForm):
 
     id = "FilterControlPanel"
     label = _("HTML Filter settings")
@@ -104,12 +103,12 @@ class FilterControlPanelForm(controlpanel.RegistryEditForm):
                     "immediately to show any changes you make, your changes "
                     "are not saved until you press the 'Save' button.")
     form_name = _("HTML Filter settings")
-    schema = IFilterSchema
+    schema = ISafeHtmlTransformLayer
     schema_prefix = "plone"
 
     def updateFields(self):
-        super(FilterControlPanelForm, self).updateFields()
+        super(SafeHtmlFilterControlPanelForm, self).updateFields()
 
 
-class FilterControlPanel(controlpanel.ControlPanelFormWrapper):
-    form = FilterControlPanelForm
+class SafeHtmlControlPanel(controlpanel.ControlPanelFormWrapper):
+    form = SafeHtmlFilterControlPanelForm
