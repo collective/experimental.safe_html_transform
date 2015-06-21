@@ -1,4 +1,4 @@
-from experimental.safe_html_transform.interfaces import _, ISafeHtmlTransformLayer
+from experimental.safe_html_transform.interfaces import _, IExperimentalSafeHtmlTransformLayer
 from plone.app.registry.browser import controlpanel
 from Products.CMFCore.interfaces import ISiteRoot
 from plone.app.layout.navigation.interfaces import INavigationRoot
@@ -12,6 +12,7 @@ class ISafeHtmlSiteRoot(ISiteRoot, INavigationRoot):
     Marker interface for the object which serves as the root of a
     Plone site.
     """
+
 
 class ITagAttrPair(Interface):
     tags = schema.TextLine(title=u"tags")
@@ -103,7 +104,7 @@ class SafeHtmlFilterControlPanelForm(controlpanel.RegistryEditForm):
                     "immediately to show any changes you make, your changes "
                     "are not saved until you press the 'Save' button.")
     form_name = _("HTML Filter settings")
-    schema = ISafeHtmlTransformLayer
+    schema = IExperimentalSafeHtmlTransformLayer
     schema_prefix = "plone"
 
     def updateFields(self):

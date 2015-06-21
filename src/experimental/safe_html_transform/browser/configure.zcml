@@ -11,7 +11,7 @@
     <include package="z3c.jbot" file="meta.zcml" />
     <browser:jbot
         directory="overrides"
-        layer="experimental.safe_html_transform.interfaces.ISafeHtmlTransformLayer"
+        layer="experimental.safe_html_transform.interfaces.IExperimentalSafeHtmlTransformLayer"
         />
 
     <!-- Publish static files -->
@@ -25,7 +25,7 @@
     <browser:page
       name="safe_html_transform-settings"
       for=".controlpanel.ISafeHtmlSiteRoot"
-      layer="..interfaces.ISafeHtmlTransformLayer"
+      layer="..interfaces.IExperimentalSafeHtmlTransformLayer"
       class=".controlpanel.SafeHtmlControlPanel"
       permission="experimental.safe_html.controlpanel.Filtering"
       />

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <registry>
-  <records interface="experimental.safe_html_transform.browser.controlpanel.IFilterSchema"
+  <records interface="experimental.safe_html_transform.browser.controlpanel.ISafeHtmlFilterSchema"
            prefix="plone" />
 </registry>
  

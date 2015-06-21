@@ -5,5 +5,5 @@ from zope.i18nmessageid import MessageFactory
 _ = MessageFactory('experimental.safe_html_transform')
 
 
-class ISafeHtmlTransformLayer(IDefaultBrowserLayer):
+class IExperimentalSafeHtmlTransformLayer(IDefaultBrowserLayer):
     """Marker interface that defines a browser layer."""
