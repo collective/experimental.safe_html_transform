@@ -8,11 +8,12 @@
     <include package="plone.app.registry" />
 
     <!-- Set overrides folder for Just-a-Bunch-Of-Templates product -->
+    
     <include package="z3c.jbot" file="meta.zcml" />
     <browser:jbot
         directory="overrides"
         layer="experimental.safe_html_transform.interfaces.IExperimentalSafeHtmlTransformLayer"
-        />
+    />
 
     <!-- Publish static files -->
     <browser:resourceDirectory

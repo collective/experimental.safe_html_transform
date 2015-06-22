@@ -93,7 +93,7 @@ class ISafeHtmlFilterSchema(ISafeHtmlFilterTagsSchema, ISafeHtmlFilterAttributes
 
 class SafeHtmlFilterControlPanelForm(controlpanel.RegistryEditForm):
 
-    id = "FilterControlPanel"
+    id = "SafeHtmlFilterControlPanel"
     label = _("HTML Filter settings")
     description = _("Plone filters HTML tags that are considered security "
                     "risks. Be aware of the implications before making "
@@ -105,7 +105,6 @@ class SafeHtmlFilterControlPanelForm(controlpanel.RegistryEditForm):
                     "are not saved until you press the 'Save' button.")
     form_name = _("HTML Filter settings")
     schema = IExperimentalSafeHtmlTransformLayer
-    schema_prefix = "plone"
 
     def updateFields(self):
         super(SafeHtmlFilterControlPanelForm, self).updateFields()
