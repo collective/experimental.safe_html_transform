@@ -1,0 +1,8 @@
+<configure
+	xmlns="http://namespaces.zope.org/zope">
+	<permission id="experimental.safe_html.controlpanel.Filtering"
+			title="Plone Site Setup: Filtering">
+		<role name="Manager"/>
+		<role name="Site Administrator"/>
+	</permission>
+</configure>

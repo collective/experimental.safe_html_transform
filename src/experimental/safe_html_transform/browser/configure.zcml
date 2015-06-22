@@ -18,12 +18,13 @@
         />
 
     <!-- Filter Control Panel -->
+    <include file="permissions.zcml" />
     <browser:page
       name="filter-controlpanel"
       for=".controlpanel.IPloneSiteRoot"
       layer="..interfaces.IExperimentalSafeHtmlTransformLayer"
       class=".controlpanel.FilterControlPanel"
-      permission="plone.app.controlpanel.Filtering"
+      permission="experimental.safe_html.controlpanel.Filtering"
       />
 
 </configure>
