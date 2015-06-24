@@ -25,9 +25,10 @@
     <!-- Filter Control Panel -->
     <browser:page
       name="safe_html_transform-settings"
-      for=".controlpanel.ISafeHtmlSiteRoot"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
       layer="..interfaces.IExperimentalSafeHtmlTransformLayer"
-      class=".controlpanel.SafeHtmlControlPanel"
+      class=".controlpanel.FilterControlPanel"
       permission="experimental.safe_html.controlpanel.Filtering"
       />
+
 </configure>
