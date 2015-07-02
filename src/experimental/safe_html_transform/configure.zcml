@@ -33,4 +33,10 @@
         handler=".setuphandlers.post_install">
     </genericsetup:importStep>
 
+  <include package="plone.app.registry" />
+  <include package="Products.MimetypesRegistry" />
+  <include package="Products.PortalTransforms" />
+  <include package="Products.PortalTransforms" />
+
+
 </configure>

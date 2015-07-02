@@ -10,6 +10,7 @@ bin/
 buildout-cache/
 develop-eggs/
 parts/
+eggs/
 src/*
 !src/experimental
 var/
