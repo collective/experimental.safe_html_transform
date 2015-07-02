@@ -16,14 +16,4 @@
         name="experimental.safe_html_transform"
         directory="static"
         />
-
-    <!-- Filter Control Panel -->
-    <browser:page
-      name="filter-controlpanel"
-      for=".controlpanel.IPloneSiteRoot"
-      layer="..interfaces.IExperimentalSafeHtmlTransformLayer"
-      class=".controlpanel.FilterControlPanel"
-      permission="plone.app.controlpanel.Filtering"
-      />
-
 </configure>

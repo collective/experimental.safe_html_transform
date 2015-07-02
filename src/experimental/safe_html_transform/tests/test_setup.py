@@ -8,7 +8,6 @@ import unittest2 as unittest
 
 class TestInstall(unittest.TestCase):
     """Test installation of experimental.safe_html_transform into Plone."""
-
     layer = EXPERIMENTAL_SAFE_HTML_TRANSFORM_INTEGRATION_TESTING
 
     def setUp(self):
