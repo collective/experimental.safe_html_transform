@@ -1,5 +1,5 @@
 <object
-    name="portal_controlpanel"
+    name="SafeHtmlControlPanel"
     xmlns:i18n="http://xml.zope.org/namespaces/i18n"
     i18n:domain="experimental.safe_html_transform"
     purge="False">
@@ -7,7 +7,7 @@
         title="safe_html_transform"
         action_id="safe_html_transform"
         appId="experimental.safe_html_transform"
-        category="Products"
+        category="Collective"
         condition_expr=""
         url_expr="string:${portal_url}/@@safe_html_transform-settings"
         visible="True"

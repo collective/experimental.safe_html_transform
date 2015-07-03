@@ -1,15 +1,19 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
     xmlns:browser="http://namespaces.zope.org/browser"
     xmlns:plone="http://namespaces.plone.org/plone"
     i18n_domain="experimental.safe_html_transform">
 
+    <include package="plone.app.registry" />
+
     <!-- Set overrides folder for Just-a-Bunch-Of-Templates product -->
+    
     <include package="z3c.jbot" file="meta.zcml" />
     <browser:jbot
         directory="overrides"
         layer="experimental.safe_html_transform.interfaces.IExperimentalSafeHtmlTransformLayer"
-        />
+    />
 
     <!-- Publish static files -->
     <browser:resourceDirectory
@@ -17,13 +21,14 @@
         directory="static"
         />
 
+    <include file="permissions.zcml" />
     <!-- Filter Control Panel -->
     <browser:page
-      name="filter-controlpanel"
-      for=".controlpanel.IPloneSiteRoot"
+      name="safe_html_transform-settings"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
       layer="..interfaces.IExperimentalSafeHtmlTransformLayer"
       class=".controlpanel.FilterControlPanel"
-      permission="plone.app.controlpanel.Filtering"
+      permission="experimental.safe_html.controlpanel.Filtering"
       />
 
 </configure>

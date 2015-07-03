@@ -1,17 +1,8 @@
-from Products.CMFPlone import PloneMessageFactory as _
+from experimental.safe_html_transform import _
 from plone.app.registry.browser import controlpanel
-from Products.CMFCore.interfaces import ISiteRoot
-from plone.app.layout.navigation.interfaces import INavigationRoot
 from zope.interface import Interface
 from zope import schema
 from zope.interface import implements
-
-
-class IPloneSiteRoot(ISiteRoot, INavigationRoot):
-    """
-    Marker interface for the object which serves as the root of a
-    Plone site.
-    """
 
 
 class ITagAttrPair(Interface):
@@ -68,7 +59,6 @@ class IFilterAttributesSchema(Interface):
 
 
 class IFilterEditorSchema(Interface):
-
     style_whitelist = schema.List(
         title=_(u'Permitted styles'),
         description=_(u'These CSS styles are allowed in style attributes.'),
@@ -92,9 +82,8 @@ class IFilterSchema(IFilterTagsSchema, IFilterAttributesSchema,
 
 
 class FilterControlPanelForm(controlpanel.RegistryEditForm):
-
     id = "FilterControlPanel"
-    label = _("HTML Filter settings")
+    label = _("SAFEHTML Filter settings")
     description = _("Plone filters HTML tags that are considered security "
                     "risks. Be aware of the implications before making "
                     "changes below. By default only tags defined in XHTML "
