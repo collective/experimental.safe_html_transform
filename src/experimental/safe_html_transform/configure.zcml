@@ -33,6 +33,5 @@
         handler=".setuphandlers.post_install">
     </genericsetup:importStep>
 
-    <include package="plone.app.registry" />
-    
+        
 </configure>
