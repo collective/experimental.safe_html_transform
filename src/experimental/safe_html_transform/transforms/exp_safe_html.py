@@ -4,6 +4,7 @@ from Products.PortalTransforms.interfaces import ITransform
 from zope.interface import implements
 from Products.PortalTransforms.utils import log
 from lxml import etree
+from StringIO import StringIO
 from lxml.html.clean import Cleaner
 from lxml.html import fragments_fromstring
 from lxml.etree import tostring
@@ -293,24 +294,32 @@ class SafeHTML:
         else:
             # append html tag to create a dummy parent for the tree
             html = "<html>%s</html>" % orig
+            parser = etree.HTMLParser()
+            tree = etree.parse(StringIO(html), parser)
+            for element in tree.getiterator():
+                if(element.tag == 'h3' or element.tag == 'h4' or element.tag == 'h5' or element.tag == 'h6' or element.tag == 'div'):
+                    element.tag = 'p'
+                if(element.tag == "html" or element.tag == "body" or element.tag == "script"):
+                    etree.strip_tags(tree, element.tag)
+            result = etree.tostring(tree.getroot(), pretty_print=True, method="html")
             NASTY_TAGS = frozenset(['style', 'script', 'object', 'applet', 'meta', 'embed'])  # noqa
             cleaner = HTMLParser(kill_tags=NASTY_TAGS, page_structure=False, safe_attrs_only=False)
-            safe_html = fragment_fromstring(cleaner.clean_html(html))
+            safe_html = fragment_fromstring(cleaner.clean_html(result))
             safe_html2 = ""
             for i in range(len(safe_html)):
                 safe_html1 = tostring(safe_html[i])
                 safe_html2 = safe_html2 + safe_html1
 
-            if safe_html2:
-                # replace the html node
-                p = re.compile(r'<.?html?.>')
-                safe_html2 = p.sub('', safe_html2)
-            # replace unwanted tags
-            safe_html2 = safe_html2.replace("h3", "p")
-            safe_html2 = safe_html2.replace("h4", "p")
-            safe_html2 = safe_html2.replace("h5", "p")
-            safe_html2 = safe_html2.replace("h6", "p")
-            safe_html2 = safe_html2.replace("div", "p")
+            # if safe_html2:
+            #     # replace the html node
+            #     p = re.compile(r'<.?html?.>')
+            #     safe_html2 = p.sub('', safe_html2)
+            # # replace unwanted tags
+            # safe_html2 = safe_html2.replace("h3", "p")
+            # safe_html2 = safe_html2.replace("h4", "p")
+            # safe_html2 = safe_html2.replace("h5", "p")
+            # safe_html2 = safe_html2.replace("h6", "p")
+            # safe_html2 = safe_html2.replace("div", "p")
             data.setData(safe_html2)
 
         return data
