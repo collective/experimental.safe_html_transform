@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from experimental.safe_html_transform import _
 from plone.app.registry.browser import controlpanel
 from zope.interface import Interface
