@@ -25,6 +25,11 @@ class TestInstall(unittest.TestCase):
         self.installer.uninstallProducts(['experimental.safe_html_transform'])
         self.assertFalse(self.installer.isProductInstalled('experimental.safe_html_transform'))
 
+    def test_post_product_uninstall(self):
+        """Test if Portal Transform is installed or not after uninstalling experimental.safe_html_transform"""
+        self.installer.uninstallProducts(['experimental.safe_html_transform'])
+        self.assertTrue(self.installer.isProductInstalled('Products.PortalTransform'))
+
     # browserlayer.xml
     def test_browserlayer(self):
         """Test that IExperimentalSafeHtmlTransformLayer is registered."""

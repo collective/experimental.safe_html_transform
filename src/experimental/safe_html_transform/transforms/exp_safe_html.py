@@ -7,7 +7,6 @@ from Products.PortalTransforms.utils import log
 from lxml import etree
 from lxml.html.clean import Cleaner
 from lxml.html import fragments_fromstring
-from lxml.etree import tostring
 
 # add some tags to nasty.
 NASTY_TAGS = frozenset(['style', 'script', 'object', 'applet', 'meta', 'embed'])  # noqa
@@ -140,8 +139,8 @@ def fragment_fromstring(html, parser=None, base_url=None, **kw):
     if not isinstance(html, _strings):
         raise TypeError('string required')
     elements = fragments_fromstring(html, parser=parser,
-                                        no_leading_text=True,
-                                        base_url=base_url, **kw)
+                                    no_leading_text=True,
+                                    base_url=base_url, **kw)
     if not elements:
         raise etree.ParserError('No elements found')
     # an array containing elements that have been fragmented. Elements
@@ -209,7 +208,7 @@ class SafeHTML:
             'class_blacklist': [],
             'remove_javascript': 1,
             'disable_transform': 0,
-            }
+        }
 
         self.config_metadata = {
             'inputs': ('list',
@@ -257,7 +256,7 @@ class SafeHTML:
             'disable_transform': ("int",
                                   'disable_transform',
                                   'If 1, nothing is done.'),
-            }
+        }
 
         self.config.update(kwargs)
 
@@ -294,18 +293,16 @@ class SafeHTML:
         else:
             # append html tag to create a dummy parent for the tree
             html = "<html>%s</html>" % orig
-            NASTY_TAGS = frozenset(['style', 'script', 'object', 'applet', 'meta', 'embed'])  # noqa
-            cleaner = HTMLParser(kill_tags=NASTY_TAGS, page_structure=False, safe_attrs_only=False)
-            safe_html = fragment_fromstring(cleaner.clean_html(html))
-            safe_html2 = ""
-            for i in range(len(safe_html)):
-                safe_html1 = tostring(safe_html[i])
-                safe_html2 = safe_html2 + safe_html1
-
+            NASTY_TAGS = frozenset(['style', 'script', 'object', 'applet', 'meta', 'embed', 'head'])  # noqa
+            cleaner = HTMLParser(kill_tags=NASTY_TAGS, page_structure=False,
+                                 safe_attrs_only=False, links=True)
+            safe_html2 = cleaner.clean_html(html)
             if safe_html2:
                 # replace the html node
                 p = re.compile(r'<.?html?.>')
                 safe_html2 = p.sub('', safe_html2)
+                q = re.compile(r'<.?body?.>')
+                safe_html2 = q.sub('', safe_html2)
             # replace unwanted tags
             safe_html2 = safe_html2.replace("h3", "p")
             safe_html2 = safe_html2.replace("h4", "p")
@@ -313,7 +310,6 @@ class SafeHTML:
             safe_html2 = safe_html2.replace("h6", "p")
             safe_html2 = safe_html2.replace("div", "p")
             data.setData(safe_html2)
-
         return data
 
 

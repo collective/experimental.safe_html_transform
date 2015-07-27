@@ -99,49 +99,49 @@ class safe_htmlUnitTest(unittest.TestCase):
         html = '<img src="logo.png"/>'
         data = datastream(self.transform.name())
         self.assertEqual(self.transform.convert(html, data)._data,
-                         '<img src="logo.png"/>'
+                         '<img src="logo.png">'
                          )
 
     def test_keep_images_with_alt_attribute(self):
         html = '<img src="logo.png" alt="logo"/>'
         data = datastream(self.transform.name())
         self.assertEqual(self.transform.convert(html, data)._data,
-                         '<img src="logo.png" alt="logo"/>'
+                         '<img src="logo.png" alt="logo">'
                          )
 
     def test_keep_images_with_logo_attribute(self):
         html = '<img src="logo.png" alt="logo"/>'
         data = datastream(self.transform.name())
         self.assertEqual(self.transform.convert(html, data)._data,
-                         '<img src="logo.png" alt="logo"/>'
+                         '<img src="logo.png" alt="logo">'
                          )
 
     def test_keep_images_with_title_attribute(self):
         html = '<img src="logo.png" title="logo"/>'
         data = datastream(self.transform.name())
         self.assertEqual(self.transform.convert(html, data)._data,
-                         '<img src="logo.png" title="logo"/>'
+                         '<img src="logo.png" title="logo">'
                          )
 
     def test_keep_images_with_width_attribute(self):
         html = '<img src="logo.png" width="100"/>'
         data = datastream(self.transform.name())
         self.assertEqual(self.transform.convert(html, data)._data,
-                         '<img src="logo.png" width="100"/>'
+                         '<img src="logo.png" width="100">'
                          )
 
     def test_keep_images_with_height_attribute(self):
         html = '<img src="logo.png" height="100"/>'
         data = datastream(self.transform.name())
         self.assertEqual(self.transform.convert(html, data)._data,
-                         '<img src="logo.png" height="100"/>'
+                         '<img src="logo.png" height="100">'
                          )
 
     def test_keep_images_with_align_attribute(self):
         html = '<img src="logo.png" align="center"/>'
         data = datastream(self.transform.name())
         self.assertEqual(self.transform.convert(html, data)._data,
-                         '<img src="logo.png" align="center"/>'
+                         '<img src="logo.png" align="center">'
                          )
 
     # Ignores
