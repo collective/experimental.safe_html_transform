@@ -15,3 +15,5 @@ after_success:
 notifications:
   email:
     - tisto@plone.org
+    - prakhar126@gmail.com
+    - jm@lentin.co.uk
