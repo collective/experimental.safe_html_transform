@@ -298,7 +298,7 @@ class SafeHTML:
             for element in tree.getiterator():
                 if(element.tag == 'h3' or element.tag == 'h4' or element.tag == 'h5' or element.tag == 'h6' or element.tag == 'div'):
                     element.tag = 'p'
-                if(element.tag == "html" or element.tag == "body" or element.tag == "script"):
+                if(element.tag == "html" or element.tag == "body"):
                     etree.strip_tags(tree, element.tag)
             result = etree.tostring(tree.getroot(), pretty_print=True, method="html")
             NASTY_TAGS = frozenset(['style', 'script', 'object', 'applet', 'meta', 'embed'])  # noqa
