@@ -296,9 +296,9 @@ class SafeHTML:
             parser = etree.HTMLParser()
             tree = etree.parse(StringIO(html), parser)
             for element in tree.getiterator():
-                if(element.tag == 'h3' or element.tag == 'h4' or element.tag == 'h5' or element.tag == 'h6' or element.tag == 'div'):
+                if element.tag in ['h3', 'h4', 'h5', 'h6', 'div']:
                     element.tag = 'p'
-                if(element.tag == "html" or element.tag == "body"):
+                if element.tag in ["html", "body"]:
                     etree.strip_tags(tree, element.tag)
             result = etree.tostring(tree.getroot(), pretty_print=True, method="html")
             NASTY_TAGS = frozenset(['style', 'script', 'object', 'applet', 'meta', 'embed'])  # noqa
