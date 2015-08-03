@@ -176,7 +176,7 @@ class safe_htmlUnitTest(unittest.TestCase):
         html = "<div>foo<p>Keep me</p></div>"
         data = datastream(self.transform.name())
         self.assertEqual(self.transform.convert(html, data)._data,
-                         '<p>foo<p>Keep me</p></p>')
+                         '<p>foo</p><p>Keep me</p>')
 
     def test_strip_outer_whitespace(self):
         html = ' <p>Keep me</p> '
