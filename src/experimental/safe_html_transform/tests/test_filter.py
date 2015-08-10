@@ -2,16 +2,7 @@ from plone.app.testing import SITE_OWNER_NAME
 from plone.app.testing import SITE_OWNER_PASSWORD
 from experimental.safe_html_transform.testing import \
     EXPERIMENTAL_SAFE_HTML_TRANSFORM_FUNCTIONAL_TESTING
-# from plone.app.testing import TEST_USER_ID, setRoles
-# from plone.app.textfield.value import RichTextValue
-# from plone.app.z3cform.interfaces import IPloneFormLayer
-# from plone.dexterity.interfaces import IDexterityFTI
 from plone.testing.z2 import Browser
-# from zope.component import createObject
-# from zope.component import queryUtility
-# from zope.interface import alsoProvides
-
-# import transaction
 import unittest2 as unittest
 
 
