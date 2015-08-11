@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from plone.app.testing import SITE_OWNER_NAME
 from plone.app.testing import SITE_OWNER_PASSWORD
 from experimental.safe_html_transform.testing import \
