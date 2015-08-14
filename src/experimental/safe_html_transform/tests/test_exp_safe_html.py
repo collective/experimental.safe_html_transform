@@ -9,7 +9,7 @@ class safe_htmlUnitTest(unittest.TestCase):
         self.transform = self._makeOne()
 
     def _getTargetClass(self):
-	    from experimental.safe_html_transform.transforms.exp_safe_html import \
+	    from experimental.safe_html_transform.transforms.safe_html import \
                 SafeHTML
             return SafeHTML
 
