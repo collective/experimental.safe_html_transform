@@ -24,7 +24,7 @@
     <include file="permissions.zcml" />
     <!-- Filter Control Panel -->
     <browser:page
-      name="safe_html_transform-settings"
+      name="filter-controlpanel"
       for="Products.CMFPlone.interfaces.IPloneSiteRoot"
       layer="..interfaces.IExperimentalSafeHtmlTransformLayer"
       class=".controlpanel.FilterControlPanel"
