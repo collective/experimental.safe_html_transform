@@ -52,25 +52,13 @@ class DocumentFunctionalTest(unittest.TestCase):
         self.assertTrue(
             'Changes canceled.' in self.browser.contents)
 
+    def test_login(self):
+        self.browser.open(self.portal.absolute_url() + "/login_form")
+        self.browser.getControl(name='__ac_name').value = 'admin'
+        self.browser.getControl(name='__ac_password').value = 'admin'
+        self.browser.getControl(name='submit').click()
+
     def test_add_new_link(self):
-        self.browser.open('http://nohost/plone/portal_factory/Document/document.2015-08-14.9025882105/edit')
-        # self.browser.getLink('Add new').click()
+        self.browser.open("http://nohost/plone/++add++Document")
         self.assertTrue(
             'Add Page' in self.browser.contents)
-
-    def test_add_new_content(self):
-        self.browser.open('http://nohost/plone/portal_factory/Document/document.2015-08-18.4050665269/edit')
-        # self.browser.getLink('Add new').click()
-        self.assertTrue(
-            'Body Text' in self.browser.contents)
-        self.browser.getControl('Body Text').value = \
-            '<p>Testing that<script> tag and its contents get stripped</script> works.</p>'
-        self.browser.getControl('Title').value = 'LOL'
-        self.browser.getControl('Save').click()
-        self.assertTrue(
-            'Changes saved.' in self.browser.contents)
-        self.assertTrue(
-            'LOL' in self.browser.contents)
-        self.assertTrue(
-            '<p>Testing that<script> tag and its contents get stripped</script> works.</p>' in self.browser.contents
-        )
