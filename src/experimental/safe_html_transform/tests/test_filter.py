@@ -52,12 +52,6 @@ class DocumentFunctionalTest(unittest.TestCase):
         self.assertTrue(
             'Changes canceled.' in self.browser.contents)
 
-    def test_login(self):
-        self.browser.open(self.portal.absolute_url() + "/login_form")
-        self.browser.getControl(name='__ac_name').value = 'admin'
-        self.browser.getControl(name='__ac_password').value = 'admin'
-        self.browser.getControl(name='submit').click()
-
     def test_add_new_link(self):
         self.browser.open("http://nohost/plone/++add++Document")
         self.assertTrue(
