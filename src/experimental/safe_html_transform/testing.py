@@ -11,6 +11,7 @@ from plone.testing import z2
 from zope.configuration import xmlconfig
 
 import experimental.safe_html_transform
+import plone.app.contenttypes
 
 
 class ExperimentalSafeHtmlTransformLayer(PloneSandboxLayer):
@@ -23,9 +24,15 @@ class ExperimentalSafeHtmlTransformLayer(PloneSandboxLayer):
             experimental.safe_html_transform,
             context=configurationContext
         )
+        xmlconfig.file(
+            'configure.zcml',
+            plone.app.contenttypes,
+            context=configurationContext
+        )
 
     def setUpPloneSite(self, portal):
         applyProfile(portal, 'experimental.safe_html_transform:default')
+        applyProfile(portal, 'plone.app.contenttypes:default')
 
 
 EXPERIMENTAL_SAFE_HTML_TRANSFORM_FIXTURE = ExperimentalSafeHtmlTransformLayer()
