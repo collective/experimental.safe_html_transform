@@ -40,7 +40,7 @@ class DocumentFunctionalTest(unittest.TestCase):
         self.assertTrue(
             'Changes saved.' in self.browser.contents)
 
-    def test_cancel_button(self):
+    def x_test_cancel_button(self):
         self.browser.open(self.portal_url + '/@@filter-controlpanel')
         self.browser.getControl(name="form.buttons.cancel").click()
         self.assertTrue(

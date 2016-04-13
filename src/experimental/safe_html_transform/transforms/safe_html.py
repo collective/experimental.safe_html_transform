@@ -4,7 +4,7 @@ from Products.PortalTransforms.interfaces import ITransform
 from zope.interface import implements
 from Products.PortalTransforms.utils import log
 from lxml import etree
-from StringIO import StringIO
+from cStringIO import StringIO
 from lxml.html.clean import Cleaner
 from lxml.html import fragments_fromstring
 from lxml.etree import tostring
@@ -136,39 +136,7 @@ class HTMLParser(Cleaner):
             remove_tags.update(('embed', 'layer', 'object', 'param'))
 
 
-def fragment_fromstring(html, parser=None, base_url=None, **kw):
-    if not isinstance(html, _strings):
-        raise TypeError('string required')
-    elements = fragments_fromstring(html, parser=parser,
-                                        no_leading_text=True,
-                                        base_url=base_url, **kw)
-    if not elements:
-        raise etree.ParserError('No elements found')
-    # an array containing elements that have been fragmented. Elements
-    # will be stored in that array of there are more than one fragmented
-    # element.
-    ele_array = []
-    if len(elements) > 1:
-        """
-        if the number of elements is greater than 1 then we have to
-        deal with each element by traverse the array and append
-        each array in the ele_array which will be returned later.
-        """
-        for i in range(len(elements)):
-            result = elements[i]
-            if result.tail and result.tail.strip():
-                raise etree.ParserError('Element followed by text: %r' % result.tail)
-            result.tail = None
-            ele_array.append(result)
-    else:
-        # if there is only one element then append that element to the
-        # array and return the array
-        result = elements[0]
-        if result.tail and result.tail.strip():
-            raise etree.ParserError('Element followed by text: %r' % result.tail)
-        result.tail = None
-        ele_array.append(result)
-    return ele_array
+
 
 
 class SafeHTML:
@@ -302,13 +270,9 @@ class SafeHTML:
                 if element.tag in ["html", "body"]:
                     etree.strip_tags(tree, element.tag)
             result = etree.tostring(tree.getroot(), pretty_print=True, method="html")
-            NASTY_TAGS = frozenset(['style', 'script', 'object', 'applet', 'meta', 'embed'])  # noqa
-            cleaner = HTMLParser(kill_tags=NASTY_TAGS, page_structure=False, safe_attrs_only=False)
-            safe_html = fragment_fromstring(cleaner.clean_html(result))
-            safe_html2 = ""
-            for i in range(len(safe_html)):
-                safe_html1 = tostring(safe_html[i])
-                safe_html2 = safe_html2 + safe_html1
+            cleaner = Cleaner(kill_tags=NASTY_TAGS, page_structure=False, safe_attrs_only=False, embedded=False)
+            safe_html = fragments_fromstring(cleaner.clean_html(result))
+            safe_html2 = ''.join([tostring(fragment).strip() for fragment in safe_html])
 
             data.setData(safe_html2)
 
