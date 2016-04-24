@@ -44,7 +44,7 @@ class DocumentFunctionalTest(unittest.TestCase):
         self.browser.open(self.portal_url + '/@@filter-controlpanel')
         self.browser.getControl(name="form.buttons.cancel").click()
         self.assertTrue(
-            self.browser.url.endswith('plone_control_panel'))
+            self.browser.url.endswith('overview-controlpanel'))
 
     def test_status_msg_after_cancel(self):
         self.browser.open(self.portal_url + '/@@filter-controlpanel')
